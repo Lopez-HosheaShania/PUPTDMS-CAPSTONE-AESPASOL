@@ -551,28 +551,18 @@
     background: var(--border);
 }
 
-.dropdown-item-icon {
-    width: 28px;
-    height: 28px;
-    min-width: 28px;
+.dropdown-menu-item:hover .sidebar-group-icon {
+    background:
+        var(--sidebar-hover-icon-surface);
 
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    border-color:
+        var(--sidebar-hover-icon-border);
 
-    border-radius: 8px;
-    background: transparent;
-    color: var(--text-2);
-    font-size: 13px;
+    color:
+        var(--sidebar-hover-icon-color);
 
-    transition:
-        background-color .18s ease,
-        color .18s ease;
-}
-
-.dropdown-menu-item:hover .dropdown-item-icon {
-    background: var(--sidebar-hover-icon-surface);
-    color: var(--sidebar-hover-text);
+    transform:
+        translateY(-1px);
 }
 
 .dropdown-menu-item:hover {
@@ -581,9 +571,9 @@
 }
 
 .dropdown-menu-item:hover .dropdown-item-text,
-.dropdown-menu-item:hover .dropdown-item-icon,
 .dropdown-menu-item:hover .dropdown-item-chevron {
-    color: var(--sidebar-hover-text);
+    color:
+        var(--sidebar-hover-text);
 }
 
 .dropdown-item-content {
@@ -597,11 +587,6 @@
     color: var(--text-2);
     font-size: .8rem;
     font-weight: 650;
-}
-
-.dropdown-item-icon i {
-    color: inherit;
-    font-size: 13px;
 }
 
 .dropdown-item-chevron {
@@ -691,38 +676,12 @@
     background: var(--sidebar-hover-text);
 }
 
-.patient-mobile-logout-form {
-    margin: 0;
-}
+@media (max-width: 767px) {
 
-.patient-mobile-logout-item {
-    border: 0;
-    font-family: inherit;
-    text-align: left;
-    color: var(--sidebar-logout-text);
-}
-
-.patient-mobile-logout-item .dropdown-item-text,
-.patient-mobile-logout-item .dropdown-item-icon {
-    color: var(--sidebar-logout-text);
-}
-
-.patient-mobile-logout-item .dropdown-item-icon {
-    background: var(--sidebar-logout-icon-bg);
-}
-
-.patient-mobile-logout-item:hover {
-    background: var(--danger-soft-hover);
-    color: var(--sidebar-logout-text);
-}
-
-.patient-mobile-logout-item:hover .dropdown-item-text,
-.patient-mobile-logout-item:hover .dropdown-item-icon {
-    color: var(--sidebar-logout-text);
-}
-
-.patient-mobile-logout-item:hover .dropdown-item-icon {
-    background: var(--sidebar-logout-icon-bg);
+    .header-desktop-logout-form,
+    .header-desktop-logout-divider {
+        display: none;
+    }
 }
 
 @media (min-width: 1200px) {
@@ -759,6 +718,11 @@
 
     .header-user-btn {
         padding-right: 8px;
+    }
+
+    .patient-mobile-logout-form,
+    .patient-mobile-logout-divider {
+        display: none;
     }
 }
 

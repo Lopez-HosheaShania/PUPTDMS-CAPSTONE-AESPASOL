@@ -1,3 +1,7 @@
+import {
+    getOdontogramTreatmentColor
+} from './treatment-colors';
+
 let odontogramThreeModulePromise = null;
 
 async function loadOdontogramThreeModule() {
@@ -16,28 +20,6 @@ async function loadOdontogramThreeModule() {
 
     return odontogramThreeModulePromise;
 }
-
-const ODONTOGRAM_PREVIEW_COLORS = {
-    D: '#ef4444',
-    M: '#111827',
-    F: '#2563eb',
-    I: '#ef4444',
-    RF: '#ef4444',
-    MO: '#111827',
-    IM: '#111827',
-    J: '#2563eb',
-    A: '#2563eb',
-    AB: '#2563eb',
-    P: '#2563eb',
-    IN: '#2563eb',
-    LC: '#2563eb',
-    RM: '#2563eb',
-    X: '#2563eb',
-    XO: '#2563eb',
-    '✓': '#111827',
-    CM: '#111827',
-    SP: '#111827'
-};
 
 const ODONTOGRAM_PREVIEW_SURFACES = [
     'top',
@@ -145,41 +127,31 @@ function getOdontogramPreviewToothName(
     };
 }
 
-function normalizeOdontogramPreviewRecord(
-    record
-) {
+
+function normalizeOdontogramPreviewRecord(record) {
     if (!record) return null;
 
-    const code =
-        String(
-            record.code ||
-            ''
-        )
-            .trim()
-            .toUpperCase();
+    const rawCode = String(record.code || '')
+        .trim()
+        .toUpperCase();
 
-    if (!code) return null;
+    if (!rawCode) return null;
+
+    const code = ['PT', '+'].includes(rawCode)
+        ? '✓'
+        : rawCode;
 
     return {
         ...record,
-
-        code:
-            ['PT', '+'].includes(code)
-                ? '✓'
-                : code,
-
-        label:
-            record.label ||
+        code,
+        label: record.label || code,
+        colorHex: getOdontogramTreatmentColor(
             code,
-
-        colorHex:
-            record.colorHex ||
-            ODONTOGRAM_PREVIEW_COLORS[
-            code
-            ] ||
-            '#111827'
+            record.colorHex || record.color_hex
+        )
     };
 }
+
 
 function normalizeOdontogramPreviewEntry(
     entry
@@ -264,7 +236,8 @@ function getOdontogramPreviewPrimaryMark(
 
 function openOdontogramPreviewTooth(
     root,
-    tooth
+    tooth,
+    selectedSurfaceKey = null
 ) {
     if (!root) {
         return;
@@ -317,10 +290,17 @@ function openOdontogramPreviewTooth(
             toothNumber
         );
 
+    const selectedSurfaceRecord =
+        selectedSurfaceKey
+            ? record?.surfaces?.[selectedSurfaceKey] || null
+            : null;
+
     const primary =
-        getOdontogramPreviewPrimaryMark(
-            record
-        );
+        selectedSurfaceKey
+            ? selectedSurfaceRecord
+            : getOdontogramPreviewPrimaryMark(
+                record
+            );
 
     panel.querySelector(
         '[data-odontogram-preview-title]'
@@ -352,15 +332,43 @@ function openOdontogramPreviewTooth(
     ).textContent =
         info.arch;
 
+    const conditionLabel =
+        panel.querySelector(
+            '[data-odontogram-preview-condition-label]'
+        );
+
+    if (conditionLabel) {
+        conditionLabel.textContent =
+            selectedSurfaceKey
+                ? 'Selected Surface'
+                : 'Overall Marking';
+    }
+
     const condition =
         panel.querySelector(
             '[data-odontogram-preview-condition]'
         );
 
+    const selectedSurfaceLabel =
+        selectedSurfaceKey
+            ? selectedSurfaceKey
+                .charAt(0)
+                .toUpperCase() +
+            selectedSurfaceKey.slice(1)
+            : null;
+
     condition.textContent =
-        primary
-            ? `${primary.code} - ${primary.label}`
-            : 'Healthy / No saved marking';
+        selectedSurfaceKey
+            ? (
+                primary
+                    ? `${selectedSurfaceLabel}: ${primary.code} - ${primary.label}`
+                    : `${selectedSurfaceLabel}: Healthy / No saved marking`
+            )
+            : (
+                primary
+                    ? `${primary.code} - ${primary.label}`
+                    : 'Healthy / No saved marking'
+            );
 
     condition.style.removeProperty(
         'background'
@@ -395,12 +403,7 @@ function openOdontogramPreviewTooth(
         });
     }
 
-    if (record?.threeD) {
-        records.push({
-            surface: '3D',
-            record: record.threeD
-        });
-    }
+    const surfaceRecords = [];
 
     ODONTOGRAM_PREVIEW_SURFACES
         .forEach(surface => {
@@ -409,9 +412,11 @@ function openOdontogramPreviewTooth(
                 surface
                 ];
 
-            if (!surfaceRecord) return;
+            if (!surfaceRecord) {
+                return;
+            }
 
-            records.push({
+            surfaceRecords.push({
                 surface:
                     surface.charAt(0)
                         .toUpperCase() +
@@ -421,6 +426,83 @@ function openOdontogramPreviewTooth(
                     surfaceRecord
             });
         });
+
+    records.push(...surfaceRecords);
+
+    if (record?.threeD) {
+        const normalizedThreeDCode =
+            String(
+                record.threeD.code || ''
+            )
+                .trim()
+                .toUpperCase();
+
+        const normalizedThreeDLabel =
+            String(
+                record.threeD.label ||
+                record.threeD.code ||
+                ''
+            )
+                .trim()
+                .toLowerCase();
+
+        const matchesSurface =
+            surfaceRecords.some(item => {
+                const surfaceCode =
+                    String(
+                        item.record?.code || ''
+                    )
+                        .trim()
+                        .toUpperCase();
+
+                const surfaceLabel =
+                    String(
+                        item.record?.label ||
+                        item.record?.code ||
+                        ''
+                    )
+                        .trim()
+                        .toLowerCase();
+
+                return (
+                    surfaceCode ===
+                    normalizedThreeDCode &&
+                    surfaceLabel ===
+                    normalizedThreeDLabel
+                );
+            });
+
+        const statusCode =
+            String(
+                record?.status?.code || ''
+            )
+                .trim()
+                .toUpperCase();
+
+        const statusLabel =
+            String(
+                record?.status?.label ||
+                record?.status?.code ||
+                ''
+            )
+                .trim()
+                .toLowerCase();
+
+        const matchesStatus =
+            !!record?.status &&
+            statusCode === normalizedThreeDCode &&
+            statusLabel === normalizedThreeDLabel;
+
+        if (
+            !matchesSurface &&
+            !matchesStatus
+        ) {
+            records.push({
+                surface: '3D',
+                record: record.threeD
+            });
+        }
+    }
 
     if (!records.length) {
         const empty =
@@ -444,7 +526,9 @@ function openOdontogramPreviewTooth(
             pill.innerHTML = `
                 <i
                     class="odontogram-preview-marking-swatch"
-                    style="background:${item.record.colorHex}">
+                    data-ui-style="background:${window.uiAttribute(
+                getOdontogramTreatmentColor(item.record.code)
+            )};">
                 </i>
 
                 <span>
@@ -530,6 +614,7 @@ async function selectOdontogramPreviewSurface(
 const odontogramPreviewThreeStates = new WeakMap();
 const odontogramPreviewCreationPromises = new WeakMap();
 const odontogramPreviewRenderRetries = new WeakMap();
+const odontogramPreviewIdleTasks = new WeakMap();
 
 export function initOdontogramPreviews(
     root = document
@@ -602,11 +687,12 @@ export function initOdontogramPreviews(
                         [];
                 }
             }
+
             showOdontogramPreviewEmptyState(
                 preview
             );
 
-            renderOdontogramPreview(
+            scheduleOdontogramPreviewRender(
                 preview
             );
         });
@@ -647,9 +733,112 @@ function showOdontogramPreviewEmptyState(
     }
 }
 
+function cancelOdontogramPreviewIdleRender(
+    root
+) {
+    const task =
+        odontogramPreviewIdleTasks.get(
+            root
+        );
+
+    if (!task) {
+        return;
+    }
+
+    if (
+        task.type === 'idle' &&
+        window.cancelIdleCallback
+    ) {
+        window.cancelIdleCallback(
+            task.id
+        );
+    } else {
+        window.clearTimeout(
+            task.id
+        );
+    }
+
+    odontogramPreviewIdleTasks.delete(
+        root
+    );
+}
+
+function scheduleOdontogramPreviewRender(
+    root,
+    options = {}
+) {
+    if (!root) {
+        return;
+    }
+
+    cancelOdontogramPreviewIdleRender(
+        root
+    );
+
+    if (
+        odontogramPreviewThreeStates.has(
+            root
+        )
+    ) {
+        renderOdontogramPreview(
+            root,
+            options
+        );
+
+        return;
+    }
+
+    const run =
+        () => {
+            odontogramPreviewIdleTasks.delete(
+                root
+            );
+
+            renderOdontogramPreview(
+                root,
+                options
+            );
+        };
+
+    if (
+        typeof window.requestIdleCallback ===
+        'function'
+    ) {
+        const id =
+            window.requestIdleCallback(
+                run
+            );
+
+        odontogramPreviewIdleTasks.set(
+            root,
+            {
+                type: 'idle',
+                id
+            }
+        );
+
+        return;
+    }
+
+    const id =
+        window.setTimeout(
+            run,
+            180
+        );
+
+    odontogramPreviewIdleTasks.set(
+        root,
+        {
+            type: 'timeout',
+            id
+        }
+    );
+}
+
 export function setOdontogramPreviewData(
     preview,
-    rawData = []
+    rawData = [],
+    options = {}
 ) {
     if (!preview) {
         return;
@@ -692,12 +881,16 @@ export function setOdontogramPreviewData(
         preview
     );
 
-    renderOdontogramPreview(
-        preview
+    scheduleOdontogramPreviewRender(
+        preview,
+        options
     );
 }
 
-async function renderOdontogramPreview(root) {
+async function renderOdontogramPreview(
+    root,
+    options = {}
+) {
     if (!root) {
         return;
     }
@@ -753,7 +946,7 @@ async function renderOdontogramPreview(root) {
 
         window.setTimeout(() => {
             renderOdontogramPreview(
-                root
+                root, options
             );
         }, 50);
 
@@ -811,7 +1004,8 @@ async function renderOdontogramPreview(root) {
 
                                     openOdontogramPreviewTooth(
                                         root,
-                                        tooth
+                                        tooth,
+                                        surfaceKey
                                     );
 
                                     if (surfaceKey) {
@@ -881,7 +1075,7 @@ async function renderOdontogramPreview(root) {
             updateOdontogramThreeScene(
                 state,
                 root.__odontogramPreviewData ||
-                []
+                [], options
             );
 
         } catch (error) {
@@ -920,7 +1114,8 @@ async function renderOdontogramPreview(root) {
 
         updateOdontogramThreeScene(
             state,
-            root.__odontogramPreviewData || []
+            root.__odontogramPreviewData || [],
+            options
         );
     } catch (error) {
         console.error(

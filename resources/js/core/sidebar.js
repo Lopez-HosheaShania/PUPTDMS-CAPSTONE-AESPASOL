@@ -213,7 +213,7 @@ function initGlobalSidebar() {
 
         button.dataset.sidebarInitialized = 'true';
 
-        if (!button.getAttribute('onclick')) {
+        if (!button.hasAttribute('data-ui-click')) {
             button.addEventListener(
                 'click',
                 event => {

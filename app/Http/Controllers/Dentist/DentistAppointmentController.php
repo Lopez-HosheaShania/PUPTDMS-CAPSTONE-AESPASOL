@@ -53,13 +53,13 @@ class DentistAppointmentController extends Controller
 
         $notifications = collect($notifications ?? []);
 
-        $appointmentCountsPerDay = Appointment::whereIn('status', ['upcoming', 'rescheduled'])
+        $appointmentCountsPerDay = Appointment::withoutGlobalScope('clinical_patients')->whereIn('status', ['upcoming', 'rescheduled'])
             ->selectRaw('appointment_date, COUNT(*) as count')
             ->groupBy('appointment_date')
             ->pluck('count', 'appointment_date')
             ->toArray();
 
-        $appointmentCountsPerSlot = Appointment::whereIn('status', ['upcoming', 'rescheduled'])
+        $appointmentCountsPerSlot = Appointment::withoutGlobalScope('clinical_patients')->whereIn('status', ['upcoming', 'rescheduled'])
             ->selectRaw('appointment_date, appointment_time, COUNT(*) as count')
             ->groupBy('appointment_date', 'appointment_time')
             ->get()
@@ -163,6 +163,13 @@ class DentistAppointmentController extends Controller
 
     public function patientProfile(Appointment $appointment)
     {
+        if (Auth::user()?->hasAnyRole(['admin', 'super_admin'])) {
+            $patient = $appointment->patient;
+            abort_unless($patient, 404);
+
+            return app(\App\Http\Controllers\Admin\AdminPatientController::class)->show($patient, 'dentist');
+        }
+
         $activeRole = session('impersonated_role') ?: session('role');
 
         if (!optional(Auth::user())->canAccessClinicalArea($activeRole)) {
@@ -399,7 +406,7 @@ class DentistAppointmentController extends Controller
 
         $mysqlTime = Carbon::createFromFormat('g:i A', trim($request->new_appointment_time))->format('H:i:s');
 
-        $slotTaken = Appointment::where('appointment_date', $request->new_appointment_date)
+        $slotTaken = Appointment::withoutGlobalScope('clinical_patients')->where('appointment_date', $request->new_appointment_date)
             ->where('appointment_time', $mysqlTime)
             ->where('id', '!=', $appointment->id)
             ->whereIn('status', ['upcoming', 'rescheduled'])
@@ -503,7 +510,7 @@ class DentistAppointmentController extends Controller
 
         $mysqlTime = Carbon::createFromFormat('g:i A', trim($request->followup_appointment_time))->format('H:i:s');
 
-        $slotTaken = Appointment::where('appointment_date', $request->followup_appointment_date)
+        $slotTaken = Appointment::withoutGlobalScope('clinical_patients')->where('appointment_date', $request->followup_appointment_date)
             ->where('appointment_time', $mysqlTime)
             ->whereIn('status', ['upcoming', 'rescheduled'])
             ->exists();
@@ -517,7 +524,8 @@ class DentistAppointmentController extends Controller
 
         $followUpAppointment = Appointment::create([
             'patient_id' => $originalAppointment->patient_id,
-            'dentist_id' => auth()->id(),
+            'dentist_id' => app(\App\Services\AssignedDentistService::class)
+                ->requireForPatient($originalAppointment->patient_id, Auth::user())->id,
             'service_type_id' => $originalAppointment->service_type_id,
             'service_type' => $originalAppointment->service_type_name
                 ?? $originalAppointment->service_type,

@@ -48,15 +48,14 @@
         'update' => 'admin.dentist-transitions.update',
         'generate_items' => 'admin.dentist-transitions.generate-items',
         'assignments' => 'admin.dentist-transitions.assignments',
-        'checklist' => 'admin.dentist-transitions.checklist',
         'finalize' => 'admin.dentist-transitions.finalize',
         'extend_access' => 'admin.dentist-transitions.extend-access',
         'cancel' => 'admin.dentist-transitions.cancel',
     ];
 
     if ($pageMode === 'index') {
-        $pageTitle = 'Dentist Continuity Management';
-        $heroTitle = 'Dentist Continuity Management';
+        $pageTitle = 'Dentist Continuity Policy';
+        $heroTitle = 'Dentist Continuity Policy';
         $heroSubtitle = null;
         $heroActions =
             '<a href="' .
@@ -125,12 +124,19 @@
                 <div class="dt-alert dt-alert-success">{{ session('success') }}</div>
             @endif
 
+            @if ($errors->any())
+                <div class="dt-alert dt-alert-error" role="alert"><ul>
+                    @foreach ($errors->all() as $message)<li>{{ $message }}</li>@endforeach
+                </ul></div>
+            @endif
+
             @if (session('error'))
                 <div class="dt-alert dt-alert-error">{{ session('error') }}</div>
             @endif
 
             @if ($pageMode === 'index')
                 <div class="admin-page-body">
+                    @include('admin.partials.continuity-current-dentist')
                     <div id="statCards" class="stat-grid admin-dashboard-stat-grid dt-stat-grid mb-6">
                         <div class="stat-card s-all">
                             <div class="stat-card-info">
@@ -238,11 +244,11 @@
                                 <div class="table-scroll dt-table-wrap">
                                     <table class="data-table dt-table">
                                         <colgroup>
-                                            <col style="width: 28%;">
-                                            <col style="width: 24%;">
-                                            <col style="width: 16%;">
-                                            <col style="width: 18%;">
-                                            <col style="width: 14%;">
+                                            <col data-ui-presentation="presentation-56d1e0204546">
+                                            <col data-ui-presentation="presentation-3ca932db06e0">
+                                            <col data-ui-presentation="presentation-9fe033fb187b">
+                                            <col data-ui-presentation="presentation-370509cd083e">
+                                            <col data-ui-presentation="presentation-546d6dae843c">
                                         </colgroup>
                                         <thead>
                                             <tr>
@@ -276,7 +282,7 @@
                                                     </td>
                                                     <td class="table-cell-center table-action-cell">
                                                         <div class="ui-action-group dt-table-actions">
-                                                            @if ($layoutRole === 'admin' && !in_array($transition->status, ['scheduled', 'completed', 'cancelled'], true))
+                                                            @if ($layoutRole === 'admin' && !in_array($transition->status, ['scheduled', 'active', 'completed', 'cancelled'], true))
                                                                 <a href="{{ route($routeNames['edit'], $transition) }}"
                                                                     class="ui-action-btn ui-action-edit"
                                                                     data-tooltip="Edit transition"
@@ -351,13 +357,13 @@
                                             <div class="dt-grid-progress">
                                                 <div class="dt-progress">
                                                     <div class="dt-progress-bar"
-                                                        style="width: {{ $transition->progress_percentage }}%;"></div>
+                                                        data-ui-style="width: {{ $transition->progress_percentage }}%;"></div>
                                                 </div>
                                                 <span>{{ $transition->progress_percentage }}% complete</span>
                                             </div>
 
                                             <div class="ui-action-group dt-grid-actions">
-                                                @if ($layoutRole === 'admin' && !in_array($transition->status, ['scheduled', 'completed', 'cancelled'], true))
+                                                @if ($layoutRole === 'admin' && !in_array($transition->status, ['scheduled', 'active', 'completed', 'cancelled'], true))
                                                     <a href="{{ route($routeNames['edit'], $transition) }}"
                                                         class="ui-action-btn ui-action-edit"
                                                         data-tooltip="Edit transition" aria-label="Edit transition">
@@ -437,68 +443,45 @@
                 </div>
             @elseif ($pageMode === 'show')
                 <div class="admin-page-body dt-show-layout">
-                    <div class="dt-summary-grid stat-grid admin-dashboard-stat-grid dt-stat-grid">
-                        <div class="stat-card s-all">
-                            <div class="stat-card-info">
-                                <span class="stat-label">Future Appointments</span>
-                                <span class="stat-num">{{ $summary['future_appointments'] }}</span>
-                                <span class="stat-footer">
-                                    <i class="fa-solid fa-calendar-check"></i>
-                                    Appointments currently under the departing dentist.
-                                </span>
-                            </div>
-
-                            <div class="stat-icon-wrapper">
-                                <i class="fa-solid fa-calendar-check"></i>
+                    <section class="dt-panel table-card dt-show-panel dt-review-panel" aria-labelledby="continuity-review-title">
+                        <div class="dt-section-head">
+                            <div class="dt-show-head">
+                                <div class="card-header-icon" aria-hidden="true"><i class="fa-solid fa-clipboard-check"></i></div>
+                                <div>
+                                    <h2 id="continuity-review-title">Continuity scope and access review</h2>
+                                    <p>{{ ucfirst($transition->coverage_type) }} coverage from {{ $transition->effective_date?->format('M d, Y') ?? 'Legacy handover' }}@if($transition->end_date) through {{ $transition->end_date->format('M d, Y') }}@endif.</p>
+                                </div>
                             </div>
                         </div>
-
-                        <div class="stat-card s-ongoing">
-                            <div class="stat-card-info">
-                                <span class="stat-label">Ready To Transfer</span>
-                                <span class="stat-num">{{ $summary['ready_to_transfer'] }}</span>
-                                <span class="stat-footer">
-                                    <i class="fa-solid fa-people-arrows-left-right"></i>
-                                    Items with valid successor coverage.
-                                </span>
+                        @if($transition->status === 'scheduled' && $transition->effective_date?->lte(today()))
+                            <p class="dt-alert dt-alert-error" role="status">This handover is awaiting activation. Review the audit logs for conflicts or unavailable replacements. Cancel and replace the plan if its details need to change.</p>
+                        @elseif($transition->status === 'active' && $transition->end_date?->lt(today()))
+                            <p class="dt-alert dt-alert-error" role="status">Temporary coverage remains active pending a safe return. Review the original dentist availability and unfinished work before ending coverage.</p>
+                        @endif
+                        @if (array_sum($unreviewedResponsibilities))
+                            <div class="global-confirm-alert" role="status" data-unreviewed-responsibilities>
+                                <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+                                <div>
+                                    <p>New responsibilities since the last review</p>
+                                    <span>{{ $unreviewedResponsibilities['patients'] }} patients, {{ $unreviewedResponsibilities['appointments'] }} appointments, and {{ $unreviewedResponsibilities['documents'] }} documents need review.
+                                        @if ($transition->status === 'scheduled')
+                                            Eligible work is rechecked when the handover takes effect. Conflicts will block the transfer.
+                                        @else
+                                            Use Refresh Impact Summary to include them in the responsibility table before approval.
+                                        @endif
+                                    </span>
+                                </div>
                             </div>
-
-                            <div class="stat-icon-wrapper">
-                                <i class="fa-solid fa-people-arrows-left-right"></i>
-                            </div>
-                        </div>
-
-                        <div class="stat-card s-approved">
-                            <div class="stat-card-info">
-                                <span class="stat-label">Transferred</span>
-                                <span class="stat-num">{{ $summary['transferred_items'] }}</span>
-                                <span class="stat-footer">
-                                    <i class="fa-solid fa-file-circle-check"></i>
-                                    Records already completed by the handover process.
-                                </span>
-                            </div>
-
-                            <div class="stat-icon-wrapper">
-                                <i class="fa-solid fa-file-circle-check"></i>
-                            </div>
-                        </div>
-
-                        <div class="stat-card s-rejected">
-                            <div class="stat-card-info">
-                                <span class="stat-label">Critical Unresolved</span>
-                                <span class="stat-num">{{ $summary['critical_unresolved_items'] }}</span>
-                                <span class="stat-footer">
-                                    <i class="fa-solid fa-triangle-exclamation"></i>
-                                    Items still blocking finalization.
-                                </span>
-                            </div>
-
-                            <div class="stat-icon-wrapper">
-                                <i class="fa-solid fa-triangle-exclamation"></i>
-                            </div>
-                        </div>
-                    </div>
-
+                        @endif
+                        <dl class="dt-review-metrics">
+                            <div><dt>Patients with care relationships</dt><dd>{{ $summary['active_patients'] }}</dd></div>
+                            <div><dt>Upcoming appointments</dt><dd>{{ $summary['future_appointments'] }}</dd></div>
+                            <div><dt>Pending documents</dt><dd>{{ $summary['pending_documents'] }}</dd></div>
+                            <div><dt>Ready To Transfer</dt><dd>{{ $summary['ready_to_transfer'] }}</dd></div>
+                            <div><dt>Transferred</dt><dd>{{ $summary['transferred_items'] }}</dd></div>
+                            <div><dt>Critical Unresolved</dt><dd>{{ $summary['critical_unresolved_items'] }}</dd></div>
+                        </dl>
+                    </section>
                     <div class="dt-page-grid">
                         <section class="dt-panel table-card dt-show-panel">
                             <div class="dt-section-head">
@@ -652,56 +635,58 @@
                         </section>
                     </div>
 
-                    <section class="dt-panel table-card dt-show-panel">
-                        <div class="dt-section-head">
-                            <div class="dt-show-head">
+                    @php
+                        $canEditAssignments = in_array($transition->status, ['draft', 'pending_review', 'handover_in_progress'], true)
+                            && auth()->user()?->hasAnyPermission(['assign_dentist_successors', 'manage_dentist_accounts']);
+                    @endphp
+                    <section class="table-card dt-responsibilities" aria-labelledby="dtResponsibilitiesHeading">
+                        <div class="card-header">
+                            <div class="card-header-left">
                                 <div class="card-header-icon">
-                                    <i class="fa-solid fa-people-arrows-left-right"></i>
+                                    <i class="fa-solid fa-people-arrows-left-right" aria-hidden="true"></i>
                                 </div>
 
                                 <div>
-                                    <h2>Active Responsibility Table</h2>
-                                    <p>Assign a default successor or override per eligible record before finalization.</p>
+                                    <h2 id="dtResponsibilitiesHeading" class="card-title">Active Responsibility Table</h2>
+                                    <p class="card-subtitle">Select records and choose a replacement dentist before saving assignments.</p>
                                 </div>
                             </div>
                         </div>
 
-                        <form action="{{ route($routeNames['assignments'], $transition) }}" method="POST">
+                        <form id="dtAssignmentsForm" action="{{ route($routeNames['assignments'], $transition) }}" method="POST" data-global-selects>
                             @csrf
                             @method('PUT')
 
-                            <div class="dt-assign-toolbar-card dt-responsibility-topcard">
-                                <div class="dt-assign-toolbar">
-                                    <div class="dt-assign-field dt-assign-field-wide" data-global-field>
-                                        <label class="dt-label dt-label-emphasis"
+                            <div class="table-toolbar dt-responsibility-toolbar">
+                                    <div class="global-form-group dt-responsibility-default" data-global-field>
+                                        <label class="global-form-label"
                                             for="default_successor_dentist_id">Default successor</label>
                                         <select id="default_successor_dentist_id" name="default_successor_dentist_id"
-                                            class="dt-select js-custom-select">
+                                            class="form-select-custom js-custom-select" data-custom-select-floating @disabled(!$canEditAssignments)>
                                             <option value="">Select a dentist...</option>
                                             @foreach ($dentists as $dentist)
-                                                @continue($dentist->id === $transition->dentist_id)
-                                                <option value="{{ $dentist->id }}" @selected($transition->default_successor_dentist_id == $dentist->id)>
+                                                @continue($dentist->id === $transition->dentist_id || $dentist->status !== 'active')
+                                                <option value="{{ $dentist->id }}" @selected(old('default_successor_dentist_id', $transition->default_successor_dentist_id) == $dentist->id)>
                                                     {{ $dentist->name }}
                                                 </option>
                                             @endforeach
                                         </select>
                                     </div>
 
-                                    <button type="submit" class="dt-btn dt-btn-primary dt-btn-save-assignments">
-                                        <i class="fa-regular fa-floppy-disk"></i>
+                                    <button type="submit" class="ui-btn ui-btn-primary" @disabled(!$canEditAssignments)>
+                                        <i class="fa-regular fa-floppy-disk" aria-hidden="true"></i>
                                         <span>Save Assignments</span>
                                     </button>
-                                </div>
                             </div>
 
-                            <div class="table-scroll dt-table-wrap dt-responsibility-wrap">
-                                <table class="data-table dt-table dt-responsibility-table">
+                            <div class="table-scroll" role="region" aria-label="Active continuity responsibilities" tabindex="0">
+                                <table class="data-table dt-responsibilities-table">
                                     <thead>
                                         <tr>
-                                            <th>Record</th>
-                                            <th>Patient</th>
-                                            <th>Assignment</th>
-                                            <th>Remarks</th>
+                                            <th scope="col">Record</th>
+                                            <th scope="col">Patient</th>
+                                            <th scope="col">Replacement dentist</th>
+                                            <th scope="col">Remarks</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -709,7 +694,7 @@
                                             $pendingTasks = $transition->items->filter(function ($item) {
                                                 return in_array(
                                                     $item->item_type,
-                                                    ['appointment', 'document_request'],
+                                                    ['patient', 'appointment', 'document_request'],
                                                     true,
                                                 );
                                             });
@@ -717,59 +702,51 @@
                                         @forelse ($pendingTasks as $item)
                                             @php
                                                 $taskLabel = match ($item->item_type) {
-                                                    'document_request' => 'Review and endorse pending document request',
-                                                    'appointment' => 'Reassign and review upcoming appointment',
-                                                    default => 'Review and transfer continuity responsibility',
+                                                    'document_request' => 'Transfer pending document request.',
+                                                    'appointment' => 'Transfer upcoming appointment.',
+                                                    default => 'Transfer patient care and record access.',
                                                 };
-                                                $taskHint = match ($item->item_type) {
-                                                    'document_request'
-                                                        => 'Include this request in the continuity handoff to the successor dentist.',
-                                                    'appointment'
-                                                        => 'Transfer this active appointment to the successor dentist for continued care.',
-                                                    default
-                                                        => 'Mark this item if it should be handed over during continuity review.',
-                                                };
-                                                $isSelectedForTransfer = !in_array(
+                                                $isSelectedForTransfer = (bool) old('items.'.$item->id.'.selected_for_transfer', !in_array(
                                                     $item->transfer_status,
                                                     ['excluded', 'manually_resolved'],
                                                     true,
-                                                );
+                                                ));
                                             @endphp
                                             <tr>
                                                 <td>
-                                                    <div class="dt-record-checkcell" data-transfer-item-row>
+                                                    <div data-transfer-item-row>
                                                         <input type="hidden"
                                                             name="items[{{ $item->id }}][selected_for_transfer]"
                                                             value="0">
-                                                        <button type="button"
-                                                            class="dt-record-selectcard @if ($isSelectedForTransfer) is-selected @endif"
-                                                            data-transfer-toggle
-                                                            aria-pressed="{{ $isSelectedForTransfer ? 'true' : 'false' }}">
-                                                            <input type="hidden"
+                                                        <label class="dt-responsibility-record" for="transfer-item-{{ $item->id }}">
+                                                            <input type="checkbox" id="transfer-item-{{ $item->id }}"
+                                                                class="global-checkbox-input"
                                                                 name="items[{{ $item->id }}][selected_for_transfer]"
-                                                                value="{{ $isSelectedForTransfer ? '1' : '0' }}"
-                                                                data-transfer-selected>
-                                                            <span class="dt-record-selectmark" aria-hidden="true">
-                                                                <i class="fa-solid fa-check"></i>
-                                                            </span>
-                                                            <span class="dt-table-stack">
+                                                                value="1" data-transfer-toggle @checked($isSelectedForTransfer)
+                                                                @disabled(!$canEditAssignments)>
+                                                            <span class="dt-responsibility-copy">
                                                                 <span
-                                                                    class="dt-inline-value dt-inline-value-sm">{{ str_replace('_', ' ', ucfirst($item->item_type)) }}</span>
+                                                                    class="global-info-value">{{ str_replace('_', ' ', ucfirst($item->item_type)) }}</span>
                                                                 <span
-                                                                    class="dt-inline-value dt-inline-value-xs">{{ $item->reference_label }}</span>
+                                                                    class="global-info-subvalue">{{ $item->reference_label }}</span>
                                                             </span>
-                                                        </button>
+                                                        </label>
                                                     </div>
                                                 </td>
-                                                <td><span
-                                                        class="dt-inline-value dt-inline-value-sm">{{ $item->patient->name ?? 'Unknown patient' }}</span>
+                                                <td>
+                                                    <div class="dt-responsibility-patient">
+                                                        <span class="patient-avatar patient-avatar-sm" data-patient-avatar
+                                                            data-patient-name="{{ $item->patient->name ?? 'Unknown patient' }}" aria-hidden="true">
+                                                            {{ mb_substr($item->patient->name ?? 'Patient', 0, 1) }}
+                                                        </span>
+                                                        <span class="global-info-value">{{ $item->patient->name ?? 'Unknown patient' }}</span>
+                                                    </div>
                                                 </td>
                                                 <td>
-                                                    <div class="dt-task-cell">
-                                                        <span class="dt-task-copy">
-                                                            <strong>{{ $taskLabel }}</strong>
-                                                            <small>{{ $taskHint }}</small>
-                                                        </span>
+                                                    <div class="global-form-group">
+                                                        <span class="global-info-value" @if($canEditAssignments) data-default-successor-name @endif>{{ $canEditAssignments ? ($transition->defaultSuccessor?->name ?? 'Choose a default successor') : ($item->successorDentist?->name ?? 'Not assigned') }}</span>
+                                                        @if($canEditAssignments)<span class="global-info-subvalue">Uses the clinic's default successor.</span>@endif
+                                                        <p class="global-info-subvalue dt-responsibility-hint">{{ $taskLabel }}</p>
                                                     </div>
                                                 </td>
                                                 <td>
@@ -779,18 +756,19 @@
                                                     <input type="hidden"
                                                         name="items[{{ $item->id }}][resolution_type]"
                                                         value="{{ $item->resolution_type }}">
-                                                    <input class="dt-input" type="text"
+                                                    <label class="sr-only" for="remarks-{{ $item->id }}">Remarks for {{ $item->reference_label }}</label>
+                                                    <input id="remarks-{{ $item->id }}" class="form-input-custom" type="text"
                                                         name="items[{{ $item->id }}][remarks]"
-                                                        value="{{ $item->remarks }}">
+                                                        value="{{ old('items.'.$item->id.'.remarks', $item->remarks) }}"
+                                                        placeholder="Add a handover note" @disabled(!$canEditAssignments)>
                                                 </td>
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="4" class="dt-empty dt-responsibility-empty">
-                                                    <div
-                                                        class="empty-state empty-state-compact dt-responsibility-empty-state">
+                                                <td colspan="4">
+                                                    <div class="empty-state empty-state-compact">
                                                         <div class="empty-state-icon">
-                                                            <i class="fa-regular fa-clipboard-check"></i>
+                                                            <i class="fa-regular fa-clipboard-check" aria-hidden="true"></i>
                                                         </div>
                                                         <h3 class="empty-state-title">No responsibilities to transfer</h3>
                                                         <p class="empty-state-sub">There are currently no active
@@ -803,9 +781,6 @@
                                 </table>
                             </div>
 
-                            <div class="dt-responsibility-footnote">
-                                <i class="fa-regular fa-shield-check"></i>
-                            </div>
                         </form>
                     </section>
 
@@ -819,76 +794,23 @@
 
                             <div>
                                 <h2>Handover Controls</h2>
-                                <p>Manage remaining access or cancel this handover.</p>
+                                <p>Review changes to the plan or cancel a handover that has not taken effect.</p>
                             </div>
                         </div>
 
                         {{-- TWO CONTROL CARDS --}}
                         <div class="dt-handover-controls-grid">
 
-                            {{-- EXTEND ACCESS --}}
-                            <form action="{{ route($routeNames['extend_access'], $transition) }}" method="POST"
-                                class="dt-handover-control-card" id="dtExtendAccessForm">
-                                @csrf
-
+                            <article class="dt-handover-control-card">
                                 <div class="dt-handover-card-header">
-                                    <div class="dt-handover-card-icon">
-                                        <i class="fa-regular fa-calendar"></i>
-                                    </div>
-
-                                    <div>
-                                        <h3>Extend Access</h3>
-                                        <p>
-                                            Push back when the departing dentist's system access ends.
-                                        </p>
-                                    </div>
+                                    <div class="dt-handover-card-icon" aria-hidden="true"><i class="fa-solid fa-calendar-check"></i></div>
+                                    <div><h3>Revising a plan</h3><p>Keep care responsibility and access changes together.</p></div>
                                 </div>
-
-                                <div class="dt-handover-access-fields">
-
-                                    {{-- DATE --}}
-                                    <div class="dt-handover-field">
-                                        <label for="dtExtendAccessDate">
-                                            Date
-                                        </label>
-
-                                        <div class="global-control-wrap dt-handover-input-wrap" data-flatpickr-trigger>
-                                            <i class="fa-regular fa-calendar global-control-icon" aria-hidden="true"></i>
-
-                                            <input id="dtExtendAccessDate" type="text"
-                                                class="form-input-custom global-form-icon js-flatpickr-date"
-                                                value="{{ optional($transition->access_ends_at)->format('Y-m-d') }}"
-                                                placeholder="Select date" readonly required>
-                                        </div>
-                                    </div>
-
-                                    {{-- TIME --}}
-                                    <div class="dt-handover-field">
-                                        <label for="dtExtendAccessTime">
-                                            Time
-                                        </label>
-
-                                        <div class="global-control-wrap dt-handover-input-wrap">
-                                            <i class="fa-regular fa-clock global-control-icon" aria-hidden="true"></i>
-
-                                            <input id="dtExtendAccessTime" type="text"
-                                                class="form-input-custom global-form-icon js-flatpickr-time"
-                                                value="{{ optional($transition->access_ends_at)->format('H:i') }}"
-                                                placeholder="Select time" readonly required>
-                                        </div>
-                                    </div>
-
+                                <div class="dt-review-copy">
+                                    <p>Edit an unapproved draft to update its details. To revise an approved scheduled plan, cancel it and create a new plan.</p>
+                                    <p>Once a handover takes effect, create an onward transition to transfer care again. Historical treatment records remain unchanged.</p>
                                 </div>
-
-                                {{-- VALUE SENT TO BACKEND --}}
-                                <input id="dtExtendAccessValue" type="hidden" name="access_ends_at"
-                                    value="{{ optional($transition->access_ends_at)->format('Y-m-d\\TH:i') }}" required>
-
-                                <button type="submit" class="dt-btn dt-handover-extend-btn">
-                                    Extend Access
-                                </button>
-                            </form>
-
+                            </article>
 
                             {{-- CANCEL HANDOVER --}}
                             <form action="{{ route($routeNames['cancel'], $transition) }}" method="POST"
@@ -903,7 +825,7 @@
                                     <div>
                                         <h3>Cancel Handover</h3>
                                         <p>
-                                            This stops the handover and restores normal access.
+                                            Cancel a handover before it takes effect. Separately suspended or deactivated accounts stay restricted.
                                         </p>
                                     </div>
                                 </div>
@@ -917,12 +839,36 @@
                                         rows="5" placeholder="Explain why this handover is being cancelled..." required></textarea>
                                 </div>
 
-                                <button type="submit" class="dt-btn dt-handover-cancel-btn" @disabled(in_array($transition->status, ['completed', 'cancelled'], true))>
+                                <button type="submit" class="dt-btn dt-handover-cancel-btn" @disabled($transition->activated_at || !in_array($transition->status, ['draft', 'pending_review', 'handover_in_progress', 'scheduled'], true))>
                                     Cancel Handover
                                 </button>
                             </form>
 
                         </div>
+                        @if($transition->status === 'active' && $transition->coverage_type === 'temporary')
+                            <form class="dt-review-approval" method="POST" action="{{ route('admin.dentist-transitions.end-temporary', $transition) }}">
+                                @csrf
+                                <label class="dt-review-check" for="return-confirmed">
+                                    <input id="return-confirmed" name="confirmed" type="checkbox" value="1" required>
+                                    <span>I confirm the original dentist can resume care and unfinished work has been reviewed.</span>
+                                </label>
+                                <div class="dt-review-actions"><button type="submit" class="dt-btn dt-btn-primary">End Temporary Coverage and Return Care</button></div>
+                            </form>
+                        @endif
+                        @if(in_array($transition->status, ['draft', 'pending_review', 'handover_in_progress'], true))
+                            <form class="dt-review-approval" method="POST" action="{{ route($routeNames['finalize'], $transition) }}">
+                                @csrf
+                                <div class="dt-review-actions flex-wrap gap-3">
+                                    @if(auth()->user()?->hasAnyPermission(['update_dentist_transitions', 'manage_dentist_accounts']))
+                                        <a href="{{ route($routeNames['edit'], $transition) }}" class="ui-btn ui-btn-secondary mr-auto" aria-label="Back to Update Transition Plan">
+                                            <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+                                            <span>Back</span>
+                                        </a>
+                                    @endif
+                                    <button class="dt-btn dt-btn-primary" type="submit">Approve and Schedule Reassignment</button>
+                                </div>
+                            </form>
+                        @endif
                     </section>
                 </div>
             @else
@@ -944,7 +890,7 @@
                                             <h4>Dentist handover</h4>
                                         </div>
 
-                                        <div class="dt-form-stage-grid">
+                                        <div class="dt-form-stage-grid dt-form-handover">
                                             <div class="dt-form-stage-field">
 
                                                 <div data-global-field class="dt-stage-control dt-stage-control-user">
@@ -954,18 +900,18 @@
                                                         class="dt-select js-custom-select"
                                                         data-field-label="Departing Dentist"
                                                         data-required-message="Please select a departing dentist."
-                                                        @if ($transition->exists) disabled @endif required>
+                                                        @if ($transition->exists || !empty($currentDentistId)) disabled @endif required>
                                                         <option value="">Select dentist</option>
                                                         @foreach ($dentists as $dentist)
                                                             <option value="{{ $dentist->id }}"
-                                                                @selected(old('dentist_id', $transition->dentist_id) == $dentist->id)>
+                                                                @selected(old('dentist_id', $transition->dentist_id ?? $selectedDentistId ?? null) == $dentist->id)>
                                                                 {{ $dentist->name }}
                                                             </option>
                                                         @endforeach
                                                     </select>
-                                                    @if ($transition->exists)
+                                                    @if ($transition->exists || !empty($currentDentistId))
                                                         <input type="hidden" name="dentist_id"
-                                                            value="{{ $transition->dentist_id }}">
+                                                            value="{{ $transition->dentist_id ?? $currentDentistId }}">
                                                     @endif
                                                     @error('dentist_id')
                                                         <p class="dt-error">{{ $message }}</p>
@@ -987,16 +933,15 @@
 
                                                 <div data-global-field class="dt-stage-control dt-stage-control-user">
                                                     <label class="dt-label" for="default_successor_dentist_id">Default
-                                                        Successor Dentist <span class="required-mark">*</span></label>
+                                                        Successor Dentist (optional for draft)</label>
                                                     <select id="default_successor_dentist_id"
                                                         name="default_successor_dentist_id"
                                                         class="dt-select js-custom-select"
                                                         data-field-label="Default Successor Dentist"
-                                                        data-required-message="Please select a default successor dentist."
-                                                        required>
+                                                        data-required-message="Please select a default successor dentist.">
                                                         <option value="">Select successor dentist</option>
                                                         @foreach ($dentists as $dentist)
-                                                            @continue($dentist->id === $transition->dentist_id)
+                                                            @continue($dentist->id === ($transition->dentist_id ?? $selectedDentistId ?? null) || $dentist->status !== 'active')
                                                             <option value="{{ $dentist->id }}"
                                                                 @selected(old('default_successor_dentist_id', $transition->default_successor_dentist_id) == $dentist->id)>
                                                                 {{ $dentist->name }}
@@ -1082,8 +1027,7 @@
                                                     <div class="dt-form-stage-note">
                                                         <i class="fa-regular fa-clock"></i>
                                                         <span>
-                                                            Dentist access will automatically end at
-                                                            11:59 PM on the selected last working date.
+                                                            The effective date below controls when responsibilities and record access change.
                                                         </span>
                                                     </div>
 
@@ -1091,6 +1035,48 @@
                                                         <p class="dt-error">{{ $message }}</p>
                                                     @enderror
                                                 </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section class="dt-step-section dt-form-card dt-span-2">
+                                    <div class="dt-form-stage-head">
+                                        <div class="card-header-icon dt-form-stage-step" aria-hidden="true">
+                                            <i class="fa-solid fa-calendar-days"></i>
+                                        </div>
+                                        <h4>Coverage schedule</h4>
+                                    </div>
+                                    <div class="dt-form-stage-grid dt-form-stage-grid-details">
+                                        <div class="dt-form-stage-field">
+                                            <div data-global-field>
+                                                <label class="dt-label" for="coverage_type">Coverage type <span class="required-mark">*</span></label>
+                                                <select id="coverage_type" name="coverage_type" class="dt-select js-custom-select" required>
+                                                    <option value="permanent" @selected(old('coverage_type', $transition->coverage_type) === 'permanent')>Permanent</option>
+                                                    <option value="temporary" @selected(old('coverage_type', $transition->coverage_type) === 'temporary')>Temporary</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="dt-form-stage-field">
+                                            <div data-global-field>
+                                                <label class="dt-label" for="effective_date">Effective date <span class="required-mark">*</span></label>
+                                                <input id="effective_date" name="effective_date" type="text" class="dt-input form-input-custom js-flatpickr-date"
+                                                    placeholder="Select date" data-field-label="Effective Date" readonly required
+                                                    min="{{ today()->toDateString() }}" value="{{ old('effective_date', $transition->effective_date?->toDateString()) }}">
+                                            </div>
+                                        </div>
+                                        <div class="dt-form-stage-field">
+                                            <div data-global-field>
+                                                <label class="dt-label" for="end_date">Temporary end date (optional)</label>
+                                                <input id="end_date" name="end_date" type="text" class="dt-input form-input-custom js-flatpickr-date"
+                                                    placeholder="Select date" data-field-label="Temporary End Date" readonly
+                                                    min="{{ old('effective_date', $transition->effective_date?->toDateString()) ?: today()->toDateString() }}"
+                                                    aria-describedby="coverage-end-help"
+                                                    value="{{ old('end_date', $transition->end_date?->toDateString()) }}">
+                                            </div>
+                                            <div id="coverage-end-help" class="dt-form-stage-note">
+                                                <i class="fa-regular fa-circle-info" aria-hidden="true"></i>
+                                                <span>For temporary coverage only. Includes this date; leave blank for a manual return.</span>
                                             </div>
                                         </div>
                                     </div>
@@ -1122,7 +1108,7 @@
                                     </a>
 
                                     <button type="submit" class="dt-btn dt-btn-primary">
-                                        {{ $transition->exists ? 'Update Handover' : 'Confirm Handover' }}
+                                        {{ $transition->exists ? 'Update Draft' : 'Save Draft for Review' }}
                                     </button>
                                 </div>
 
@@ -1136,8 +1122,8 @@
     </main>
 @endsection
 
-@push('scripts')
-    <script>
+@section('scripts')
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         document.addEventListener('DOMContentLoaded', () => {
             const pageMode = @js($pageMode);
             const continuityToolbarForm = document.getElementById('continuityToolbarForm');
@@ -1158,6 +1144,25 @@
             const filterSuccessor = document.getElementById('dtFilterSuccessor');
             const filterEffectiveDate = document.getElementById('dtFilterEffectiveDate');
             const transitionForm = document.getElementById('dtTransitionForm');
+            const coverageType = document.getElementById('coverage_type');
+            const endDate = document.getElementById('end_date');
+            const coverageEffectiveDate = document.getElementById('effective_date');
+            const syncCoverageDateLimit = () => {
+                if (!coverageEffectiveDate || !endDate) return;
+                endDate.min = coverageEffectiveDate.value || coverageEffectiveDate.min;
+                endDate._flatpickr?.set('minDate', endDate.min);
+            };
+            coverageEffectiveDate?.addEventListener('change', syncCoverageDateLimit);
+            syncCoverageDateLimit();
+
+            const syncCoverage = () => {
+                if (!coverageType || !endDate) return;
+                endDate.disabled = coverageType.value !== 'temporary';
+                endDate.required = false;
+            };
+            coverageType?.addEventListener('change', syncCoverage);
+            syncCoverage();
+
             const extendAccessForm = document.getElementById('dtExtendAccessForm');
             const extendAccessDate = document.getElementById('dtExtendAccessDate');
             const extendAccessTime = document.getElementById('dtExtendAccessTime');
@@ -1238,27 +1243,33 @@
 
             document.querySelectorAll('[data-transfer-item-row]').forEach(row => {
                 const toggle = row.querySelector('[data-transfer-toggle]');
-                const selectedField = row.querySelector('[data-transfer-selected]');
                 const statusField = row.closest('tr')?.querySelector('[data-transfer-status]');
 
-                if (!toggle || !selectedField || !statusField) {
+                if (!toggle || !statusField) {
                     return;
                 }
 
                 const syncTransferRow = () => {
-                    const isSelected = String(selectedField.value || '0') === '1';
-
-                    toggle.classList.toggle('is-selected', isSelected);
-                    toggle.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
-                    statusField.value = isSelected ? 'pending' : 'excluded';
+                    statusField.value = toggle.checked ? 'pending' : 'excluded';
                 };
 
                 syncTransferRow();
-                toggle.addEventListener('click', () => {
-                    selectedField.value = selectedField.value === '1' ? '0' : '1';
-                    syncTransferRow();
-                });
+                toggle.addEventListener('change', syncTransferRow);
             });
+
+            const defaultSuccessorSelect = document.getElementById('default_successor_dentist_id');
+            if (defaultSuccessorSelect) {
+                const syncSuccessorNames = () => {
+                    const name = defaultSuccessorSelect.value
+                        ? defaultSuccessorSelect.selectedOptions[0]?.textContent.trim()
+                        : 'Choose a default successor';
+                    document.querySelectorAll('[data-default-successor-name]').forEach(label => {
+                        label.textContent = name;
+                    });
+                };
+                syncSuccessorNames();
+                defaultSuccessorSelect.addEventListener('change', syncSuccessorNames);
+            }
 
             if (pageMode === 'index') {
                 bindOtherTransitionToggle('[data-transition-type-filter]', '#dtFilterTypeOther',
@@ -1483,7 +1494,7 @@
 
                     <div class="dt-grid-progress">
                         <div class="dt-progress">
-                            <div class="dt-progress-bar" style="width: ${Number(transition.progress_percentage || 0)}%;"></div>
+                            <div class="dt-progress-bar" data-ui-style="width: ${window.uiAttribute(Number(transition.progress_percentage || 0))}%;"></div>
                         </div>
                         <span>${Number(transition.progress_percentage || 0)}% complete</span>
                     </div>
@@ -1660,4 +1671,4 @@
             }
         });
     </script>
-@endpush
+@endsection

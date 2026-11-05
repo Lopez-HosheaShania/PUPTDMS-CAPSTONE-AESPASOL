@@ -14,6 +14,7 @@
 @import './core/utilities.css';
 
 /* Components */
+@import './components/accordion.css';
 @import './components/search.css';
 @import './components/filters.css';
 @import './components/modals.css';
@@ -23,7 +24,7 @@
 @import './components/flatpickr.css';
 @import './components/calendar.css';
 @import './components/floating-actions.css';
-@import './components/accessibility.css';
+@import './components/floating-save-bar.css';
 @import './components/view-toggle.css';
 @import './components/voice-input.css';
 @import './components/card.css';
@@ -38,6 +39,7 @@
 @import './components/patient-record-modal.css';
 @import './components/booking-workflow.css';
 @import './components/filter-select.css';
+@import './components/accessibility.css';
 
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 @plugin "daisyui";

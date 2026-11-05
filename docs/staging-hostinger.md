@@ -1,5 +1,81 @@
 # Hostinger Staging Guide
 
+## Security remediation deployment
+
+The application now enforces a nonce-based CSP by default. Deploy the changed
+Blade views, JavaScript, configuration, middleware, `public/.htaccess`, and all
+files produced by `npm ci` followed by `npm run build`. Include
+`public/vendor/sienna` (fonts and translations as well as JavaScript) and
+`public/build`. Run Composer install from the existing lockfile as usual.
+
+Sienna's `locales/` and `fonts/` folders are generated assets and are ignored by
+Git. Both `npm run build` and `npm run dev` recreate them from the pinned npm
+package. They remain required in the deployment artifact; include them when
+uploading a local build to Hostinger even though they are excluded from commits.
+
+On publicly reachable staging use `APP_DEBUG=false`, `SESSION_SECURE_COOKIE=true`,
+`SESSION_HTTP_ONLY=true`, and `SESSION_SAME_SITE=lax`. Keep local HTTP settings
+separate. Do not make Laravel's `XSRF-TOKEN` HttpOnly; its frontend CSRF use is intentional.
+
+Clear stale route/view/config caches before warming the deployment caches:
+
+```sh
+php artisan route:clear
+php artisan view:clear
+php artisan config:clear
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+```
+
+Additional browser origins are configured through comma-separated
+`CSP_CONNECT_SOURCES`, `CSP_FRAME_SOURCES`, and `CSP_IMAGE_SOURCES`. Use exact
+HTTPS/WSS origins. The public Reverb origin and configured IdP logout/login
+origins are included automatically. `TRUSTED_PROXIES` accepts verified proxy
+IPs/CIDRs; it intentionally does not accept `*`. Do not add arbitrary origins
+from violation reports to the allowlist.
+
+`CSP_REPORT_ONLY=true` is a temporary diagnostic option, not a completed
+remediation. Restore `false` for enforcement. Avoid caching nonce-bearing HTML
+in a CDN or full-page cache. Do not add another server-level CSP that replaces
+the application's dynamic nonce or leaves the old permissive policy present.
+
+`public/.htaccess` supplies HSTS for HTTPS static files as well as dynamic
+responses, if the host supports these directives. The initial duration is one
+day (`86400`). Laravel uses the same default through `HSTS_MAX_AGE`. Keep the
+server value and application setting aligned when increasing the duration.
+`includeSubDomains` is off, and preload is not enabled. Verify every affected
+host before changing either. If TLS terminates at a proxy/CDN, configure that
+layer to send HSTS as well; do not blindly trust forwarded headers.
+
+In the hosting PHP configuration set `expose_php=Off` where available. Verify
+that the hosting panel redirects HTTP to HTTPS. On managed/shared hosting,
+coordinate ports 21, 3306 and 65002 with the provider: application code cannot
+close those services. Ports 80 and 443 can remain approved web services.
+
+After upload verify real GET responses for `/`, `/login`, an authenticated page,
+an error page and `/build/assets/*.css`. Check CSP nonce matching, HSTS,
+`X-Powered-By` suppression and session-cookie flags. Redirects should retain
+Location/status/cookies with an empty body. Test SSO login/logout, chatbot,
+accessibility, booking, modals, realtime notifications, document previews and
+PDF export for every role, then repeat the original ZAP/Nmap scans. These code
+changes alone do not establish closure of the historical scan findings.
+
+Developer checks:
+
+```sh
+npm run build
+php artisan test tests/Feature/SecurityHeadersTest.php tests/Feature/SecurityPageTest.php
+npm audit
+```
+
+Template events use the explicit registry in `resources/js/core/action-handlers.js`;
+attributes contain handler identifiers and JSON data, never executable expressions.
+Do not reintroduce inline event attributes or runtime string evaluation.
+`scripts/vendor-assets.mjs` maintains the pinned Sienna asset, local resources
+and its narrowly scoped CSP style compatibility patches. Review these patches
+when changing the dependency version; the build fails if the expected API changes.
+
 This guide is for the `dcms` Laravel app on a shared Hostinger plan.
 
 Goal: create a staging copy that is separate from production and from the other group's project.
@@ -140,7 +216,7 @@ Start from `.env.example` or the production `.env`, but change these at minimum:
 ```env
 APP_NAME="DCMS Staging"
 APP_ENV=staging
-APP_DEBUG=true
+APP_DEBUG=false
 APP_URL=https://dcms-staging.your-domain.com
 
 DB_CONNECTION=mysql
@@ -152,6 +228,8 @@ DB_PASSWORD=your_staging_database_password
 
 SESSION_DOMAIN=dcms-staging.your-domain.com
 SESSION_SECURE_COOKIE=true
+SESSION_HTTP_ONLY=true
+SESSION_SAME_SITE=lax
 QUEUE_CONNECTION=database
 CACHE_STORE=file
 FILESYSTEM_DISK=local

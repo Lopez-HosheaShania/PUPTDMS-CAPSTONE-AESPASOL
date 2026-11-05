@@ -7,7 +7,15 @@ import './core/modal';
 import './core/toast';
 import './core/session';
 
+import './ui/accordion';
 import './ui/header';
+import './ui/floating-save-bar';
+import './ui/chatbot';
+import './ui/signature-preview';
+
+if (document.querySelector('[data-monthly-report]')) {
+    import('./reports/monthly-report.js');
+}
 
 const featurePromises = new Map();
 
@@ -346,6 +354,10 @@ if (
     );
 }
 
+if (hasAny('#reportSignatoryModal')) {
+    import('./reports/report-signatory.js');
+}
+
 function loadSearchBarModule() {
     return loadFeature(
         'search-bar',
@@ -510,6 +522,84 @@ document.addEventListener(
     true
 );
 
+window.GlobalLoading = {
+    show({
+        title =
+        'PUP Dental Management System',
+
+        message =
+        'Loading...'
+    } = {}) {
+        const overlay =
+            document.getElementById(
+                'globalLoadingOverlay'
+            );
+
+        if (!overlay) {
+            return;
+        }
+
+        const titleElement =
+            document.getElementById(
+                'globalLoadingTitle'
+            );
+
+        const messageElement =
+            document.getElementById(
+                'globalLoadingMessage'
+            );
+
+        if (titleElement) {
+            titleElement.textContent =
+                title;
+        }
+
+        if (messageElement) {
+            messageElement.textContent =
+                message;
+        }
+
+        overlay.classList.add(
+            'is-active'
+        );
+
+        overlay.setAttribute(
+            'aria-hidden',
+            'false'
+        );
+
+        overlay.setAttribute(
+            'aria-busy',
+            'true'
+        );
+    },
+
+    hide() {
+        const overlay =
+            document.getElementById(
+                'globalLoadingOverlay'
+            );
+
+        if (!overlay) {
+            return;
+        }
+
+        overlay.classList.remove(
+            'is-active'
+        );
+
+        overlay.setAttribute(
+            'aria-hidden',
+            'true'
+        );
+
+        overlay.setAttribute(
+            'aria-busy',
+            'false'
+        );
+    }
+};
+
 window.openFilterDrawer =
     async function (...args) {
         const module =
@@ -526,26 +616,6 @@ window.closeFilterDrawer =
             await loadFilterDrawerModule();
 
         return module.closeFilterDrawer(
-            ...args
-        );
-    };
-
-window.openFilterPanel =
-    async function (...args) {
-        const module =
-            await loadFilterDrawerModule();
-
-        return module.openFilterPanel(
-            ...args
-        );
-    };
-
-window.closeFilterPanel =
-    async function (...args) {
-        const module =
-            await loadFilterDrawerModule();
-
-        return module.closeFilterPanel(
             ...args
         );
     };
@@ -692,6 +762,32 @@ function loadDatePickerModule() {
 
 window.loadDatePickerModule = loadDatePickerModule;
 
+if (
+    hasAny(
+        flatpickrSelectors
+    )
+) {
+    Promise.all([
+        loadCustomSelectModule(),
+        loadDatePickerModule(),
+    ])
+        .then(([
+            _customSelectModule,
+            datePickerModule,
+        ]) => {
+            datePickerModule
+                .initGlobalDatePickers(
+                    document
+                );
+        })
+        .catch(error => {
+            console.error(
+                'Unable to initialize date pickers.',
+                error
+            );
+        });
+}
+
 async function ensureDatePickerReady(
     input
 ) {
@@ -779,6 +875,7 @@ if (
     hasAny(
         [
             'form[data-global-validation]',
+            '[data-global-field]',
             '[data-char-limit]',
             '[data-global-number-stepper]'
         ].join(',')
@@ -1000,6 +1097,30 @@ document.addEventListener(
 
         if (
             hasAny(
+                [
+                    '[data-global-voice-trigger]',
+                    '.voice-search-mic.external[data-voice-trigger]'
+                ].join(','),
+                modal
+            )
+        ) {
+            try {
+                await loadVoiceModule();
+
+                window
+                    .initGlobalVoiceInputs?.(
+                        modal
+                    );
+            } catch (error) {
+                console.error(
+                    'Unable to initialize modal voice inputs.',
+                    error
+                );
+            }
+        }
+
+        if (
+            hasAny(
                 flatpickrSelectors,
                 modal
             )
@@ -1025,6 +1146,7 @@ document.addEventListener(
         if (
             hasAny(
                 [
+                    '[data-global-field]',
                     '[data-char-limit]',
                     'form[data-global-validation]',
                     '[data-global-number-stepper]'

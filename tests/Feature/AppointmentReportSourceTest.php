@@ -8,12 +8,14 @@ use App\Models\Patient;
 use App\Models\User;
 use App\Services\AppointmentReportRecords;
 use App\Services\DocumentTemplateRenderer;
+use App\Http\Controllers\Dentist\DentistReportController;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
+use setasign\Fpdi\Fpdi;
 
 class AppointmentReportSourceTest extends TestCase
 {
@@ -34,6 +36,8 @@ class AppointmentReportSourceTest extends TestCase
         AppointmentProcedure::create([
             'appointment_id' => $appointment->id, 'procedure_started_at' => $date.' 09:00:00',
             'procedure_completed_at' => $date.' 09:30:00', 'procedure_duration_seconds' => 1800,
+            'diagnosis' => 'Dental Caries',
+            'odontogram_data' => [['tooth' => 11, 'status' => ['code' => 'D', 'label' => 'Decayed']]],
         ]);
 
         return $appointment;
@@ -59,11 +63,117 @@ class AppointmentReportSourceTest extends TestCase
         $gad = $invoke('buildGadReportContext', []);
         $this->assertSame('Report Test Patient', $daily['row_1_patient_name']);
         $this->assertSame('Faculty', $daily['row_1_office']);
-        $this->assertSame('Report Test Patient', $services['patient_name_1']);
+        $this->assertSame('Patient, Report Test', $services['patient_name_1']);
         $this->assertSame('30', $services['processing_time_1']);
         $this->assertSame('1', $cases['faculty_cases_1']);
         $this->assertSame('1', $gad['header_faculty']);
         $this->assertFalse(Route::has('dentist.dentist.reports.daily-treatment-record.store'));
+        $this->travelBack();
+    }
+
+    public function test_dental_services_pdf_department_uses_category_for_non_students(): void
+    {
+        $method = new \ReflectionMethod(DentistReportController::class, 'dentalServicesCourseYearSectionDisplay');
+        $controller = new DentistReportController;
+        foreach ([
+            ['faculty', 'Bachelor of Secondary Education', 'Faculty'],
+            ['administrative', null, 'Administrative'],
+            ['administrative', 'Old program', 'Administrative'],
+            ['dependent_alumni', null, 'Dependent'],
+            ['student', 'BSIT', 'BSIT - Y3 / 1'],
+        ] as [$classification, $program, $expected]) {
+            $patient = new Patient(['classification' => $classification, 'course_code' => $program,
+                'course_name' => $program, 'year_level' => '3', 'section' => '1']);
+            $this->assertSame($expected, $method->invoke($controller, $patient));
+        }
+    }
+
+    public function test_dental_services_templates_preserve_compound_surnames_without_changing_daily_treatment_names(): void
+    {
+        $this->travelTo(Carbon::parse('2026-09-07'));
+        $legacy = $this->appointment();
+        $legacy->patient->update(['name' => 'Mary Joy Dela Cruz']);
+
+        $profile = $this->appointment();
+        $profile->patient->update(['name' => 'Mary Joy Cruz']);
+        $profile->patient->user->update(['first_name' => 'Mary Joy', 'last_name' => 'Dela Cruz']);
+
+        $records = app(AppointmentReportRecords::class)->between(now()->startOfMonth(), now()->endOfMonth());
+        $this->assertSame(['Dela Cruz, Mary Joy', 'Dela Cruz, Mary Joy'], $records->pluck('dental_services_patient_name')->all());
+
+        $renderer = app(DocumentTemplateRenderer::class);
+        $services = (new \ReflectionMethod($renderer, 'buildDentalServicesContext'))->invoke($renderer);
+        $daily = (new \ReflectionMethod($renderer, 'buildDailyTreatmentRecordContext'))->invoke($renderer);
+
+        $this->assertSame('Dela Cruz, Mary Joy', $services['patient_name_1']);
+        $this->assertSame('Dela Cruz, Mary Joy', $services['patient_name_2']);
+        $this->assertSame('Mary Joy Cruz', $daily['row_1_patient_name']);
+        $this->assertSame('Mary Joy Dela Cruz', $daily['row_2_patient_name']);
+        $this->assertDatabaseHas('patients', ['id' => $legacy->patient_id, 'name' => 'Mary Joy Dela Cruz']);
+        $this->assertDatabaseHas('patients', ['id' => $profile->patient_id, 'name' => 'Mary Joy Cruz']);
+        $this->travelBack();
+    }
+
+    public function test_dsr_template_times_use_the_actual_start_and_processing_minutes(): void
+    {
+        $this->travelTo(Carbon::parse('2026-09-07'));
+        $appointment = $this->appointment();
+        $appointment->procedure->update([
+            'procedure_started_at' => '2026-09-02 09:17:45',
+            'procedure_completed_at' => '2026-09-02 11:00:00',
+        ]);
+        $renderer = app(DocumentTemplateRenderer::class);
+        $services = (new \ReflectionMethod($renderer, 'buildDentalServicesContext'))->invoke($renderer);
+        $this->assertSame('09:17 AM', $services['time_in_1']);
+        $this->assertSame('09:47 AM', $services['time_processed_1']);
+        $this->assertSame('30', $services['processing_time_1']);
+        $daily = (new \ReflectionMethod($renderer, 'buildDailyTreatmentRecordContext'))->invoke($renderer);
+        $this->assertSame('09/02/26 9:17 AM', $daily['row_1_date']);
+        $this->assertSame('09/02/26 9:47 AM', $daily['row_1_processed']);
+        $this->travelBack();
+    }
+
+    public function test_daily_report_uses_manual_timing(): void
+    {
+        $this->travelTo(Carbon::parse('2026-09-07'));
+        foreach (['12:00:00' => '2026-09-02 12:10:00', '23:55:00' => '2026-09-03 00:05:00'] as $timeIn => $expectedEnd) {
+            $appointment = $this->appointment();
+            $appointment->procedure->update([
+                'procedure_started_at' => '2026-09-02 '.$timeIn,
+                'procedure_completed_at' => '2026-09-03 18:00:00',
+                'procedure_duration_seconds' => 600,
+            ]);
+            $start = Carbon::parse('2026-09-02 '.$timeIn);
+            $end = Carbon::parse($expectedEnd);
+            $records = app(AppointmentReportRecords::class)->between(now()->startOfMonth(), now()->endOfMonth());
+            $row = $records->firstWhere('id', $appointment->id);
+            $this->assertSame($start->toDateTimeString(), $row->time_in->toDateTimeString());
+            $this->assertSame($expectedEnd, $row->time_out->toDateTimeString());
+
+            $renderer = app(DocumentTemplateRenderer::class);
+            $context = (new \ReflectionMethod($renderer, 'buildDailyTreatmentRecordContext'))->invoke($renderer);
+            $this->assertSame($start->format('m/d/y g:i A'), $context['row_1_date']);
+            $this->assertSame($end->format('m/d/y g:i A'), $context['row_1_processed']);
+
+            foreach (['DTR-DEFAULT', 'DTR-FACULTY', 'DTR-ALUMNI'] as $code) {
+                $pdf = new class('L', 'pt') extends Fpdi {
+                    public array $texts = [];
+
+                    public function Cell($w, $h = 0, $txt = '', $border = 0, $ln = 0, $align = '', $fill = false, $link = '')
+                    {
+                        $this->texts[] = $txt;
+                        parent::Cell($w, $h, $txt, $border, $ln, $align, $fill, $link);
+                    }
+                };
+                $pdf->AddPage();
+                (new \ReflectionMethod(DentistReportController::class, 'drawDailyTreatmentRecordRows'))
+                    ->invoke(new DentistReportController(), $pdf, collect([$appointment->fresh()]), $code);
+                $this->assertContains($start->format('m/d/y  |  h:i A'), $pdf->texts);
+                $this->assertContains($end->format('m/d/y  |  h:i A'), $pdf->texts);
+                $this->assertNotContains('09/02/26  |  09:00 AM', $pdf->texts);
+                $this->assertNotContains('09/03/26  |  06:00 PM', $pdf->texts);
+            }
+        }
         $this->travelBack();
     }
 

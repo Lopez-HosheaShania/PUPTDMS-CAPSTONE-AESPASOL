@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\Admin\SystemLogController;
 use App\Http\Controllers\Admin\SystemSettingsController;
 use App\Http\Controllers\Admin\UserManagementController;
+use App\Http\Controllers\Admin\RolePreviewController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\Auth\BackupLoginController;
 use App\Http\Controllers\Auth\LogoutController;
@@ -104,34 +105,44 @@ Route::get('/login', function (IdpHealthService $idpHealthService) {
 Route::get('/backup-login', [BackupLoginController::class, 'show'])->name('backup.login');
 
 Route::get('/dashboard', function () {
-    if (! Auth::check()) {
-        return redirect()->route('login');
+    if (!Auth::check()) {
+        return redirect()
+            ->route('login');
     }
 
-    $impersonatedRole = session('impersonated_role');
-
-    if ($impersonatedRole === 'patient') {
-        return redirect()->route('patient.dashboard');
-    }
-
-    if ($impersonatedRole === 'dentist') {
-        return redirect()->route('dentist.dentist.dashboard');
-    }
-
-    $role = strtolower((string) optional(Auth::user()->role)->slug);
+    $role = strtolower(
+        (string) optional(
+            Auth::user()->role
+        )->slug
+    );
 
     return match ($role) {
-        'admin', 'super_admin' => redirect()->route('admin.admin.dashboard'),
-        'dentist', 'dentist_role' => redirect()->route('dentist.dentist.dashboard'),
-        'patient', 'patient_role' => redirect()->route('patient.dashboard'),
-        default => redirect()->route('login'),
+        'admin',
+        'super_admin' =>
+        redirect()
+            ->route(
+                'admin.admin.dashboard'
+            ),
+
+        'dentist',
+        'dentist_role' =>
+        redirect()
+            ->route(
+                'dentist.dentist.dashboard'
+            ),
+
+        'patient',
+        'patient_role' =>
+        redirect()
+            ->route(
+                'patient.dashboard'
+            ),
+
+        default =>
+        redirect()
+            ->route('login'),
     };
 })->name('dashboard');
-
-// Patient Register
-Route::get('/register', function () {
-    return view('auth.register');
-})->name('register');
 
 /*
 |--------------------------------------------------------------------------
@@ -207,23 +218,21 @@ Route::post('/login', [BackupLoginController::class, 'store'])->name('login.stor
 // Logout (all roles)
 Route::post('/logout', [LogoutController::class, 'logout'])->name('logout');
 
-Route::post(
-    '/session/expire',
-    [
-        SessionManagementController::class,
-        'expire',
-    ]
-)->name('session.expire');
+Route::post('/session/expire', [SessionManagementController::class, 'expire',])
+    ->name('session.expire');
 
-Route::post(
-    '/session/activity',
-    [
-        SessionManagementController::class,
-        'activity',
-    ]
-)
+Route::get('/session/status', [SessionManagementController::class, 'status',])
+    ->name('session.status');
+
+Route::post('/session/activity', [SessionManagementController::class, 'activity',])
     ->middleware('auth')
     ->name('session.activity');
+
+Route::put('/reports/signatory', [\App\Http\Controllers\Dentist\ReportSignatoryController::class, 'update'])
+    ->middleware('auth')->name('reports.signatory.update');
+
+Route::post('/reports/signatory/validate-signature', [\App\Http\Controllers\Dentist\ReportSignatoryController::class, 'validateSignature'])
+    ->middleware(['auth', 'throttle:10,1'])->name('reports.signatory.validate-signature');
 
 Route::middleware('auth')->prefix('notifications')->name('notifications.')->group(function () {
     Route::get('/poll', [NotificationController::class, 'poll'])
@@ -348,6 +357,9 @@ Route::prefix('admin')
             ->middleware('permission:create_report_files')
             ->name('admin.report-files');
 
+        Route::get('/report-files/cancellation-breakdown', [AdminReportController::class, 'cancellationBreakdown'])
+            ->middleware('permission:create_report_files')->name('admin.reports.cancellation-breakdown');
+
         Route::get('/reports', [AdminReportController::class, 'index'])
             ->middleware('permission:view_reports,view_ai_reports,create_ai_generative_reports')
             ->name('admin.reports');
@@ -387,6 +399,27 @@ Route::prefix('admin')
 
         /*
         |--------------------------------------------------------------------------
+        | ROLE PREVIEW
+        |--------------------------------------------------------------------------
+        */
+        Route::post('/role-preview/start', [RolePreviewController::class, 'start'])
+            ->middleware('permission:access_super_admin_dashboard')
+            ->name('admin.role_preview.start');
+
+        Route::get('/role-preview/patient', [RolePreviewController::class, 'patient'])
+            ->middleware('permission:access_super_admin_dashboard')
+            ->name('admin.role_preview.patient');
+
+        Route::get('/role-preview/dentist', [RolePreviewController::class, 'dentist'])
+            ->middleware('permission:access_super_admin_dashboard')
+            ->name('admin.role_preview.dentist');
+
+        Route::post('/role-preview/stop', [RolePreviewController::class, 'stop'])
+            ->middleware('permission:access_super_admin_dashboard')
+            ->name('admin.role_preview.stop');
+
+        /*
+        |--------------------------------------------------------------------------
         | SYSTEM LOGS
         |--------------------------------------------------------------------------
         */
@@ -397,6 +430,10 @@ Route::prefix('admin')
         Route::get('/session-management', [AdminSessionManagementController::class, 'index'])
             ->middleware('permission:manage_audit_trail')
             ->name('admin.session_management.index');
+
+        Route::get('/session-management/check', [AdminSessionManagementController::class, 'checkLatest'])
+            ->middleware('permission:manage_audit_trail')
+            ->name('admin.session_management.check');
 
         Route::delete('/session-management/sessions/{reference}', [AdminSessionManagementController::class, 'destroySession'])
             ->middleware('permission:manage_audit_trail')
@@ -475,47 +512,6 @@ Route::prefix('admin')
         Route::post('/patients/{patient}/existing-appointment/save', [\App\Http\Controllers\Dentist\OdontogramController::class, 'storeExistingAppointment'])
             ->middleware('permission:create_procedure_records')
             ->name('admin.odontogram.existing-appointment.store');
-
-        /*
-        |--------------------------------------------------------------------------
-        | PATIENT LIST (FOR IMPERSONATION)
-        |--------------------------------------------------------------------------
-        */
-        Route::get('/patients/list', function () {
-            $user = Auth::user();
-
-            if (! $user || ! $user->hasPermission('view_patient_profiles')) {
-                return response()->json(['message' => 'Unauthorized'], 403);
-            }
-            $patients = Patient::query()
-                ->with([
-                    'information' => function ($query) {
-                        $query->select([
-                            'id',
-                            'patient_id',
-                            'phone',
-                        ]);
-                    },
-                ])
-                ->select([
-                    'id',
-                    'name',
-                    'email',
-                ])
-                ->orderBy('name')
-                ->get()
-                ->map(function (Patient $patient) {
-                    return [
-                        'id' => $patient->id,
-                        'name' => $patient->name,
-                        'email' => $patient->email,
-                        'phone' => $patient->information?->phone,
-                    ];
-                })
-                ->values();
-
-            return response()->json($patients);
-        })->name('admin.patients.list');
 
         /*
         |--------------------------------------------------------------------------
@@ -693,6 +689,13 @@ Route::prefix('admin')
             ->middleware('permission:manage_system_settings,set_notification_rules')
             ->name('admin.system_settings');
 
+        Route::get('/retention-policy', [\App\Http\Controllers\Admin\RetentionPolicyController::class, 'index'])
+            ->middleware('permission:manage_system_settings')->name('admin.retention.index');
+        Route::get('/retention-review', [\App\Http\Controllers\Admin\RetentionPolicyController::class, 'review'])
+            ->middleware('permission:manage_system_settings')->name('admin.retention.review');
+        Route::put('/retention-policy/{policy}', [\App\Http\Controllers\Admin\RetentionPolicyController::class, 'update'])
+            ->middleware('permission:manage_system_settings')->name('admin.retention.update');
+
         Route::post('/system-settings', [SystemSettingsController::class, 'update'])
             ->middleware('permission:manage_system_settings,set_notification_rules')
             ->name('admin.system_settings.update');
@@ -708,20 +711,12 @@ Route::prefix('admin')
     ->group(function () {
 
         Route::get('/user-management', [UserManagementController::class, 'index'])
-            ->middleware('permission:view_account_details,create_users,disable_users,update_user_role,update_user_password')
+            ->middleware('permission:view_account_details,disable_users,update_user_role')
             ->name('admin.user_management');
-
-        Route::post('/user-management', [UserManagementController::class, 'store'])
-            ->middleware('permission:create_users')
-            ->name('admin.user_management.store');
 
         Route::put('/user-management/{user}', [UserManagementController::class, 'update'])
             ->middleware('permission:update_user_role')
             ->name('admin.user_management.update');
-
-        Route::post('/user-management/{user}/reset-password', [UserManagementController::class, 'resetPassword'])
-            ->middleware('permission:update_user_password')
-            ->name('admin.user_management.reset_password');
 
         Route::post('/user-management/{user}/toggle-status', [UserManagementController::class, 'toggleStatus'])
             ->middleware('permission:disable_users')
@@ -741,6 +736,9 @@ Route::prefix('admin')
         Route::post('/dentist-transitions', [DentistTransitionController::class, 'store'])
             ->name('admin.dentist-transitions.store');
 
+        Route::put('/dentist-transitions/current-dentist', [DentistTransitionController::class, 'assignCurrentDentist'])
+            ->name('admin.dentist-transitions.assign-current');
+
         Route::get('/dentist-transitions/{transition}', [DentistTransitionController::class, 'show'])
             ->name('admin.dentist-transitions.show');
 
@@ -756,8 +754,6 @@ Route::prefix('admin')
         Route::put('/dentist-transitions/{transition}/assignments', [DentistTransitionController::class, 'assignments'])
             ->name('admin.dentist-transitions.assignments');
 
-        Route::put('/dentist-transitions/{transition}/checklist', [DentistTransitionController::class, 'checklist'])
-            ->name('admin.dentist-transitions.checklist');
 
         Route::post('/dentist-transitions/{transition}/finalize', [DentistTransitionController::class, 'finalize'])
             ->name('admin.dentist-transitions.finalize');
@@ -767,6 +763,10 @@ Route::prefix('admin')
 
         Route::post('/dentist-transitions/{transition}/extend-access', [DentistTransitionController::class, 'extendAccess'])
             ->name('admin.dentist-transitions.extend-access');
+
+        Route::post('/dentist-transitions/{transition}/end-temporary', [DentistTransitionController::class, 'endTemporary'])
+            ->middleware('permission:finalize_dentist_transitions')
+            ->name('admin.dentist-transitions.end-temporary');
     });
 
 Route::prefix('admin')
@@ -787,117 +787,6 @@ Route::prefix('admin')
             ->middleware('permission:delete_service_type')
             ->name('service-types.destroy');
     });
-
-/*
-|--------------------------------------------------------------------------
-| ADMIN IMPERSONATION ROUTES
-|--------------------------------------------------------------------------
-*/
-
-Route::post('/impersonate', function (Request $request) {
-
-    /** @var \App\Models\User $user */
-    $user = Auth::user();
-
-    if (! $user || ! $user->hasPermission('access_super_admin_dashboard')) {
-        return response()->json(['message' => 'Unauthorized'], 403);
-    }
-
-    $request->validate([
-        'role' => 'required|string',
-    ]);
-
-    $targetRole = strtolower(trim($request->role));
-
-    if (! session()->has('impersonator_role')) {
-        session([
-            'impersonator_role' => optional(Auth::user()->role)->slug,
-            'impersonator_admin_id' => Auth::id(),
-            'impersonator_admin_email' => Auth::user()->email,
-        ]);
-    }
-
-    if (in_array($targetRole, ['dentist', 'dentist_role'], true)) {
-
-        session([
-            'impersonated_role' => 'dentist',
-        ]);
-
-        session()->forget(['impersonated_patient_id']);
-
-        AuditLogger::log(
-            'impersonation_started',
-            'authentication',
-            'Admin started impersonating Dentist dashboard'
-        );
-
-        return response()->json([
-            'redirect' => route('dentist.dentist.dashboard'),
-        ]);
-    }
-
-    if (in_array($targetRole, ['patient', 'patient_role'], true)) {
-
-        $request->validate([
-            'patient_id' => 'required|exists:patients,id',
-        ]);
-
-        $patient = Patient::find($request->patient_id);
-
-        if (! $patient) {
-            return response()->json([
-                'message' => 'Selected patient not found.',
-            ], 422);
-        }
-
-        session([
-            'impersonated_role' => 'patient',
-            'impersonated_patient_id' => $patient->id,
-        ]);
-
-        AuditLogger::log(
-            'impersonation_started',
-            'authentication',
-            'Admin started impersonating Patient ID ' . $patient->id
-        );
-
-        return response()->json([
-            'redirect' => route('patient.dashboard'),
-        ]);
-    }
-
-    return response()->json([
-        'message' => 'Unsupported role: ' . $targetRole,
-    ], 422);
-})->name('admin.impersonate');
-
-Route::post('/stop-impersonation', function () {
-
-    /** @var \App\Models\User $user */
-    $user = Auth::user();
-
-    if (! $user || ! $user->hasAnyRole(['super_admin', 'admin'])) {
-        return response()->json(['message' => 'Unauthorized'], 403);
-    }
-
-    if (session()->has('impersonator_role')) {
-        AuditLogger::log(
-            'impersonation_stopped',
-            'authentication',
-            'Admin stopped impersonation'
-        );
-    }
-
-    session()->forget([
-        'impersonated_role',
-        'impersonated_patient_id',
-        'impersonator_role',
-        'impersonator_admin_id',
-        'impersonator_admin_email',
-    ]);
-
-    return redirect()->route('admin.admin.dashboard');
-})->name('admin.stop_impersonation');
 
 /*
 |--------------------------------------------------------------------------
@@ -1004,6 +893,10 @@ Route::prefix('patient')->middleware(['role:patient'])->group(function () {
         ->middleware('permission:book_appointments')
         ->name('book.appointment.draft.show');
 
+    Route::get('/book-appointment/verify-personal-information', [AppointmentController::class, 'verifyPersonalInformation'])
+        ->middleware('permission:book_appointments')
+        ->name('book.appointment.verify-personal-information');
+
     Route::put('/book-appointment/draft', [AppointmentController::class, 'saveDraft'])
         ->middleware('permission:book_appointments')
         ->name('book.appointment.draft.save');
@@ -1016,14 +909,6 @@ Route::prefix('patient')->middleware(['role:patient'])->group(function () {
         ->middleware('permission:book_appointments')
         ->name('book.appointment.validate-signature');
 
-    Route::get('/signature-review', [AppointmentController::class, 'showSignatureReview'])
-        ->middleware('permission:book_appointments')
-        ->name('patient.signature-review.show');
-
-    Route::post('/signature-review', [AppointmentController::class, 'updateSignatureReview'])
-        ->middleware('permission:book_appointments')
-        ->name('patient.signature-review.update');
-
     Route::get('/appointments', [AppointmentController::class, 'index'])
         ->middleware('permission:view_own_appointments,book_appointments')
         ->name('book.appointment.index');
@@ -1033,11 +918,6 @@ Route::prefix('patient')->middleware(['role:patient'])->group(function () {
     })->name('patient.appointment.cancelled.view');
 });
 
-Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
-    Route::post('/patients/{patient}/signature/invalid', [AppointmentController::class, 'markSignatureInvalid'])
-        ->name('admin.patient.signature.invalid');
-});
-
 /*
 |--------------------------------------------------------------------------
 | DENTIST ROUTES
@@ -1045,9 +925,6 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
 */
 
 Route::prefix('dentist')->middleware(['auth'])->group(function () {
-    Route::post('/patients/{patient}/signature/invalid', [AppointmentController::class, 'markSignatureInvalid'])
-        ->middleware('permission:create_medical_records')
-        ->name('dentist.patient.signature.invalid');
     Route::get('/dashboard', [DentistDashboardController::class, 'index'])
         ->middleware('permission:access_dentist_dashboard')
         ->name('dentist.dentist.dashboard');
@@ -1144,6 +1021,9 @@ Route::prefix('dentist')->middleware(['auth'])->group(function () {
         ->middleware('permission:view_reports,create_report_files')
         ->name('dentist.dentist.report');
 
+    Route::get('/report/cancellation-breakdown', [AdminReportController::class, 'cancellationBreakdown'])
+        ->middleware('permission:view_reports,create_report_files')->name('dentist.reports.cancellation-breakdown');
+
     Route::get('/report/gad-data', [\App\Http\Controllers\Dentist\DentistReportController::class, 'gadData'])
         ->middleware('permission:view_reports,create_report_files')
         ->name('dentist.dentist.report.gad-data');
@@ -1192,6 +1072,10 @@ Route::prefix('dentist')->middleware(['auth'])->group(function () {
         ->middleware('permission:create_report_files')
         ->name('dentist.dentist.report.monthly-report-download');
 
+    Route::post('/report/monthly-report-counts', [\App\Http\Controllers\Dentist\DentistReportController::class, 'monthlyReportCounts'])
+        ->middleware('permission:create_report_files')
+        ->name('dentist.dentist.report.monthly-report-counts');
+
     Route::get('/report/weekly-data', [\App\Http\Controllers\Dentist\DentistReportController::class, 'weeklyData'])
         ->middleware('permission:create_report_files')
         ->name('dentist.dentist.report.weekly-data');
@@ -1234,9 +1118,18 @@ Route::prefix('dentist')->middleware(['auth'])->group(function () {
         ->middleware('permission:manage_walk_in_patients')
         ->name('dentist.walk-in.patient-booking-information');
 
+    Route::get('/walk-in/guest/check-identity', [WalkInController::class, 'checkGuestIdentity'])
+        ->middleware('permission:manage_walk_in_patients')
+        ->name('dentist.walk-in.guest.identity.check');
+
     Route::post('/walk-in/guest', [WalkInController::class, 'storeGuest'])
         ->middleware('permission:manage_walk_in_patients')
         ->name('dentist.walk-in.guest.store');
+
+    Route::post('/walk-in/guest', [WalkInController::class, 'storeGuest'])
+        ->middleware('permission:manage_walk_in_patients')
+        ->name('dentist.walk-in.guest.store');
+
     Route::post('/walk-in/start', [WalkInController::class, 'startWalkIn'])
         ->middleware('permission:manage_walk_in_patients')
         ->name('dentist.walk-in.start');
@@ -1353,6 +1246,9 @@ Route::prefix('dentist')->middleware(['auth'])->group(function () {
     Route::get('/inventory/data', [InventoryController::class, 'fetch'])
         ->middleware('permission:view_inventory')
         ->name('dentist.dentist.inventory.data');
+
+    Route::get('/inventory/procedure-notes', [InventoryController::class, 'procedureNotes'])
+        ->middleware('permission:view_inventory')->name('dentist.inventory.procedure-notes');
 
     Route::post('/inventory', [InventoryController::class, 'store'])
         ->middleware('permission:add_inventory')
@@ -1501,20 +1397,12 @@ Route::prefix('dentist')->middleware(['auth'])->group(function () {
         ->name('dentist.faculty.store');
 
     Route::get('/user-management', [UserManagementController::class, 'index'])
-        ->middleware('permission:view_account_details,create_users,disable_users,update_user_role,update_user_password')
+        ->middleware('permission:view_account_details,disable_users,update_user_role')
         ->name('dentist.user_management');
-
-    Route::post('/user-management', [UserManagementController::class, 'store'])
-        ->middleware('permission:create_users')
-        ->name('dentist.user_management.store');
 
     Route::put('/user-management/{user}', [UserManagementController::class, 'update'])
         ->middleware('permission:update_user_role')
         ->name('dentist.user_management.update');
-
-    Route::post('/user-management/{user}/reset-password', [UserManagementController::class, 'resetPassword'])
-        ->middleware('permission:update_user_password')
-        ->name('dentist.user_management.reset_password');
 
     Route::post('/user-management/{user}/toggle-status', [UserManagementController::class, 'toggleStatus'])
         ->middleware('permission:disable_users')
@@ -1581,9 +1469,6 @@ Route::prefix('dentist')->middleware(['auth'])->group(function () {
         ->middleware('permission:assign_dentist_successors')
         ->name('dentist.dentist.transitions.assignments');
 
-    Route::put('/transitions/{transition}/checklist', [DentistTransitionController::class, 'checklist'])
-        ->middleware('permission:update_dentist_transitions')
-        ->name('dentist.dentist.transitions.checklist');
 
     Route::post('/transitions/{transition}/finalize', [DentistTransitionController::class, 'finalize'])
         ->middleware('permission:finalize_dentist_transitions')

@@ -594,17 +594,11 @@ function initGlobalFlatpickr() {
                 return;
             }
 
-            if (
-                window.matchMedia(
-                    '(max-width: 640px)'
-                ).matches
-            ) {
-                requestAnimationFrame(
-                    () => {
-                        instance.close();
-                    }
-                );
-            }
+            requestAnimationFrame(() => {
+                if (instance.isOpen) {
+                    instance.close();
+                }
+            });
         },
 
         onOpen: (_dates, _str, instance) => {
@@ -646,7 +640,10 @@ function initGlobalFlatpickr() {
         options.appendTo =
             shouldPortalToBody
                 ? document.body
-                : (parentPopup || document.body);
+                : (
+                    parentPopup ||
+                    document.body
+                );
 
         if (
             parentPopup &&
@@ -702,15 +699,43 @@ function initGlobalFlatpickr() {
             options.maxDate = "today";
         }
 
-        window.flatpickr(el, options);
+        const instance =
+            window.flatpickr(
+                el,
+                options
+            );
+
+        instance
+            .calendarContainer
+            ?.setAttribute(
+                'data-modal-portal',
+                ''
+            );
     });
 
-    const timeInputs = document.querySelectorAll('.js-flatpickr-time');
+    const timeInputs =
+        document.querySelectorAll(
+            '.js-flatpickr-time'
+        );
 
     timeInputs.forEach(el => {
-        if (el._flatpickr) return;
+        if (el._flatpickr) {
+            return;
+        }
 
-        const initialTime = String(el.value || '').trim();
+        const parentPopup =
+            el.closest(
+                'dialog, .ui-modal, .modal-overlay'
+            );
+
+        const shouldPortalToBody =
+            el.hasAttribute(
+                'data-flatpickr-append-to-body'
+            );
+
+        const initialTime =
+            String(el.value || '').trim();
+
         const visibleInputClass = el.className
             .split(/\s+/)
             .filter(className => className && className !== 'js-flatpickr-time')
@@ -725,7 +750,7 @@ function initGlobalFlatpickr() {
 
             altInputClass: `${visibleInputClass} flatpickr-time-display form-control input`,
             time_24hr: false,
-            minuteIncrement: 5,
+            minuteIncrement: el.dataset.timeMinuteIncrement === '1' ? 1 : 5,
             defaultDate: /^([01]\d|2[0-3]):[0-5]\d$/.test(initialTime)
                 ? initialTime
                 : undefined,
@@ -733,11 +758,28 @@ function initGlobalFlatpickr() {
             clickOpens: true,
             disableMobile: true,
             position: "auto center",
-            appendTo: document.body,
+
+            appendTo:
+                shouldPortalToBody
+                    ? document.body
+                    : (parentPopup || document.body),
+
+            positionElement:
+                parentPopup &&
+                    !shouldPortalToBody
+                    ? el
+                    : undefined,
 
             onReady: (_dates, _str, instance) => {
-                if (/^([01]\d|2[0-3]):[0-5]\d$/.test(initialTime)) {
-                    instance.setDate(initialTime, false, 'H:i');
+                if (
+                    /^([01]\d|2[0-3]):[0-5]\d$/
+                        .test(initialTime)
+                ) {
+                    instance.setDate(
+                        initialTime,
+                        false,
+                        'H:i'
+                    );
                 }
             },
 
@@ -750,7 +792,18 @@ function initGlobalFlatpickr() {
             },
         };
 
-        window.flatpickr(el, options);
+        const instance =
+            window.flatpickr(
+                el,
+                options
+            );
+
+        instance
+            .calendarContainer
+            ?.setAttribute(
+                'data-modal-portal',
+                ''
+            );
     });
 }
 
@@ -1023,22 +1076,29 @@ if (
 
 let activeFlatpickrInstance = null;
 
-function ensureFlatpickrBackdrop() {
+function ensureFlatpickrBackdrop(instance) {
+    const parentPopup =
+        instance?.input?.closest(
+            'dialog, .ui-modal, .modal-overlay'
+        );
+
+    const host =
+        parentPopup ||
+        document.body;
+
     let backdrop =
-        document.querySelector(
-            '.flatpickr-mobile-backdrop'
+        host.querySelector(
+            ':scope > .flatpickr-mobile-backdrop'
         );
 
     if (!backdrop) {
         backdrop =
-            document.createElement(
-                'div'
-            );
+            document.createElement('div');
 
         backdrop.className =
             'flatpickr-mobile-backdrop';
 
-        document.body.appendChild(
+        host.appendChild(
             backdrop
         );
 
@@ -1055,17 +1115,8 @@ function ensureFlatpickrBackdrop() {
                 event.preventDefault();
                 event.stopPropagation();
 
-                const instance =
-                    activeFlatpickrInstance;
-
-                if (!instance) {
-                    return;
-                }
-
-                activeFlatpickrInstance =
-                    null;
-
-                instance.close();
+                activeFlatpickrInstance
+                    ?.close();
             }
         );
     }
@@ -1085,38 +1136,32 @@ function openFlatpickrSheet(instance) {
         return;
     }
 
+    const calendar =
+        instance.calendarContainer;
+
+    if (!calendar) {
+        return;
+    }
+
     const backdrop =
-        ensureFlatpickrBackdrop();
+        ensureFlatpickrBackdrop(
+            instance
+        );
 
     backdrop.dataset.ready =
         'false';
-
-    document.body.classList.add(
-        'flatpickr-sheet-open'
-    );
 
     backdrop.classList.add(
         'show'
     );
 
-    instance.calendarContainer
-        .classList.add(
-            'flatpickr-mobile-sheet'
-        );
-
-    instance.calendarContainer.style.zIndex =
-        '999999';
+    calendar.classList.add(
+        'flatpickr-mobile-centered'
+    );
 
     requestAnimationFrame(() => {
-        instance.calendarContainer
-            .classList.add(
-                'sheet-show'
-            );
-
-        window.setTimeout(() => {
-            backdrop.dataset.ready =
-                'true';
-        }, 180);
+        backdrop.dataset.ready =
+            'true';
     });
 }
 
@@ -1129,9 +1174,18 @@ function closeFlatpickrSheet(instance) {
         return;
     }
 
+    const parentPopup =
+        instance?.input?.closest(
+            'dialog, .ui-modal, .modal-overlay'
+        );
+
+    const host =
+        parentPopup ||
+        document.body;
+
     const backdrop =
-        document.querySelector(
-            '.flatpickr-mobile-backdrop'
+        host.querySelector(
+            ':scope > .flatpickr-mobile-backdrop'
         );
 
     if (backdrop) {
@@ -1143,102 +1197,18 @@ function closeFlatpickrSheet(instance) {
         );
     }
 
-    document.body.classList.remove(
-        'flatpickr-sheet-open'
-    );
-
     instance.calendarContainer
         ?.classList.remove(
-            'sheet-show'
+            'flatpickr-mobile-centered'
         );
 
-    window.setTimeout(() => {
-
-        instance.calendarContainer
-            ?.classList.remove(
-                'flatpickr-mobile-sheet',
-                'sheet-dragging'
-            );
-
-        if (
-            instance.calendarContainer
-        ) {
-            instance.calendarContainer
-                .style.removeProperty(
-                    'transform'
-                );
-
-            instance.calendarContainer
-                .style.removeProperty(
-                    'z-index'
-                );
-        }
-
-        if (activeFlatpickrInstance === instance) {
-            activeFlatpickrInstance =
-                null;
-        }
-
-    }, 220);
-}
-
-function initFlatpickrSwipeClose() {
-    let startY = 0;
-    let dragging = false;
-
-    document.addEventListener('touchstart', (e) => {
-        const calendar = e.target.closest('.flatpickr-mobile-sheet.open');
-        if (!calendar) return;
-
-        startY = e.touches[0].clientY;
-        dragging = true;
-        calendar.classList.add('sheet-dragging');
-    }, { passive: true });
-
-    document.addEventListener('touchmove', (e) => {
-        if (!dragging) return;
-
-        const calendar = document.querySelector('.flatpickr-mobile-sheet.open');
-        if (!calendar) return;
-
-        const diff = Math.max(0, e.touches[0].clientY - startY);
-        calendar.style.transform = `translateY(${diff}px)`;
-    }, { passive: true });
-
-    document.addEventListener('touchend', () => {
-        if (!dragging) return;
-
-        const calendar = document.querySelector('.flatpickr-mobile-sheet.open');
-        if (!calendar) return;
-
-        const matrixY = calendar.style.transform.match(/translateY\((\d+)px\)/);
-        const diff = matrixY ? Number(matrixY[1]) : 0;
-
-        calendar.classList.remove('sheet-dragging');
-
-        if (diff > 90 && activeFlatpickrInstance) {
-            activeFlatpickrInstance.close();
-        } else {
-            calendar.style.transform = '';
-        }
-
-        dragging = false;
-    });
-}
-
-if (
-    document.readyState ===
-    'loading'
-) {
-    document.addEventListener(
-        'DOMContentLoaded',
-        initFlatpickrSwipeClose,
-        {
-            once: true
-        }
-    );
-} else {
-    initFlatpickrSwipeClose();
+    if (
+        activeFlatpickrInstance ===
+        instance
+    ) {
+        activeFlatpickrInstance =
+            null;
+    }
 }
 
 window.loadFlatpickr = loadFlatpickr;

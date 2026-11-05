@@ -1,21 +1,52 @@
+function closeCustomSelect(wrapper) {
+    const menu = wrapper.customSelectMenu;
+    if (menu?.classList.contains('is-portaled')) {
+        menu.classList.remove('is-portaled');
+        wrapper.appendChild(menu);
+        for (const property of ['left', 'right', 'top', 'bottom', 'width']) {
+            menu.style.removeProperty(property);
+        }
+    }
+
+    wrapper.classList.remove('is-open', 'drop-up');
+    wrapper.querySelector('.custom-select-button')?.setAttribute('aria-expanded', 'false');
+}
+
 function closeCustomSelects(except = null) {
     document.querySelectorAll('.custom-select.is-open').forEach(wrapper => {
         if (wrapper === except) return;
 
-        wrapper.classList.remove('is-open', 'drop-up');
-
-        wrapper
-            .querySelector('.custom-select-button')
-            ?.setAttribute('aria-expanded', 'false');
+        closeCustomSelect(wrapper);
     });
 }
 
 export function syncCustomSelect(wrapper) {
-    const select = wrapper.querySelector('select');
-    const valueText = wrapper.querySelector('[data-custom-select-value]');
-    const button = wrapper.querySelector('.custom-select-button');
+    if (
+        !wrapper ||
+        typeof wrapper.querySelector !== 'function'
+    ) {
+        return;
+    }
 
-    if (!select || !valueText || !button) return;
+    const select = wrapper.querySelector('select');
+
+    const valueText =
+        wrapper.querySelector(
+            '[data-custom-select-value]'
+        );
+
+    const button =
+        wrapper.querySelector(
+            '.custom-select-button'
+        );
+
+    if (
+        !select ||
+        !valueText ||
+        !button
+    ) {
+        return;
+    }
 
     const selectedOption = select.options[select.selectedIndex];
 
@@ -29,7 +60,7 @@ export function syncCustomSelect(wrapper) {
 
     button.disabled = select.disabled;
 
-    wrapper
+    (wrapper.customSelectMenu ?? wrapper)
         .querySelectorAll('.custom-select-option')
         .forEach(option => {
             const isActive =
@@ -53,7 +84,7 @@ function positionCustomSelectMenu(
             '.custom-select-button'
         );
 
-    const menu =
+    const menu = wrapper.customSelectMenu ??
         wrapper.querySelector(
             '.custom-select-menu'
         );
@@ -159,13 +190,16 @@ function positionCustomSelectMenu(
     menu.style.transition =
         'none';
 
+    const naturalHeight =
+        Math.max(
+            menu.scrollHeight,
+            96
+        );
+
     const preferredHeight =
         Math.min(
-            Math.max(
-                menu.scrollHeight,
-                96
-            ),
-            260
+            naturalHeight,
+            360
         );
 
     const shouldOpenUp =
@@ -186,7 +220,7 @@ function positionCustomSelectMenu(
         Math.max(
             96,
             Math.min(
-                260,
+                360,
                 availableSpace
             )
         );
@@ -195,6 +229,59 @@ function positionCustomSelectMenu(
         '--custom-select-max-height',
         `${maxHeight}px`
     );
+
+    const filterPanel =
+        wrapper.closest(
+            '.filter-drawer-panel'
+        );
+
+    if (wrapper.querySelector('select[data-custom-select-floating]')) {
+        // Keep the global menu outside overflow containers such as scrollable tables.
+        const width = Math.min(buttonRect.width, window.innerWidth - 16);
+        menu.classList.add('is-portaled');
+        menu.style.width = `${width}px`;
+        menu.style.left = `${Math.max(8, Math.min(buttonRect.left, window.innerWidth - width - 8))}px`;
+        menu.style.right = 'auto';
+        menu.style.top = shouldOpenUp ? 'auto' : `${buttonRect.bottom + 8}px`;
+        menu.style.bottom = shouldOpenUp ? `${window.innerHeight - buttonRect.top + 8}px` : 'auto';
+        document.body.appendChild(menu);
+    } else if (filterPanel) {
+        const panelRect =
+            filterPanel.getBoundingClientRect();
+
+        menu.classList.add(
+            'is-floating'
+        );
+
+        menu.style.left =
+            `${buttonRect.left - panelRect.left}px`;
+
+        menu.style.right =
+            'auto';
+
+        menu.style.width =
+            `${buttonRect.width}px`;
+
+        if (shouldOpenUp) {
+            menu.style.top =
+                'auto';
+
+            menu.style.bottom =
+                `${panelRect.bottom -
+                buttonRect.top +
+                8
+                }px`;
+        } else {
+            menu.style.top =
+                `${buttonRect.bottom -
+                panelRect.top +
+                8
+                }px`;
+
+            menu.style.bottom =
+                'auto';
+        }
+    }
 
     menu.style.display =
         previousDisplay;
@@ -250,6 +337,7 @@ export function initCustomSelects(root = document) {
         const menu = document.createElement('div');
         menu.className = 'custom-select-menu';
         menu.setAttribute('role', 'listbox');
+        wrapper.customSelectMenu = menu;
 
         Array.from(select.options).forEach(option => {
             if (option.hidden || option.disabled) return;
@@ -265,12 +353,7 @@ export function initCustomSelects(root = document) {
             const label = document.createElement('span');
             label.textContent = option.textContent.trim();
 
-            const check = document.createElement('i');
-            check.className =
-                'fa-solid fa-check custom-select-check';
-            check.setAttribute('aria-hidden', 'true');
-
-            item.append(label, check);
+            item.append(label);
 
             item.addEventListener('click', event => {
                 event.preventDefault();
@@ -283,15 +366,7 @@ export function initCustomSelects(root = document) {
 
                 syncCustomSelect(wrapper);
 
-                wrapper.classList.remove(
-                    'is-open',
-                    'drop-up'
-                );
-
-                button.setAttribute(
-                    'aria-expanded',
-                    'false'
-                );
+                closeCustomSelect(wrapper);
 
                 select.dispatchEvent(
                     new Event('input', {
@@ -352,7 +427,7 @@ export function initCustomSelects(root = document) {
                     });
                 }
             } else {
-                wrapper.classList.remove('is-open', 'drop-up');
+                closeCustomSelect(wrapper);
             }
 
             button.setAttribute(
@@ -369,11 +444,40 @@ export function initCustomSelects(root = document) {
     });
 }
 
-document.addEventListener('click', event => {
-    if (event.target.closest('.custom-select')) return;
+document.addEventListener('scroll', event => {
+    if (!event.target.closest?.('.custom-select-menu.is-portaled')) {
+        document.querySelectorAll('.custom-select.is-open').forEach(wrapper => {
+            if (wrapper.customSelectMenu?.classList.contains('is-portaled')) {
+                closeCustomSelect(wrapper);
+            }
+        });
+    }
+    if (
+        event.target instanceof Element &&
+        event.target.closest(
+            '.filter-drawer-body'
+        )
+    ) {
+        closeCustomSelects();
+    }
+},
+    true
+);
+
+window.addEventListener('resize', () => closeCustomSelects());
+
+document.addEventListener('pointerdown', event => {
+    if (
+        event.target.closest?.(
+            '.custom-select'
+        )
+    ) {
+        return;
+    }
 
     closeCustomSelects();
-});
+}
+);
 
 document.addEventListener('keydown', event => {
     if (event.key === 'Escape') {
@@ -381,11 +485,8 @@ document.addEventListener('keydown', event => {
     }
 });
 
-window.initCustomSelects =
-    initCustomSelects;
-
-window.syncCustomSelect =
-    syncCustomSelect;
+window.initCustomSelects = initCustomSelects;
+window.syncCustomSelect = syncCustomSelect;
 
 function bootCustomSelects() {
     initCustomSelects(

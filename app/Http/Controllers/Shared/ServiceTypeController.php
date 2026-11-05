@@ -29,7 +29,6 @@ class ServiceTypeController extends Controller
                 'required',
                 'string',
                 'max:255',
-                'regex:/^[A-Za-zÑñ\s]+$/u',
                 'unique:service_types,name',
             ],
             'description' => [
@@ -37,8 +36,6 @@ class ServiceTypeController extends Controller
                 'string',
                 'max:255',
             ],
-        ], [
-            'name.regex' => 'Service name can only contain letters and spaces.',
         ]);
 
         $service = ServiceType::create([
@@ -68,7 +65,6 @@ class ServiceTypeController extends Controller
                 'required',
                 'string',
                 'max:255',
-                'regex:/^[A-Za-zÑñ\s]+$/u',
                 'unique:service_types,name,' . $service->id,
             ],
             'description' => [
@@ -76,8 +72,6 @@ class ServiceTypeController extends Controller
                 'string',
                 'max:255',
             ],
-        ], [
-            'name.regex' => 'Service name can only contain letters and spaces.',
         ]);
 
         $service->update([

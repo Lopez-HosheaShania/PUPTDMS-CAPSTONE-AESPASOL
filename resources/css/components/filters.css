@@ -1219,10 +1219,6 @@ body:has(#filterModal.closing) .ai-help-popover {
     min-width: 0;
 }
 
-.filter-group-last {
-    padding-bottom: 24px;
-}
-
 @media (max-width: 767px) {
     .filter-drawer-wrapper .custom-select-button {
         min-height: 36px;
@@ -1536,10 +1532,6 @@ body:has(#filterModal.closing) .ai-help-popover {
     .filter-two-column-grid {
         grid-template-columns: 1fr;
         gap: 16px;
-    }
-
-    .filter-group-last {
-        padding-bottom: 16px;
     }
 }
 

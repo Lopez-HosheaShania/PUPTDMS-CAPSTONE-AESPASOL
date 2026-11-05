@@ -674,7 +674,7 @@
     }
 }
 
-@keyframes appointmentAccordionExpand {
+@keyframes globalAccordionExpand {
     from {
         opacity: 0;
         transform: translateY(-8px);
@@ -688,10 +688,10 @@
 
 .slide-down-fade-in {
     animation:
-        appointmentAccordionExpand .26s cubic-bezier(.22, 1, .36, 1) both;
+        globalAccordionExpand .26s cubic-bezier(.22, 1, .36, 1) both;
 }
 
-@keyframes appointmentAccordionCollapse {
+@keyframes globalAccordionCollapse {
     from {
         opacity: 1;
         transform: translateY(0);
@@ -1202,6 +1202,39 @@
     animation: authLandingFloatBottom 4.8s ease-in-out .35s infinite;
 }
 
+@keyframes globalLiveInsertIn {
+    from {
+        opacity: 0;
+        transform:
+            translateY(-10px) scale(.992);
+    }
+
+    to {
+        opacity: 1;
+        transform:
+            translateY(0) scale(1);
+    }
+}
+
+.global-live-insert {
+    animation:
+        globalLiveInsertIn .42s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+@keyframes global-loading-pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: .8;
+    }
+
+    50% {
+        transform: scale(1.06);
+        opacity: 1;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
 
     .page-enter,
@@ -1221,7 +1254,9 @@
     .global-carousel-out-left,
     .global-carousel-out-right,
     .global-carousel-in-left,
-    .global-carousel-in-right {
+    .global-carousel-in-right,
+    .global-live-insert,
+    .global-loading-logo {
         animation: none;
     }
 
@@ -1295,6 +1330,28 @@
     .appt-panel-fade,
     .appt-section-reveal,
     .appt-tab.appt-active::after {
+        animation: none;
+    }
+}
+
+.chatbot-panel.show:not(.closing) {
+    animation: modalEnter .34s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+.asw-menu.asw-menu {
+    animation: modalEnter .34s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .chatbot-panel.show:not(.closing),
+    .asw-menu.asw-menu {
+        animation: none;
+    }
+}
+
+@media (max-width: 640px) {
+    .chatbot-panel.show:not(.closing) {
         animation: none;
     }
 }

@@ -272,8 +272,6 @@ class RolePermissionController extends Controller
             'create_clinic_schedule',
             'delete_clinic_schedule',
             'view_document_requests',
-            'approve_document_requests',
-            'reject_document_requests',
             'view_academic_periods',
             'update_academic_period',
             'create_academic_period',
@@ -287,6 +285,7 @@ class RolePermissionController extends Controller
             'access_dentist_dashboard',
             'receive_notifications',
             'view_patient_profiles',
+            'view_dental_records',
             'view_appointments',
             'reschedule_appointments',
             'cancel_appointments',
@@ -525,9 +524,8 @@ class RolePermissionController extends Controller
             $permissionIds = array_map('intval', $request->input("permissions.{$role->id}", []));
         }
 
-        $role->permissions()->sync(
-            $this->normalizePermissionIdsForRole($role, $permissionIds)
-        );
+        $permissionIds = $this->normalizePermissionIdsForRole($role, $permissionIds);
+        $role->permissions()->sync($permissionIds);
 
         AuditLogger::log(
             'update',
@@ -616,8 +614,22 @@ class RolePermissionController extends Controller
 
     public function storeRole(Request $request)
     {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255', 'unique:roles,name'],
+        if (is_string($request->input('name'))) {
+            $request->merge([
+                'name' => ucwords(preg_replace('/ +/', ' ', trim($request->input('name')))),
+            ]);
+        }
+
+        $validated = $request->validate([
+            'name' => [
+                'bail', 'required', 'string', 'min:3', 'max:50',
+                'regex:/\A[A-Za-z]+(?: [A-Za-z]+)*\z/',
+                function ($attribute, $value, $fail) {
+                    if (Role::whereRaw('LOWER(name) = ?', [strtolower($value)])->exists()) {
+                        $fail('A role with this name already exists.');
+                    }
+                },
+            ],
             'slug' => [
                 'required',
                 'string',
@@ -626,14 +638,17 @@ class RolePermissionController extends Controller
                 'regex:/^[a-z0-9]+(?:[-_][a-z0-9]+)*$/',
             ],
         ], [
-            'name.unique' => 'A role with this name already exists.',
+            'name.required' => 'Please enter a role name.',
+            'name.min' => 'Role Name must contain at least 3 characters.',
+            'name.max' => 'Role Name must not exceed 50 characters.',
+            'name.regex' => 'Role Name may only contain letters and single spaces between words.',
             'slug.unique' => 'A role with this slug already exists.',
             'slug.regex' => 'Slug may only contain lowercase letters, numbers, hyphens, and underscores.',
         ]);
 
         $role = Role::create([
-            'name' => $request->name,
-            'slug' => $request->slug,
+            'name' => $validated['name'],
+            'slug' => $validated['slug'],
         ]);
 
         $role->permissions()->sync([]);
@@ -812,15 +827,13 @@ class RolePermissionController extends Controller
 
         Role::with('permissions')
             ->get()
-            ->each(function (Role $role) use ($adminOnlyPermissionIds): void {
+            ->each(function (Role $role): void {
                 $currentPermissionIds = $role->permissions
                     ->pluck('id')
                     ->map(fn ($id) => (int) $id)
                     ->all();
 
-                $normalizedPermissionIds = $role->slug === 'admin'
-                    ? array_values(array_unique(array_merge($currentPermissionIds, $adminOnlyPermissionIds)))
-                    : array_values(array_diff($currentPermissionIds, $adminOnlyPermissionIds));
+                $normalizedPermissionIds = $this->normalizePermissionIdsForRole($role, $currentPermissionIds);
 
                 sort($currentPermissionIds);
 

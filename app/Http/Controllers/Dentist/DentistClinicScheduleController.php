@@ -31,7 +31,7 @@ class DentistClinicScheduleController extends Controller
         $startDate = Carbon::now()->startOfMonth()->subMonth();
         $endDate = Carbon::now()->endOfMonth()->addMonths(3);
 
-        $appointmentCountsPerDay = Appointment::whereBetween('appointment_date', [
+        $appointmentCountsPerDay = Appointment::withoutGlobalScope('clinical_patients')->whereBetween('appointment_date', [
             $startDate->toDateString(),
             $endDate->toDateString(),
         ])
@@ -242,7 +242,7 @@ class DentistClinicScheduleController extends Controller
             ]);
         }
 
-        $bookedSlotCounts = Appointment::where('appointment_date', $iso)
+        $bookedSlotCounts = Appointment::withoutGlobalScope('clinical_patients')->where('appointment_date', $iso)
             ->whereIn('status', ['upcoming', 'rescheduled'])
             ->selectRaw('appointment_time, COUNT(*) as cnt')
             ->groupBy('appointment_time')

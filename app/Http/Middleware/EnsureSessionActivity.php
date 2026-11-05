@@ -99,7 +99,9 @@ class EnsureSessionActivity
                 $request->ajax()
             ) {
                 return response()->json([
+                    'active' => false,
                     'expired' => true,
+                    'reason' => 'idle',
                     'message' =>
                     'Your session has expired due to inactivity.',
                 ], 401);
@@ -115,32 +117,31 @@ class EnsureSessionActivity
             }
 
             return response()->json([
+                'active' => false,
                 'expired' => true,
+                'reason' => 'idle',
                 'message' =>
                 'Your session has expired due to inactivity.',
             ], 401);
         }
 
-        $request->session()->put(
-            'last_activity_at',
-            $now
-        );
-
         return $next($request);
     }
 
-    private function idleTimeoutSeconds(Request $request): int
-    {
-        $user = $request->user();
+    private function idleTimeoutSeconds(
+        Request $request
+    ): int {
+        $user =
+            $request->user();
 
         if (!$user) {
             return 0;
         }
 
-        return $user->idleTimeoutSeconds((string) (
-            $request->session()->get('impersonated_role')
-                ?: $request->session()->get('role')
-                ?: optional($user->role)->slug
-        ));
+        return $user->idleTimeoutSeconds(
+            optional(
+                $user->role
+            )->slug
+        );
     }
 }

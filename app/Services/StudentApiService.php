@@ -282,19 +282,12 @@ class StudentApiService
         }
     }
 
-    public function getStudentByEmail(string $email): array
+    public function getStudentByEmail(string $email, bool $allowCachedFallback = true): array
     {
         try {
-            $token = $this->getAccessToken();
-
             $url = $this->baseUrl . '/integrations/students/profile';
 
-            $response = Http::acceptJson()
-                ->withToken($token)
-                ->timeout(15)
-                ->get($url, [
-                    'email' => $email,
-                ]);
+            $response = $this->getStudentInformation($url, ['email' => $email]);
 
             if (! $response->successful()) {
                 Log::error('Student fetch by email failed', [
@@ -317,6 +310,10 @@ class StudentApiService
 
             return $payload;
         } catch (\Throwable $e) {
+            if (! $allowCachedFallback) {
+                throw $e;
+            }
+
             $student = $this->findStudentByEmailFromFallbacks($email);
 
             if ($student !== null) {
@@ -332,11 +329,9 @@ class StudentApiService
         }
     }
 
-    public function getPersonalInfoByStudentNumber(string $studentNumber): array
+    public function getPersonalInfoByStudentNumber(string $studentNumber, bool $allowCachedFallback = true): array
     {
         try {
-            $token = $this->getAccessToken();
-
             $url = $this->baseUrl . '/integrations/students/' . urlencode($studentNumber) . '/personal-info';
 
             Log::info('DEBUG Personal Info Request', [
@@ -344,10 +339,7 @@ class StudentApiService
                 'url' => $url,
             ]);
 
-            $response = Http::acceptJson()
-                ->withToken($token)
-                ->timeout(15)
-                ->get($url);
+            $response = $this->getStudentInformation($url);
 
             Log::info('DEBUG Personal Info Response', [
                 'student_number' => $studentNumber,
@@ -365,6 +357,10 @@ class StudentApiService
 
             return $payload;
         } catch (\Throwable $e) {
+            if (! $allowCachedFallback) {
+                throw $e;
+            }
+
             $cachedPayload = Cache::get($this->personalInfoCacheKey($studentNumber));
 
             if (is_array($cachedPayload)) {
@@ -378,6 +374,62 @@ class StudentApiService
 
             throw $e;
         }
+    }
+
+    private function getStudentInformation(string $url, array $query = []): \Illuminate\Http\Client\Response
+    {
+        $response = Http::acceptJson()->withToken($this->getAccessToken())
+            ->timeout(15)->get($url, $query);
+
+        if ($response->status() === 401) {
+            Cache::forget('ogos_student_api_access_token');
+            $response = Http::acceptJson()->withToken($this->getAccessToken())
+                ->timeout(15)->get($url, $query);
+        }
+
+        return $response;
+    }
+
+    public function getPersonalInformationCompletion(string $studentNumber, array $profile = []): ?float
+    {
+        $payload = $this->getPersonalInfoByStudentNumber($studentNumber, false);
+        $info = $payload['data'] ?? null;
+
+        if (! is_array($info) || $info === []) {
+            return null;
+        }
+
+        foreach (['personalInformationCompletion', 'personal_information_completion', 'completionPercentage', 'completion_percentage', 'profileCompletion', 'profile_completion'] as $field) {
+            if (array_key_exists($field, $info)) {
+                $value = $info[$field];
+
+                return is_numeric($value) && (float) $value >= 0 && (float) $value <= 100
+                    ? (float) $value : null;
+            }
+        }
+
+        foreach (['isProfileComplete', 'is_profile_complete'] as $field) {
+            if (array_key_exists($field, $info)) {
+                return is_bool($info[$field]) ? ($info[$field] ? 100.0 : 0.0) : null;
+            }
+        }
+
+        $required = [
+            $profile['name'] ?? null,
+            $info['dateOfBirth'] ?? $info['birthdate'] ?? null,
+            data_get($info, 'gender.name') ?? $info['gender'] ?? null,
+            $profile['phone'] ?? null,
+            $profile['email'] ?? null,
+            $info['emergencyContactName'] ?? $info['emergency_contact_name']
+                ?? data_get($info, 'emergencyContact.name') ?? data_get($info, 'emergency_contact.name'),
+            $info['emergencyContactNumber'] ?? $info['emergency_contact_number']
+                ?? data_get($info, 'emergencyContact.number') ?? data_get($info, 'emergencyContact.contactNumber')
+                ?? data_get($info, 'emergency_contact.number') ?? data_get($info, 'emergency_contact.contact_number'),
+        ];
+
+        $completed = collect($required)->filter(fn ($value) => is_scalar($value) && filled($value))->count();
+
+        return round(($completed / count($required)) * 100, 2);
     }
 
     public function getAddressesByStudentNumber(string $studentNumber): array

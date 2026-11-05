@@ -49,6 +49,7 @@ class DocumentRequestController extends Controller
 
         try {
             $documentRequest = DB::transaction(function () use ($validated, $patient) {
+                $clinicAssignment = app(\App\Services\ClinicDentistService::class)->lockAssignment();
                 // Serialize document-request submissions for this patient so the
                 // duplicate-request and two-per-day limits cannot be bypassed by
                 // near-simultaneous submissions.
@@ -106,6 +107,13 @@ class DocumentRequestController extends Controller
                     ->orderByDesc('appointment_date')
                     ->orderByDesc('appointment_time')
                     ->value('dentist_id');
+
+                if ($clinicAssignment->dentist_id) {
+                    $assignedDentistId = app(\App\Services\AssignedDentistService::class)->findForBooking($lockedPatient->id)?->id;
+                    if (! $assignedDentistId) {
+                        throw ValidationException::withMessages(['document_type' => 'The current dentist is unavailable or patient care needs handover review. Contact the clinic.']);
+                    }
+                }
 
                 return DocumentRequest::create([
                     'patient_id' => $lockedPatient->id,
@@ -549,13 +557,7 @@ class DocumentRequestController extends Controller
 
         return back()->with('success', 'Request updated.');
     }
-    private const LEGACY_APPROVED_STATUSES = [
-        'approved',
-        'ready',
-        'ready-for-pickup',
-        'ready-for-release',
-        'released',
-    ];
+    private const LEGACY_APPROVED_STATUSES = DocumentRequest::APPROVED_STATUSES;
 
     private function buildDocumentRequestQuery(Request $request)
     {
@@ -568,7 +570,7 @@ class DocumentRequestController extends Controller
         $dateTo = trim((string) $request->get('date_to', ''));
         $sort = trim((string) $request->get('sort', 'newest'));
 
-        $query = DocumentRequest::withStateColumns()->with('patient');
+        $query = DocumentRequest::withStateColumns()->with(['patient.studentInformation', 'patient.facultyInformation']);
 
         if ($search !== '') {
             $query->where(function ($q) use ($search) {
@@ -581,12 +583,15 @@ class DocumentRequestController extends Controller
                             ->where('name', 'like', "%{$search}%")
                             ->orWhere('email', 'like', "%{$search}%")
                             ->orWhereHas(
-                                'information',
+                                'studentInformation',
                                 function ($informationQuery) use ($search) {
                                     $informationQuery
-                                        ->where('student_no', 'like', "%{$search}%")
-                                        ->orWhere('faculty_code', 'like', "%{$search}%");
+                                        ->where('student_no', 'like', "%{$search}%");
                                 }
+                            )
+                            ->orWhereHas(
+                                'facultyInformation',
+                                fn ($query) => $query->where('faculty_code', 'like', "%{$search}%")
                             );
                     });
             });
@@ -690,13 +695,10 @@ class DocumentRequestController extends Controller
         $patient = $documentRequest->patient;
         $createdAt = $documentRequest->created_at;
 
-        $patient?->loadMissing('information');
-
-        $patientIdentifier =
-            $patient?->information?->student_no
-            ?? $patient?->information?->faculty_code
-            ?? $patient?->id
-            ?? 'No ID set';
+        $studentNumber = trim((string) $patient?->student_no);
+        $facultyCode = trim((string) $patient?->faculty_code);
+        $patientIdentifier = $studentNumber !== '' ? $studentNumber
+            : ($facultyCode !== '' ? 'Faculty: ' . $facultyCode : 'No identity number');
 
         return [
             'id' => $documentRequest->id,

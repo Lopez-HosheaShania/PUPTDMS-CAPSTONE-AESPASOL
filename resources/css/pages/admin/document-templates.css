@@ -227,13 +227,8 @@
         align-items: stretch;
     }
 
-    .document-template-banner .admin-banner-actions,
-    .document-template-banner .admin-banner-pill {
+    .document-template-banner .admin-banner-actions {
         width: 100%;
-    }
-
-    .document-template-banner .admin-banner-pill {
-        justify-content: center;
     }
 
     .templates-grid {

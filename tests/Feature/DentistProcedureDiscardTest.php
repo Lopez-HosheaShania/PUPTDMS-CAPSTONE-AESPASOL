@@ -115,7 +115,7 @@ class DentistProcedureDiscardTest extends TestCase
 
         $response->assertOk()
             ->assertJson([
-                'redirect_url' => route('dentist.odontogram.existing-appointment.create', ['patient' => $patient->id]),
+                'redirect_url' => route('dentist.dentist.patient.profile', ['patient' => $patient->id]),
             ]);
 
         $this->assertNull(session($draftSessionKey));
@@ -123,6 +123,38 @@ class DentistProcedureDiscardTest extends TestCase
             'patient_id' => $patient->id,
             'previous_dentist' => 'Dr. Existing',
         ]);
+    }
+
+    public function test_existing_appointment_discard_returns_to_profile_without_any_appointments(): void
+    {
+        $this->withoutVite();
+        $this->withoutExceptionHandling();
+        \Illuminate\Support\Facades\Http::fake();
+
+        $dentist = $this->makeDentist();
+        $permission = Permission::firstOrCreate(
+            ['slug' => 'view_patient_profiles'],
+            ['name' => 'View Patient Profiles', 'module' => 'Patients']
+        );
+        $dentist->role->permissions()->attach($permission);
+        $patient = $this->makePatient('no-visits@example.com');
+        $profileUrl = route('dentist.dentist.patient.profile', ['patient' => $patient->id]);
+
+        $this->actingAs($dentist)->withSession(['role' => 'dentist'])
+            ->get($profileUrl)->assertOk();
+
+        $draftSessionKey = 'existing_appointment_draft_patient_' . $patient->id;
+        $response = $this->withSession([
+            $draftSessionKey => ['service_type' => 'Cleaning'],
+        ])->postJson(route('dentist.odontogram.discard'), [
+            'context' => 'existing-appointment',
+            'patient_id' => $patient->id,
+        ]);
+
+        $response->assertOk()->assertJson(['redirect_url' => $profileUrl]);
+        $response->assertSessionMissing($draftSessionKey);
+        $this->get($response->json('redirect_url'))->assertOk();
+        $this->assertDatabaseMissing('appointments', ['patient_id' => $patient->id]);
     }
 
     private function makeDentist(): User

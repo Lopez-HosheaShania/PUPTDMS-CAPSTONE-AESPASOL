@@ -4,13 +4,14 @@ namespace App\Http\Requests;
 
 use App\Models\DentistTransitionItem;
 use App\Models\User;
+use App\Services\AssignedDentistService;
 use Illuminate\Foundation\Http\FormRequest;
 
 class AssignDentistSuccessorsRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user()?->hasAnyRole(['admin', 'super_admin']) ?? false;
     }
 
     public function rules(): array
@@ -20,7 +21,7 @@ class AssignDentistSuccessorsRequest extends FormRequest
             'items' => ['nullable', 'array'],
             'items.*.selected_for_transfer' => ['nullable', 'boolean'],
             'items.*.successor_dentist_id' => ['nullable', 'integer', 'exists:users,id'],
-            'items.*.transfer_status' => ['nullable', 'string'],
+            'items.*.transfer_status' => ['nullable', 'in:ready,pending,excluded,manually_resolved'],
             'items.*.resolution_type' => ['nullable', 'string', 'max:40'],
             'items.*.remarks' => ['nullable', 'string'],
         ];
@@ -36,6 +37,13 @@ class AssignDentistSuccessorsRequest extends FormRequest
                 return;
             }
 
+            $defaultId = $this->input('default_successor_dentist_id');
+            if ($defaultId) {
+                $successor = User::with('role')->find($defaultId);
+                if (! $successor || $defaultId == $transition->dentist_id || ! AssignedDentistService::isDentist($successor) || $successor->status !== 'active') {
+                    $validator->errors()->add('default_successor_dentist_id', 'Choose an active replacement dentist other than the affected dentist.');
+                }
+            }
             $items = $this->input('items', []);
 
             foreach ($items as $itemId => $itemData) {
@@ -59,7 +67,7 @@ class AssignDentistSuccessorsRequest extends FormRequest
 
                 $successor = User::with('role')->find($successorId);
 
-                if (!$successor || optional($successor->role)->slug !== 'dentist' || $successor->status !== 'active') {
+                if (!$successor || ! AssignedDentistService::isDentist($successor) || $successor->status !== 'active') {
                     $validator->errors()->add("items.{$itemId}.successor_dentist_id", 'Each successor must be an active dentist.');
                 }
             }

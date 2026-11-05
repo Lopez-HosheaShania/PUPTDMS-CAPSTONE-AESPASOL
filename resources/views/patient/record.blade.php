@@ -35,7 +35,7 @@
         ];
     @endphp
 
-    <script id="patientRecordsPageData" type="application/json">
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}" id="patientRecordsPageData" type="application/json">
     {!! json_encode(
         $patientRecordsPageData,
         JSON_HEX_TAG
@@ -45,7 +45,7 @@
     ) !!}
 </script>
 
-    <script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         window.patientRecordsPageData =
             JSON.parse(
                 document.getElementById(
@@ -149,30 +149,15 @@
                 </section>
 
                 <section id="documentRequestHistory" class="card document-history-card">
-                    <div class="card-header">
-                        <div class="card-header-left">
-                            <div class="card-header-icon">
-                                <i class="fa-solid fa-file-lines"></i>
-                            </div>
-
-                            <div>
-                                <h2 class="card-title">
-                                    Document Request History
-                                </h2>
-
-                                <p class="card-subtitle">
-                                    Track documents you requested from the dental clinic.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="card-header-right">
+                    <x-card-header title="Document Request History"
+                        subtitle="Track documents you requested from the dental clinic." icon="fa-solid fa-file-lines">
+                        <x-slot:actions>
                             <span class="card-header-badge">
                                 {{ $documentRequestStats['total'] ?? 0 }}
                                 {{ ($documentRequestStats['total'] ?? 0) === 1 ? 'Request' : 'Requests' }}
                             </span>
-                        </div>
-                    </div>
+                        </x-slot:actions>
+                    </x-card-header>
 
                     <div class="card-body">
 
@@ -271,7 +256,7 @@
                                     @endphp
 
                                     <article class="global-record-card document-request-item"
-                                        style="
+                                        data-ui-style="
                             --record-accent:
                             {{ $displayStatus === 'approved'
                                 ? 'var(--status-approved-solid)'

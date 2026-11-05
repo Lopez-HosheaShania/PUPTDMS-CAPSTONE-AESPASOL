@@ -37,15 +37,7 @@
                     </div>
                 </div>
             @else
-                <div class="page-banner mb-6">
-                    <div class="page-banner-inner">
-                        <div class="min-w-0">
-                            <h1 class="page-title">
-                                Faculty Integration
-                            </h1>
-                        </div>
-                    </div>
-                </div>
+                <x-page-banner title="Faculty Integration" class="mb-6" />
             @endif
 
             <form id="facultyIntegrationForm" method="POST" action="{{ route($routePrefix . '.faculty.store') }}"
@@ -95,7 +87,8 @@
                                     <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100"
                                         aria-valuenow="0">
 
-                                        <div id="progressFacultyBar" class="progress-fill" style="width: 0%;">
+                                        <div id="progressFacultyBar" class="progress-fill"
+                                            data-ui-presentation="presentation-72dd1572d65e">
                                         </div>
 
                                     </div>
@@ -191,7 +184,8 @@
                                     <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100"
                                         aria-valuenow="0">
 
-                                        <div id="progressInformationBar" class="progress-fill" style="width: 0%;">
+                                        <div id="progressInformationBar" class="progress-fill"
+                                            data-ui-presentation="presentation-72dd1572d65e">
                                         </div>
 
                                     </div>
@@ -219,7 +213,7 @@
                                     <div class="flex flex-col gap-5">
 
                                         <div class="flex flex-col gap-3 border-b pb-4 sm:flex-row sm:items-center"
-                                            style="border-color: var(--border);">
+                                            data-ui-presentation="presentation-7c1d0a16a55f">
 
                                             <div class="flex min-w-0 items-center gap-3">
 
@@ -264,42 +258,42 @@
                                                 <div>
 
                                                     <div class="global-info-item global-info-item-inline justify-between gap-4"
-                                                        style="border-color: var(--border);">
+                                                        data-ui-presentation="presentation-7c1d0a16a55f">
 
                                                         <span class="ui-muted-text">
                                                             Faculty ID
                                                         </span>
 
                                                         <span id="faculty_id" class="global-info-value text-right"
-                                                            style="margin-top: 0;">
+                                                            data-ui-presentation="presentation-25a98a3a6a48">
                                                             Not provided
                                                         </span>
 
                                                     </div>
 
                                                     <div class="global-info-item global-info-item-inline justify-between gap-4"
-                                                        style="border-color: var(--border);">
+                                                        data-ui-presentation="presentation-7c1d0a16a55f">
 
                                                         <span class="ui-muted-text">
                                                             Faculty Code
                                                         </span>
 
                                                         <span id="faculty_code" class="global-info-value text-right"
-                                                            style="margin-top: 0;">
+                                                            data-ui-presentation="presentation-25a98a3a6a48">
                                                             Not provided
                                                         </span>
 
                                                     </div>
 
                                                     <div class="global-info-item global-info-item-inline justify-between gap-4"
-                                                        style="border-color: var(--border);">
+                                                        data-ui-presentation="presentation-7c1d0a16a55f">
 
                                                         <span class="ui-muted-text">
                                                             Birthday
                                                         </span>
 
                                                         <span id="birthday" class="global-info-value text-right"
-                                                            style="margin-top: 0;">
+                                                            data-ui-presentation="presentation-25a98a3a6a48">
                                                             Not provided
                                                         </span>
 
@@ -313,7 +307,7 @@
                                                         </span>
 
                                                         <span id="gender" class="global-info-value text-right"
-                                                            style="margin-top: 0;">
+                                                            data-ui-presentation="presentation-25a98a3a6a48">
                                                             Not provided
                                                         </span>
 
@@ -332,28 +326,28 @@
                                                 <div>
 
                                                     <div class="global-info-item global-info-item-inline justify-between gap-4"
-                                                        style="border-color: var(--border);">
+                                                        data-ui-presentation="presentation-7c1d0a16a55f">
 
                                                         <span class="ui-muted-text">
                                                             Faculty Type
                                                         </span>
 
                                                         <span id="faculty_type" class="global-info-value text-right"
-                                                            style="margin-top: 0;">
+                                                            data-ui-presentation="presentation-25a98a3a6a48">
                                                             Not provided
                                                         </span>
 
                                                     </div>
 
                                                     <div class="global-info-item global-info-item-inline justify-between gap-4"
-                                                        style="border-color: var(--border);">
+                                                        data-ui-presentation="presentation-7c1d0a16a55f">
 
                                                         <span class="ui-muted-text">
                                                             Department
                                                         </span>
 
                                                         <span id="department" class="global-info-value text-right"
-                                                            style="margin-top: 0;">
+                                                            data-ui-presentation="presentation-25a98a3a6a48">
                                                             Not provided
                                                         </span>
 
@@ -367,7 +361,7 @@
                                                         </span>
 
                                                         <span id="email" class="global-info-value min-w-0 text-right"
-                                                            style="margin-top: 0;">
+                                                            data-ui-presentation="presentation-25a98a3a6a48">
                                                             Not provided
                                                         </span>
 
@@ -391,7 +385,7 @@
                                                     </span>
 
                                                     <span id="home_address" class="global-info-value min-w-0 text-right"
-                                                        style="margin-top: 0;">
+                                                        data-ui-presentation="presentation-25a98a3a6a48">
                                                         Not provided
                                                     </span>
 
@@ -445,7 +439,8 @@
                                     <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100"
                                         aria-valuenow="0">
 
-                                        <div id="progressAccessBar" class="progress-fill" style="width: 0%;">
+                                        <div id="progressAccessBar" class="progress-fill"
+                                            data-ui-presentation="presentation-72dd1572d65e">
                                         </div>
 
                                     </div>
@@ -608,10 +603,9 @@
                                         Reset
                                     </button>
 
-                                    <button type="submit" class="ui-btn ui-btn-primary">
-                                        <i class="fa-solid fa-floppy-disk"></i>
+                                    <x-button type="submit" variant="primary" icon="fa-solid fa-floppy-disk">
                                         Save Faculty
-                                    </button>
+                                    </x-button>
 
                                 </div>
 
@@ -624,27 +618,8 @@
 
                         <section class="card">
 
-                            <div class="card-header">
-
-                                <div class="card-header-left">
-
-                                    <div class="card-header-icon">
-                                        <i class="fa-solid fa-circle-info"></i>
-                                    </div>
-
-                                    <div>
-                                        <h2 class="card-title">
-                                            Quick Notes
-                                        </h2>
-
-                                        <p class="card-subtitle">
-                                            Guidance for a cleaner workflow
-                                        </p>
-                                    </div>
-
-                                </div>
-
-                            </div>
+                            <x-card-header title="Quick Notes" subtitle="Guidance for a cleaner workflow"
+                                icon="fa-solid fa-circle-info" />
 
                             <div class="card-body">
 
@@ -706,7 +681,7 @@
 @endsection
 
 @section('scripts')
-    <script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         document.addEventListener('DOMContentLoaded', function() {
 
             const facultyForm =

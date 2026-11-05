@@ -3,6 +3,9 @@
 namespace App\Providers;
 
 use App\Helpers\AuditLogger;
+use App\Models\Appointment;
+use App\Policies\OdontogramPolicy;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
@@ -12,6 +15,8 @@ use Illuminate\Support\Str;
 class AppServiceProvider extends ServiceProvider
 {
     private const AUDIT_EXCLUDED_MODELS = [
+        \App\Models\RetentionPolicy::class,
+        \App\Models\RetentionPolicyApproval::class,
         \App\Models\AiServiceLog::class,
         \App\Models\AuditLog::class,
         \App\Models\AuditLogActor::class,
@@ -87,8 +92,10 @@ class AppServiceProvider extends ServiceProvider
         //
     }
 
-        public function boot(): void
+    public function boot(): void
     {
+        Gate::policy(Appointment::class, OdontogramPolicy::class);
+
         try {
             $timezone = setting('timezone', 'Asia/Manila (UTC+8)');
             $clinicName = setting('clinic_name', 'PUP Taguig Dental Clinic');

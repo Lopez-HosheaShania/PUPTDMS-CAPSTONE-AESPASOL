@@ -498,7 +498,7 @@
 
 .air-modal-print-hero {
     padding: 18px 0 15px;
-    margin-bottom: 12px;
+    margin-bottom: 6px;
     border-bottom: 1px solid #e8e8e8;
 }
 
@@ -2074,5 +2074,114 @@
 
     .air-modal-panel {
         border-left: 0 !important;
+    }
+}
+.air-report-title-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .65rem;
+}
+
+.air-advisory-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    border: 1px solid #e5caca;
+    border-radius: 999px;
+    background: #fff1f2;
+    color: #7f1417;
+    font-size: 8px;
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+.air-advisory-notice {
+    margin-bottom: 10px;
+}
+
+.air-advisory-note {
+    margin: 6px 0 0;
+    color: #52525b;
+    font-size: 9px;
+    line-height: 1.4;
+}
+
+.air-screen .air-advisory-note {
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.air-analysis-unavailable {
+    margin: 8px 0 0;
+    padding: 8px 10px;
+    border: 1px solid #e5caca;
+    border-radius: 6px;
+    color: #7f1417;
+    background: #fff1f2;
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.air-modal-print-hero .air-advisory-badge {
+    margin-top: 6px;
+    font-size: 6px;
+}
+
+.air-modal-print-sheet .air-advisory-note {
+    margin-top: 0;
+    font-size: 6px;
+    line-height: 1.45;
+}
+
+/* Keep the footer in document flow so longer analyses cannot cover it. */
+.air-modal-print-sheet {
+    display: flex;
+    flex-direction: column;
+    aspect-ratio: auto;
+    min-height: calc(var(--air-preview-page-width) * 297 / 210);
+    padding-bottom: 22px;
+}
+
+.air-modal-print-sheet > * {
+    flex-shrink: 0;
+}
+
+.air-modal-print-sheet .air-modal-print-footer {
+    position: static;
+    margin-top: auto;
+}
+
+.air-modal.is-preview-landscape .air-modal-print-sheet {
+    aspect-ratio: auto !important;
+    min-height: calc(var(--air-preview-page-width) * 210 / 297) !important;
+    padding-bottom: 22px !important;
+}
+
+@media print {
+    .air-print-page {
+        display: flex !important;
+        flex-direction: column !important;
+        padding-bottom: 9mm !important;
+    }
+
+    .air-print-page > * {
+        flex-shrink: 0;
+    }
+
+    .air-print-fixed-header {
+        flex-wrap: wrap !important;
+        padding-bottom: 2mm !important;
+    }
+
+    .air-print-fixed-header .air-advisory-badge {
+        color: #7f1417 !important;
+        font-size: 8px !important;
+        font-weight: 700 !important;
+    }
+
+    .air-print-fixed-footer {
+        position: static !important;
+        margin-top: auto !important;
+        break-inside: avoid;
     }
 }

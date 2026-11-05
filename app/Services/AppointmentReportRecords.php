@@ -3,15 +3,16 @@
 namespace App\Services;
 
 use App\Models\Appointment;
+use App\Support\DentalServicesPatientName;
+use App\Support\DentalServicesProcedureTiming;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
 class AppointmentReportRecords
 {
-    /** Read report rows from the same completed appointments used by the PDF downloads. */
     public function between(Carbon $from, Carbon $to): Collection
     {
-        return Appointment::with(['patient.user', 'patient.information', 'patient.medicalHistory', 'procedure'])
+        return Appointment::with(['patient.user.profile', 'patient.information', 'patient.medicalHistory', 'procedure', 'dentist'])
             ->where('status', 'completed')->whereHas('patient')
             ->whereDate('appointment_date', '>=', $from->toDateString())
             ->whereDate('appointment_date', '<=', $to->toDateString())
@@ -36,11 +37,16 @@ class AppointmentReportRecords
 
                 return (object) [
                     'id' => $appointment->id,
+                    'dentist_name' => $appointment->dentist_name,
                     'treatment_date' => $date,
-                    'time_in' => $appointment->appointment_time ? Carbon::parse($date->toDateString().' '.$appointment->appointment_time) : null,
-                    'time_out' => $procedure?->procedure_completed_at ? Carbon::parse($procedure->procedure_completed_at) : null,
+                    'time_in' => DentalServicesProcedureTiming::requestedTimeIn($appointment),
+                    'time_out' => DentalServicesProcedureTiming::timeProcessed($appointment),
                     'updated_at' => $procedure?->procedure_completed_at ? Carbon::parse($procedure->procedure_completed_at) : $appointment->updated_at,
                     'patient_name' => $patient->name,
+                    'dental_services_patient_name' => DentalServicesPatientName::surnameFirst($patient),
+                    'dental_services_time_in' => DentalServicesProcedureTiming::requestedTimeIn($appointment),
+                    'dental_services_time_processed' => DentalServicesProcedureTiming::timeProcessed($appointment),
+                    'dental_services_minutes_processed' => DentalServicesProcedureTiming::minutesProcessed($appointment),
                     'patient_email' => $patient->email, 'email' => $patient->email,
                     'patient_phone' => $patient->phone, 'contact' => $patient->phone,
                     'office_type' => $department, 'department' => $department,
@@ -49,10 +55,13 @@ class AppointmentReportRecords
                     'age' => $age, 'gender' => ucfirst(strtolower((string) ($patient->gender ?? $patient->user?->gender))),
                     'is_senior' => (bool) $patient->is_senior, 'is_pwd' => (bool) $patient->is_pwd,
                     'treatment_done' => $appointment->service_type ?? 'Dental Service',
+                    'diagnosis' => preg_replace('/\s+/', ' ', trim((string) $procedure?->diagnosis)),
+                    'dental_case_teeth_count' => \App\Support\DentalCaseTeeth::count($procedure?->odontogram_data),
                     'minutes_processed' => round(($procedure?->procedure_duration_seconds ?? 0) / 60, 2),
                     'has_signature' => filled($signature), 'signature_path' => $signature,
                     'is_walk_in' => (bool) $appointment->is_walk_in,
-                    'visit_type' => $appointment->is_walk_in ? 'Emergency' : 'Non-Emergency',
+                    'is_emergency' => $appointment->is_emergency,
+                    'visit_type' => $appointment->is_emergency ? 'Emergency' : 'Non-Emergency',
                 ];
             });
     }

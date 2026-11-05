@@ -1,7 +1,10 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
-import { createOdontogramPresentation, ODONTOGRAM_SURFACE_KEYS } from './odontogram-model';
+import {
+    createOdontogramPresentationProgressive,
+    ODONTOGRAM_SURFACE_KEYS
+} from './odontogram-model';
 
 const ADULT_UPPER = [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28];
 const ADULT_LOWER = [48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38];
@@ -43,6 +46,8 @@ export function createOdontogramThreeScene({
     controls.target.set(0, 0, 0);
     const state = {
         container, mode, scene, camera, renderer, controls,
+        ready: false,
+        buildPromise: null,
         teethMeshes: [], pickObjects: [], data: normalizeOdontogramData(data),
         raycaster: new THREE.Raycaster(), pointer: new THREE.Vector2(),
         selectedTooth: null, selectedSurfaceKey: null, selectedMesh: null,
@@ -60,26 +65,166 @@ export function createOdontogramThreeScene({
     });
     if (mode === 'preview') controls.addEventListener('change', state.renderScene);
     addOdontogramLights(state);
-    addOdontogramEnvironment(state);
-    const presentation = createOdontogramPresentation({ scene, teethMeshes: state.teethMeshes, upperTeeth: ADULT_UPPER, lowerTeeth: ADULT_LOWER });
-    state.model = presentation.root; state.jaws = presentation.jaws; state.oralTissues = presentation.oralTissues;
-    scene.updateMatrixWorld(true);
-    const bounds = new THREE.Box3();
-    state.model.traverse(object => { if (object.isMesh && object.visible) bounds.expandByObject(object); });
-    bounds.getSize(state.fullViewSize); bounds.getCenter(state.initialControlsTarget);
-    controls.target.copy(state.initialControlsTarget);
-    setFullViewPosition(state); camera.position.copy(state.initialCameraPosition); controls.update();
-    syncOdontogramOralTissues(state);
-    scene.traverse(object => {
-        if (object.isMesh && (object.userData.surfaceKey || object.userData.isGum || object.userData.isOralTissue)) state.pickObjects.push(object);
-    });
-    scene.updateMatrixWorld(true);
-    bindOdontogramPointerEvents(state);
-    syncOdontogramThreeTheme(state);
-    activeOdontogramStates.add(state);
-    updateOdontogramThreeScene(state, data);
-    if (mode !== 'preview') startOdontogramAnimation(state);
-    onReady?.(state);
+
+    state.buildPromise =
+        (async () => {
+
+            await new Promise(
+                resolve => {
+                    globalThis.setTimeout(
+                        resolve,
+                        0
+                    );
+                }
+            );
+
+            const presentation =
+                await createOdontogramPresentationProgressive({
+                    scene,
+
+                    teethMeshes:
+                        state.teethMeshes,
+
+                    upperTeeth:
+                        ADULT_UPPER,
+
+                    lowerTeeth:
+                        ADULT_LOWER
+                });
+
+            state.model =
+                presentation.root;
+
+            state.jaws =
+                presentation.jaws;
+
+            state.oralTissues =
+                presentation.oralTissues;
+
+            scene.updateMatrixWorld(
+                true
+            );
+
+            const bounds =
+                new THREE.Box3();
+
+            state.model.traverse(
+                object => {
+
+                    if (
+                        object.isMesh &&
+                        object.visible
+                    ) {
+                        bounds.expandByObject(
+                            object
+                        );
+                    }
+                }
+            );
+
+            bounds.getSize(
+                state.fullViewSize
+            );
+
+            bounds.getCenter(
+                state.initialControlsTarget
+            );
+
+            controls.target.copy(
+                state.initialControlsTarget
+            );
+
+            setFullViewPosition(
+                state
+            );
+
+            camera.position.copy(
+                state.initialCameraPosition
+            );
+
+            controls.update();
+
+            syncOdontogramOralTissues(
+                state
+            );
+
+            scene.traverse(
+                object => {
+
+                    if (
+                        object.isMesh &&
+                        (
+                            object.userData
+                                .surfaceKey ||
+
+                            object.userData
+                                .isGum ||
+
+                            object.userData
+                                .isOralTissue
+                        )
+                    ) {
+                        state.pickObjects.push(
+                            object
+                        );
+                    }
+                }
+            );
+
+            scene.updateMatrixWorld(
+                true
+            );
+
+            bindOdontogramPointerEvents(
+                state
+            );
+
+            state.ready =
+                true;
+
+            syncOdontogramThreeTheme(
+                state
+            );
+
+            activeOdontogramStates.add(
+                state
+            );
+
+            updateOdontogramThreeScene(
+                state,
+                state.data
+            );
+
+            if (
+                mode !== 'preview'
+            ) {
+                startOdontogramAnimation(
+                    state
+                );
+            }
+
+            onReady?.(
+                state
+            );
+
+            return state;
+
+        })()
+            .catch(
+                error => {
+
+                    console.error(
+                        'Unable to build odontogram 3D scene.',
+                        error
+                    );
+
+                    state.buildError =
+                        error;
+
+                    throw error;
+                }
+            );
+
     return state;
 }
 
@@ -140,6 +285,11 @@ export function resizeOdontogramThreeScene(state) {
     state.camera.aspect = width / height;
     state.camera.updateProjectionMatrix();
     state.renderer.setSize(width, height, false);
+    if (!state.ready) {
+        state.renderScene();
+
+        return;
+    }
     setFullViewPosition(state);
     if (!state.hasUserCameraChange && !state.cameraAnimationFrame) {
         state.camera.position.copy(state.initialCameraPosition);
@@ -235,10 +385,128 @@ function refreshSurfaceOutlines(state) {
     }
 }
 
+function animateOdontogramSurfaceColors(
+    state,
+    transitions,
+    duration = 260
+) {
+    if (
+        !state ||
+        !transitions.length
+    ) {
+        return;
+    }
+
+    if (state.surfaceColorAnimationFrame) {
+        cancelAnimationFrame(
+            state.surfaceColorAnimationFrame
+        );
+
+        state.surfaceColorAnimationFrame =
+            null;
+    }
+
+    const reducedMotion =
+        window.matchMedia?.(
+            '(prefers-reduced-motion: reduce)'
+        ).matches === true;
+
+    if (reducedMotion) {
+        transitions.forEach(
+            transition => {
+                transition.material.color.copy(
+                    transition.to
+                );
+            }
+        );
+
+        state.renderScene();
+
+        return;
+    }
+
+    const start =
+        performance.now();
+
+    const step =
+        now => {
+            const progress =
+                Math.min(
+                    (now - start) /
+                    duration,
+                    1
+                );
+
+            const eased =
+                progress <
+                    0.5
+                    ? 4 *
+                    progress ** 3
+                    : 1 -
+                    (
+                        -2 *
+                        progress +
+                        2
+                    ) ** 3 /
+                    2;
+
+            transitions.forEach(
+                transition => {
+                    transition.material
+                        .color
+                        .lerpColors(
+                            transition.from,
+                            transition.to,
+                            eased
+                        );
+                }
+            );
+
+            state.renderScene();
+
+            if (progress < 1) {
+                state.surfaceColorAnimationFrame =
+                    requestAnimationFrame(
+                        step
+                    );
+
+                return;
+            }
+
+            state.surfaceColorAnimationFrame =
+                null;
+        };
+
+    state.surfaceColorAnimationFrame =
+        requestAnimationFrame(
+            step
+        );
+}
+
 export function updateOdontogramThreeScene(state, data = [], options = {}) {
-    if (!state) return;
-    state.visualOptions = { ...options };
-    state.data = normalizeOdontogramData(data);
+    if (!state) {
+        return;
+    }
+
+    state.visualOptions = {
+        ...options
+    };
+
+    state.data =
+        normalizeOdontogramData(
+            data
+        );
+
+
+    if (!state.ready) {
+        return;
+    }
+
+    const animateSurfaceChanges =
+        options.animateSurfaceChanges ===
+        true;
+
+    const surfaceTransitions = [];
     state.selectedTooth = options.selectedTooth ?? null;
     state.selectedSurfaceKey = options.selectedSurfaceKey ?? null;
     state.selectedMesh = getOdontogramThreeToothMesh(state, state.selectedTooth);
@@ -271,7 +539,31 @@ export function updateOdontogramThreeScene(state, data = [], options = {}) {
             material.transparent = false;
             material.opacity = 1;
             material.depthWrite = true;
-            material.color.set(color);
+            const targetColor =
+                new THREE.Color(
+                    color
+                );
+
+            if (
+                animateSurfaceChanges &&
+                !material.color.equals(
+                    targetColor
+                )
+            ) {
+                surfaceTransitions.push({
+                    material,
+
+                    from:
+                        material.color.clone(),
+
+                    to:
+                        targetColor
+                });
+            } else {
+                material.color.copy(
+                    targetColor
+                );
+            }
             material.emissive.set(0x000000);
             material.roughness = treatment ? .44 : .28;
             material.clearcoat = treatment ? .12 : .38;
@@ -291,7 +583,22 @@ export function updateOdontogramThreeScene(state, data = [], options = {}) {
     state.scene.traverse(object => {
         if (object.userData.isGum || object.userData.isOralTissue) object.material.wireframe = Boolean(state.wireframe);
     });
-    refreshSurfaceOutlines(state);
+    refreshSurfaceOutlines(
+        state
+    );
+
+    if (
+        animateSurfaceChanges &&
+        surfaceTransitions.length
+    ) {
+        animateOdontogramSurfaceColors(
+            state,
+            surfaceTransitions
+        );
+
+        return;
+    }
+
     state.renderScene();
 }
 

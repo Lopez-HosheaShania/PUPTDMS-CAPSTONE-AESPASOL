@@ -76,9 +76,7 @@
 
                 'status' => 'completed',
 
-                'dentist' =>
-                    $appt->dentist_name ??
-                    (optional($appt->dentist)->name ?? (optional($clinicDentist)->name ?? 'Assigned Dentist')),
+                'dentist' => $appt->dentist_name ?? 'Not assigned',
 
                 'duration' => $appt->procedure?->procedure_duration_seconds
                     ? \Carbon\CarbonInterval::seconds((int) $appt->procedure->procedure_duration_seconds)
@@ -102,7 +100,7 @@
         }
     @endphp
 
-    <script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         window.patientOdontogramTeeth = @json($odontogramTeeth ?? []);
         window.apptActivityChartData = @json($appointmentActivityChart ?? []);
     </script>
@@ -241,10 +239,10 @@
 
                         </div>
 
-                        <button type="button" class="ui-btn ui-btn-secondary ui-btn-sm" onclick="handleScheduleCheckup()">
-                            <i class="fa-solid fa-calendar-plus"></i>
-                            <span>Schedule Check-Up</span>
-                        </button>
+                        <x-button type="button" variant="secondary" size="sm" icon="fa-solid fa-calendar-plus"
+                            data-ui-click="action-9eb7d8dc0629">
+                            Schedule Check-Up
+                        </x-button>
 
                     </div>
                 </div>
@@ -349,21 +347,20 @@
                 </div>
 
                 <div class="appt-quick-actions">
-                    <a href="{{ route('patient.book.appointment') }}" class="ui-btn ui-btn-secondary ">
-                        <i class="fa-solid fa-calendar-plus"></i>
-                        <span>Rebook Appointment</span>
-                    </a>
+                    <x-button href="{{ route('patient.book.appointment') }}" variant="secondary"
+                        icon="fa-solid fa-calendar-plus">
+                        Rebook Appointment
+                    </x-button>
 
-                    <button type="button" class="ui-btn ui-btn-secondary "
-                        onclick="apptShowPast(); document.getElementById('apptPastPanel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });">
-                        <i class="fa-solid fa-clock-rotate-left"></i>
-                        <span>View Past Visits</span>
-                    </button>
+                    <x-button type="button" variant="secondary" icon="fa-solid fa-clock-rotate-left"
+                        data-ui-click="action-3581bd1ec7b5">
+                        View Past Visits
+                    </x-button>
 
-                    <button type="button" class="ui-btn ui-btn-secondary " onclick="scrollToAppointmentCalendar()">
-                        <i class="fa-solid fa-calendar-days"></i>
-                        <span>Focus Calendar</span>
-                    </button>
+                    <x-button type="button" variant="secondary" icon="fa-solid fa-calendar-days"
+                        data-ui-click="action-8d572863bc05">
+                        Focus Calendar
+                    </x-button>
                 </div>
             </section>
 
@@ -393,7 +390,8 @@
 
                     <div class="appt-list-tabs" id="apptListTabs">
 
-                        <button type="button" class="appt-tab appt-active" id="apptFutureTab" onclick="apptShowFuture()">
+                        <button type="button" class="appt-tab appt-active" id="apptFutureTab"
+                            data-ui-click="action-2600bc4012b8">
                             <i class="fa-regular fa-calendar"></i>
 
                             <span>Future Visits</span>
@@ -404,7 +402,7 @@
                             </span>
                         </button>
 
-                        <button type="button" class="appt-tab" id="apptPastTab" onclick="apptShowPast()">
+                        <button type="button" class="appt-tab" id="apptPastTab" data-ui-click="action-15d0e1e6763b">
                             <i class="fa-solid fa-clock-rotate-left"></i>
 
                             <span>Past Visits</span>
@@ -526,7 +524,7 @@
                                         Schedule Now
                                     </a>
 
-                                    <button type="button" onclick="scrollToAppointmentCalendar()"
+                                    <button type="button" data-ui-click="action-8d572863bc05"
                                         class="mt-2 w-full text-xs font-bold text-white/80 hover:text-white transition">
                                         Check available dates
                                     </button>
@@ -536,7 +534,7 @@
                     @endif
                 </div>
 
-                <div id="apptPastPanel" style="display:none;">
+                <div id="apptPastPanel" data-ui-presentation="presentation-d0466aa33fa8">
                     @if ($pastVisits->count())
                         <div class="appt-list-divider">
                             <span>Recent History</span>
@@ -568,10 +566,10 @@
                                 Your completed appointments will appear here.
                             </p>
 
-                            <button type="button" onclick="apptShowFuture()" class="ui-btn ui-btn-secondary mt-4">
-                                <i class="fa-solid fa-calendar-plus"></i>
+                            <x-button type="button" variant="secondary" icon="fa-solid fa-calendar-plus" class="mt-4"
+                                data-ui-click="action-2600bc4012b8">
                                 Book First Appointment
-                            </button>
+                            </x-button>
                         </div>
                     @endif
                 </div>
@@ -716,7 +714,7 @@
 @endsection
 
 @section('scripts')
-    <script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         let apptActivityChartInstance = null;
 
         async function initAppointmentActivityChart() {
@@ -853,28 +851,22 @@
         }
 
         function apptShowFuture() {
-            const futurePanel =
-                document.getElementById('apptFuturePanel');
+            const futurePanel = document.getElementById('apptFuturePanel');
+            const pastPanel = document.getElementById('apptPastPanel');
+            const tabs = document.getElementById('apptListTabs');
 
-            const pastPanel =
-                document.getElementById('apptPastPanel');
+            if (!futurePanel || !pastPanel) return;
 
-            const tabs =
-                document.getElementById('apptListTabs');
+            futurePanel.hidden = false;
+            pastPanel.hidden = false;
 
-            if (!futurePanel || !pastPanel) {
-                return;
-            }
-
-            futurePanel.style.display = '';
+            futurePanel.style.display = 'block';
             pastPanel.style.display = 'none';
 
-            document
-                .getElementById('apptFutureTab')
+            document.getElementById('apptFutureTab')
                 ?.classList.add('appt-active');
 
-            document
-                .getElementById('apptPastTab')
+            document.getElementById('apptPastTab')
                 ?.classList.remove('appt-active');
 
             tabs?.classList.remove('is-past');
@@ -883,28 +875,22 @@
         }
 
         function apptShowPast() {
-            const futurePanel =
-                document.getElementById('apptFuturePanel');
+            const futurePanel = document.getElementById('apptFuturePanel');
+            const pastPanel = document.getElementById('apptPastPanel');
+            const tabs = document.getElementById('apptListTabs');
 
-            const pastPanel =
-                document.getElementById('apptPastPanel');
+            if (!futurePanel || !pastPanel) return;
 
-            const tabs =
-                document.getElementById('apptListTabs');
-
-            if (!futurePanel || !pastPanel) {
-                return;
-            }
+            futurePanel.hidden = false;
+            pastPanel.hidden = false;
 
             futurePanel.style.display = 'none';
-            pastPanel.style.display = '';
+            pastPanel.style.display = 'block';
 
-            document
-                .getElementById('apptPastTab')
+            document.getElementById('apptPastTab')
                 ?.classList.add('appt-active');
 
-            document
-                .getElementById('apptFutureTab')
+            document.getElementById('apptFutureTab')
                 ?.classList.remove('appt-active');
 
             tabs?.classList.add('is-past');
@@ -955,8 +941,9 @@
             }
 
 
-            window.location.href =
-                "{{ route('patient.book.appointment') }}";
+            window.verifyPersonalInformationBeforeBooking(
+                "{{ route('patient.book.appointment') }}"
+            );
         }
 
         function openAccordion(acc) {
@@ -1094,7 +1081,7 @@
                 const condition = voConditionFromRecord(record);
 
                 return `
-            <button type="button" class="vo-tooth ${condition}" onclick="openViewToothModal(${n})">
+            <button type="button" class="vo-tooth ${condition}" data-ui-click="action-265f97b3419b" data-ui-click-arg-0="${window.uiAttribute(n)}">
                 ${bottom ? '<div class="vo-root"></div>' : ''}
                 <div class="vo-num">${n}</div>
                 <div class="vo-box">${condition === 'extracted' ? '<i class="fa-solid fa-xmark"></i>' : ''}</div>

@@ -11,6 +11,9 @@
     $isDentist = $layoutRole === 'dentist';
     $isPatient = $layoutRole === 'patient';
 
+    $rolePreviewActive =
+        (bool) session('role_preview_active') && in_array(session('preview_role'), ['patient', 'dentist'], true);
+
     $hideSidebar = View::hasSection('hide-sidebar');
     $hideMobileNav = View::hasSection('hide-mobile-nav');
     $hidePatientModals = View::hasSection('hide-patient-modals');
@@ -27,6 +30,7 @@
 <html lang="en" data-theme="{{ session('theme', 'light') }}">
 
 <head>
+    @include('partials.security-bootstrap')
     <meta charset="UTF-8">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -35,7 +39,7 @@
         <meta name="auth-user-id" content="{{ auth()->id() }}">
     @endif
 
-    <script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         (function() {
             const savedTheme =
                 localStorage.getItem('theme');
@@ -119,7 +123,7 @@
 
     <link rel="icon" type="image/png" href="{{ asset('images/PUPT-DMS-Logo.png') }}">
 
-    <style>
+    <style nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         @keyframes page-enter {
             from {
                 opacity: .92;
@@ -173,10 +177,11 @@
 <body
     class="
         role-{{ $layoutRole }}
+        {{ $rolePreviewActive ? 'role-preview-active' : '' }}
         {{ $hideSidebar ? 'layout-no-sidebar' : '' }}
         {{ $hideMobileNav ? 'layout-no-mobile-nav' : '' }}
         {{ $hideFloatingActions ? 'layout-no-floating-actions' : '' }}
-        @yield('body-class', 'bg-[#F4F4F4]')">
+        @yield('body-class')">
 
     @include('partials.header', [
         'role' => $layoutRole,
@@ -196,20 +201,31 @@
         @include('partials.patient.mobile-nav')
     @endif
 
-    @if ($isPatient && !$hidePatientModals)
+    @if ($isPatient && !$hidePatientModals && !$rolePreviewActive)
         @include('components.patient-document-modals')
         @include('components.patient-record-modal')
     @endif
 
     @if ($isPatient)
         @include('partials.impersonation-banner')
+
+        @unless ($rolePreviewActive)
+            @include('components.booking.personal-information-verification')
+
+            @include('components.booking.maintenance-modal')
+        @endunless
     @endif
 
     @if ($isDentist || ($isAdmin && View::hasSection('usesAppointmentCalendar')))
         @include('partials.impersonation-banner')
-        @include('components.reschedule-modal')
-        @include('components.cancel-modal')
-        @include('components.patient-record-modal')
+
+        @unless ($rolePreviewActive)
+            @include('components.reschedule-modal')
+
+            @include('components.cancel-modal')
+
+            @include('components.patient-record-modal')
+        @endunless
     @endif
 
     @if ($isAdmin && !View::hasSection('usesAppointmentCalendar'))
@@ -228,61 +244,62 @@
 
     @include('partials.global-toast')
 
-    <div id="logoutConfirmModal" class="ui-modal logout-confirm-modal" role="dialog" aria-modal="true"
-        aria-labelledby="logoutConfirmTitle" aria-describedby="logoutConfirmDescription" aria-hidden="true">
-        <div class="ui-modal-card modal-sm logout-confirm-card">
+    @include('components.global-loading')
+
+    <div id="logoutConfirmModal" class="ui-modal" role="dialog" aria-modal="true" aria-labelledby="logoutConfirmTitle"
+        aria-describedby="logoutConfirmDescription" aria-hidden="true">
+
+        <div class="ui-modal-card modal-sm">
+
             <div class="modal-hd">
                 <div class="modal-heading">
-                    <div class="modal-icon logout-confirm-icon">
+
+                    <div class="modal-icon">
                         <i class="fa-solid fa-right-from-bracket"></i>
                     </div>
 
                     <div class="modal-copy">
                         <h2 id="logoutConfirmTitle" class="modal-title">
-                            Confirm Logout
+                            Are you sure you want to log out?
                         </h2>
-
-                        <p class="modal-subtitle">
-                            You are about to end your current session.
-                        </p>
                     </div>
+
                 </div>
             </div>
 
             <div class="modal-bd">
-                <div class="logout-confirm-message">
-                    <div class="logout-confirm-message-icon">
-                        <i class="fa-solid fa-shield-halved"></i>
-                    </div>
+                <div>
 
                     <div>
-                        <p id="logoutConfirmDescription">
-                            Are you sure you want to log out?
+                        <p id="logoutConfirmDescription" class="confirmed-modal-message">
+                            You will need to sign in again to continue.
                         </p>
-
-                        <span>
-                            You will need to sign in again to access your account.
-                        </span>
                     </div>
+
                 </div>
             </div>
 
-            <div class="modal-ft logout-confirm-actions">
-                <button type="button" class="btn-close-modal" data-logout-modal-close>
-                    Stay Signed In
-                </button>
+            <div class="modal-ft">
+                <div class="modal-actions">
 
-                <button type="button" id="confirmLogoutBtn" class="modal-btn-confirm danger">
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                    <span>Log Out</span>
-                </button>
+                    <button type="button" class="ui-btn ui-btn-secondary" data-modal-close="logoutConfirmModal">
+                        Stay Logged In
+                    </button>
+
+                    <button type="button" id="confirmLogoutBtn" class="ui-btn ui-btn-primary" data-modal-initial-focus>
+                        <span>Log Out</span>
+
+                    </button>
+
+                </div>
             </div>
+
         </div>
     </div>
 
     @include('partials.terms-modal')
 
-    @if (($isDentist || $isAdmin) && View::hasSection('usesAppointmentCalendar'))
+    @if (!$rolePreviewActive && ($isDentist || $isAdmin) && View::hasSection('usesAppointmentCalendar'))
         @include('components.appointment-calendar-script', [
             'mode' => 'booking',
             'calendarContainerId' => 'calGridWrapReschedule',
@@ -325,7 +342,7 @@
     @endif
 
     @if ($isPatient && !$hideMobileNav && !$hidePatientModals)
-        <script>
+        <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
             function openQuickAction(type) {
                 if (type === 'record') {
                     document
@@ -346,10 +363,112 @@
     </div>
 
     @if (!$hideFloatingActions)
-        <script src="{{ asset('vendor/sienna/sienna-accessibility.umd.js') }}" data-position="bottom-right"
+        <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}"
+            src="{{ asset('vendor/sienna/sienna-accessibility.umd.js') }}" data-position="bottom-right"
             data-offset="{{ $accessibilityOffset }}" defer></script>
 
         @include('partials.chatbot')
+    @endif
+
+    @if ($rolePreviewActive)
+        <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
+            document.addEventListener(
+                'DOMContentLoaded',
+                () => {
+                    const previewRoots = [
+                        document.getElementById(
+                            'mainContent'
+                        ),
+
+                        document.getElementById(
+                            'sidebar'
+                        ),
+
+                        document.getElementById(
+                            'mobileDrawer'
+                        ),
+
+                        document.getElementById(
+                            'mobileBottomNav'
+                        ),
+                    ].filter(Boolean);
+
+                    const allowedSelector = [
+                        '[data-sidebar-toggle]',
+                        '[data-sidebar-group-toggle]',
+                        '[data-drawer-toggle]',
+                        '[data-drawer-close]',
+                        '[data-drawer-group-toggle]',
+                        '[data-theme-choice]',
+                        '[data-preview-allow]',
+                    ].join(',');
+
+                    const showPreviewNotice =
+                        () => {
+                            if (
+                                typeof window
+                                .showToast ===
+                                'function'
+                            ) {
+                                window.showToast(
+                                    'Preview Mode',
+                                    'This action is unavailable while previewing a role.',
+                                    'info'
+                                );
+                            }
+                        };
+
+                    previewRoots.forEach(
+                        root => {
+                            root.addEventListener(
+                                'click',
+                                event => {
+                                    const action =
+                                        event.target
+                                        .closest(
+                                            'a, button, [data-ui-click], [role="button"]'
+                                        );
+
+                                    if (!action) {
+                                        return;
+                                    }
+
+                                    if (
+                                        action.matches(
+                                            allowedSelector
+                                        ) ||
+                                        action.closest(
+                                            allowedSelector
+                                        )
+                                    ) {
+                                        return;
+                                    }
+
+                                    event.preventDefault();
+
+                                    event.stopImmediatePropagation();
+
+                                    showPreviewNotice();
+                                },
+                                true
+                            );
+
+                            root.addEventListener(
+                                'submit',
+                                event => {
+                                    event.preventDefault();
+
+                                    event.stopImmediatePropagation();
+
+                                    showPreviewNotice();
+                                },
+                                true
+                            );
+                        }
+                    );
+                }
+            );
+        </script>
     @endif
 
     @stack('scripts')

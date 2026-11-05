@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Appointment;
+use App\Support\DentalServicesPatientName;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use setasign\Fpdi\Fpdi;
@@ -16,16 +17,11 @@ class DptReport
 
     public function records(Carbon $from, Carbon $to, bool $emergency): Collection
     {
-        return Appointment::with(['patient.user', 'patient.information', 'dentist', 'procedure'])
+        return Appointment::with(['patient.user.profile', 'patient.information', 'dentist', 'procedure'])
             ->where('status', 'completed')->whereHas('patient')
             ->whereDate('appointment_date', '>=', $from->toDateString())
             ->whereDate('appointment_date', '<=', $to->toDateString())
-            ->where(function ($query) use ($emergency) {
-                $query->where('is_walk_in', $emergency);
-                if (! $emergency) {
-                    $query->orWhereNull('is_walk_in');
-                }
-            })
+            ->emergencyCase($emergency)
             ->orderBy('appointment_date')->orderBy('appointment_time')->orderBy('id')
             ->get()->map(function (Appointment $appointment) {
                 $patient = $appointment->patient;
@@ -40,11 +36,10 @@ class DptReport
                     'id' => $appointment->id,
                     'date' => Carbon::parse($appointment->appointment_date)->format('m/d/y'),
                     'classification' => $classification,
-                    // Preserve compound surnames; use the stored display name for legacy profiles.
-                    'surname' => $patient->user?->last_name ?: $patient->name,
+                    'surname' => DentalServicesPatientName::surname($patient),
                     'minutes' => $appointment->procedure?->procedure_duration_seconds !== null
                         ? max(0, $appointment->procedure->procedure_duration_seconds) / 60 : null,
-                    'dentist' => $appointment->dentist?->name ?? '',
+                    'dentist' => $appointment->dentist_name ?? '',
                 ];
             });
     }
@@ -66,6 +61,8 @@ class DptReport
             for ($page = 0; $page < $pages; $page++) {
                 $pdf->AddPage($size['orientation'], [$size['width'], $size['height']]);
                 $pdf->useTemplate($template);
+                $pageRecords = $upperPages->get($page, collect())->merge($lowerPages->get($page, collect()));
+                app(ReportSignatory::class)->draw($pdf, $type, $pageRecords);
                 $pdf->SetFillColor(255, 255, 255);
                 $pdf->Rect(225, 136, 100, 13, 'F');
                 $date = $from->format('m/d/Y');

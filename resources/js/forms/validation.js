@@ -212,8 +212,15 @@ function getFormInputValidationMessage(field) {
     }
 
     const type = String(field.type || '').toLowerCase();
-    const value = String(field.value || '').trim();
-    const label = getGlobalFieldLabel(field);
+
+    const rawValue =
+        String(field.value || '');
+
+    const value =
+        rawValue.trim();
+
+    const label =
+        getGlobalFieldLabel(field);
 
     if (type === 'radio') {
         if (!isRequired) {
@@ -308,6 +315,29 @@ function getFormInputValidationMessage(field) {
 
     if (!value) return '';
 
+    const shouldValidateWhitespace =
+        field instanceof HTMLTextAreaElement ||
+        (
+            field instanceof HTMLInputElement &&
+            [
+                'text',
+                'search',
+                'email',
+                'tel',
+                'url'
+            ].includes(type)
+        );
+
+    if (shouldValidateWhitespace) {
+        if (rawValue !== rawValue.trim()) {
+            return `${label} cannot start or end with spaces.`;
+        }
+
+        if (/[ \t]{2,}/.test(rawValue)) {
+            return `${label} cannot contain multiple consecutive spaces.`;
+        }
+    }
+
     if (type === 'email' && !field.validity.valid) {
         return 'Please enter a valid email address.';
     }
@@ -316,7 +346,7 @@ function getFormInputValidationMessage(field) {
         field.hasAttribute('minlength') &&
         value.length < Number(field.getAttribute('minlength'))
     ) {
-        return `${label} must contain at least ${field.getAttribute('minlength')} characters.`;
+        return field.dataset.minlengthMessage || `${label} must contain at least ${field.getAttribute('minlength')} characters.`;
     }
     if (
         field.name === 'password_confirmation' &&
@@ -336,7 +366,7 @@ function getFormInputValidationMessage(field) {
         field.hasAttribute('maxlength') &&
         value.length > Number(field.getAttribute('maxlength'))
     ) {
-        return `${label} must not exceed ${field.getAttribute('maxlength')} characters.`;
+        return field.dataset.maxlengthMessage || `${label} must not exceed ${field.getAttribute('maxlength')} characters.`;
     }
 
     if (field.validity.patternMismatch) {
@@ -368,6 +398,12 @@ function getFormInputValidationMessage(field) {
 }
 
 const globalValidationRules = new Map();
+
+registerGlobalValidationRule('roleName', function (field) {
+    return /^[A-Za-z]+(?: [A-Za-z]+)*$/.test(field.value)
+        ? ''
+        : field.dataset.patternMessage || 'Only letters and single spaces between words are allowed.';
+});
 
 function registerGlobalValidationRule(name, validator) {
     if (!name || typeof validator !== 'function') return;
@@ -579,6 +615,24 @@ registerGlobalValidationRule('personName', function (field) {
         : 'Only letters, spaces, apostrophe, period, and hyphen are allowed.';
 }
 );
+
+registerGlobalValidationRule('emergencyContactName', function (field) {
+    const value = String(field.value || '').trim();
+
+    if (!value) return '';
+
+    if (value.length < 3) {
+        return 'Emergency contact name must contain at least 3 characters.';
+    }
+
+    if (value.length > 50) {
+        return 'Emergency contact name must not exceed 50 characters.';
+    }
+
+    return /[A-Za-zÑñ]/.test(value) && /^[A-Za-zÑñ\s.'-]+$/.test(value)
+        ? ''
+        : 'Only letters, spaces, apostrophe, period, and hyphen are allowed.';
+});
 
 registerGlobalValidationRule('studentNumber', function (field) {
     const value = String(field.value || '').trim();
@@ -918,6 +972,40 @@ function ensureGlobalFieldError(field) {
     return error;
 }
 
+const globalGroupedFieldMessages = new WeakMap();
+
+function showGroupedFieldValidationMessage(field, group, message) {
+    const key = group.dataset.globalValidationGroup;
+    const error = ensureGlobalGroupError(group, key);
+    if (!error) return;
+
+    error.id ||= `${key}-group-error`;
+    globalGroupedFieldMessages.set(field, message);
+    const descriptions = new Set((field.getAttribute('aria-describedby') || '').split(/\s+/).filter(Boolean));
+    if (message) {
+        field.setAttribute('aria-invalid', 'true');
+        descriptions.add(error.id);
+    } else {
+        field.removeAttribute('aria-invalid');
+        descriptions.delete(error.id);
+    }
+    if (descriptions.size) field.setAttribute('aria-describedby', [...descriptions].join(' '));
+    else field.removeAttribute('aria-describedby');
+
+    const firstInvalid = [...group.querySelectorAll('input, select, textarea')]
+        .find(input => !input.disabled && input.classList.contains('is-invalid'));
+    const groupMessage = firstInvalid
+        ? group.dataset.groupValidationMessage || globalGroupedFieldMessages.get(firstInvalid) || 'Please correct the highlighted fields.'
+        : '';
+
+    // Announce once for the group, rather than rebuilding the same notice for every cell.
+    if (error.dataset.validationMessage !== groupMessage
+        || Boolean(groupMessage) !== error.classList.contains('show')) {
+        showGlobalGroupError(group, key, groupMessage);
+        error.dataset.validationMessage = groupMessage;
+    }
+}
+
 function showFormInputValidationMessage(
     field,
     message = '',
@@ -981,6 +1069,12 @@ function showFormInputValidationMessage(
         'is-valid',
         !hasError && hasValue
     );
+
+    const validationGroup = field.closest('[data-global-validation-group]');
+    if (validationGroup?.dataset.globalValidationGroup) {
+        showGroupedFieldValidationMessage(field, validationGroup, message);
+        return;
+    }
 
     const indicator =
         ensureGlobalFieldError(field);
@@ -1063,11 +1157,173 @@ function clearFormInputValidation(field) {
     showFormInputValidationMessage(field, '', '');
 }
 
+function applyGlobalServerValidationErrors(
+    form,
+    errors = {},
+    options = {}
+) {
+    if (
+        !form ||
+        !errors ||
+        typeof errors !== 'object'
+    ) {
+        return {
+            valid: true,
+            firstInvalid: null
+        };
+    }
+
+    let firstInvalid = null;
+
+    Object.entries(errors).forEach(
+        ([fieldName, rawMessages]) => {
+            const messages =
+                Array.isArray(rawMessages)
+                    ? rawMessages
+                    : [rawMessages];
+
+            const message =
+                String(
+                    messages.find(Boolean) || ''
+                ).trim();
+
+            if (!message) {
+                return;
+            }
+
+            const arrayFieldName =
+                fieldName.replace(
+                    /\.\d+$/,
+                    '[]'
+                );
+
+            const field =
+                form.querySelector(
+                    `[name="${CSS.escape(fieldName)}"]`
+                ) ||
+                form.querySelector(
+                    `[name="${CSS.escape(arrayFieldName)}"]`
+                ) ||
+                document.getElementById(
+                    fieldName
+                );
+
+            if (!field) {
+                return;
+            }
+
+            setPersistentServerFieldError(
+                field,
+                message
+            );
+
+            if (!firstInvalid) {
+                firstInvalid = field;
+            }
+        }
+    );
+
+    if (
+        firstInvalid &&
+        options.focus !== false
+    ) {
+        focusGlobalInvalidField(
+            firstInvalid
+        );
+    }
+
+    if (firstInvalid) {
+        shakeGlobalFieldErrors(
+            form
+        );
+    }
+
+    return {
+        valid: !firstInvalid,
+        firstInvalid
+    };
+}
+
+function setPersistentServerFieldError(
+    field,
+    message
+) {
+    if (!field || !message) {
+        return;
+    }
+
+    field.dataset.serverValidationError =
+        String(message);
+
+    field.dataset.serverValidationValue =
+        String(field.value || '').trim();
+
+    showFormInputValidationMessage(
+        field,
+        message
+    );
+}
+
+function clearPersistentServerFieldError(
+    field
+) {
+    if (!field) {
+        return;
+    }
+
+    delete field.dataset.serverValidationError;
+    delete field.dataset.serverValidationValue;
+}
+
+function getPersistentServerFieldError(
+    field
+) {
+    if (!field) {
+        return '';
+    }
+
+    const message =
+        field.dataset.serverValidationError || '';
+
+    const validatedValue =
+        field.dataset.serverValidationValue || '';
+
+    const currentValue =
+        String(field.value || '').trim();
+
+    if (!message) {
+        return '';
+    }
+
+    if (
+        currentValue ===
+        validatedValue
+    ) {
+        return message;
+    }
+
+    clearPersistentServerFieldError(
+        field
+    );
+
+    return '';
+}
+
 function validateFormInputField(field) {
     if (!field) return true;
 
+    capitalizeGlobalWords(field);
+
+    const persistentServerError =
+        getPersistentServerFieldError(
+            field
+        );
+
     const message =
-        getFormInputValidationMessage(field);
+        persistentServerError ||
+        getFormInputValidationMessage(
+            field
+        );
 
     let successMessage = '';
 
@@ -1217,8 +1473,7 @@ function isGlobalPhoneField(field) {
 function normalizeGlobalPersonName(field) {
     if (
         !field ||
-        field.dataset.validationRule !==
-        'personName'
+        !['personName', 'emergencyContactName'].includes(field.dataset.validationRule)
     ) {
         return;
     }
@@ -1238,6 +1493,57 @@ function normalizeGlobalPersonName(field) {
         field.value =
             normalized;
     }
+}
+
+function normalizeGlobalSpaces(field) {
+    if (field?.dataset.normalizeSpaces === 'true') {
+        field.value = String(field.value || '').trim().replace(/ +/g, ' ');
+    }
+}
+
+function capitalizeGlobalWords(field) {
+    const mode = field?.dataset.capitalizeWords;
+    if (mode !== 'true' && mode !== 'name') return;
+
+    const value = String(field.value || '');
+    const normalized = mode === 'name'
+        ? value.toLowerCase().replace(/(^|[\s-])(\p{L})/gu, (_, separator, letter) => separator + letter.toUpperCase())
+        : value.replace(/(^|\s)([a-z])/g, (_, space, letter) => space + letter.toUpperCase());
+    if (normalized === field.value) return;
+
+    const start = field.selectionStart;
+    const end = field.selectionEnd;
+    const direction = field.selectionDirection;
+    field.value = normalized;
+
+    if (typeof start === 'number' && typeof field.setSelectionRange === 'function') {
+        field.setSelectionRange(start, end, direction);
+    }
+}
+
+function getGlobalTextInsertionMessage(field, insertedText) {
+    if (field.dataset.validationRule === 'emergencyContactName' && /[^A-Za-zÑñ\s.'-]/.test(insertedText || '')) {
+        return 'Only letters, spaces, apostrophe, period, and hyphen are allowed.';
+    }
+
+    if (!insertedText || (
+        field.dataset.validationRule !== 'roleName' &&
+        field.dataset.enforceMaxlength !== 'true'
+    )) return '';
+
+    if (field.dataset.validationRule === 'roleName' && /[^A-Za-z ]/.test(insertedText)) {
+        return field.dataset.patternMessage || 'Only letters and spaces are allowed.';
+    }
+
+    const nextLength = field.value.length -
+        ((field.selectionEnd ?? 0) - (field.selectionStart ?? 0)) + insertedText.length;
+
+    if (field.maxLength >= 0 && nextLength > field.maxLength) {
+        return field.dataset.maxlengthMessage ||
+            `${getGlobalFieldLabel(field)} must not exceed ${field.maxLength} characters.`;
+    }
+
+    return '';
 }
 
 function bindFormInputValidation(root = document) {
@@ -1293,6 +1599,17 @@ function bindFormInputValidation(root = document) {
                 );
             });
 
+            form.addEventListener('paste', event => {
+                const field = event.target;
+                if (!(field instanceof HTMLInputElement)) return;
+
+                const message = getGlobalTextInsertionMessage(field, event.clipboardData?.getData('text'));
+                if (message) {
+                    event.preventDefault();
+                    showFormInputValidationMessage(field, message);
+                }
+            }, true);
+
             form.addEventListener(
                 'beforeinput',
                 event => {
@@ -1315,6 +1632,13 @@ function bindFormInputValidation(root = document) {
                         return;
                     }
 
+                    const insertionMessage = getGlobalTextInsertionMessage(field, insertedText);
+                    if (insertionMessage) {
+                        event.preventDefault();
+                        showFormInputValidationMessage(field, insertionMessage);
+                        return;
+                    }
+
                     if (
                         isGlobalPhoneField(
                             field
@@ -1325,17 +1649,36 @@ function bindFormInputValidation(root = document) {
                     ) {
                         event.preventDefault();
 
+                        window
+                            .showFormInputValidationMessage?.(
+                                field,
+                                'Contact number can only contain numbers.'
+                            );
+
                         return;
                     }
 
                     if (
-                        field.dataset.validationRule ===
-                        'personName' &&
+                        [
+                            'personName',
+                            'emergencyContactName',
+                            'guestName'
+                        ].includes(
+                            field.dataset.validationRule
+                        ) &&
                         /[^A-Za-zÑñ\s.'-]/.test(
                             insertedText
                         )
                     ) {
                         event.preventDefault();
+
+                        window.showFormInputValidationMessage?.(
+                            field,
+                            field.dataset.patternMessage ||
+                            'Only letters, spaces, apostrophe, period, and hyphen are allowed.'
+                        );
+
+                        return;
                     }
                 },
                 true
@@ -1384,6 +1727,10 @@ function bindFormInputValidation(root = document) {
                 normalizeGlobalPersonName(
                     field
                 );
+
+                if (event.type === 'blur') {
+                    normalizeGlobalSpaces(field);
+                }
 
                 validateFormInputField(
                     field
@@ -2119,6 +2466,8 @@ function validateGlobalForm(form, options = {}) {
     let firstInvalid = null;
 
     fields.forEach(field => {
+        normalizeGlobalSpaces(field);
+
         if (
             field.type === 'radio' &&
             processedRadioGroups.has(field.name)
@@ -2214,6 +2563,10 @@ window.bindFormInputValidation = bindFormInputValidation;
 window.validateFormInputField = validateFormInputField;
 window.showFormInputValidationMessage = showFormInputValidationMessage;
 window.clearFormInputValidation = clearFormInputValidation;
+window.applyGlobalServerValidationErrors = applyGlobalServerValidationErrors;
+window.setPersistentServerFieldError = setPersistentServerFieldError;
+window.clearPersistentServerFieldError = clearPersistentServerFieldError;
+window.getPersistentServerFieldError = getPersistentServerFieldError;
 
 window.setFieldState = setFieldState;
 window.updateCharCounter = updateCharCounter;

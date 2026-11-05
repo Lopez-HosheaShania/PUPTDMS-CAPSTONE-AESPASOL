@@ -3,7 +3,14 @@
 
     $authUser = auth()->user();
 
-    $role = $role ?? (optional(optional($authUser)->role)->slug ?? (session('role') ?? 'patient'));
+    $actualRole = optional(optional($authUser)->role)->slug ?? (session('role') ?? 'patient');
+
+    $isRolePreview =
+        (bool) session('role_preview_active') && in_array(session('preview_role'), ['patient', 'dentist'], true);
+
+    $role = $role ?? $actualRole;
+
+    $notificationRole = $isRolePreview ? $actualRole : $role;
     $resolveNotificationUrl = function (array $payload, string $activeRole): string {
         $fallbackUrl = data_get($payload, 'url') ?? (data_get($payload, 'action_url') ?? '#');
 
@@ -83,7 +90,7 @@
             ->latest()
             ->take(15)
             ->get()
-            ->map(function ($notification) use ($resolveNotificationUrl, $role) {
+            ->map(function ($notification) use ($resolveNotificationUrl, $notificationRole) {
                 $payload = $notification->data ?? [];
                 $title =
                     data_get($payload, 'title') ??
@@ -102,7 +109,9 @@
                     'DentistTransitionNotification',
                 );
 
-                $actionUrl = $isDentistContinuityNotification ? '#' : $resolveNotificationUrl($payload, $role);
+                $actionUrl = $isDentistContinuityNotification
+                    ? '#'
+                    : $resolveNotificationUrl($payload, $notificationRole);
 
                 return [
                     'id' => $notification->id,
@@ -157,17 +166,32 @@
 
     $showMobileMenu = $showMobileMenu ?? in_array($role, ['admin', 'super_admin', 'dentist'], true);
     $showSettings = $showSettings ?? in_array($role, ['admin', 'super_admin'], true);
-    $activeHeaderRole = session('impersonated_role') ?: $role;
+    $activeHeaderRole = $role;
     $isPatientHeader = in_array($activeHeaderRole, ['patient', 'patient_role'], true);
     $clinicTitle = $clinicTitle ?? 'PUP TAGUIG DENTAL CLINIC';
 
-    if ($role === 'patient') {
+    if ($isRolePreview) {
+        $displayName = $authUser?->name ?? 'Administrator';
+
+        $displayRole = $authUser?->display_role_name ?? Role::displayNameFor($actualRole);
+
+        if (!empty($authUser?->profile_image)) {
+            $avatarUrl = asset('storage/' . $authUser->profile_image);
+        } else {
+            $avatarUrl =
+                'https://ui-avatars.com/api/?name=' .
+                urlencode($displayName) .
+                '&background=8B0000&color=ffffff&bold=true';
+        }
+    } elseif ($role === 'patient') {
         $displayName = ucwords(strtolower(optional($patient)->name ?? ($authUser->name ?? 'Patient User')));
+
         $displayName = preg_replace_callback(
             '/\b(ii|iii|iv|v|vi|vii|viii|ix|x)\.?$/i',
             fn($matches) => strtoupper($matches[0]),
             $displayName,
         );
+
         $displayRole = 'Patient';
         $patientImage = optional($patient)->profile_image ?? null;
         $userImage = $authUser->profile_image ?? null;
@@ -184,9 +208,7 @@
         }
     } else {
         $displayName = $authUser->name ?? 'User';
-        $displayRole = session()->has('impersonated_role')
-            ? Role::displayNameFor(session('impersonated_role'))
-            : $authUser?->display_role_name ?? Role::displayNameFor($role);
+        $displayRole = $authUser?->display_role_name ?? Role::displayNameFor($role);
 
         if (!empty($authUser->profile_image)) {
             $avatarUrl = asset('storage/' . $authUser->profile_image);
@@ -350,7 +372,7 @@
                 </div>
 
                 <i class="fa-solid fa-chevron-down desktop-chevron"
-                    style="font-size:.65rem; opacity:.75; margin-left:4px;"></i>
+                    data-ui-presentation="presentation-1e7752fa6c28"></i>
             </button>
 
             <div id="userMenu" class="header-dropdown-menu header-user-menu" role="menu">
@@ -359,7 +381,7 @@
                     @if ($isPatientHeader)
                         <label id="darkModeToggleItem" class="dropdown-menu-item patient-mobile-theme-item">
                             <div class="dropdown-item-content">
-                                <span class="dropdown-item-icon">
+                                <span class="sidebar-group-icon">
                                     <i id="themeIcon" class="fa-solid fa-moon"></i>
                                 </span>
 
@@ -377,11 +399,10 @@
                         </label>
                     @endif
 
-
                     @if ($showSettings && Route::has('admin.system_settings'))
                         <a href="{{ route('admin.system_settings') }}" class="dropdown-menu-item" role="menuitem">
                             <div class="dropdown-item-content">
-                                <span class="dropdown-item-icon">
+                                <span class="sidebar-group-icon">
                                     <i class="fa-solid fa-gear"></i>
                                 </span>
 
@@ -394,7 +415,6 @@
                         </a>
                     @endif
 
-
                     @if ($isPatientHeader && Route::has('security.sessions.index'))
                         <div class="dropdown-menu-divider patient-mobile-theme-divider" role="separator"></div>
                     @endif
@@ -403,11 +423,10 @@
                         <div class="dropdown-menu-divider" role="separator"></div>
                     @endif
 
-
                     @if (Route::has('security.sessions.index'))
                         <a href="{{ route('security.sessions.index') }}" class="dropdown-menu-item" role="menuitem">
                             <div class="dropdown-item-content">
-                                <span class="dropdown-item-icon">
+                                <span class="sidebar-group-icon">
                                     <i class="fa-solid fa-shield-halved"></i>
                                 </span>
 
@@ -418,19 +437,16 @@
 
                             <i class="fa-solid fa-chevron-right dropdown-item-chevron" aria-hidden="true"></i>
                         </a>
-                    @endif
 
-
-                    @if ($isPatientHeader)
-                        <div class="dropdown-menu-divider patient-mobile-logout-divider" role="separator"></div>
+                        <div class="dropdown-menu-divider header-desktop-logout-divider" role="separator"></div>
 
                         <form action="{{ route('logout') }}" method="POST"
-                            class="js-logout-form patient-mobile-logout-form">
+                            class="js-logout-form header-logout-form header-desktop-logout-form">
                             @csrf
 
-                            <button type="submit" class="dropdown-menu-item patient-mobile-logout-item">
+                            <button type="submit" class="dropdown-menu-item header-logout-item">
                                 <div class="dropdown-item-content">
-                                    <span class="dropdown-item-icon">
+                                    <span class="sidebar-group-icon">
                                         <i class="fa-solid fa-right-from-bracket"></i>
                                     </span>
 
@@ -446,6 +462,5 @@
 
             </div>
         </div>
-    </div>
     </div>
 </header>

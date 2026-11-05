@@ -39,15 +39,6 @@ class ChatbotController extends Controller
 
         $apiKey = config('services.openai.api_key');
 
-        if (!$apiKey) {
-            return response()->json(
-                [
-                    'error' => 'Missing OPENAI_API_KEY sa .env or config/services.php.',
-                ],
-                500,
-            );
-        }
-
         Log::info('Chatbot question', [
             'message' => $request->message,
             'context' => $request->context,
@@ -180,7 +171,7 @@ class ChatbotController extends Controller
             ]);
         }
 
-        if (!$aiServiceManager->shouldUse('chatbot')) {
+        if (!$apiKey || !$aiServiceManager->shouldUse('chatbot')) {
             $aiServiceManager->recordFallback('chatbot', 'Chatbot AI is disabled or offline.', [
                 'user_id' => Auth::id(),
             ]);
@@ -968,9 +959,10 @@ PROMPT;
     private function getLocalSystemReply(string $message, ?string $context = null, ?Patient $patient = null, bool $isLoginPage = false, string $role = 'guest'): ?string
     {
         $text = strtolower($message);
+        $isGreeting = preg_match('/^\s*(?:hi|hello|hey|good morning|good afternoon|good evening)[\s!,.?]*$/iu', $message) === 1;
 
         if ($isLoginPage) {
-            if (str_contains($text, 'hello') || str_contains($text, 'hi')) {
+            if ($isGreeting) {
                 return 'Hello! This is the login page. Please sign in using your account to access appointments, records, schedules, and document requests.';
             }
 
@@ -989,13 +981,27 @@ PROMPT;
             return 'This is the login page. You can sign in here to access appointments, records, schedules, and document requests.';
         }
 
-        if (str_contains($text, 'hello') || str_contains($text, 'hi')) {
+        if ($isGreeting) {
             $name =
                 $this->resolveChatbotDisplayName(
                     $patient
                 );
 
             return "Hello {$name}! How can I assist you today regarding appointments, dental records, or system features?";
+        }
+        $askingDentalRecords = preg_match('/\b(?:records?|(?:treatment|dental|medical|visit) history|(?:past|previous) treatments?|diagnos(?:is|es)|prescriptions?|(?:dental|tooth|teeth) chart)\b/i', $text)
+            || $this->chatbotContainsAnyPhrase($text, [
+                'kasaysayan ng paggamot', 'nakaraang paggamot', 'dating paggamot',
+                'dental na rekord', 'dental na record',
+            ]);
+
+        if ($askingDentalRecords) {
+            return match ($role) {
+                'patient' => 'Open Records in the bottom navigation to go to Dental Records. In Visit History, open the completed visit you want to review to see its treatment details, diagnosis, prescriptions, and odontogram.',
+                'dentist' => 'Go to Patients, search for the patient, and open their profile to review dental records and treatment history. You can also open a completed appointment to view its treatment record, diagnosis, and odontogram.',
+                'admin' => 'Go to Patient Directory, search for the patient, and open their profile to review dental records and treatment history available to your role.',
+                default => 'Please sign in first to view your dental records, treatment history, diagnosis, and odontogram.',
+            };
         }
 
         if ($role === 'admin') {
@@ -1146,10 +1152,6 @@ PROMPT;
             }
 
             return "You do not have any upcoming appointment recorded in the system.";
-        }
-
-        if (str_contains($text, 'record') || str_contains($text, 'dental records')) {
-            return 'Open the Records tab in the bottom navigation, or go to the Dental Records page to view your dental history, odontogram, treatments, and diagnosis.';
         }
 
         if (str_contains($text, 'odontogram')) {

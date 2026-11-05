@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Dentist;
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\DocumentTemplate;
+use App\Support\DentalServicesPatientName;
+use App\Support\DentalServicesProcedureTiming;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -65,6 +67,7 @@ class DentalServicesRecordController extends Controller
         return Appointment::query()
             ->with([
                 'patient.medicalHistory',
+                'patient.user.profile',
                 'procedure',
             ])
             ->where('status', 'completed')
@@ -83,8 +86,6 @@ class DentalServicesRecordController extends Controller
         $gender = strtolower(trim((string) ($patient->gender ?? $patient->user?->gender ?? '')));
         $isMale = str_starts_with($gender, 'm');
         $isFemale = str_starts_with($gender, 'f');
-        $visitType = strtolower(trim((string) ($appointment->visit_type ?? $appointment->concern ?? '')));
-        $isWalkIn = (bool) ($appointment->is_walk_in ?? false);
 
         $programDisplay = trim((string) ($patient->course_code ?? ''));
 
@@ -111,18 +112,10 @@ class DentalServicesRecordController extends Controller
             ($patient->is_senior ?? false) ? 'Senior' : null,
         ]));
 
-        $timeIn = $appointment->appointment_time
-            ? Carbon::parse($appointment->appointment_time)->format('h:i A')
-            : '';
-
-        $timeOut = $procedure?->procedure_completed_at
-            ? Carbon::parse($procedure->procedure_completed_at)->format('h:i A')
-            : '';
-
-        $durationMinutes = (int) ($procedure?->procedure_duration_seconds ?? 0);
-        $duration = $durationMinutes > 0
-            ? (string) (int) ceil($durationMinutes / 60) . ' mins'
-            : '';
+        $timeIn = DentalServicesProcedureTiming::requestedTimeIn($appointment)?->format('h:i A') ?? '';
+        $timeOut = DentalServicesProcedureTiming::timeProcessed($appointment)?->format('h:i A') ?? '';
+        $durationMinutes = DentalServicesProcedureTiming::minutesProcessed($appointment);
+        $duration = $durationMinutes !== null ? $durationMinutes . ' mins' : '';
 
         return [
             'id' => $appointment->id,
@@ -136,7 +129,7 @@ class DentalServicesRecordController extends Controller
                 ? Carbon::parse($appointment->appointment_date)->format('Y-m')
                 : '',
             'timeIn' => $timeIn,
-            'name' => $this->formatPatientNameSurnameFirst($patient?->name),
+            'name' => DentalServicesPatientName::surnameFirst($patient),
             'program' => $programDisplay,
             'age' => $this->patientAge($patient?->birthdate ?? $patient?->user?->birthdate),
             'gad' => [
@@ -147,36 +140,13 @@ class DentalServicesRecordController extends Controller
             'contact' => trim((string) ($patient->phone ?? '')),
             'timeOut' => $timeOut,
             'duration' => $duration,
-            'type' => ($isWalkIn || str_contains($visitType, 'emergency')) ? 'Emergency' : 'Non-Emergency',
+            'type' => $appointment->is_emergency ? 'Emergency' : 'Non-Emergency',
             'department' => $this->departmentLabel($patient),
             'has_signature' => filled($patient?->medicalHistory?->patient_signature),
             'signature_url' => filled($patient?->medicalHistory?->patient_signature)
                 ? asset('storage/' . ltrim((string) $patient->medicalHistory->patient_signature, '/'))
                 : null,
         ];
-    }
-
-    private function formatPatientNameSurnameFirst(?string $fullName): string
-    {
-        $fullName = trim((string) $fullName);
-
-        if ($fullName === '') {
-            return 'Unknown Patient';
-        }
-
-        $parts = preg_split('/\s+/', $fullName) ?: [];
-        $parts = array_values(array_filter($parts, fn($part) => trim((string) $part) !== ''));
-
-        if (count($parts) === 1) {
-            return $parts[0];
-        }
-
-        $surname = array_pop($parts);
-        $firstName = array_shift($parts) ?? '';
-        $remainingNames = trim(implode(' ', $parts));
-        $givenNames = trim($firstName . ' ' . $remainingNames);
-
-        return trim($surname . ', ' . $givenNames);
     }
 
     private function patientAge($birthdate): string
@@ -199,7 +169,8 @@ class DentalServicesRecordController extends Controller
         }
 
         $patientType = strtolower(trim((string) (
-            $patient->patient_type
+            $patient->classification
+            ?? $patient->patient_type
             ?? $patient->type
             ?? ''
         )));
@@ -212,11 +183,11 @@ class DentalServicesRecordController extends Controller
             return 'Dependent';
         }
 
-        if (filled($patient->faculty_code)) {
+        if ($patientType === 'faculty' || filled($patient->faculty_code)) {
             return 'Faculty';
         }
 
-        if (filled($patient->course_code) || filled($patient->course_name)) {
+        if ($patientType === 'student' || filled($patient->student_no) || filled($patient->course_code) || filled($patient->course_name)) {
             return 'Student';
         }
 

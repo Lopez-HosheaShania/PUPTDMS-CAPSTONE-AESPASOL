@@ -27,6 +27,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Str;
 use App\Services\AppointmentOdontogramSnapshotService;
 $isDentistProfile = $profileMode === 'dentist';
+$canViewClinicalRecords = $isDentistProfile && !(auth()->user()?->hasAnyRole(['admin', 'super_admin']) ?? false);
 
 $patientName = $patient->name ?? 'Unknown Patient';
 $displayName = $patient->name ?? 'Guest';
@@ -37,29 +38,16 @@ $futureCount = isset($futureVisits) ? $futureVisits->count() : 0;
 $pastCount = isset($pastVisits) ? $pastVisits->count() : 0;
 
 $odontogramSnapshotService =
-    app(AppointmentOdontogramSnapshotService::class);
+app(AppointmentOdontogramSnapshotService::class);
 
 $previousOdontogramByVisitId =
-    $odontogramSnapshotService
-        ->previousSnapshotsByAppointment(
-            collect($pastVisits ?? [])
-        );
+$canViewClinicalRecords ? $odontogramSnapshotService
+->previousSnapshotsByAppointment(
+collect($pastVisits ?? [])
+) : [];
 
-$medicalAnswers = optional($patient->medicalHistory)->answers ?? collect();
-$dentalDates = optional($patient->dentalHistoryDates);
-$signatureReviewStatus = optional($patient->medicalHistory)->signature_review_status;
-$signatureReviewNotes = optional($patient->medicalHistory)->signature_review_notes;
-$signaturePath = optional($patient->medicalHistory)->patient_signature;
-$signatureUrl = $signaturePath ? asset('storage/' . $signaturePath) : null;
-$isPendingManualReview = $signatureReviewStatus === 'pending_manual_review';
-$isInvalidSignature = $signatureReviewStatus === 'invalid_reupload_required';
-$canReviewSignature = auth()->user()?->hasPermission('create_medical_records') ?? false;
-$showManualSignatureReview =
-in_array($profileMode, ['admin', 'dentist'], true) &&
-in_array($signatureReviewStatus, ['pending_manual_review', 'invalid_reupload_required'], true) &&
-!empty($signaturePath) &&
-$canReviewSignature;
-
+$medicalAnswers = $canViewClinicalRecords ? (optional($patient->medicalHistory)->answers ?? collect()) : collect();
+$dentalDates = $canViewClinicalRecords ? optional($patient->dentalHistoryDates) : null;
 $from = request('from');
 
 if ($profileMode === 'admin') {
@@ -91,7 +79,7 @@ urlencode($displayName) .
 '&background=8B0000&color=ffffff&bold=true';
 }
 
-$identityLabel = $patient->faculty_code ? 'Faculty Code' : 'Student No';
+$identityLabel = ($patient->classification === 'faculty' || $patient->faculty_code) ? 'Faculty Code' : 'Student No';
 $identityValue = $patient->faculty_code ?: ($patient->student_no ?: 'N/A');
 
 $emergencyPerson = optional($patient->medicalHistory)->emergency_person;
@@ -100,7 +88,7 @@ $emergencyRelation = optional($patient->medicalHistory)->emergency_relation;
 
 $profileIsActive = true;
 
-$patientType = $patient->faculty_code ? 'Faculty' : ($patient->student_no ? 'Student' : 'Patient');
+$patientType = \App\Support\PatientClassification::label($patient);
 
 $procedureAppointment = collect($futureVisits ?? [])
 ->first(function ($visit) {
@@ -126,11 +114,11 @@ Carbon::parse($visit->appointment_date)->isToday();
 });
 
 $canStartProcedure =
-$isDentistProfile &&
+$canViewClinicalRecords &&
 !empty($procedureAppointment);
-$odontogramData = optional($patient->odontogram)->odontogram_data ?? [];
-$odontogramLastUpdatedAt = optional($patient->odontogram)->updated_at;
-$odontogramLastUpdatedBy = optional($patient->odontogram)->updated_by;
+$odontogramData = $canViewClinicalRecords ? (optional($patient->odontogram)->odontogram_data ?? []) : [];
+$odontogramLastUpdatedAt = $canViewClinicalRecords ? optional($patient->odontogram)->updated_at : null;
+$odontogramLastUpdatedBy = $canViewClinicalRecords ? optional($patient->odontogram)->updated_by : null;
 $odontogramMetaVisit = $lastVisit ?? ($appointment ?? ($nextAppointment ?? null));
 $odontogramMetaDate = $odontogramMetaVisit?->appointment_date
 ? Carbon::parse($odontogramMetaVisit->appointment_date)->format('M d, Y')
@@ -141,10 +129,6 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
     <div class="w-full fade-in">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
             <div>
-                <p class="text-xs text-gray-500 mb-1.5 font-medium uppercase tracking-wider">
-                    <a href="{{ $backUrl }}" class="hover:text-[#8B0000] transition">{{ $backLabel }}</a>
-                    <span class="mx-1">/</span> Patient Record
-                </p>
 
                 <div class="flex items-center gap-3">
                     <a href="{{ $backUrl }}" class="ui-icon-btn neutral" data-tooltip="Back to {{ $backLabel }}"
@@ -160,24 +144,28 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
 
             @if ($isDentistProfile || ($profileMode === 'admin' && $canBookAppointment))
             <div class="flex items-center gap-2">
+
                 @if ($profileMode === 'admin' && $canBookAppointment)
-                <a href="{{ route('admin.book_appointments.patient', ['patient' => $patient->id]) }}"
-                    class="ui-btn ui-btn-primary">
-                    <i class="fa-solid fa-calendar-plus text-xs"></i> Book Appointment
-                </a>
+                <x-button href="{{ route('admin.book_appointments.patient', ['patient' => $patient->id]) }}"
+                    variant="primary" icon="fa-solid fa-calendar-plus">
+                    Book Appointment
+                </x-button>
                 @endif
+
                 @if ($isDentistProfile)
-                <a href="{{ route('dentist.odontogram.existing-appointment.create', ['patient' => $patient->id]) }}"
-                    class="ui-btn ui-btn-secondary">
-                    <i class="fa-solid fa-clock-rotate-left text-xs"></i> Add Existing Appointment
-                </a>
+                <x-button
+                    href="{{ route('dentist.odontogram.existing-appointment.create', ['patient' => $patient->id]) }}"
+                    variant="secondary" icon="fa-solid fa-clock-rotate-left">
+                    Add Existing Appointment
+                </x-button>
                 @endif
+
                 @if ($canStartProcedure)
-                <button type="button" onclick="openStartModal()" class="ui-btn ui-btn-success">
-                    <i class="fa-solid fa-play"></i>
-                    <span>Start Procedure</span>
-                </button>
+                <x-button type="button" variant="success" icon="fa-solid fa-play" data-ui-click="action-0c1e6fd96db0">
+                    Start Procedure
+                </x-button>
                 @endif
+
             </div>
             @endif
         </div>
@@ -202,7 +190,7 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
                                     class="ui-icon-btn neutral patient-privacy-toggle" data-masked="true"
                                     data-tooltip="Show private information" data-tooltip-tone="neutral"
                                     aria-label="Show private information" aria-pressed="false"
-                                    onclick="togglePatientProfilePrivacy(this)">
+                                    data-ui-click="action-c2a93914d63a">
                                     <i class="fa-regular fa-eye"></i>
                                 </button>
                             </div>
@@ -218,6 +206,7 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
                                 $patientRoleIcon = match ($patientType) {
                                 'Faculty' => 'fa-chalkboard-user',
                                 'Student' => 'fa-user-graduate',
+                                'Administrative Personnel' => 'fa-building-user',
                                 default => 'fa-user',
                                 };
                                 @endphp
@@ -333,62 +322,6 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
                             @endif
                         </div>
 
-                        @if ($showManualSignatureReview)
-                        <div
-                            class="{{ $isInvalidSignature ? 'bg-red-50/70 border-red-100' : 'bg-amber-50/70 border-amber-100' }} px-5 py-4 border-t">
-                            <p
-                                class="text-[10px] font-bold {{ $isInvalidSignature ? 'text-red-800' : 'text-amber-800' }} uppercase tracking-widest mb-2 flex items-center gap-1.5">
-                                <i class="fa-solid fa-file-signature"></i>
-                                {{ $isInvalidSignature ? 'Signature Re-upload Requested' : 'Signature Review Required'
-                                }}
-                            </p>
-
-                            <div
-                                class="rounded-xl border {{ $isInvalidSignature ? 'border-red-200' : 'border-amber-200' }} bg-white p-3 shadow-sm">
-                                <a href="{{ $signatureUrl }}" target="_blank" rel="noopener noreferrer"
-                                    class="block overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
-                                    <img src="{{ $signatureUrl }}" alt="Patient signature for manual review"
-                                        class="w-full h-auto object-contain max-h-56">
-                                </a>
-
-                                <div class="mt-3 space-y-2">
-                                    <div
-                                        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border {{ $isInvalidSignature ? 'bg-red-100 text-red-800 border-red-200' : 'bg-amber-100 text-amber-800 border-amber-200' }}">
-                                        <i
-                                            class="fa-solid {{ $isInvalidSignature ? 'fa-circle-xmark' : 'fa-triangle-exclamation' }} text-[10px]"></i>
-                                        {{ $isInvalidSignature ? 'Invalid Signature' : 'Pending Manual Review' }}
-                                    </div>
-
-                                    <p class="text-xs text-gray-600 leading-relaxed">
-                                        {{ $signatureReviewNotes ?:
-                                        'The AI signature checker was unavailable during
-                                        submission, so this uploaded signature needs manual review.' }}
-                                    </p>
-
-                                    <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
-                                        <a href="{{ $signatureUrl }}" target="_blank" rel="noopener noreferrer"
-                                            class="ui-btn ui-btn-secondary ui-btn-sm">
-                                            <i class="fa-solid fa-up-right-from-square text-[10px]"></i>
-                                            Open Full Signature
-                                        </a>
-
-                                        @if ($isPendingManualReview && $canReviewSignature)
-                                        <form method="POST"
-                                            action="{{ $profileMode === 'admin' ? route('admin.patient.signature.invalid', $patient) : route('dentist.patient.signature.invalid', $patient) }}"
-                                            onsubmit="return confirm('Mark this uploaded signature as invalid and notify the patient to upload a new one?');"
-                                            class="ml-auto">
-                                            @csrf
-                                            <button type="submit" class="ui-btn ui-btn-secondary ui-btn-sm">
-                                                <i class="fa-solid fa-ban text-[8px]"></i>
-                                                Invalid Signature
-                                            </button>
-                                        </form>
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        @endif
                     </article>
                 </div>
             </aside>
@@ -455,26 +388,14 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
                 </div>
 
                 <section class="card profile-section-card treatment-history-card">
-                    <div class="card-header treatment-history-header">
-                        <div class="card-header-left">
-                            <div class="card-header-icon status-upcoming">
-                                <i class="fa-solid fa-folder-open"></i>
-                            </div>
-
-                            <div>
-                                <h2 class="card-title">Treatment History</h2>
-                                <p class="card-subtitle">
-                                    Review upcoming appointments and completed patient visits.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
+                    <x-card-header title="Treatment History"
+                        subtitle="Review upcoming appointments and completed patient visits."
+                        icon="fa-solid fa-folder-open" class="treatment-history-header" />
 
                     <div class="card-body treatment-history-body">
                         <div class="treatment-tabs" role="tablist" aria-label="Treatment history">
                             <button id="futureTab" type="button" class="treatment-tab is-active" role="tab"
-                                aria-selected="true" aria-controls="futureContent"
-                                onclick="switchTreatmentTab('future')">
+                                aria-selected="true" aria-controls="futureContent" data-ui-click="action-52d5565ec9b2">
                                 <i class="fa-regular fa-calendar"></i>
 
                                 <span>Upcoming</span>
@@ -485,7 +406,7 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
                             </button>
 
                             <button id="pastTab" type="button" class="treatment-tab" role="tab" aria-selected="false"
-                                aria-controls="pastContent" onclick="switchTreatmentTab('past')">
+                                aria-controls="pastContent" data-ui-click="action-b3866f05a448">
                                 <i class="fa-solid fa-clock-rotate-left"></i>
 
                                 <span>Past Visits</span>
@@ -535,9 +456,9 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
                                 <div class="space-y-3" data-show-more-list>
                                     @forelse($pastVisits ?? [] as $visit)
 
-                                    <x-appointment-record-card :appointment="$visit" variant="past" :show-details="true"
-                                        :show-countdown="false" :show-time-range="false"
-                                        :show-reserved="$isDentistProfile"
+                                    <x-appointment-record-card :appointment="$visit" variant="past"
+                                        :show-details="$canViewClinicalRecords" :show-countdown="false"
+                                        :show-time-range="false" :show-reserved="$isDentistProfile"
                                         :previous-odontogram="$previousOdontogramByVisitId[$visit->id] ?? []"
                                         :record-edit-url="$isDentistProfile && $visit->status === 'completed'
                                         ? route('dentist.odontogram.saved.edit', ['appointment' => $visit->id, 'from' => 'appointments'])
@@ -570,38 +491,21 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
                     </div>
                 </section>
 
+                @if ($canViewClinicalRecords)
                 <section class="card health-lifestyle-card mb-10">
-                    <div class="card-header">
-                        <div class="card-header-left">
-                            <div class="card-header-icon status-completed">
-                                <i class="fa-solid fa-notes-medical"></i>
-                            </div>
-
-                            <div>
-                                <h2 class="card-title">
-                                    Health & Lifestyle Information
-                                </h2>
-
-                                <p class="card-subtitle">
-                                    Patient dental, medical, and lifestyle records.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="card-header-right">
+                    <x-card-header title="Health & Lifestyle Information"
+                        subtitle="Patient dental, medical, and lifestyle records." icon="fa-solid fa-notes-medical">
+                        <x-slot:actions>
                             <span class="status-pill status-completed">
                                 <span class="status-dot"></span>
                                 <span>Latest Record</span>
                             </span>
-                        </div>
-                    </div>
+                        </x-slot:actions>
+                    </x-card-header>
 
                     <div class="card-body">
                         <div class="space-y-6">
 
-                            {{-- =========================
-                            DENTAL HISTORY
-                            ========================== --}}
                             <div>
                                 <div class="section-card-title">
                                     <i class="fa-solid fa-tooth"></i>
@@ -704,10 +608,6 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
                                 </div>
                             </div>
 
-
-                            {{-- =========================
-                            DENTAL SYMPTOMS & HABITS
-                            ========================== --}}
                             <div>
                                 <div class="section-card-title">
                                     <i class="fa-solid fa-notes-medical"></i>
@@ -752,10 +652,6 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
                                 </div>
                             </div>
 
-
-                            {{-- =========================
-                            MEDICAL HISTORY
-                            ========================== --}}
                             <div>
                                 <div class="section-card-title">
                                     <i class="fa-solid fa-heart-pulse"></i>
@@ -837,10 +733,6 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
                                 </div>
                             </div>
 
-
-                            {{-- =========================
-                            MEDICAL CONDITIONS
-                            ========================== --}}
                             <div>
                                 <div class="section-card-title">
                                     <i class="fa-solid fa-disease"></i>
@@ -874,10 +766,6 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
                                 </div>
                             </div>
 
-
-                            {{-- =========================
-                            PATIENT ODONTOGRAM
-                            ========================== --}}
                             <div>
                                 <div class="section-card-title">
                                     <i class="fa-solid fa-teeth"></i>
@@ -918,10 +806,6 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
                                 @endif
                             </div>
 
-
-                            {{-- =========================
-                            ADDITIONAL CONCERNS
-                            ========================== --}}
                             <div>
                                 <div class="section-card-title">
                                     <i class="fa-regular fa-comment-dots"></i>
@@ -974,6 +858,7 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
                         </div>
                     </div>
                 </section>
+                @endif
         </div>
     </div>
 </main>
@@ -1014,7 +899,7 @@ $procedureAppointment->service_type_name
 @endsection
 
 @section('scripts')
-<script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
 
     function maskPatientPhone(value) {
         const raw = String(value || '').trim();

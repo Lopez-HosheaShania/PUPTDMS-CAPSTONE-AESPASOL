@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
 @php
-$routePrefix = request()->routeIs('dentist.*') ? 'dentist' : 'admin';
-$rolePermissionsBasePath = $routePrefix === 'dentist' ? '/dentist/role-permissions' : '/admin/role-permissions';
+    $routePrefix = request()->routeIs('dentist.*') ? 'dentist' : 'admin';
+    $rolePermissionsBasePath = $routePrefix === 'dentist' ? '/dentist/role-permissions' : '/admin/role-permissions';
 @endphp
 
 @section('layout-role', 'admin')
@@ -10,226 +10,190 @@ $rolePermissionsBasePath = $routePrefix === 'dentist' ? '/dentist/role-permissio
 @section('title', 'Roles & Permissions')
 
 @section('styles')
-@vite('resources/css/pages/admin/role-permissions.css')
+    @vite('resources/css/pages/admin/role-permissions.css')
 @endsection
 
 @section('content')
 
-@php
-$logs = $logs ?? collect([]);
-$totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $logs->total() : $logs->count();
+    @php
+        $logs = $logs ?? collect([]);
+        $totalCount = $logs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $logs->total() : $logs->count();
 
-$authUser = auth()->user();
-$canViewAsRole = $authUser?->hasPermission('access_super_admin_dashboard') ?? false;
-$canCreateRoles = $authUser?->hasPermission('create_custom_roles') ?? false;
-$canUpdateRolePermissions = $authUser?->hasPermission('update_role_permissions') ?? false;
-$canDeleteCustomRoles = $authUser?->hasPermission('delete_custom_roles') ?? false;
-@endphp
+        $authUser = auth()->user();
+        $canCreateRoles = $authUser?->hasPermission('create_custom_roles') ?? false;
+        $canUpdateRolePermissions = $authUser?->hasPermission('update_role_permissions') ?? false;
+        $canDeleteCustomRoles = $authUser?->hasPermission('delete_custom_roles') ?? false;
+    @endphp
 
-<main id="mainContent" class="app-page-shell page-enter">
-    <div class="role-permission-shell">
+    <main id="mainContent" class="app-page-shell page-enter">
+        <div class="role-permission-shell">
 
-        <div class="page-banner">
-            <div class="page-banner-inner">
-                <div>
-                    <h1 class="page-title">Roles & Permissions</h1>
-                    <p class="page-subtitle">Manage role access and permission groups across the system.</p>
-                </div>
+            <div class="page-banner">
+                <div class="page-banner-inner">
+                    <div>
+                        <h1 class="page-title">Roles & Permissions</h1>
+                    </div>
 
-                <div class="page-banner-actions">
-                    @if ($canCreateRoles)
-                    <button type="button" class="ui-btn ui-btn-primary" onclick="openNewRoleModal()">
-                        <i class="fa-solid fa-plus"></i>
-                        <span>New Role</span>
-                    </button>
-                    @endif
+                    <div class="page-banner-actions">
+                        @if ($canCreateRoles)
+                            <button type="button" class="ui-btn ui-btn-primary" data-ui-click="action-39518fccd42a">
+                                <i class="fa-solid fa-plus"></i>
+                                <span>New Role</span>
+                            </button>
+                        @endif
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="main-grid">
+            <div class="main-grid">
 
-            <aside class="role-sidebar-sticky">
-                @php
-                function getRoleBadge($name, $slug)
-                {
-                $n = strtolower($name);
-                $s = strtolower($slug);
-
-                if (str_contains($n, 'super') || str_contains($s, 'super')) {
-                return ['badgeColor' => '#7B0D0D', 'label' => 'Protected'];
-                }
-
-                if ($s === 'admin') {
-                return ['badgeColor' => '#7B0D0D', 'label' => 'Configured'];
-                }
-
-                if (str_contains($n, 'dentist') || str_contains($s, 'dentist')) {
-                return ['badgeColor' => '#d97706', 'label' => 'Clinical'];
-                }
-
-                if (str_contains($n, 'staff') || str_contains($s, 'staff') || str_contains($n, 'clinic')) {
-                return ['badgeColor' => '#059669', 'label' => 'Front Desk'];
-                }
-
-                if (
-                str_contains($n, 'student') ||
-                str_contains($s, 'student') ||
-                str_contains($n, 'patient') ||
-                str_contains($s, 'patient')
-                ) {
-                return ['badgeColor' => '#4b5563', 'label' => 'Limited'];
-                }
-
-                return ['badgeColor' => '#6B7280', 'label' => 'Custom'];
-                }
-                $totalPerms = $groupedPermissions->flatten()->count();
-                @endphp
-
-                <div class="role-list-header">Active Roles ({{ $roles->count() }})</div>
-
-                <div class="role-list-container role-list-view" id="roleListContainer">
-                    @foreach ($roles as $i => $role)
+                <aside class="role-sidebar-sticky">
                     @php
-                    $c = getRoleBadge($role->name, $role->slug);
-                    $granted = $role->permissions->count();
-                    $pct = $totalPerms > 0 ? round(($granted / $totalPerms) * 100) : 0;
-                    $words = array_slice(explode(' ', $role->name), 0, 2);
-                    $initials = '';
-                    foreach ($words as $_w) {
-                    $initials .= strtoupper($_w[0]);
-                    }
-                    $isHighlighted = isset($highlightRoleId) && (int) $highlightRoleId === (int) $role->id;
-                    $isFirst = isset($highlightRoleId) ? $isHighlighted : $i === 0;
-                    $isSuperRole =
-                    in_array(strtolower($role->slug), ['super_admin', 'super-admin', 'superadmin']) ||
-                    str_contains(strtolower($role->name), 'super');
-                    $isProtectedRole =
-                    $isSuperRole || in_array(strtolower($role->slug), ['admin', 'patient', 'dentist']);
+                        function getRoleMeta($name, $slug)
+                        {
+                            $name = strtolower($name);
+                            $slug = strtolower($slug);
+
+                            if (
+                                $slug === 'admin' ||
+                                str_contains($name, 'admin') ||
+                                str_contains($slug, 'staff') ||
+                                str_contains($slug, 'clinic')
+                            ) {
+                                return [
+                                    'theme' => 'admin',
+                                ];
+                            }
+
+                            if (str_contains($name, 'dentist') || str_contains($slug, 'dentist')) {
+                                return [
+                                    'theme' => 'dentist',
+                                ];
+                            }
+
+                            if (
+                                str_contains($name, 'patient') ||
+                                str_contains($slug, 'patient') ||
+                                str_contains($name, 'student') ||
+                                str_contains($slug, 'student')
+                            ) {
+                                return [
+                                    'theme' => 'patient',
+                                ];
+                            }
+
+                            return [
+                                'theme' => 'none',
+                                'label' => 'Custom',
+                            ];
+                        }
+
+                        $totalPerms = $groupedPermissions->flatten()->count();
                     @endphp
 
-                    <div class="card role-card {{ $isFirst ? 'active' : '' }}" data-role-id="{{ $role->id }}"
-                        data-role-name="{{ $role->display_name }}" data-granted="{{ $granted }}"
-                        data-total="{{ $totalPerms }}" data-pct="{{ $pct }}" data-slug="{{ $role->slug }}"
-                        data-is-super="{{ $isSuperRole ? '1' : '0' }}" onclick="selectRole(this)">
+                    <div class="role-list-header">Active Roles ({{ $roles->count() }})</div>
+                    <div class="sidebar-stack">
 
-                        @if (!$isProtectedRole && $canDeleteCustomRoles)
-                        <button type="button" class="ui-action-btn ui-action-delete role-delete-action" onclick="event.stopPropagation(); openDeleteModal(
-        '{{ $role->id }}',
-        @js($role->name)
-    )" data-tooltip="Delete role" data-tooltip-tone="delete" aria-label="Delete role">
-                            <i class="fa-solid fa-trash-can"></i>
-                        </button>
-                        @endif
+                        <div class="role-list-container role-list-view" id="roleListContainer">
+                            @foreach ($roles as $i => $role)
+                                @php
+                                    $roleMeta = getRoleMeta($role->name, $role->slug);
+                                    $granted = $role->permissions->count();
+                                    $pct = $totalPerms > 0 ? round(($granted / $totalPerms) * 100) : 0;
+                                    $isHighlighted =
+                                        isset($highlightRoleId) && (int) $highlightRoleId === (int) $role->id;
+                                    $isFirst = isset($highlightRoleId) ? $isHighlighted : $i === 0;
+                                    $isProtectedRole = in_array(strtolower($role->slug), [
+                                        'admin',
+                                        'patient',
+                                        'dentist',
+                                    ]);
+                                @endphp
 
-                        <div class="role-card-header">
-                            <div class="patient-avatar patient-avatar-sm">
-                                {{ $initials }}</div>
-                            <div class="role-card-copy">
-                                <div class="role-card-title-row">
-                                    <span class="role-name-label">
-                                        {{ $role->display_name }}
-                                    </span>
+                                <div class="card role-card {{ $isFirst ? 'active' : '' }}"
+                                    data-role-id="{{ $role->id }}" data-role-name="{{ $role->display_name }}"
+                                    data-role-theme="{{ $roleMeta['theme'] }}" data-granted="{{ $granted }}"
+                                    data-total="{{ $totalPerms }}" data-pct="{{ $pct }}"
+                                    data-slug="{{ $role->slug }}" data-ui-click="action-eee17b73e521">
+
+                                    <div class="role-card-header">
+
+                                        <div class="role-card-copy">
+                                            <div class="role-card-title-row">
+                                                <span class="role-name-label">
+                                                    {{ $role->display_name }}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div class="count-label">
+                                            Permissions: {{ $granted }} / {{ $totalPerms }}
+                                        </div>
+
+                                        @if (!$isProtectedRole && $canDeleteCustomRoles)
+                                            <button type="button" class="ui-action-btn ui-action-delete"
+                                                data-ui-click="action-4befe37bff71"
+                                                data-ui-click-arg-0="{{ $role->id }}"
+                                                data-ui-click-arg-1="{{ json_encode($role->name, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                data-tooltip="Delete role" data-tooltip-tone="delete"
+                                                aria-label="Delete role">
+                                                <i class="fa-solid fa-trash-can"></i>
+                                            </button>
+                                        @endif
+
+                                    </div>
+
+                                    <progress class="progress-bar" value="{{ $pct }}" max="100"></progress>
                                 </div>
-                                <div style="display:flex; align-items:center; gap:6px;">
-                                    <span class="badge-pill" style="
-        background: {{ $c['badgeColor'] }}15;
-        color: {{ $c['badgeColor'] }};
-    ">
-                                        {{ $c['label'] }}
-                                    </span>
+                            @endforeach
+                        </div>
+                    </div>
+                </aside>
+
+                <section class="role-permission-panel">
+
+                    <div class="card role-permission-toolbar-card">
+
+                        <div class="card-header role-permission-toolbar">
+
+                            <div class="card-header-right role-permission-toolbar-row">
+
+                                <div class="perm-search-row voice-search-row">
+
+                                    <x-search-bar id="permSearch" placeholder="Search permissions..."
+                                        callback="handleRolePermissionSearch" :debounce="150"
+                                        clear-label="Clear permission search" class="perm-search-control" />
+
+                                    <x-voice-input target="#permSearch" status-id="permSearchVoiceStatus"
+                                        label="Voice search permissions" title="Voice search" />
+
                                 </div>
-                            </div>
-                        </div>
 
-                        <div style="margin-top:12px;">
-                            <div class="role-access-meta">
-                                <span>Access</span>
+                                <div class="card-header-actions role-permission-actions">
 
-                                <span class="pct-label">
-                                    {{ $pct }}%
-                                </span>
-                            </div>
-                            <div class="progress-bar role-access-progress">
-                                <div class="progress-fill" style="width: {{ $pct }}%;"></div>
-                            </div>
-                            <div class="count-label">
-                                {{ $granted }} / {{ $totalPerms }} permissions
-                            </div>
-                        </div>
-                    </div>
-                    @endforeach
-                </div>
+                                    @if ($canViewAsRole)
+                                        <button type="button" class="ui-action-btn ui-action-view role-view-as-action"
+                                            id="globalViewAsBtn" data-ui-click="action-e9aac4adc59f"
+                                            data-tooltip="View as role" data-tooltip-tone="view" aria-label="View as role">
+                                            <i class="fa-solid fa-eye"></i>
 
-                <div class="card accent-card">
-                    @php
-                    $fr = isset($highlightRoleId)
-                    ? $roles->firstWhere('id', (int) $highlightRoleId)
-                    : $roles->first();
-                    $fp = $fr
-                    ? ($totalPerms > 0
-                    ? round(($fr->permissions->count() / $totalPerms) * 100)
-                    : 0)
-                    : 0;
-                    @endphp
-                    <div style="font-size:15px; font-weight:800; margin-bottom:4px;" id="accentRoleName">
-                        {{ $fr?->display_name ?? '' }}</div>
-                    <div style="font-size:32px; font-weight:900; margin-bottom:2px; line-height:1;" id="accentPct">
-                        {{ $fp }}%</div>
-                    <div style="font-size:11px; opacity:0.8; margin-bottom:14px;" id="accentCount">
-                        {{ $fr?->permissions->count() ?? 0 }} of {{ $totalPerms }} active</div>
-                    <div style="height:4px; background:rgba(255,255,255,0.2); border-radius:10px;">
-                        <div id="accentBar"
-                            style="height:100%; width:{{ $fp }}%; background:#fff; border-radius:10px; transition:width 0.4s;">
-                        </div>
-                    </div>
-                </div>
-            </aside>
+                                            <span class="va-count-badge" id="globalVaBadge">
+                                                0
+                                            </span>
+                                        </button>
+                                    @endif
 
-            <section class="role-permission-panel">
+                                    <x-button id="collapseBtn" type="button" variant="secondary" size="sm"
+                                        icon="fa-solid fa-angles-up" data-ui-click="action-b1ec55a9368e">
+                                        Collapse All
+                                    </x-button>
 
-                <div class="card role-permission-toolbar-card">
+                                    <x-button id="resetDefaultsBtn" type="button" variant="warning" size="sm"
+                                        icon="fa-solid fa-rotate-left" data-ui-click="action-93a40e63c926">
+                                        Reset Defaults
+                                    </x-button>
 
-                    <div class="card-header role-permission-toolbar">
-
-                        <div class="card-header-right role-permission-toolbar-row">
-
-                            <div class="perm-search-row voice-search-row">
-
-                                <x-search-bar id="permSearch" placeholder="Search permissions..."
-                                    callback="handleRolePermissionSearch" :debounce="150"
-                                    clear-label="Clear permission search" class="perm-search-control" />
-
-                                <x-voice-input target="#permSearch" status-id="permSearchVoiceStatus"
-                                    label="Voice search permissions" title="Voice search" />
-
-                            </div>
-
-                            <div class="card-header-actions role-permission-actions">
-
-                                @if ($canViewAsRole)
-                                <button type="button" class="ui-action-btn ui-action-view role-view-as-action"
-                                    id="globalViewAsBtn" onclick="openViewAs()" data-tooltip="View as role"
-                                    data-tooltip-tone="view" aria-label="View as role">
-                                    <i class="fa-solid fa-eye"></i>
-
-                                    <span class="va-count-badge" id="globalVaBadge">
-                                        0
-                                    </span>
-                                </button>
-                                @endif
-
-                                <button type="button" class="ui-btn ui-btn-secondary ui-btn-sm" id="collapseBtn"
-                                    onclick="toggleAllGroups()">
-                                    <i class="fa-solid fa-angles-up"></i>
-                                    <span>Collapse All</span>
-                                </button>
-
-                                <button type="button" class="ui-btn ui-btn-warning ui-btn-sm" id="resetDefaultsBtn"
-                                    onclick="ajaxResetDefaults()">
-                                    <i class="fa-solid fa-rotate-left"></i>
-                                    <span>Reset Defaults</span>
-                                </button>
+                                </div>
 
                             </div>
 
@@ -237,1477 +201,466 @@ $canDeleteCustomRoles = $authUser?->hasPermission('delete_custom_roles') ?? fals
 
                     </div>
 
-                </div>
+                    <div class="role-permission-content">
 
-                <div class="role-permission-content">
-                    <div class="protected-banner" id="protectedBanner" style="display:none;">
-                        <i class="fa-solid fa-shield-halved" style="font-size:24px; color:#d97706;"></i>
-                        <div>
-                            <div style="font-weight:800; font-size:13px; color:#92400e;">Protected Role</div>
-                            <div style="font-size:12px; color:#b45309;">System roles stay protected from deletion, but
-                                permissions remain explicitly defined.</div>
-                        </div>
-                    </div>
-
-                    @foreach ($roles as $ri => $role)
-                    @php
-                    $isSuperRole =
-                    in_array(strtolower($role->slug), ['super_admin', 'super-admin', 'superadmin']) ||
-                    str_contains(strtolower($role->name), 'super');
-                    $isActiveRole = isset($highlightRoleId)
-                    ? (int) $highlightRoleId === (int) $role->id
-                    : $ri === 0;
-                    $micons = [
-                    'Dental Records' => ['fa-notes-medical', '#8B0000'],
-                    'Patients' => ['fa-user-group', '#d97706'],
-                    'Appointments' => ['fa-calendar-days', '#059669'],
-                    'Document Requests' => ['fa-envelope-open-text', '#2563eb'],
-                    'Document Templates' => ['fa-file-lines', '#7c3aed'],
-                    'Reports' => ['fa-chart-pie', '#7c3aed'],
-                    'General Access' => ['fa-user-shield', '#059669'],
-                    'Inventory' => ['fa-boxes-stacked', '#ea580c'],
-                    'User Management' => ['fa-user-cog', '#dc2626'],
-                    'System Settings' => ['fa-screwdriver-wrench', '#4b5563'],
-                    ];
-                    @endphp
-
-                    <form id="form-role-{{ $role->id }}" class="role-form" data-role-id="{{ $role->id }}"
-                        data-discard-form data-discard-title="Discard permission changes?"
-                        data-discard-subtitle="You have unsaved changes for this role."
-                        data-discard-message="The permission changes for this role will be restored to their last saved state."
-                        style="display:{{ $isActiveRole ? 'block' : 'none' }}; height: 100%;">
-                        @csrf
-                        <input type="hidden" name="role_id" value="{{ $role->id }}">
-
-                        <div class="groups-container">
-                            @forelse($groupedPermissions as $module => $permissions)
+                        @foreach ($roles as $ri => $role)
                             @php
-                            [$ico, $icol] = $micons[$module] ?? ['fa-shield-halved', '#4b5563'];
-                            $mSlug = Str::slug($module);
-                            $mTotal = $permissions->count();
-                            $roleGranted = 0;
-                            foreach ($permissions as $_p) {
-                            if ($role->permissions->contains('id', $_p->id)) {
-                            $roleGranted++;
-                            }
-                            }
-                            $allOn = $roleGranted === $mTotal;
+                                $isActiveRole = isset($highlightRoleId)
+                                    ? (int) $highlightRoleId === (int) $role->id
+                                    : $ri === 0;
+
+                                $moduleIcons = [
+                                    'Dental Records' => 'fa-notes-medical',
+                                    'Patients' => 'fa-user-group',
+                                    'Appointments' => 'fa-calendar-days',
+                                    'Document Requests' => 'fa-envelope-open-text',
+                                    'Document Templates' => 'fa-file-lines',
+                                    'Reports' => 'fa-chart-pie',
+                                    'General Access' => 'fa-user-shield',
+                                    'Inventory' => 'fa-boxes-stacked',
+                                    'User Management' => 'fa-user-cog',
+                                    'System Settings' => 'fa-screwdriver-wrench',
+                                ];
                             @endphp
 
-                            <div class="table-card permission-module-card" data-group="{{ strtolower($module) }}">
+                            <form id="form-role-{{ $role->id }}" class="role-form" data-role-id="{{ $role->id }}"
+                                data-discard-form data-discard-title="Discard permission changes?"
+                                data-discard-subtitle="You have unsaved changes for this role."
+                                data-discard-message="The permission changes for this role will be restored to their last saved state."
+                                {{ !$isActiveRole ? 'hidden' : '' }}>
+                                @csrf
+                                <input type="hidden" name="role_id" value="{{ $role->id }}">
 
-                                <div class="table-toolbar perm-group-header perm-group" onclick="togglePermGroup(this)">
+                                <div class="groups-container">
+                                    @forelse($groupedPermissions as $module => $permissions)
+                                        @php
+                                            $moduleIcon = $moduleIcons[$module] ?? 'fa-shield-halved';
+                                            $moduleSlug = Str::slug($module);
+                                            $moduleTotal = $permissions->count();
+                                            $grantedCount = 0;
+                                            foreach ($permissions as $_p) {
+                                                if ($role->permissions->contains('id', $_p->id)) {
+                                                    $grantedCount++;
+                                                }
+                                            }
+                                            $allGranted = $grantedCount === $moduleTotal;
+                                        @endphp
 
-                                    <div class="table-toolbar-title">
+                                        <div class="table-card permission-module-card"
+                                            data-group="{{ strtolower($module) }}">
 
-                                        <div class="perm-group-icon" style="--module-color: {{ $icol }};">
-                                            <i class="fa-solid {{ $ico }}"></i>
-                                        </div>
+                                            <div class="table-toolbar perm-group-header perm-group"
+                                                data-ui-click="action-47ae060a446f">
 
-                                        <div class="perm-group-info">
-                                            <div class="perm-group-title">
-                                                {{ $module }}
+                                                <div class="table-toolbar-title">
+
+                                                    <div class="card-header-icon">
+                                                        <i class="fa-solid {{ $moduleIcon }}"></i>
+                                                    </div>
+
+                                                    <div>
+                                                        <div class="card-title">
+                                                            {{ $module }}
+                                                        </div>
+
+                                                        <div class="card-subtitle">
+                                                            {{ $grantedCount }} of {{ $moduleTotal }} enabled
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+
+                                                <div class="table-toolbar-actions">
+
+                                                    <div class="dot-row"
+                                                        id="dots-{{ $role->id }}-{{ $moduleSlug }}">
+                                                        @for ($index = 0; $index < $moduleTotal; $index++)
+                                                            <span
+                                                                class="status-dot {{ $index < $grantedCount ? 'status-granted' : 'status-denied' }}"></span>
+                                                        @endfor
+                                                    </div>
+
+                                                    <div class="all-toggle-wrap" data-ui-click="action-2b6cb68857e5">
+                                                        <span>All</span>
+
+                                                        <x-switch class="group-master" :checked="$allGranted" :disabled="!$canUpdateRolePermissions"
+                                                            data-role="{{ $role->id }}"
+                                                            data-module="{{ $moduleSlug }}" data-discard-ignore="true"
+                                                            data-ui-change="action-76cbb6258bf9" />
+                                                    </div>
+
+                                                    <i class="fa-solid fa-chevron-up chevron"></i>
+
+                                                </div>
+
                                             </div>
 
-                                            <div class="group-count">
-                                                {{ $roleGranted }}
-                                                of
-                                                {{ $mTotal }}
-                                                enabled
+                                            <div class="perm-group-body">
+
+                                                <div class="table-scroll">
+
+                                                    <table class="data-table">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Permission</th>
+
+                                                                <th class="table-cell-center">
+                                                                    Status
+                                                                </th>
+
+                                                                <th class="table-cell-center">
+                                                                    Access
+                                                                </th>
+                                                            </tr>
+                                                        </thead>
+
+                                                        <tbody>
+                                                            @foreach ($permissions as $permission)
+                                                                @php
+                                                                    $isGranted = $role->permissions->contains(
+                                                                        'id',
+                                                                        $permission->id,
+                                                                    );
+                                                                @endphp
+
+                                                                <tr class="perm-row"
+                                                                    data-perm-search="{{ strtolower($permission->name . ' ' . $permission->slug) }}">
+                                                                    <td class="table-cell-main">
+                                                                        <span class="table-primary">
+                                                                            <strong>
+                                                                                {{ $permission->name }}
+                                                                            </strong>
+                                                                        </span>
+                                                                    </td>
+
+                                                                    <td class="table-cell-center">
+                                                                        <span
+                                                                            class="status-pill {{ $isGranted ? 'status-granted' : 'status-denied' }}">
+                                                                            <span class="status-dot"></span>
+
+                                                                            {{ $isGranted ? 'Granted' : 'Denied' }}
+                                                                        </span>
+                                                                    </td>
+
+                                                                    <td class="table-cell-center">
+                                                                        <x-switch
+                                                                            name="permissions[{{ $role->id }}][]"
+                                                                            value="{{ $permission->id }}"
+                                                                            class="perm-toggle" :checked="$isGranted"
+                                                                            :disabled="!$canUpdateRolePermissions"
+                                                                            data-role="{{ $role->id }}"
+                                                                            data-module="{{ $moduleSlug }}"
+                                                                            data-perm-name="{{ $permission->name }}"
+                                                                            data-perm-slug="{{ $permission->slug }}"
+                                                                            data-ui-change="action-f71c950e5fcd" />
+                                                                    </td>
+                                                                </tr>
+                                                            @endforeach
+                                                        </tbody>
+
+                                                    </table>
+
+                                                </div>
+
                                             </div>
+
                                         </div>
 
-                                    </div>
+                                    @empty
 
-                                    <div class="perm-group-actions">
-
-                                        <div class="dot-row" id="dots-{{ $role->id }}-{{ $mSlug }}">
-                                            @for ($d = 0; $d < $mTotal; $d++) <div
-                                                class="dot {{ $d < $roleGranted ? 'is-granted' : '' }}"
-                                                style="--dot-color: {{ $icol }};">
-                                        </div>
-                                        @endfor
-                                    </div>
-
-                                    <div class="all-toggle-wrap" onclick="event.stopPropagation();">
-                                        <span>All</span>
-
-                                        <label class="global-switch">
-                                            <input type="checkbox" class="global-switch-input group-master"
-                                                data-role="{{ $role->id }}" data-module="{{ $mSlug }}"
-                                                data-discard-ignore="true" {{ $allOn ? 'checked' : '' }} {{ $isSuperRole
-                                                || !$canUpdateRolePermissions ? 'disabled' : '' }}
-                                                onchange="onGroupMasterChange(this)">
-
-                                            <span class="global-switch-track"></span>
-                                        </label>
-                                    </div>
-
-                                    <i class="fa-solid fa-chevron-up chevron"></i>
+                                        <div class="empty-state-host" data-role-permission-empty></div>
+                                    @endforelse
 
                                 </div>
 
+                                <x-floating-save-bar id="footer-bar-{{ $role->id }}" title="Unsaved changes"
+                                    subtitle="0 changes">
+                                    <x-slot:actions>
+
+                                        @if ($canViewAsRole)
+                                            <button type="button" class="ui-action-btn ui-action-view fsb-view-as"
+                                                data-ui-click="action-e9aac4adc59f" data-tooltip="View as role"
+                                                data-tooltip-tone="view" aria-label="View as role">
+                                                <i class="fa-solid fa-eye"></i>
+
+                                                <span class="va-count-badge">
+                                                    0
+                                                </span>
+                                            </button>
+                                        @endif
+
+                                        <x-button type="button" variant="secondary" class="btn-discard"
+                                            data-ui-click="action-01fe488d50f6"
+                                            data-ui-click-arg-0="{{ $role->id }}">
+                                            Discard
+                                        </x-button>
+
+                                        <x-button id="save-btn-{{ $role->id }}" type="button" variant="primary"
+                                            icon="fa-solid fa-floppy-disk" class="btn-save-float"
+                                            data-ui-click="action-e15c3c78bc8e"
+                                            data-ui-click-arg-0="{{ $role->id }}">
+                                            Save
+                                        </x-button>
+
+                                    </x-slot:actions>
+                                </x-floating-save-bar>
+                            </form>
+                        @endforeach
+
+                        <div id="permSearchEmptyState" class="empty-state-host perm-search-empty-state" hidden></div>
+                    </div>
+
+                </section>
+            </div>
+        </div>
+    </main>
+
+    @if ($canCreateRoles)
+        <div id="newRoleModal" class="ui-modal modal-theme-primary" aria-hidden="true">
+
+            <div class="ui-modal-card modal-md">
+                <div class="modal-hd">
+                    <div class="modal-heading">
+                        <div class="modal-icon">
+                            <i class="fa-solid fa-user-shield"></i>
+                        </div>
+
+                        <div class="modal-copy">
+                            <h3 class="modal-title">
+                                Create New Role
+                            </h3>
+
+                            <p class="modal-subtitle">
+                                Define a new role and assign permissions.
+                            </p>
+                        </div>
+                    </div>
+
+                    <button type="button" class="modal-x" data-discard-close="newRoleModal"
+                        aria-label="Close create role modal">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <form id="createRoleForm" action="{{ route($routePrefix . '.role_permissions.store_role') }}"
+                    method="POST" class="modal-card-form" data-global-validation data-form-validation-rule="createRole"
+                    data-discard-form data-discard-title="Discard new role?"
+                    data-discard-subtitle="You have unsaved role information."
+                    data-discard-message="Closing this modal will remove the role information you entered. Do you want to discard these changes?"
+                    novalidate>
+                    @csrf
+
+                    <div class="modal-bd">
+                        <div class="modal-form-grid">
+
+                            <div class="global-form-group" data-global-field>
+                                <label class="global-form-label" for="newRoleName">
+                                    Role Name
+                                    <span class="required-mark">*</span>
+                                </label>
+
+                                <div class="global-control-wrap">
+                                    <input type="text" id="newRoleName" name="name" class="form-input-custom"
+                                        placeholder="e.g. Dental Intern" data-field-label="Role Name"
+                                        minlength="3" maxlength="50" pattern="[A-Za-z]+(?: [A-Za-z]+)*"
+                                        data-validation-rule="roleName" data-normalize-spaces="true" data-capitalize-words="true"
+                                        data-pattern-message="Role Name may only contain letters and single spaces between words."
+                                        data-required-message="Please enter a role name." required autocomplete="off">
+                                </div>
                             </div>
 
-                            <div class="perm-group-body">
+                            <div class="global-form-group" data-global-field>
+                                <label class="global-form-label" for="newRoleSlug">
+                                    Role Slug
+                                    <span class="required-mark">*</span>
+                                </label>
 
-                                <div class="table-scroll">
-
-                                    <table class="data-table permission-table">
-
-                                        <thead>
-                                            <tr>
-                                                <th>Permission</th>
-                                                <th class="table-cell-center">
-                                                    Status
-                                                </th>
-
-                                                <th class="table-cell-center">
-                                                    Access
-                                                </th>
-                                            </tr>
-                                        </thead>
-
-                                        <tbody>
-                                            @foreach ($permissions as $permission)
-                                            @php
-                                            $isGranted = $role->permissions->contains(
-                                            'id',
-                                            $permission->id,
-                                            );
-                                            @endphp
-
-                                            <tr class="perm-row"
-                                                data-perm-search="{{ strtolower($permission->name . ' ' . $permission->slug) }}">
-                                                <td class="table-cell-main">
-
-                                                    <span class="table-primary">
-                                                        <strong>
-                                                            {{ $permission->name }}
-                                                        </strong>
-                                                    </span>
-
-                                                </td>
-
-                                                <td class="table-cell-center">
-
-                                                    <span
-                                                        class="status-pill {{ $isGranted ? 'status-granted' : 'status-denied' }}">
-                                                        <span class="status-dot"></span>
-
-                                                        {{ $isGranted ? 'Granted' : 'Denied' }}
-                                                    </span>
-
-                                                </td>
-
-                                                <td class="table-cell-center">
-
-                                                    <label class="global-switch">
-
-                                                        <input type="checkbox" name="permissions[{{ $role->id }}][]"
-                                                            value="{{ $permission->id }}"
-                                                            class="global-switch-input perm-toggle"
-                                                            data-role="{{ $role->id }}" data-module="{{ $mSlug }}"
-                                                            data-color="{{ $icol }}"
-                                                            data-perm-name="{{ $permission->name }}"
-                                                            data-perm-slug="{{ $permission->slug }}" {{ $isGranted
-                                                            ? 'checked' : '' }} {{ $isSuperRole ||
-                                                            !$canUpdateRolePermissions ? 'disabled' : '' }}
-                                                            onchange="onPermChange(this)">
-
-                                                        <span class="global-switch-track"></span>
-
-                                                    </label>
-
-                                                </td>
-
-                                            </tr>
-                                            @endforeach
-
-                                        </tbody>
-
-                                    </table>
-
+                                <div class="global-control-wrap">
+                                    <input type="text" id="newRoleSlug" name="slug" class="form-input-custom"
+                                        placeholder="e.g. dental-intern" data-field-label="Role Slug"
+                                        data-required-message="Please enter a role slug."
+                                        data-pattern-message="Use lowercase letters, numbers, and hyphens only."
+                                        pattern="[a-z0-9]+(?:-[a-z0-9]+)*" required autocomplete="off">
                                 </div>
-
                             </div>
 
                         </div>
-
-                        @empty
-
-                        <div class="empty-state-host" data-role-permission-empty></div>
-                        @endforelse
-
-                </div>
-
-                @if (!$isSuperRole)
-                <div class="floating-save-bar" id="footer-bar-{{ $role->id }}">
-                    <div class="fsb-text">
-                        <span class="fsb-title">Unsaved changes</span>
-                        <span class="fsb-sub">0 changes</span>
                     </div>
 
-                    <div class="fsb-actions">
-                        @if ($canViewAsRole)
-                        <button type="button" class="ui-action-btn ui-action-view fsb-view-as" onclick="openViewAs()"
-                            data-tooltip="View as role" data-tooltip-tone="view" aria-label="View as role">
-                            <i class="fa-solid fa-eye"></i>
+                    <div class="modal-ft">
+                        <x-button type="button" variant="secondary" data-discard-close="newRoleModal">
+                            Cancel
+                        </x-button>
 
-                            <span class="va-count-badge">
-                                0
-                            </span>
-                        </button>
-                        @endif
-
-                        <button type="button" class="ui-btn ui-btn-secondary btn-discard"
-                            onclick="requestDiscardRoleChanges('{{ $role->id }}')">
-                            Discard
-                        </button>
-
-                        <button type="button" class="ui-btn ui-btn-primary btn-save-float" id="save-btn-{{ $role->id }}"
-                            onclick="ajaxSaveRole('{{ $role->id }}')">
-                            <i class="fa-solid fa-floppy-disk"></i>
-                            <span>Save</span>
-                        </button>
+                        <x-button id="btnSubmitNewRole" type="submit" variant="primary">
+                            Create Role
+                        </x-button>
                     </div>
-                </div>
-                @endif
                 </form>
-                @endforeach
-
-                <div id="permSearchEmptyState" class="empty-state-host perm-search-empty-state" hidden></div>
+            </div>
         </div>
+    @endif
 
-        </section>
-    </div>
-    </div>
-</main>
+    @if ($canDeleteCustomRoles)
+        <x-delete-confirm-modal id="deleteRoleModal" form-id="deleteRoleForm" name-id="deleteRoleName"
+            title="Delete Role" subtitle="This action requires confirmation" message="Are you sure you want to delete"
+            helper="This role will be permanently removed." close-callback="action-6acb9f0eb412" />
+    @endif
 
-@if ($canCreateRoles)
-<div id="newRoleModal" class="ui-modal modal-theme-primary" aria-hidden="true">
+    <div id="resetConfirmModal" class="ui-modal modal-theme-warning" aria-hidden="true">
+        <div class="ui-modal-card modal-sm" role="dialog" aria-modal="true" aria-labelledby="resetConfirmTitle"
+            data-ui-click="action-22499e15f3ee">
 
-    <div class="ui-modal-card modal-md">
-        <div class="modal-hd">
-            <div class="modal-heading">
-                <div class="modal-icon">
-                    <i class="fa-solid fa-user-shield"></i>
+            <div class="modal-hd">
+
+                <div class="modal-heading">
+
+                    <div class="modal-icon">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </div>
+
+                    <div class="modal-copy">
+
+                        <h3 id="resetConfirmTitle" class="modal-title">
+                            Reset to Defaults?
+                        </h3>
+
+                        <p class="modal-subtitle">
+                            Restore the original role permissions.
+                        </p>
+
+                    </div>
+
                 </div>
 
-                <div class="modal-copy">
-                    <h3 class="modal-title">
-                        Create New Role
-                    </h3>
-
-                    <p class="modal-subtitle">
-                        Define a new role and assign permissions.
-                    </p>
-                </div>
             </div>
 
-            <button type="button" class="modal-x" data-discard-close="newRoleModal"
-                aria-label="Close create role modal">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-
-        <form id="createRoleForm" action="{{ route($routePrefix . '.role_permissions.store_role') }}" method="POST"
-            class="modal-card-form" data-global-validation data-form-validation-rule="createRole" data-discard-form
-            data-discard-title="Discard new role?" data-discard-subtitle="You have unsaved role information."
-            data-discard-message="Closing this modal will remove the role information you entered. Do you want to discard these changes?"
-            novalidate>
-
-            @csrf
             <div class="modal-bd">
-                <div class="modal-form-grid">
-                    <div class="global-form-group" data-global-field>
-                        <label class="global-form-label" for="newRoleName">
-                            Role Name
-                            <span class="required-mark">*</span>
-                        </label>
 
-                        <div class="global-control-wrap">
-                            <i class="fa-solid fa-tag global-control-icon"></i>
+                <div class="global-confirm-alert">
+                    <div>
 
-                            <input type="text" id="newRoleName" name="name"
-                                class="form-input-custom global-form-icon" placeholder="e.g. Dental Intern"
-                                data-field-label="Role Name" data-required-message="Please enter a role name." required
-                                autocomplete="off">
-                        </div>
-                    </div>
+                        <p>
+                            Reset permissions for
+                            <strong>
+                                Admin, Dentist, and Patient?
+                            </strong>
+                        </p>
 
-                    <div class="global-form-group" data-global-field>
-                        <label class="global-form-label" for="newRoleSlug">
-                            Role Slug
-                            <span class="required-mark">*</span>
-                        </label>
+                        <span>
+                            Custom permission changes will be lost.
+                            This action cannot be undone.
+                        </span>
 
-                        <div class="global-control-wrap">
-                            <i class="fa-solid fa-link global-control-icon"></i>
-
-                            <input type="text" id="newRoleSlug" name="slug"
-                                class="form-input-custom global-form-icon" placeholder="e.g. dental-intern"
-                                data-field-label="Role Slug" data-required-message="Please enter a role slug."
-                                data-pattern-message="Use lowercase letters, numbers, and hyphens only."
-                                pattern="[a-z0-9]+(?:-[a-z0-9]+)*" required autocomplete="off">
-                        </div>
                     </div>
 
                 </div>
+
             </div>
 
             <div class="modal-ft">
-                <button type="button" data-discard-close="newRoleModal" class="ui-btn ui-btn-secondary">
+                <x-button type="button" variant="secondary" data-ui-click="action-394b0354d213">
                     Cancel
+                </x-button>
+
+                <x-button id="resetConfirmBtn" type="button" variant="warning" data-ui-click="action-3fbd142ad2bd">
+                    Reset
+                </x-button>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="vaOverlay" class="ui-modal modal-theme-primary" aria-hidden="true">
+        <div class="ui-modal-card modal-lg">
+
+            <div class="modal-hd">
+                <div class="modal-heading">
+
+                    <div class="modal-icon">
+                        <i class="fa-solid fa-eye"></i>
+                    </div>
+
+                    <div class="modal-copy">
+                        <h3 class="modal-title">
+                            View As Role
+                        </h3>
+
+                        <p class="modal-subtitle">
+                            Preview the dashboard access assigned to each role.
+                        </p>
+                    </div>
+
+                </div>
+
+                <button type="button" class="modal-x" data-modal-close="vaOverlay"
+                    aria-label="Close role preview modal">
+                    <i class="fa-solid fa-xmark"></i>
                 </button>
-
-                <button type="submit" id="btnSubmitNewRole" class="ui-btn ui-btn-primary">
-                    <i class="fa-solid fa-plus"></i>
-                    <span>Create Role</span>
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-@endif
-
-@if ($canDeleteCustomRoles)
-<x-delete-confirm-modal id="deleteRoleModal" form-id="deleteRoleForm" name-id="deleteRoleName" title="Delete Role"
-    subtitle="This action requires confirmation" message="Are you sure you want to delete"
-    helper="This role will be permanently removed." close-callback="closeDeleteModal()" />
-@endif
-
-<div id="resetConfirmModal" class="ui-modal modal-theme-warning" aria-hidden="true">
-    <div class="ui-modal-card modal-sm" role="dialog" aria-modal="true" aria-labelledby="resetConfirmTitle"
-        onclick="event.stopPropagation()">
-        <div class="modal-hd">
-
-            <div class="modal-heading">
-
-                <div class="modal-icon">
-                    <i class="fa-solid fa-rotate-left"></i>
-                </div>
-
-                <div class="modal-copy">
-
-                    <h3 id="resetConfirmTitle" class="modal-title">
-                        Reset to Defaults?
-                    </h3>
-
-                    <p class="modal-subtitle">
-                        Restore the original role permissions.
-                    </p>
-
-                </div>
-
             </div>
 
-        </div>
-
-        <div class="modal-bd">
-
-            <div class="global-confirm-alert">
-
-                <i class="fa-solid fa-triangle-exclamation"></i>
-
-                <div>
-                    <p>
-                        Reset permissions for <strong>Admin, Dentist, and Patient?</strong>
-                    </p>
-
-                    <span>
-                        Custom permission changes will be lost.
-                        This action cannot be undone.
-                    </span>
-                </div>
-
+            <div class="modal-bd">
+                <div id="vaRoleList" class="modal-form-grid"></div>
             </div>
 
-        </div>
-
-        <div class="modal-ft">
-
-            <button type="button" onclick="closeResetConfirm()" class="ui-btn ui-btn-secondary">
-                Cancel
-            </button>
-
-            <button type="button" id="resetConfirmBtn" onclick="confirmResetDefaults()" class="ui-btn ui-btn-warning">
-                <i class="fa-solid fa-rotate-left"></i>
-                <span>Yes, Reset</span>
-            </button>
+            <div class="modal-ft">
+                <x-button type="button" variant="secondary" data-modal-close="vaOverlay">
+                    Close
+                </x-button>
+            </div>
 
         </div>
     </div>
-</div>
-
-<div id="vaOverlay" class="ui-modal modal-theme-view" aria-hidden="true">
-
-    <div class="ui-modal-card modal-lg">
-        <div class="modal-hd">
-            <div class="modal-heading">
-                <div class="modal-icon">
-                    <i class="fa-solid fa-eye"></i>
-                </div>
-
-                <div class="modal-copy">
-                    <h3 class="modal-title">View As Role</h3>
-                    <p class="modal-subtitle" id="vaSubtitle">
-                        Select a role to preview dashboard access
-                    </p>
-                </div>
-            </div>
-
-            <button type="button" onclick="closeViewAs()" class="modal-x" aria-label="Close role preview modal">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-
-        <div class="modal-bd">
-            <div
-                style="background: linear-gradient(135deg, var(--crimson), var(--crimson-dark)); border-radius: 12px; padding: 14px 18px; display: flex; align-items: center; gap: 14px; margin-bottom: 16px; color: #fff;">
-                <i class="fa-solid fa-shield-halved" style="font-size: 20px; opacity: .8;"></i>
-                <div>
-                    <div
-                        style="font-size:11px; opacity:.8; margin-bottom:2px; text-transform:uppercase; font-weight:700;">
-                        Newly granted & saved</div>
-                    <div><strong style="font-size:20px;" id="vaTotalPerms">0</strong> permissions across <strong
-                            style="font-size:20px;" id="vaTotalRoles">0</strong> roles</div>
-                </div>
-            </div>
-            <div id="vaRoleList"></div>
-        </div>
-
-        <div class="modal-ft">
-            <button type="button" onclick="closeViewAs()" class="ui-btn ui-btn-secondary">
-                Close
-            </button>
-        </div>
-    </div>
-</div>
-
-<div id="patientPickerOverlay" class="ui-modal modal-theme-success" aria-hidden="true">
-
-    <div class="ui-modal-card modal-lg">
-        <div class="modal-hd">
-            <div class="modal-heading">
-                <div class="modal-icon">
-                    <i class="fa-solid fa-user-injured"></i>
-                </div>
-
-                <div class="modal-copy">
-                    <h3 class="modal-title">
-                        Select Patient Account
-                    </h3>
-
-                    <p class="modal-subtitle">
-                        Choose which patient to impersonate
-                    </p>
-                </div>
-            </div>
-
-            <button type="button" onclick="closePatientPicker()" class="modal-x"
-                aria-label="Close patient picker modal">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-
-        <div class="modal-bd">
-            <div class="patient-picker-search-row">
-
-                <x-search-bar id="patientPickerSearch" placeholder="Search patient name or email..."
-                    callback="handlePatientPickerSearch" :debounce="200" clear-label="Clear patient search"
-                    class="patient-picker-search" />
-
-            </div>
-            <div id="patientPickerList"></div>
-        </div>
-
-        <div class="modal-ft">
-            <button type="button" onclick="closePatientPicker()" class="ui-btn ui-btn-secondary">
-                Close
-            </button>
-        </div>
-    </div>
-</div>
-
-<div class="redirect-overlay" id="redirectOverlay">
-    <div class="redirect-spinner"></div>
-    <div id="redirectText" style="font-size:1.1rem;font-weight:800;color:#fff;margin-bottom:6px;"></div>
-    <div id="redirectSub" style="font-size:.85rem;color:rgba(255,255,255,.7);"></div>
-</div>
-
 @endsection
 
 @section('scripts')
-<script>
-    const PERM_MODULES = [{
-        module: 'Dashboard',
-        color: '#8B0000'
-    },
-    {
-        module: 'Patients',
-        color: '#d97706'
-    },
-    {
-        module: 'Appointments',
-        color: '#059669'
-    },
-    {
-        module: 'Document Requests',
-        color: '#2563eb'
-    },
-    {
-        module: 'Document Template',
-        color: '#7c3aed'
-    },
-    {
-        module: 'Reports',
-        color: '#7c3aed'
-    },
-    {
-        module: 'Academic Periods',
-        color: '#059669'
-    },
-    {
-        module: 'System Logs',
-        color: '#dc2626'
-    },
-    {
-        module: 'System Settings',
-        color: '#4b5563'
-    },
-    ];
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
+        let initialStates = {};
+        let savedGrants = {};
+        let activeRoleId = null;
+        let isModalActive = false;
 
-    function getModuleColor(module) {
-        const found = PERM_MODULES.find(m => m.module === module);
-        return found ? found.color : '#4b5563';
-    }
-
-    let initialStates = {};
-    let savedGrants = {};
-    let activeRoleId = null;
-    let isModalActive = false;
-
-    function syncScrollStateForSaveBar() {
-        updateFABVisibility();
-    }
-
-    const ROLE_TOAST_DURATION = 7000;
-
-    const flashedViewAs = @json(session('saved_view_as') ?? null);
-    if (flashedViewAs && flashedViewAs.role_id) {
-        savedGrants[String(flashedViewAs.role_id)] = (flashedViewAs.permissions || []).map(p => ({
-            name: p.name,
-            slug: p.slug,
-            color: getModuleColor(p.module)
-        }));
-    }
-
-    function mountFloatingSaveBars() {
-        document.querySelectorAll('.floating-save-bar').forEach(bar => {
-            if (!bar.id) return;
-
-            [...document.body.children].forEach(child => {
-                if (child !== bar && child.id === bar.id && child.classList.contains(
-                    'floating-save-bar')) {
-                    child.remove();
-                }
-            });
-
-            bar.classList.add('role-permissions-floating-save-bar');
-            if (bar.parentElement !== document.body) {
-                document.body.appendChild(bar);
-            }
-        });
-    }
-
-    function getPermissionStateKey(
-        toggle
-    ) {
-        return [
-            toggle.dataset.module || '',
-            toggle.value || ''
-        ].join('::');
-    }
-
-    function initRoleForms() {
-        mountFloatingSaveBars();
-
-        initialStates = {};
-        savedGrants = {};
-        activeRoleId = null;
-
-        const firstActiveCard =
-            document.querySelector(
-                '.role-card.active'
-            ) ||
-            document.querySelector(
-                '.role-card'
-            );
-
-        if (firstActiveCard) {
-            activeRoleId =
-                firstActiveCard.dataset.roleId;
-        }
-
-        document.querySelectorAll('.role-form').forEach(form => {
-            const roleId = form.dataset.roleId;
-            if (!roleId) return;
-
-            initialStates[roleId] = {};
-            savedGrants[roleId] = [];
-
-            form
-                .querySelectorAll(
-                    '.perm-toggle'
-                )
-                .forEach(input => {
-
-                    const stateKey =
-                        getPermissionStateKey(
-                            input
-                        );
-
-                    initialStates[
-                        roleId
-                    ][stateKey] =
-                        input.checked;
-
-                    if (input.checked) {
-                        savedGrants[
-                            roleId
-                        ].push({
-                            name: input.dataset
-                                .permName || '',
-
-                            slug: input.dataset
-                                .permSlug || '',
-
-                            color: input.dataset
-                                .color ||
-                                '#4b5563'
-                        });
-                    }
-                });
-
-            const bar = document.getElementById('footer-bar-' + roleId);
-            if (bar) bar.classList.remove('show');
-
-            const modules = [...new Set(Array.from(form.querySelectorAll('.perm-toggle')).map(t => t.dataset
-                .module).filter(Boolean))];
-            modules.forEach(module => {
-                const sample =
-                    form.querySelector(
-                        `.perm-toggle[data-module="${module}"]`
-                    );
-
-                if (!sample) {
-                    return;
-                }
-
-                syncGroupMaster(
-                    roleId,
-                    module
-                );
-
-                updateGroupCount(
-                    roleId,
-                    module
-                );
-
-                updateDots(
-                    roleId,
-                    module,
-                    sample.dataset.color ||
-                    '#4b5563'
-                );
-            });
-
-            window.DiscardChanges
-                ?.captureForm(form);
-        });
-
-        updateViewAsBtn();
-
-        requestAnimationFrame(() => {
-            document
-                .querySelectorAll(
-                    '.floating-save-bar'
-                )
-                .forEach(bar => {
-                    bar.classList.remove(
-                        'show'
-                    );
-                });
-
+        function syncScrollStateForSaveBar() {
             updateFABVisibility();
-        });
-    }
-
-    function keepRoleListLayout() {
-        const container = document.getElementById('roleListContainer');
-        const mainContent = document.getElementById('mainContent');
-        if (container) {
-            container.classList.remove('role-grid-view');
-            container.classList.add('role-list-view');
-        }
-        if (mainContent) {
-            mainContent.classList.remove('mode-grid', 'mode-list');
-        }
-    }
-
-    window.handleRolePermissionSearch =
-        function (value) {
-            filterPerms(
-                String(value || '')
-            );
-        };
-
-    window.handlePatientPickerSearch =
-        function (value) {
-            filterPatientPicker(
-                String(value || '')
-            );
-        };
-
-    document.addEventListener('DOMContentLoaded', () => {
-        mountFloatingSaveBars();
-        const firstCard = document.querySelector('.role-card');
-        const protectedBanner = document.getElementById('protectedBanner');
-
-        if (firstCard && protectedBanner && firstCard.dataset.isSuper === '1') {
-            protectedBanner.style.display = 'flex';
         }
 
-        initRoleForms();
-        keepRoleListLayout();
-        syncScrollStateForSaveBar();
-
-        @if (session('success'))
-            if (typeof showToast === 'function') {
-                showToast('Success', '{!! addslashes(session('success')) !!}', 'success');
-            }
-        @endif
-
-        @if (session('error'))
-            if (typeof showToast === 'function') {
-                showToast('Error', '{!! addslashes(session('error')) !!}', 'error');
-            }
-        @endif
-
-        document
-            .querySelectorAll(
-                '[data-role-permission-empty]'
-            )
-            .forEach(host => {
-                window.EmptyState?.render({
-                    host,
-                    icon: 'fa-shield-halved',
-                    title: 'No permissions found',
-                    message: 'Permission groups will appear here once they are available.',
-                });
-            });
-    });
-
-    function selectRole(card) {
-        document.querySelectorAll('.role-card').forEach(c => {
-            c.classList.remove('active');
-        });
-
-        card.classList.add('active');
-
-        const roleId = card.dataset.roleId;
-        const roleName = card.dataset.roleName || '';
-        const granted = parseInt(card.dataset.granted || '0', 10);
-        const total = parseInt(card.dataset.total || '0', 10);
-        const pct = parseInt(card.dataset.pct || '0', 10);
-
-        document.getElementById('accentRoleName').textContent = roleName;
-        document.getElementById('accentPct').textContent = pct + '%';
-        document.getElementById('accentCount').textContent = granted + ' of ' + total + ' active';
-        document.getElementById('accentBar').style.width = pct + '%';
-
-        const slug = (card.dataset.slug || '').toLowerCase();
-        const isSuper = ['super_admin', 'super-admin', 'superadmin'].includes(slug) || roleName.toLowerCase().includes(
-            'super');
-        const banner = document.getElementById('protectedBanner');
-        if (banner) banner.style.display = isSuper ? 'flex' : 'none';
-
-        document.querySelectorAll('.role-form').forEach(f => f.style.display = 'none');
-        const form = document.getElementById('form-role-' + roleId);
-        if (form) form.style.display = 'block';
-
-        const permSearch =
-            document.getElementById(
-                'permSearch'
-            );
-
-        if (permSearch) {
-            permSearch.value = '';
-
-            permSearch.dispatchEvent(
-                new Event(
-                    'input', {
-                    bubbles: true,
-                }
-                )
-            );
+        function getPermissionStateKey(
+            toggle
+        ) {
+            return [
+                toggle.dataset.module || '',
+                toggle.value || ''
+            ].join('::');
         }
 
-        filterPerms('');
+        function initRoleForms() {
+            window.FloatingSaveBar
+                ?.mount(document);
 
-        activeRoleId = roleId;
-        updateFABVisibility();
-    }
+            initialStates = {};
+            savedGrants = {};
+            activeRoleId = null;
 
-    function updateViewAsBtn() {
-        let totalSavedRoles = 0;
-
-        Object.values(
-            savedGrants
-        ).forEach(grants => {
-            if (
-                grants.length > 0
-            ) {
-                totalSavedRoles++;
-            }
-        });
-
-        const topButton =
-            document.getElementById(
-                'globalViewAsBtn'
-            );
-
-        if (topButton) {
-            const badge =
-                topButton.querySelector(
-                    '.va-count-badge'
+            const firstActiveCard =
+                document.querySelector(
+                    '.role-card.active'
+                ) ||
+                document.querySelector(
+                    '.role-card'
                 );
 
-            if (badge) {
-                badge.textContent =
-                    totalSavedRoles;
-
-                badge.hidden =
-                    totalSavedRoles <= 0;
+            if (firstActiveCard) {
+                activeRoleId =
+                    firstActiveCard.dataset.roleId;
             }
-        }
 
-        document
-            .querySelectorAll(
-                '.fsb-view-as'
-            )
-            .forEach(btn => {
-                const badge =
-                    btn.querySelector(
-                        '.va-count-badge'
-                    );
+            document.querySelectorAll('.role-form').forEach(form => {
+                const roleId = form.dataset.roleId;
+                if (!roleId) return;
 
-                if (badge) {
-                    badge.textContent =
-                        totalSavedRoles;
-                }
-            });
+                initialStates[roleId] = {};
+                savedGrants[roleId] = [];
 
-        updateFABVisibility();
-    }
-
-    function hasActiveRolePermissionModal() {
-        const modalIds = [
-            'newRoleModal',
-            'deleteRoleModal',
-            'resetConfirmModal',
-            'vaOverlay',
-            'patientPickerOverlay'
-        ];
-
-        return modalIds.some(id => {
-            const modal = document.getElementById(id);
-            if (!modal) return false;
-
-            const ariaHidden = modal.getAttribute('aria-hidden');
-            return ariaHidden === 'false' ||
-                modal.classList.contains('show') ||
-                modal.classList.contains('open') ||
-                !modal.hidden;
-        });
-    }
-
-    function updateFABVisibility() {
-        document.querySelectorAll('.floating-save-bar').forEach(b => b.classList.remove('show'));
-
-        if (!activeRoleId) return;
-        const bar = document.getElementById('footer-bar-' + activeRoleId);
-        if (!bar) return;
-
-        if (isModalActive && hasActiveRolePermissionModal()) {
-            return;
-        }
-
-        const form = document.getElementById('form-role-' + activeRoleId);
-        if (!form) return;
-
-        let isDirty = false;
-        let changesCount = 0;
-
-        const baseline =
-            initialStates[
-            activeRoleId
-            ];
-
-        if (!baseline) {
-            return;
-        }
-
-        form
-            .querySelectorAll(
-                '.perm-toggle'
-            )
-            .forEach(toggle => {
-
-                const stateKey =
-                    getPermissionStateKey(
-                        toggle
-                    );
-
-                if (
-                    !Object.prototype
-                        .hasOwnProperty
-                        .call(
-                            baseline,
-                            stateKey
-                        )
-                ) {
-                    return;
-                }
-
-                if (
-                    toggle.checked !==
-                    baseline[
-                    stateKey
-                    ]
-                ) {
-                    isDirty = true;
-                    changesCount++;
-                }
-            });
-
-        let totalSavedRoles = 0;
-        Object.values(savedGrants).forEach(grants => {
-            if (grants.length > 0) totalSavedRoles++;
-        });
-
-        const title = bar.querySelector('.fsb-title');
-        const sub = bar.querySelector('.fsb-sub');
-        const btnDiscard = bar.querySelector('.btn-discard');
-        const btnSave = bar.querySelector('.btn-save-float');
-        const btnViewAs = bar.querySelector('.fsb-view-as');
-
-        if (isDirty) {
-            bar.classList.add('show');
-            title.textContent = 'Unsaved changes';
-            sub.textContent = changesCount + ' unsaved change' + (changesCount > 1 ? 's' : '');
-            sub.style.display = 'block';
-            btnDiscard.style.display = 'inline-flex';
-            btnSave.style.display = 'inline-flex';
-            if (btnViewAs) {
-                btnViewAs.style.display = 'inline-flex';
-                const badge = btnViewAs.querySelector('.va-count-badge');
-                if (badge) badge.textContent = totalSavedRoles;
-            }
-        } else {
-            bar.classList.remove('show');
-        }
-    }
-
-    function requestDiscardRoleChanges(roleId) {
-        const form = document.getElementById(
-            `form-role-${roleId}`
-        );
-
-        if (!form) return;
-
-        window.DiscardChanges?.confirmClose(
-            form,
-            () => discardChanges(roleId)
-        );
-    }
-
-    function hasUnsavedRoleChanges(
-        roleId
-    ) {
-        const form =
-            document.getElementById(
-                'form-role-' + roleId
-            );
-
-        const baseline =
-            initialStates[
-            roleId
-            ];
-
-        if (
-            !form ||
-            !baseline
-        ) {
-            return false;
-        }
-
-        return [
-            ...form.querySelectorAll(
-                '.perm-toggle'
-            )
-        ].some(toggle => {
-
-            const stateKey =
-                getPermissionStateKey(
-                    toggle
-                );
-
-            return (
-                Object.prototype
-                    .hasOwnProperty
-                    .call(
-                        baseline,
-                        stateKey
-                    ) &&
-                toggle.checked !==
-                baseline[stateKey]
-            );
-        });
-    }
-
-    function discardChanges(roleId) {
-        const form = document.getElementById('form-role-' + roleId);
-        if (!form) return;
-
-        form
-            .querySelectorAll(
-                '.perm-toggle'
-            )
-            .forEach(toggle => {
-
-                const stateKey =
-                    getPermissionStateKey(
-                        toggle
-                    );
-
-                const initVal =
-                    initialStates[
-                    roleId
-                    ]?.[
-                    stateKey
-                    ];
-
-                if (
-                    typeof initVal !==
-                    'boolean'
-                ) {
-                    return;
-                }
-
-                if (
-                    toggle.checked !==
-                    initVal
-                ) {
-                    toggle.checked =
-                        initVal;
-
-                    updatePermVisuals(
-                        toggle
-                    );
-                }
-            });
-
-        const modules = [...new Set(Array.from(form.querySelectorAll('.perm-toggle')).map(t => t.dataset.module).filter(
-            Boolean))];
-        modules.forEach(module => {
-            const sample = form.querySelector(`.perm-toggle[data-module="${module}"]`);
-            syncGroupMaster(roleId, module);
-            updateGroupCount(roleId, module);
-            updateDots(roleId, module, sample.dataset.color || '#4b5563');
-        });
-
-        updateAccentCard(roleId);
-        window.DiscardChanges?.captureForm(form);
-        updateFABVisibility();
-    }
-
-    function updatePermVisuals(input) {
-        const row =
-            input.closest('.perm-row');
-
-        if (!row) {
-            return;
-        }
-
-        const status =
-            row.querySelector(
-                '.status-pill'
-            );
-
-        if (!status) {
-            return;
-        }
-
-        const granted =
-            input.checked;
-
-        status.className =
-            `status-pill ${granted
-                ? 'status-granted'
-                : 'status-denied'
-            }`;
-
-        status.innerHTML = `
-        <span class="status-dot"></span>
-        ${granted ? 'Granted' : 'Denied'}
-    `;
-    }
-
-    let allExpanded = true;
-
-    function getPermissionGroupBody(
-        group
-    ) {
-        if (!group) {
-            return null;
-        }
-
-        const body =
-            group.nextElementSibling;
-
-        if (
-            !body ||
-            !body.classList.contains(
-                'perm-group-body'
-            )
-        ) {
-            return null;
-        }
-
-        return body;
-    }
-
-    function togglePermGroup(header) {
-        const group =
-            header.closest(
-                '.perm-group'
-            );
-
-        const body =
-            getPermissionGroupBody(
-                group
-            );
-
-        if (!body) {
-            return;
-        }
-
-        const chevron =
-            header.querySelector(
-                '.chevron'
-            );
-
-        const willCollapse = !body.classList.contains(
-            'collapsed'
-        );
-
-        body.classList.toggle(
-            'collapsed',
-            willCollapse
-        );
-
-        chevron?.classList.toggle(
-            'collapsed',
-            willCollapse
-        );
-    }
-
-    function toggleAllGroups() {
-        const button =
-            document.getElementById(
-                'collapseBtn'
-            );
-
-        const form = [
-            ...document.querySelectorAll(
-                '.role-form'
-            )
-        ].find(
-            form =>
-                form.style.display ===
-                'block'
-        );
-
-        if (
-            !form ||
-            !button
-        ) {
-            return;
-        }
-
-        allExpanded = !allExpanded;
-
-        form
-            .querySelectorAll(
-                '.perm-group'
-            )
-            .forEach(group => {
-
-                const body =
-                    group.nextElementSibling;
-
-                if (
-                    !body ||
-                    !body.classList.contains(
-                        'perm-group-body'
-                    )
-                ) {
-                    return;
-                }
-
-                body.classList.toggle(
-                    'collapsed',
-                    !allExpanded
-                );
-
-                group
-                    .querySelector(
-                        '.chevron'
-                    )
-                    ?.classList.toggle(
-                        'collapsed',
-                        !allExpanded
-                    );
-            });
-
-        button.innerHTML =
-            allExpanded ?
-                `
-                <i class="fa-solid fa-angles-up"></i>
-                <span>Collapse All</span>
-            ` :
-                `
-                <i class="fa-solid fa-angles-down"></i>
-                <span>Expand All</span>
-            `;
-    }
-
-    function onGroupMasterChange(master) {
-        const roleId =
-            master.dataset.role;
-
-        const mSlug =
-            master.dataset.module;
-
-        const form =
-            document.getElementById(
-                'form-role-' + roleId
-            );
-
-        if (!form) {
-            return;
-        }
-
-        const newState =
-            master.checked;
-
-        form
-            .querySelectorAll(
-                `.perm-toggle[data-module="${mSlug}"]`
-            )
-            .forEach(toggle => {
-                if (toggle.disabled) {
-                    return;
-                }
-
-                toggle.checked =
-                    newState;
-
-                updatePermVisuals(
-                    toggle
-                );
-            });
-
-        const sample =
-            form.querySelector(
-                `.perm-toggle[data-module="${mSlug}"]`
-            );
-
-        updateDots(
-            roleId,
-            mSlug,
-            sample?.dataset.color ||
-            '#4b5563'
-        );
-
-        updateGroupCount(
-            roleId,
-            mSlug
-        );
-
-        updateAccentCard(
-            roleId
-        );
-
-        updateFABVisibility();
-    }
-
-    function onPermChange(input) {
-        updatePermVisuals(input);
-        const roleId = input.dataset.role;
-        const mSlug = input.dataset.module;
-
-        updateDots(roleId, mSlug, input.dataset.color);
-        updateGroupCount(roleId, mSlug);
-        syncGroupMaster(roleId, mSlug);
-        updateAccentCard(roleId);
-        updateFABVisibility();
-    }
-
-    function syncGroupMaster(roleId, mSlug) {
-        const form = document.getElementById('form-role-' + roleId);
-        if (!form) return;
-        const all = [...form.querySelectorAll(`.perm-toggle[data-module="${mSlug}"]`)];
-        const checked = all.filter(t => t.checked).length;
-        const master = form.querySelector(`.group-master[data-module="${mSlug}"]`);
-        if (!master) return;
-        master.checked = checked === all.length;
-        master.indeterminate = checked > 0 && checked < all.length;
-    }
-
-    function updateDots(roleId, mSlug, color) {
-        const cont = document.getElementById(`dots-${roleId}-${mSlug}`);
-        if (!cont) return;
-        const form = document.getElementById('form-role-' + roleId);
-        if (!form) return;
-        const toggles = [...form.querySelectorAll(`.perm-toggle[data-module="${mSlug}"]`)];
-        const dots = cont.querySelectorAll('.dot');
-        toggles.forEach((t, i) => {
-            if (!dots[i]) return;
-            dots[i].style.setProperty('--dot-color', color || '#8B0000');
-            dots[i].classList.toggle('is-granted', !!t.checked);
-        });
-    }
-
-    function updateGroupCount(
-        roleId,
-        mSlug
-    ) {
-        const form =
-            document.getElementById(
-                'form-role-' + roleId
-            );
-
-        if (!form) {
-            return;
-        }
-
-        const dotsEl =
-            form.querySelector(
-                `[id="dots-${roleId}-${mSlug}"]`
-            );
-
-        if (!dotsEl) {
-            return;
-        }
-
-        const group =
-            dotsEl.closest(
-                '.perm-group'
-            );
-
-        if (!group) {
-            return;
-        }
-
-        const body =
-            group.nextElementSibling;
-
-        if (
-            !body ||
-            !body.classList.contains(
-                'perm-group-body'
-            )
-        ) {
-            return;
-        }
-
-        const toggles = [
-            ...body.querySelectorAll(
-                `.perm-toggle[data-module="${mSlug}"]`
-            )
-        ];
-
-        const enabledCount =
-            toggles.filter(
-                toggle =>
-                    toggle.checked
-            ).length;
-
-        const countEl =
-            group.querySelector(
-                '.group-count'
-            );
-
-        if (countEl) {
-            countEl.textContent =
-                `${enabledCount} of ${toggles.length} enabled`;
-        }
-    }
-
-    function updateAccentCard(roleId) {
-        const form = document.getElementById('form-role-' + roleId);
-        if (!form) return;
-        const all = [...form.querySelectorAll('.perm-toggle')];
-        const total = all.length;
-        const checked = all.filter(t => t.checked).length;
-        const pct = total > 0 ? Math.round(checked / total * 100) : 0;
-
-        document.getElementById('accentPct').textContent = pct + '%';
-        document.getElementById('accentCount').textContent = `${checked} of ${total} active`;
-        document.getElementById('accentBar').style.width = pct + '%';
-
-        const card = document.querySelector(`.role-card[data-role-id="${roleId}"]`);
-        if (card) {
-            card.querySelector('.pct-label').textContent = pct + '%';
-            card.querySelector('.count-label').textContent = `${checked} / ${total} permissions`;
-            card.querySelector('.progress-fill').style.width = pct + '%';
-            card.dataset.granted = checked;
-            card.dataset.pct = pct;
-        }
-    }
-
-    function ajaxSaveRole(roleId) {
-        const form = document.getElementById('form-role-' + roleId);
-        const btn = document.getElementById('save-btn-' + roleId);
-        if (!form || !btn) return;
-
-        const checkedIds = [...form.querySelectorAll('.perm-toggle:checked')].map(t => t.value);
-        const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
-
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving…';
-
-        fetch('{{ route($routePrefix . '.role_permissions.update') }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrf,
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                role_id: roleId,
-                permissions: checkedIds
-            })
-        })
-            .then(async res => {
-                const data = await res.json().catch(() => ({}));
-                if (!res.ok) throw new Error(data.message || 'Server error ' + res.status);
-                return data;
-            })
-            .then(data => {
                 form
                     .querySelectorAll(
                         '.perm-toggle'
@@ -1720,310 +673,1382 @@ $canDeleteCustomRoles = $authUser?->hasPermission('delete_custom_roles') ?? fals
                             );
 
                         initialStates[
-                            roleId
-                        ][stateKey] =
+                                roleId
+                            ][stateKey] =
                             input.checked;
+
+                        if (input.checked) {
+                            savedGrants[
+                                roleId
+                            ].push({
+                                name: input.dataset.permName || '',
+
+                                slug: input.dataset.permSlug || '',
+
+                                module: input.dataset.module || ''
+                            });
+                        }
                     });
 
-                window.DiscardChanges?.captureForm(form);
+                const bar =
+                    document.getElementById(
+                        'footer-bar-' + roleId
+                    );
 
-                savedGrants[roleId] = [];
-                form.querySelectorAll('.perm-toggle:checked').forEach(input => {
-                    savedGrants[roleId].push({
-                        name: input.dataset.permName || '',
-                        slug: input.dataset.permSlug || '',
-                        color: input.dataset.color || '#4b5563'
-                    });
+                if (bar) {
+                    window.FloatingSaveBar
+                        ?.hide(bar);
+                }
+
+                const modules = [...new Set(Array.from(form.querySelectorAll('.perm-toggle')).map(t => t.dataset
+                    .module).filter(Boolean))];
+
+                modules.forEach(module => {
+                    syncGroupMaster(roleId, module);
+                    updateGroupCount(roleId, module);
+                    updateDots(roleId, module);
                 });
 
-                updateViewAsBtn();
-
-                if (typeof showToast === 'function') {
-                    showToast('Success', `Permissions updated successfully.`, 'success');
-                }
-            })
-            .catch(err => {
-                if (typeof showToast === 'function') {
-                    showToast('Error', err.message || 'Could not save permissions.', 'error');
-                }
-            })
-            .finally(() => {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save';
+                window.DiscardChanges
+                    ?.captureForm(form);
             });
-    }
 
-    function filterPerms(q) {
-        q = String(q || '')
-            .toLowerCase()
-            .trim();
+            updateViewAsBtn();
 
-        const form = [
-            ...document.querySelectorAll(
-                '.role-form'
-            )
-        ].find(
-            form =>
-                form.style.display ===
-                'block'
-        );
+            requestAnimationFrame(() => {
+                window.FloatingSaveBar
+                    ?.hideAll();
 
-        if (!form) {
-            return;
+                updateFABVisibility();
+            });
         }
 
-        let visibleGroups = 0;
+        function keepRoleListLayout() {
+            const container = document.getElementById('roleListContainer');
+            const mainContent = document.getElementById('mainContent');
+            if (container) {
+                container.classList.remove('role-grid-view');
+                container.classList.add('role-list-view');
+            }
+            if (mainContent) {
+                mainContent.classList.remove('mode-grid', 'mode-list');
+            }
+        }
 
-        form
-            .querySelectorAll(
-                '.perm-group'
-            )
-            .forEach(group => {
+        window.handleRolePermissionSearch =
+            function(value) {
+                filterPerms(
+                    String(value || '')
+                );
+            };
 
-                const moduleCard =
-                    group.closest(
-                        '.permission-module-card'
-                    );
+        document.addEventListener('DOMContentLoaded', () => {
 
-                const body =
-                    getPermissionGroupBody(
-                        group
-                    );
+            initRoleForms();
+            keepRoleListLayout();
+            syncScrollStateForSaveBar();
 
-                if (
-                    !moduleCard ||
-                    !body
-                ) {
-                    return;
+            @if (session('success'))
+                if (typeof showToast === 'function') {
+                    showToast('Success', '{!! addslashes(session('success')) !!}', 'success');
                 }
+            @endif
 
-                const rows = [
-                    ...body.querySelectorAll(
-                        '.perm-row'
-                    )
-                ];
+            @if (session('error'))
+                if (typeof showToast === 'function') {
+                    showToast('Error', '{!! addslashes(session('error')) !!}', 'error');
+                }
+            @endif
 
-                let hasVisibleRow =
-                    false;
+            document
+                .querySelectorAll(
+                    '[data-role-permission-empty]'
+                )
+                .forEach(host => {
+                    window.EmptyState?.render({
+                        host,
+                        icon: 'fa-shield-halved',
+                        title: 'No permissions found',
+                        message: 'Permission groups will appear here once they are available.',
+                    });
+                });
+        });
 
-                rows.forEach(row => {
-                    const searchable =
-                        String(
-                            row.dataset
-                                .permSearch ||
-                            ''
+        function selectRole(card) {
+            document
+                .querySelectorAll('.role-card')
+                .forEach(roleCard => {
+                    roleCard.classList.remove(
+                        'active'
+                    );
+                });
+
+            card.classList.add('active');
+
+            const roleId =
+                card.dataset.roleId;
+
+            document
+                .querySelectorAll('.role-form')
+                .forEach(form => {
+                    form.hidden = true;
+                });
+
+            const form =
+                document.getElementById(
+                    'form-role-' + roleId
+                );
+
+            if (form) {
+                form.hidden = false;
+            }
+
+            const permSearch =
+                document.getElementById(
+                    'permSearch'
+                );
+
+            if (permSearch) {
+                permSearch.value = '';
+            }
+
+            filterPerms('');
+
+            activeRoleId = roleId;
+
+            updateFABVisibility();
+        }
+
+        function updateViewAsBtn() {
+            let totalSavedRoles = 0;
+
+            document
+                .querySelectorAll(
+                    '.role-card'
+                )
+                .forEach(card => {
+                    const roleId =
+                        card.dataset.roleId;
+
+                    const roleSlug =
+                        card.dataset.slug;
+
+                    if (
+                        !canPreviewRole(
+                            roleSlug
                         )
-                            .toLowerCase();
+                    ) {
+                        return;
+                    }
 
-                    const matches = !q ||
-                        searchable.includes(
-                            q
-                        );
+                    const permissions =
+                        savedGrants[
+                            roleId
+                        ] || [];
 
-                    row.style.display =
-                        matches ?
-                            '' :
-                            'none';
-
-                    if (matches) {
-                        hasVisibleRow =
-                            true;
+                    if (
+                        permissions.length > 0
+                    ) {
+                        totalSavedRoles++;
                     }
                 });
 
-                moduleCard.style.display =
-                    hasVisibleRow ?
-                        '' :
-                        'none';
+            const topButton =
+                document.getElementById(
+                    'globalViewAsBtn'
+                );
 
-                if (hasVisibleRow) {
-                    visibleGroups++;
+            if (topButton) {
+                const badge =
+                    topButton.querySelector(
+                        '.va-count-badge'
+                    );
+
+                if (badge) {
+                    badge.textContent =
+                        totalSavedRoles;
+
+                    badge.hidden =
+                        totalSavedRoles <= 0;
                 }
+            }
 
-                if (
-                    q &&
-                    hasVisibleRow
-                ) {
-                    body.classList.remove(
-                        'collapsed'
+            document
+                .querySelectorAll(
+                    '.fsb-view-as'
+                )
+                .forEach(btn => {
+                    const badge =
+                        btn.querySelector(
+                            '.va-count-badge'
+                        );
+
+                    if (badge) {
+                        badge.textContent =
+                            totalSavedRoles;
+                    }
+                });
+
+            updateFABVisibility();
+        }
+
+        function hasActiveRolePermissionModal() {
+            const modalIds = [
+                'newRoleModal',
+                'deleteRoleModal',
+                'resetConfirmModal',
+                'vaOverlay',
+                'patientPickerOverlay',
+            ];
+
+            return modalIds.some(
+                id => {
+                    const modal =
+                        document.getElementById(
+                            id
+                        );
+
+                    if (!modal) {
+                        return false;
+                    }
+
+                    return (
+                        modal.getAttribute(
+                            'aria-hidden'
+                        ) === 'false' ||
+                        modal.classList.contains(
+                            'show'
+                        ) ||
+                        modal.classList.contains(
+                            'open'
+                        )
+                    );
+                }
+            );
+        }
+
+        function updateFABVisibility() {
+            window.FloatingSaveBar?.hideAll();
+
+            if (!activeRoleId) {
+                return;
+            }
+
+            const bar =
+                document.getElementById(
+                    'footer-bar-' + activeRoleId
+                );
+
+            if (!bar) {
+                return;
+            }
+
+            if (
+                isModalActive &&
+                hasActiveRolePermissionModal()
+            ) {
+                return;
+            }
+
+            const form =
+                document.getElementById(
+                    'form-role-' + activeRoleId
+                );
+
+            if (!form) {
+                return;
+            }
+
+            const baseline =
+                initialStates[activeRoleId];
+
+            if (!baseline) {
+                return;
+            }
+
+            let changesCount = 0;
+
+            form
+                .querySelectorAll('.perm-toggle')
+                .forEach(toggle => {
+                    const stateKey =
+                        getPermissionStateKey(toggle);
+
+                    if (
+                        !Object.prototype
+                        .hasOwnProperty
+                        .call(
+                            baseline,
+                            stateKey
+                        )
+                    ) {
+                        return;
+                    }
+
+                    if (
+                        toggle.checked !==
+                        baseline[stateKey]
+                    ) {
+                        changesCount++;
+                    }
+                });
+
+            if (changesCount === 0) {
+                window.FloatingSaveBar?.hide(bar);
+                return;
+            }
+
+            const title =
+                bar.querySelector('.fsb-title');
+
+            const subtitle =
+                bar.querySelector('.fsb-sub');
+
+            if (title) {
+                title.textContent =
+                    'Unsaved changes';
+            }
+
+            if (subtitle) {
+                subtitle.textContent =
+                    `${changesCount} unsaved change${changesCount > 1 ? 's' : ''}`;
+            }
+
+            const viewAsButton =
+                bar.querySelector('.fsb-view-as');
+
+            if (viewAsButton) {
+                const badge =
+                    viewAsButton.querySelector(
+                        '.va-count-badge'
+                    );
+
+                if (badge) {
+                    const totalSavedRoles =
+                        Object.values(savedGrants)
+                        .filter(
+                            grants =>
+                            grants.length > 0
+                        )
+                        .length;
+
+                    badge.textContent =
+                        totalSavedRoles;
+                }
+            }
+
+            window.FloatingSaveBar?.show(bar);
+        }
+
+        function requestDiscardRoleChanges(roleId) {
+            const form = document.getElementById(
+                `form-role-${roleId}`
+            );
+
+            if (!form) return;
+
+            window.DiscardChanges?.confirmClose(
+                form,
+                () => discardChanges(roleId)
+            );
+        }
+
+        function discardChanges(roleId) {
+            const form = document.getElementById('form-role-' + roleId);
+            if (!form) return;
+
+            form
+                .querySelectorAll(
+                    '.perm-toggle'
+                )
+                .forEach(toggle => {
+
+                    const stateKey =
+                        getPermissionStateKey(
+                            toggle
+                        );
+
+                    const initVal =
+                        initialStates[
+                            roleId
+                        ]?.[
+                            stateKey
+                        ];
+
+                    if (
+                        typeof initVal !==
+                        'boolean'
+                    ) {
+                        return;
+                    }
+
+                    if (
+                        toggle.checked !==
+                        initVal
+                    ) {
+                        toggle.checked =
+                            initVal;
+
+                        updatePermVisuals(
+                            toggle
+                        );
+                    }
+                });
+
+            const modules = [...new Set(Array.from(form.querySelectorAll('.perm-toggle')).map(t => t.dataset.module)
+                .filter(
+                    Boolean))];
+            modules.forEach(module => {
+                const sample = form.querySelector(`.perm-toggle[data-module="${module}"]`);
+                syncGroupMaster(roleId, module);
+                updateGroupCount(roleId, module);
+                updateDots(roleId, module);
+            });
+
+            updateRoleCardStats(roleId);
+            window.DiscardChanges?.captureForm(form);
+            updateFABVisibility();
+        }
+
+        function updatePermVisuals(input) {
+            const row =
+                input.closest('.perm-row');
+
+            if (!row) {
+                return;
+            }
+
+            const status =
+                row.querySelector(
+                    '.status-pill'
+                );
+
+            if (!status) {
+                return;
+            }
+
+            const granted =
+                input.checked;
+
+            status.className =
+                `status-pill ${granted
+                ? 'status-granted'
+                : 'status-denied'
+            }`;
+
+            status.innerHTML = `
+        <span class="status-dot"></span>
+        ${granted ? 'Granted' : 'Denied'}
+    `;
+        }
+
+        let allExpanded = true;
+
+        function getPermissionGroupBody(
+            group
+        ) {
+            if (!group) {
+                return null;
+            }
+
+            const body =
+                group.nextElementSibling;
+
+            if (
+                !body ||
+                !body.classList.contains(
+                    'perm-group-body'
+                )
+            ) {
+                return null;
+            }
+
+            return body;
+        }
+
+        function togglePermGroup(header) {
+            const group =
+                header.closest(
+                    '.perm-group'
+                );
+
+            const body =
+                getPermissionGroupBody(
+                    group
+                );
+
+            if (!body) {
+                return;
+            }
+
+            const chevron =
+                header.querySelector(
+                    '.chevron'
+                );
+
+            const willCollapse = !body.classList.contains(
+                'collapsed'
+            );
+
+            body.classList.toggle(
+                'collapsed',
+                willCollapse
+            );
+
+            chevron?.classList.toggle(
+                'collapsed',
+                willCollapse
+            );
+        }
+
+        function toggleAllGroups() {
+            const button =
+                document.getElementById(
+                    'collapseBtn'
+                );
+
+            const form = [
+                ...document.querySelectorAll(
+                    '.role-form'
+                )
+            ].find(
+                form => !form.hidden
+            );
+
+            if (
+                !form ||
+                !button
+            ) {
+                return;
+            }
+
+            allExpanded = !allExpanded;
+
+            form
+                .querySelectorAll(
+                    '.perm-group'
+                )
+                .forEach(group => {
+
+                    const body =
+                        group.nextElementSibling;
+
+                    if (
+                        !body ||
+                        !body.classList.contains(
+                            'perm-group-body'
+                        )
+                    ) {
+                        return;
+                    }
+
+                    body.classList.toggle(
+                        'collapsed',
+                        !allExpanded
                     );
 
                     group
                         .querySelector(
                             '.chevron'
                         )
-                        ?.classList.remove(
-                            'collapsed'
+                        ?.classList.toggle(
+                            'collapsed',
+                            !allExpanded
                         );
-                }
-            });
-
-        const empty =
-            document.getElementById(
-                'permSearchEmptyState'
-            );
-
-        if (!empty) {
-            return;
-        }
-
-        const hasNoMatches =
-            q.length > 0 &&
-            visibleGroups === 0;
-
-        if (hasNoMatches) {
-            empty.hidden = false;
-
-            window.EmptyState
-                ?.renderSearch({
-                    host: empty,
-                    input: document.getElementById(
-                        'permSearch'
-                    ),
-                    query: q,
-                    message: 'Try a different permission name or slug.',
                 });
 
-            return;
+            button.innerHTML =
+                allExpanded ?
+                `
+                <i class="fa-solid fa-angles-up"></i>
+                <span>Collapse All</span>
+            ` :
+                `
+                <i class="fa-solid fa-angles-down"></i>
+                <span>Expand All</span>
+            `;
         }
 
-        window.EmptyState
-            ?.hide(empty);
+        function onGroupMasterChange(master) {
+            const roleId =
+                master.dataset.role;
 
-        empty.hidden = true;
-    }
+            const mSlug =
+                master.dataset.module;
 
-    function openNewRoleModal() {
-        isModalActive = true;
-        updateFABVisibility();
+            const form =
+                document.getElementById(
+                    'form-role-' + roleId
+                );
 
-        const form =
-            document.getElementById('createRoleForm');
-
-        const modal =
-            document.getElementById('newRoleModal');
-
-        if (!form || !modal) {
-            isModalActive = false;
-            updateFABVisibility();
-            return;
-        }
-
-        form.reset();
-
-        form
-            .querySelectorAll('.global-field-error')
-            .forEach(error => {
-                error.innerHTML = '';
-                error.classList.remove('show');
-                error.setAttribute('aria-hidden', 'true');
-            });
-
-        form
-            .querySelectorAll('.is-invalid')
-            .forEach(field => {
-                field.classList.remove('is-invalid');
-                field.removeAttribute('aria-invalid');
-                field.removeAttribute('aria-describedby');
-            });
-
-        window.openModal?.('newRoleModal');
-
-        document.dispatchEvent(
-            new CustomEvent('voice:refresh', {
-                detail: {
-                    root: modal
-                }
-            })
-        );
-    }
-
-    const roleNameField =
-        document.getElementById('newRoleName');
-
-    const roleSlugField =
-        document.getElementById('newRoleSlug');
-
-    roleNameField?.addEventListener('input', function () {
-        if (!roleSlugField) return;
-
-        roleSlugField.value = this.value
-            .toLowerCase()
-            .trim()
-            .replace(/[^a-z0-9\s-]/g, '')
-            .replace(/\s+/g, '-')
-            .replace(/-+/g, '-')
-            .replace(/^-|-$/g, '');
-
-        roleSlugField.dispatchEvent(
-            new Event('input', {
-                bubbles: true
-            })
-        );
-    });
-
-    function closeNewRoleModal() {
-        window.closeModal?.('newRoleModal');
-
-        window.setTimeout(() => {
-            isModalActive = false;
-            updateFABVisibility();
-        }, 180);
-    }
-
-    document
-        .getElementById('createRoleForm')
-        ?.addEventListener('submit', function (e) {
-            e.preventDefault();
-
-            const validation =
-                window.validateGlobalForm?.(this);
-
-            if (!validation || !validation.valid) {
+            if (!form) {
                 return;
             }
 
-            const form = this;
+            const newState =
+                master.checked;
 
-            const slug = String(
-                form.querySelector('[name="slug"]')
-                    ?.value || ''
-            ).trim();
+            form
+                .querySelectorAll(
+                    `.perm-toggle[data-module="${mSlug}"]`
+                )
+                .forEach(toggle => {
+                    if (toggle.disabled) {
+                        return;
+                    }
 
-            const btn =
-                document.getElementById(
-                    'btnSubmitNewRole'
+                    toggle.checked =
+                        newState;
+
+                    updatePermVisuals(
+                        toggle
+                    );
+                });
+
+            const sample =
+                form.querySelector(
+                    `.perm-toggle[data-module="${mSlug}"]`
                 );
 
-            btn.disabled = true;
+            updateDots(
+                roleId,
+                mSlug
+            );
 
-            btn.innerHTML = `
+            updateGroupCount(
+                roleId,
+                mSlug
+            );
+
+            updateRoleCardStats(
+                roleId
+            );
+
+            updateFABVisibility();
+        }
+
+        function onPermChange(input) {
+            updatePermVisuals(input);
+            const roleId = input.dataset.role;
+            const mSlug = input.dataset.module;
+
+            updateDots(roleId, mSlug);
+            updateGroupCount(roleId, mSlug);
+            syncGroupMaster(roleId, mSlug);
+            updateRoleCardStats(roleId);
+            updateFABVisibility();
+        }
+
+        function syncGroupMaster(roleId, mSlug) {
+            const form = document.getElementById('form-role-' + roleId);
+            if (!form) return;
+            const all = [...form.querySelectorAll(`.perm-toggle[data-module="${mSlug}"]`)];
+            const checked = all.filter(t => t.checked).length;
+            const master = form.querySelector(`.group-master[data-module="${mSlug}"]`);
+            if (!master) return;
+            master.checked = checked === all.length;
+            master.indeterminate = checked > 0 && checked < all.length;
+        }
+
+        function updateDots(roleId, moduleSlug) {
+            const container =
+                document.getElementById(
+                    `dots-${roleId}-${moduleSlug}`
+                );
+
+            if (!container) return;
+
+            const form =
+                document.getElementById(
+                    'form-role-' + roleId
+                );
+
+            if (!form) return;
+
+            const toggles = [
+                ...form.querySelectorAll(
+                    `.perm-toggle[data-module="${moduleSlug}"]`
+                )
+            ];
+
+            const dots =
+                container.querySelectorAll(
+                    '.status-dot'
+                );
+
+            toggles.forEach((toggle, index) => {
+                const dot = dots[index];
+
+                if (!dot) return;
+
+                dot.classList.toggle(
+                    'status-granted',
+                    toggle.checked
+                );
+
+                dot.classList.toggle(
+                    'status-denied',
+                    !toggle.checked
+                );
+            });
+        }
+
+        function updateGroupCount(
+            roleId,
+            mSlug
+        ) {
+            const form =
+                document.getElementById(
+                    'form-role-' + roleId
+                );
+
+            if (!form) {
+                return;
+            }
+
+            const dotsEl =
+                form.querySelector(
+                    `[id="dots-${roleId}-${mSlug}"]`
+                );
+
+            if (!dotsEl) {
+                return;
+            }
+
+            const group =
+                dotsEl.closest(
+                    '.perm-group'
+                );
+
+            if (!group) {
+                return;
+            }
+
+            const body =
+                group.nextElementSibling;
+
+            if (
+                !body ||
+                !body.classList.contains(
+                    'perm-group-body'
+                )
+            ) {
+                return;
+            }
+
+            const toggles = [
+                ...body.querySelectorAll(
+                    `.perm-toggle[data-module="${mSlug}"]`
+                )
+            ];
+
+            const enabledCount =
+                toggles.filter(
+                    toggle =>
+                    toggle.checked
+                ).length;
+
+            const countEl =
+                group.querySelector(
+                    '.card-subtitle'
+                );
+
+            if (countEl) {
+                countEl.textContent =
+                    `${enabledCount} of ${toggles.length} enabled`;
+            }
+        }
+
+        function updateRoleCardStats(roleId) {
+            const form =
+                document.getElementById(
+                    'form-role-' + roleId
+                );
+
+            if (!form) {
+                return;
+            }
+
+            const toggles = [
+                ...form.querySelectorAll(
+                    '.perm-toggle'
+                )
+            ];
+
+            const total =
+                toggles.length;
+
+            const granted =
+                toggles.filter(
+                    toggle => toggle.checked
+                ).length;
+
+            const pct =
+                total > 0 ?
+                Math.round(
+                    granted / total * 100
+                ) :
+                0;
+
+            const card =
+                document.querySelector(
+                    `.role-card[data-role-id="${roleId}"]`
+                );
+
+            if (!card) {
+                return;
+            }
+
+            const countLabel =
+                card.querySelector(
+                    '.count-label'
+                );
+
+            const progress =
+                card.querySelector(
+                    '.progress-bar'
+                );
+
+            if (countLabel) {
+                countLabel.textContent =
+                    `Permissions: ${granted} / ${total}`;
+            }
+
+            if (progress) {
+                progress.value = pct;
+            }
+
+            card.dataset.granted =
+                granted;
+
+            card.dataset.pct =
+                pct;
+        }
+
+        function ajaxSaveRole(roleId) {
+            const form = document.getElementById('form-role-' + roleId);
+            const btn = document.getElementById('save-btn-' + roleId);
+            if (!form || !btn) return;
+
+            const previousState =
+                initialStates[
+                    roleId
+                ] || {};
+
+            const newlyGrantedCount = [
+                ...form.querySelectorAll(
+                    '.perm-toggle'
+                )
+            ].filter(input => {
+                const key =
+                    getPermissionStateKey(
+                        input
+                    );
+
+                return (
+                    input.checked &&
+                    previousState[key] ===
+                    false
+                );
+            }).length;
+
+            const checkedIds = [
+                ...form.querySelectorAll(
+                    '.perm-toggle:checked'
+                )
+            ].map(toggle => toggle.value);
+
+            const csrf =
+                document.querySelector(
+                    'meta[name="csrf-token"]'
+                )?.content ||
+                '{{ csrf_token() }}';
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving…';
+
+            fetch('{{ route($routePrefix . '.role_permissions.update') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrf,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        role_id: roleId,
+                        permissions: checkedIds
+                    })
+                })
+                .then(async res => {
+                    const data = await res.json().catch(() => ({}));
+                    if (!res.ok) throw new Error(data.message || 'Server error ' + res.status);
+                    return data;
+                })
+                .then(data => {
+                    form
+                        .querySelectorAll(
+                            '.perm-toggle'
+                        )
+                        .forEach(input => {
+
+                            const stateKey =
+                                getPermissionStateKey(
+                                    input
+                                );
+
+                            initialStates[
+                                    roleId
+                                ][stateKey] =
+                                input.checked;
+                        });
+
+                    window.DiscardChanges?.captureForm(form);
+
+                    savedGrants[roleId] = [];
+
+                    form
+                        .querySelectorAll(
+                            '.perm-toggle:checked'
+                        )
+                        .forEach(input => {
+                            savedGrants[
+                                roleId
+                            ].push({
+                                name: input.dataset.permName || '',
+
+                                slug: input.dataset.permSlug || '',
+
+                                module: input.dataset.module || ''
+                            });
+                        });
+
+                    updateViewAsBtn();
+
+                    if (typeof showToast === 'function') {
+                        const toastMessage =
+                            newlyGrantedCount > 0 ?
+                            `${newlyGrantedCount} newly granted permission${newlyGrantedCount === 1 ? '' : 's'} saved successfully.` :
+                            'Permissions updated successfully.';
+
+                        showToast(
+                            'Permissions saved',
+                            toastMessage,
+                            'success'
+                        );
+                    }
+                })
+                .catch(err => {
+                    if (typeof showToast === 'function') {
+                        showToast('Error', err.message || 'Could not save permissions.', 'error');
+                    }
+                })
+                .finally(() => {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save';
+                });
+        }
+
+        function filterPerms(q) {
+            q = String(q || '')
+                .toLowerCase()
+                .trim();
+
+            const form = [
+                ...document.querySelectorAll(
+                    '.role-form'
+                )
+            ].find(
+                form => !form.hidden
+            );
+
+            if (!form) {
+                return;
+            }
+
+            let visibleGroups = 0;
+
+            form
+                .querySelectorAll(
+                    '.perm-group'
+                )
+                .forEach(group => {
+
+                    const moduleCard =
+                        group.closest(
+                            '.permission-module-card'
+                        );
+
+                    const body =
+                        getPermissionGroupBody(
+                            group
+                        );
+
+                    if (
+                        !moduleCard ||
+                        !body
+                    ) {
+                        return;
+                    }
+
+                    const rows = [
+                        ...body.querySelectorAll(
+                            '.perm-row'
+                        )
+                    ];
+
+                    let hasVisibleRow =
+                        false;
+
+                    rows.forEach(row => {
+                        const searchable =
+                            String(
+                                row.dataset
+                                .permSearch ||
+                                ''
+                            )
+                            .toLowerCase();
+
+                        const matches = !q ||
+                            searchable.includes(
+                                q
+                            );
+
+                        row.hidden = !matches;
+
+                        if (matches) {
+                            hasVisibleRow =
+                                true;
+                        }
+                    });
+
+                    moduleCard.hidden = !hasVisibleRow;
+
+                    if (hasVisibleRow) {
+                        visibleGroups++;
+                    }
+
+                    if (
+                        q &&
+                        hasVisibleRow
+                    ) {
+                        body.classList.remove(
+                            'collapsed'
+                        );
+
+                        group
+                            .querySelector(
+                                '.chevron'
+                            )
+                            ?.classList.remove(
+                                'collapsed'
+                            );
+                    }
+                });
+
+            const empty =
+                document.getElementById(
+                    'permSearchEmptyState'
+                );
+
+            if (!empty) {
+                return;
+            }
+
+            const hasNoMatches =
+                q.length > 0 &&
+                visibleGroups === 0;
+
+            if (hasNoMatches) {
+                empty.hidden = false;
+
+                window.EmptyState
+                    ?.renderSearch({
+                        host: empty,
+                        input: document.getElementById(
+                            'permSearch'
+                        ),
+                        query: q,
+                        message: 'Try a different permission name or slug.',
+                    });
+
+                return;
+            }
+
+            window.EmptyState
+                ?.hide(empty);
+
+            empty.hidden = true;
+        }
+
+        function openNewRoleModal() {
+            isModalActive = true;
+            updateFABVisibility();
+
+            const form =
+                document.getElementById('createRoleForm');
+
+            const modal =
+                document.getElementById('newRoleModal');
+
+            if (!form || !modal) {
+                isModalActive = false;
+                updateFABVisibility();
+                return;
+            }
+
+            form.reset();
+
+            form
+                .querySelectorAll('.global-field-error')
+                .forEach(error => {
+                    error.innerHTML = '';
+                    error.classList.remove('show');
+                    error.setAttribute('aria-hidden', 'true');
+                });
+
+            form
+                .querySelectorAll('.is-invalid')
+                .forEach(field => {
+                    field.classList.remove('is-invalid');
+                    field.removeAttribute('aria-invalid');
+                    field.removeAttribute('aria-describedby');
+                });
+
+            window.openModal?.('newRoleModal');
+
+            document.dispatchEvent(
+                new CustomEvent('voice:refresh', {
+                    detail: {
+                        root: modal
+                    }
+                })
+            );
+        }
+
+        const roleNameField =
+            document.getElementById('newRoleName');
+
+        const roleSlugField =
+            document.getElementById('newRoleSlug');
+
+        roleNameField?.addEventListener('input', function() {
+            if (!roleSlugField) return;
+
+            roleSlugField.value = this.value
+                .toLowerCase()
+                .trim()
+                .replace(/[^a-z0-9\s-]/g, '')
+                .replace(/\s+/g, '-')
+                .replace(/-+/g, '-')
+                .replace(/^-|-$/g, '');
+
+            roleSlugField.dispatchEvent(
+                new Event('input', {
+                    bubbles: true
+                })
+            );
+        });
+
+        function closeNewRoleModal() {
+            window.closeModal?.('newRoleModal');
+
+            window.setTimeout(() => {
+                isModalActive = false;
+                updateFABVisibility();
+            }, 180);
+        }
+
+        document
+            .getElementById('createRoleForm')
+            ?.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const validation =
+                    window.validateGlobalForm?.(this);
+
+                if (!validation || !validation.valid) {
+                    return;
+                }
+
+                const form = this;
+
+                const slug = String(
+                    form.querySelector('[name="slug"]')
+                    ?.value || ''
+                ).trim();
+
+                const btn =
+                    document.getElementById(
+                        'btnSubmitNewRole'
+                    );
+
+                btn.disabled = true;
+
+                btn.innerHTML = `
             <i class="fa-solid fa-spinner fa-spin"></i>
             Creating...
         `;
 
-            fetch(form.action, {
-                method: 'POST',
-                body: new FormData(form),
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json'
+                fetch(form.action, {
+                        method: 'POST',
+                        body: new FormData(form),
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(async res => {
+                        const data = await res.json().catch(() => ({}));
+                        if (!res.ok) {
+                            if (data.errors) {
+                                window.applyGlobalServerValidationErrors?.(form, data.errors);
+                            }
+                            let errorMsg = 'Could not create role.';
+                            if (data.errors) errorMsg = Object.values(data.errors).flat().join(' ');
+                            else if (data.message) errorMsg = data.message;
+                            throw new Error(errorMsg);
+                        }
+                        return data;
+                    })
+                    .then(data => {
+                        closeNewRoleModal();
+                        if (typeof showToast === 'function') {
+                            showToast('Success', data.message || 'Role created successfully.', 'success');
+                        }
+
+                        fetch(window.location.href)
+                            .then(r => r.text())
+                            .then(html => {
+                                const doc = new DOMParser().parseFromString(html, 'text/html');
+                                const newGrid = doc.querySelector('.main-grid');
+
+                                if (newGrid) {
+                                    const currentGrid = document.querySelector('.main-grid');
+
+                                    if (currentGrid) {
+                                        currentGrid.innerHTML = newGrid.innerHTML;
+
+                                        document.dispatchEvent(new CustomEvent('voice:refresh', {
+                                            detail: {
+                                                root: currentGrid
+                                            }
+                                        }));
+                                    }
+                                    initRoleForms();
+                                    keepRoleListLayout();
+                                    syncScrollStateForSaveBar();
+
+                                    const newRoleCard = document.querySelector(
+                                        `.role-card[data-slug="${slug}"]`) || document.querySelector(
+                                        '.role-card');
+                                    if (newRoleCard) selectRole(newRoleCard);
+                                }
+                                btn.disabled = false;
+                                btn.innerHTML = `
+                                <i class="fa-solid fa-plus"></i>
+                                <span>Create Role</span>
+                            `;
+                            });
+                    })
+                    .catch(err => {
+                        if (typeof showToast === 'function') {
+                            showToast(
+                                'Create Role Failed',
+                                err.message || 'Could not create the role.',
+                                'error'
+                            );
+                        }
+
+                        btn.disabled = false;
+
+                        btn.innerHTML = `
+        <i class="fa-solid fa-plus"></i>
+        <span>Create Role</span>
+    `;
+                    });
+            });
+
+        const PROTECTED_ROLE_SLUGS = [
+            'admin',
+            'patient',
+            'dentist'
+        ];
+
+        function getFallbackRoleName(roleName, roleSlug) {
+            const normalizedName = String(roleName || '').toLowerCase();
+            const normalizedSlug = String(roleSlug || '').toLowerCase();
+
+            if (normalizedSlug.includes('dentist') || normalizedName.includes('dentist')) {
+                return 'Dentist';
+            }
+
+            if (
+                normalizedSlug.includes('admin') ||
+                normalizedName.includes('admin') ||
+                normalizedSlug.includes('staff') ||
+                normalizedName.includes('staff') ||
+                normalizedSlug.includes('clinic') ||
+                normalizedName.includes('clinic')
+            ) {
+                return 'Admin';
+            }
+
+            return 'Patient';
+        }
+
+        function openDeleteModal(roleId, roleName) {
+            const card = document.querySelector(`.role-card[data-role-id="${roleId}"]`);
+            const slug = (card?.dataset.slug || '').toLowerCase().trim();
+            if (PROTECTED_ROLE_SLUGS.includes(slug)) {
+                if (typeof showToast === 'function') {
+                    showToast('Protected Role', `Cannot delete built-in role.`, 'error');
                 }
-            })
+                return;
+            }
+
+            isModalActive = true;
+            updateFABVisibility();
+
+            document.getElementById('deleteRoleName').textContent = roleName;
+            document.getElementById('deleteRoleForm').action = `${@json($rolePermissionsBasePath)}/${roleId}/destroy`;
+            window.openModal?.('deleteRoleModal');
+        }
+
+        function closeDeleteModal() {
+            window.closeModal?.('deleteRoleModal');
+
+            window.setTimeout(() => {
+                isModalActive = false;
+                updateFABVisibility();
+            }, 180);
+        }
+
+        document.getElementById('deleteRoleForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const form = this;
+            const btn = form.querySelector('.ui-btn-danger');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Deleting...';
+
+            fetch(form.action, {
+                    method: 'POST',
+                    body: new FormData(form),
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                })
                 .then(async res => {
                     const data = await res.json().catch(() => ({}));
                     if (!res.ok) {
-                        let errorMsg = 'Could not create role.';
-                        if (data.errors) errorMsg = Object.values(data.errors).flat().join(' ');
-                        else if (data.message) errorMsg = data.message;
-                        throw new Error(errorMsg);
+                        throw new Error(data.message || 'Could not delete role.');
                     }
                     return data;
                 })
-                .then(data => {
-                    closeNewRoleModal();
+                .then((data) => {
+                    closeDeleteModal();
                     if (typeof showToast === 'function') {
-                        showToast('Success', data.message || 'Role created successfully.', 'success');
+                        showToast('Success', data.message || 'Role deleted successfully.', 'success');
                     }
 
                     fetch(window.location.href)
@@ -2033,679 +2058,902 @@ $canDeleteCustomRoles = $authUser?->hasPermission('delete_custom_roles') ?? fals
                             const newGrid = doc.querySelector('.main-grid');
 
                             if (newGrid) {
-                                const currentGrid = document.querySelector('.main-grid');
-
-                                if (currentGrid) {
-                                    currentGrid.innerHTML = newGrid.innerHTML;
-
-                                    document.dispatchEvent(new CustomEvent('voice:refresh', {
-                                        detail: {
-                                            root: currentGrid
-                                        }
-                                    }));
-                                }
+                                document.querySelector('.main-grid').innerHTML = newGrid.innerHTML;
                                 initRoleForms();
                                 keepRoleListLayout();
                                 syncScrollStateForSaveBar();
-
-                                const newRoleCard = document.querySelector(
-                                    `.role-card[data-slug="${slug}"]`) || document.querySelector(
-                                        '.role-card');
-                                if (newRoleCard) selectRole(newRoleCard);
+                                const firstRole = document.querySelector('.role-card');
+                                if (firstRole) selectRole(firstRole);
                             }
                             btn.disabled = false;
-                            btn.innerHTML = `
-                                <i class="fa-solid fa-plus"></i>
-                                <span>Create Role</span>
-                            `;
+                            btn.innerHTML = '<i class="fa-solid fa-trash-can"></i> Delete';
                         });
                 })
                 .catch(err => {
+                    closeDeleteModal();
                     if (typeof showToast === 'function') {
-                        showToast(
-                            'Create Role Failed',
-                            err.message || 'Could not create the role.',
-                            'error'
-                        );
+                        showToast('Error', err.message, 'error');
                     }
-
                     btn.disabled = false;
-
-                    btn.innerHTML = `
-        <i class="fa-solid fa-plus"></i>
-        <span>Create Role</span>
-    `;
+                    btn.innerHTML = '<i class="fa-solid fa-trash-can"></i> Delete';
                 });
         });
 
-    const PROTECTED_ROLE_SLUGS = ['admin', 'patient', 'dentist', 'super_admin', 'super-admin', 'superadmin'];
+        document.addEventListener(
+            'click',
+            event => {
+                const button =
+                    event.target.closest(
+                        '[data-patient-impersonate]'
+                    );
 
-    function getFallbackRoleName(roleName, roleSlug) {
-        const normalizedName = String(roleName || '').toLowerCase();
-        const normalizedSlug = String(roleSlug || '').toLowerCase();
+                if (!button) {
+                    return;
+                }
 
-        if (normalizedSlug.includes('dentist') || normalizedName.includes('dentist')) {
-            return 'Dentist';
-        }
+                event.preventDefault();
 
-        if (
-            normalizedSlug.includes('admin') ||
-            normalizedName.includes('admin') ||
-            normalizedSlug.includes('staff') ||
-            normalizedName.includes('staff') ||
-            normalizedSlug.includes('clinic') ||
-            normalizedName.includes('clinic')
-        ) {
-            return 'Admin';
-        }
+                const patientId =
+                    button.dataset
+                    .impersonatePatientId;
 
-        return 'Patient';
-    }
+                const patientName =
+                    button.dataset
+                    .impersonatePatientName ||
+                    'Patient';
 
-    function openDeleteModal(roleId, roleName) {
-        const card = document.querySelector(`.role-card[data-role-id="${roleId}"]`);
-        const slug = (card?.dataset.slug || '').toLowerCase().trim();
-        if (PROTECTED_ROLE_SLUGS.includes(slug)) {
-            if (typeof showToast === 'function') {
-                showToast('Protected Role', `Cannot delete built-in role.`, 'error');
+                if (!patientId) {
+                    return;
+                }
             }
-            return;
-        }
-
-        isModalActive = true;
-        updateFABVisibility();
-
-        document.getElementById('deleteRoleName').textContent = roleName;
-        document.getElementById('deleteRoleForm').action = `${@json($rolePermissionsBasePath)}/${roleId}/destroy`;
-        window.openModal?.('deleteRoleModal');
-    }
-
-    function closeDeleteModal() {
-        window.closeModal?.('deleteRoleModal');
-
-        window.setTimeout(() => {
-            isModalActive = false;
-            updateFABVisibility();
-        }, 180);
-    }
-
-    document.getElementById('deleteRoleForm').addEventListener('submit', function (e) {
-        e.preventDefault();
-        const form = this;
-        const btn = form.querySelector('.ui-btn-danger');
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Deleting...';
-
-        fetch(form.action, {
-            method: 'POST',
-            body: new FormData(form),
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'application/json'
-            }
-        })
-            .then(async res => {
-                const data = await res.json().catch(() => ({}));
-                if (!res.ok) {
-                    throw new Error(data.message || 'Could not delete role.');
-                }
-                return data;
-            })
-            .then((data) => {
-                closeDeleteModal();
-                if (typeof showToast === 'function') {
-                    showToast('Success', data.message || 'Role deleted successfully.', 'success');
-                }
-
-                fetch(window.location.href)
-                    .then(r => r.text())
-                    .then(html => {
-                        const doc = new DOMParser().parseFromString(html, 'text/html');
-                        const newGrid = doc.querySelector('.main-grid');
-
-                        if (newGrid) {
-                            document.querySelector('.main-grid').innerHTML = newGrid.innerHTML;
-                            initRoleForms();
-                            keepRoleListLayout();
-                            syncScrollStateForSaveBar();
-                            const firstRole = document.querySelector('.role-card');
-                            if (firstRole) selectRole(firstRole);
-                        }
-                        btn.disabled = false;
-                        btn.innerHTML = '<i class="fa-solid fa-trash-can"></i> Delete';
-                    });
-            })
-            .catch(err => {
-                closeDeleteModal();
-                if (typeof showToast === 'function') {
-                    showToast('Error', err.message, 'error');
-                }
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-trash-can"></i> Delete';
-            });
-    });
-
-    function ajaxResetDefaults() {
-        if (
-            activeRoleId &&
-            hasUnsavedRoleChanges(
-                activeRoleId
-            )
-        ) {
-            const form =
-                document.getElementById(
-                    'form-role-' +
-                    activeRoleId
-                );
-
-            window.DiscardChanges
-                ?.confirmClose(
-                    form,
-                    () => {
-                        discardChanges(
-                            activeRoleId
-                        );
-
-                        openResetDefaultsModal();
-                    }
-                );
-
-            return;
-        }
-
-        openResetDefaultsModal();
-    }
-
-    function openResetDefaultsModal() {
-        isModalActive = true;
-
-        updateFABVisibility();
-
-        window.openModal?.(
-            'resetConfirmModal'
         );
-    }
 
-    function closeResetConfirm() {
-        window.closeModal?.('resetConfirmModal');
-        window.setTimeout(() => {
-            isModalActive = false;
+        function ajaxResetDefaults() {
+            const activeForm =
+                activeRoleId ?
+                document.getElementById(
+                    'form-role-' + activeRoleId
+                ) :
+                null;
+
+            if (
+                activeForm &&
+                window.DiscardChanges
+                ?.isFormDirty(activeForm)
+            ) {
+                window.DiscardChanges
+                    ?.confirmClose(
+                        activeForm,
+                        () => {
+                            discardChanges(
+                                activeRoleId
+                            );
+
+                            openResetDefaultsModal();
+                        }
+                    );
+
+                return;
+            }
+
+            openResetDefaultsModal();
+        }
+
+        function openResetDefaultsModal() {
+            isModalActive = true;
+
             updateFABVisibility();
-        }, 180);
-    }
 
-    function confirmResetDefaults() {
-        const confirmBtn = document.getElementById('resetConfirmBtn');
-        const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
-        confirmBtn.disabled = true;
-        confirmBtn.innerHTML = `
+            window.openModal?.(
+                'resetConfirmModal'
+            );
+        }
+
+        function closeResetConfirm() {
+            window.closeModal?.('resetConfirmModal');
+            window.setTimeout(() => {
+                isModalActive = false;
+                updateFABVisibility();
+            }, 180);
+        }
+
+        function confirmResetDefaults() {
+            const confirmBtn = document.getElementById('resetConfirmBtn');
+            const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
+            confirmBtn.disabled = true;
+            confirmBtn.innerHTML = `
     <i class="fa-solid fa-spinner fa-spin"></i>
     <span>Resetting...</span>
 `;
 
-        fetch('{{ $rolePermissionsBasePath }}/reset', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrf,
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({})
-        })
-            .then(async res => {
-                const data = await res.json().catch(() => ({}));
-                if (!res.ok) throw new Error(data.message || 'Server error ' + res.status);
-                return data;
-            })
-            .then(() => {
-                closeResetConfirm();
-                if (typeof showToast === 'function') {
-                    showToast('Success', 'Permissions reset to defaults.', 'success');
-                }
+            fetch('{{ $rolePermissionsBasePath }}/reset', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrf,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({})
+                })
+                .then(async res => {
+                    const data = await res.json().catch(() => ({}));
+                    if (!res.ok) throw new Error(data.message || 'Server error ' + res.status);
+                    return data;
+                })
+                .then(() => {
+                    closeResetConfirm();
+                    if (typeof showToast === 'function') {
+                        showToast('Success', 'Permissions reset to defaults.', 'success');
+                    }
 
-                fetch(window.location.href)
-                    .then(res => res.text())
-                    .then(html => {
-                        const doc = new DOMParser().parseFromString(html, 'text/html');
-                        const newGrid = doc.querySelector('.main-grid');
-                        const currentGrid = document.querySelector('.main-grid');
+                    fetch(window.location.href)
+                        .then(res => res.text())
+                        .then(html => {
+                            const doc = new DOMParser().parseFromString(html, 'text/html');
+                            const newGrid = doc.querySelector('.main-grid');
+                            const currentGrid = document.querySelector('.main-grid');
 
-                        if (newGrid && currentGrid) {
-                            const previousRoleId =
-                                activeRoleId;
+                            if (newGrid && currentGrid) {
+                                const previousRoleId =
+                                    activeRoleId;
 
-                            currentGrid.innerHTML =
-                                newGrid.innerHTML;
+                                currentGrid.innerHTML =
+                                    newGrid.innerHTML;
 
-                            isModalActive = false;
+                                isModalActive = false;
 
-                            initRoleForms();
+                                initRoleForms();
 
-                            keepRoleListLayout();
+                                keepRoleListLayout();
 
-                            document.dispatchEvent(
-                                new CustomEvent(
-                                    'voice:refresh', {
-                                    detail: {
-                                        root: currentGrid
-                                    }
-                                }
-                                )
-                            );
+                                document.dispatchEvent(
+                                    new CustomEvent(
+                                        'voice:refresh', {
+                                            detail: {
+                                                root: currentGrid
+                                            }
+                                        }
+                                    )
+                                );
 
-                            const roleCard =
-                                (
-                                    previousRoleId ?
+                                const roleCard =
+                                    (
+                                        previousRoleId ?
                                         document.querySelector(
                                             `.role-card[data-role-id="${previousRoleId}"]`
                                         ) :
                                         null
-                                ) ||
-                                document.querySelector(
-                                    '.role-card'
-                                );
+                                    ) ||
+                                    document.querySelector(
+                                        '.role-card'
+                                    );
 
-                            document
-                                .querySelectorAll(
-                                    '.role-form'
-                                )
-                                .forEach(form => {
-                                    form.style.display =
-                                        'none';
-                                });
+                                document
+                                    .querySelectorAll(
+                                        '.role-form'
+                                    )
+                                    .forEach(form => {
+                                        form.hidden = true;
+                                    });
 
-                            if (roleCard) {
-                                selectRole(roleCard);
+                                if (roleCard) {
+                                    selectRole(roleCard);
+                                }
+
+                                syncScrollStateForSaveBar();
                             }
-
-                            syncScrollStateForSaveBar();
-                        }
-                        confirmBtn.disabled = false;
-                        confirmBtn.innerHTML = `
+                            confirmBtn.disabled = false;
+                            confirmBtn.innerHTML = `
     <i class="fa-solid fa-rotate-left"></i>
     <span>Yes, Reset</span>
 `;
-                    });
-            })
-            .catch(err => {
-                closeResetConfirm();
-                if (typeof showToast === 'function') {
-                    showToast('Error', err.message || 'Could not reset.', 'error');
-                }
-                confirmBtn.disabled = false;
-                confirmBtn.innerHTML = `
+                        });
+                })
+                .catch(err => {
+                    closeResetConfirm();
+                    if (typeof showToast === 'function') {
+                        showToast('Error', err.message || 'Could not reset.', 'error');
+                    }
+                    confirmBtn.disabled = false;
+                    confirmBtn.innerHTML = `
     <i class="fa-solid fa-rotate-left"></i>
     <span>Yes, Reset</span>
 `;
-            });
-    }
-
-    function registerCreateRoleValidation() {
-        if (
-            typeof window.registerGlobalFormValidationRule !==
-            'function'
-        ) {
-            return false;
+                });
         }
 
-        window.registerGlobalFormValidationRule(
-            'createRole',
-            form => {
-                const nameField =
-                    form.querySelector('[name="name"]');
+        function registerCreateRoleValidation() {
+            if (
+                typeof window.registerGlobalFormValidationRule !==
+                'function'
+            ) {
+                return false;
+            }
 
-                const slugField =
-                    form.querySelector('[name="slug"]');
+            window.registerGlobalFormValidationRule(
+                'createRole',
+                form => {
+                    const nameField =
+                        form.querySelector('[name="name"]');
 
-                const name =
-                    String(nameField?.value || '').trim();
+                    const slugField =
+                        form.querySelector('[name="slug"]');
 
-                const slug =
-                    String(slugField?.value || '')
+                    const name =
+                        String(nameField?.value || '').trim();
+
+                    const slug =
+                        String(slugField?.value || '')
                         .trim()
                         .toLowerCase();
 
-                let valid = true;
-                let firstInvalid = null;
+                    let valid = true;
+                    let firstInvalid = null;
 
-                const duplicateName = Array.from(
-                    document.querySelectorAll('.role-card')
-                ).some(card => {
-                    return String(
-                        card.dataset.roleName || ''
-                    ).trim().toLowerCase() ===
-                        name.toLowerCase();
-                });
+                    const duplicateName = Array.from(
+                        document.querySelectorAll('.role-card')
+                    ).some(card => {
+                        return String(
+                                card.dataset.roleName || ''
+                            ).trim().toLowerCase() ===
+                            name.toLowerCase();
+                    });
 
-                if (name && duplicateName) {
-                    window.showFormInputValidationMessage?.(
-                        nameField,
-                        'A role with this name already exists.'
-                    );
+                    if (name && duplicateName) {
+                        window.showFormInputValidationMessage?.(
+                            nameField,
+                            'A role with this name already exists.'
+                        );
 
-                    valid = false;
-                    firstInvalid ||= nameField;
+                        valid = false;
+                        firstInvalid ||= nameField;
+                    }
+
+                    const duplicateSlug = Array.from(
+                        document.querySelectorAll('.role-card')
+                    ).some(card => {
+                        return String(
+                            card.dataset.slug || ''
+                        ).trim().toLowerCase() === slug;
+                    });
+
+                    if (slug && duplicateSlug) {
+                        window.showFormInputValidationMessage?.(
+                            slugField,
+                            'A role with this slug already exists.'
+                        );
+
+                        valid = false;
+                        firstInvalid ||= slugField;
+                    }
+
+                    return {
+                        valid,
+                        firstInvalid
+                    };
                 }
+            );
 
-                const duplicateSlug = Array.from(
-                    document.querySelectorAll('.role-card')
-                ).some(card => {
-                    return String(
-                        card.dataset.slug || ''
-                    ).trim().toLowerCase() === slug;
-                });
+            return true;
+        }
 
-                if (slug && duplicateSlug) {
-                    window.showFormInputValidationMessage?.(
-                        slugField,
-                        'A role with this slug already exists.'
-                    );
+        window.addEventListener(
+            'global-validation-ready',
+            registerCreateRoleValidation
+        );
 
-                    valid = false;
-                    firstInvalid ||= slugField;
-                }
+        document.addEventListener(
+            'DOMContentLoaded',
+            registerCreateRoleValidation
+        );
+
+        function humanizePermissionToken(value) {
+            return String(value || '')
+                .trim()
+                .replace(/[._-]+/g, ' ')
+                .replace(
+                    /\b\w/g,
+                    character =>
+                    character.toUpperCase()
+                );
+        }
+
+        function resolvePermissionDisplay(
+            permission
+        ) {
+            const slug =
+                String(
+                    permission.slug || ''
+                ).trim();
+
+            const parts =
+                slug
+                .split('.')
+                .filter(Boolean);
+
+            /*
+             * Example:
+             * inventory.view
+             *
+             * module  -> Inventory
+             * action  -> View
+             */
+            if (parts.length > 1) {
+                const moduleKey =
+                    parts[0];
+
+                const actionKey =
+                    parts
+                    .slice(1)
+                    .join(' ');
 
                 return {
-                    valid,
-                    firstInvalid
+                    groupKey: moduleKey,
+
+                    groupLabel: humanizePermissionToken(
+                        moduleKey
+                    ),
+
+                    permissionLabel: humanizePermissionToken(
+                        actionKey
+                    ),
                 };
             }
-        );
 
-        return true;
-    }
+            /*
+             * If the permission slug does not use
+             * dot notation, fall back to the module
+             * already produced by $groupedPermissions.
+             *
+             * This avoids inventing another module.
+             */
+            return {
+                groupKey: permission.module,
 
-    window.addEventListener(
-        'global-validation-ready',
-        registerCreateRoleValidation
-    );
+                groupLabel: humanizePermissionToken(
+                    permission.module
+                ),
 
-    document.addEventListener(
-        'DOMContentLoaded',
-        registerCreateRoleValidation
-    );
-
-    function openViewAs() {
-        isModalActive = true;
-        updateFABVisibility();
-
-        const overlay = document.getElementById('vaOverlay');
-        if (overlay && overlay.parentElement !== document.body) {
-            document.body.appendChild(overlay);
-        }
-        const list = document.getElementById('vaRoleList');
-        if (!overlay || !list) return;
-        list.innerHTML = '';
-        let totalPerms = 0,
-            totalRoles = 0;
-
-        document.querySelectorAll('.role-card').forEach(card => {
-            const roleId = card.dataset.roleId;
-            const roleName = card.dataset.roleName || 'Role';
-            const roleSlug = (card.dataset.slug || '').toLowerCase();
-            const granted = parseInt(card.dataset.granted || '0', 10);
-            if (granted <= 0) return;
-
-            const form = document.getElementById(`form-role-${roleId}`);
-            if (!form) return;
-
-            const checkedPerms = [...form.querySelectorAll('.perm-toggle:checked')].map(input => ({
-                name: input.dataset.permName || 'Permission',
-                color: input.dataset.color || '#4b5563'
-            }));
-            if (!checkedPerms.length) return;
-
-            totalRoles++;
-            totalPerms += checkedPerms.length;
-            const initials = roleName.split(' ').slice(0, 2).map(w => w[0].toUpperCase()).join('');
-            const color = checkedPerms[0]?.color || '#4b5563';
-            const isSuperAdmin = ['super_admin', 'super-admin', 'superadmin'].includes(roleSlug) || roleName
-                .toLowerCase().includes('super');
-
-            const tags = checkedPerms.map(p =>
-                `<span style="font-size:10px; font-weight:700; color:${p.color}; background:${p.color}15; padding:2px 8px; border-radius:12px;">${p.name}</span>`
-            ).join('');
-            const goBtn = !isSuperAdmin ?
-                `<button class="va-go-btn va-redirect-btn" data-role-id="${roleId}" data-role-name="${roleName}" data-role-slug="${roleSlug}" data-color="${color}">Go to Dashboard <i class="fa-solid fa-arrow-right"></i></button>` :
-                '';
-
-            list.innerHTML += `
-            <div class="va-role-row ${!isSuperAdmin ? 'va-redirect-btn' : ''}" data-role-id="${roleId}" data-role-name="${roleName}" data-role-slug="${roleSlug}" data-color="${color}" style="${isSuperAdmin ? 'cursor:default;' : ''}">
-                <div style="width:40px; height:40px; border-radius:10px; background:${color}; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:12px;">${initials}</div>
-                <div style="flex:1;">
-                    <div style="font-size:13px; font-weight:800; color:#111827; margin-bottom:2px;">${roleName}</div>
-                    <div style="display:flex; flex-wrap:wrap; gap:5px;">${tags}</div>
-                </div>
-                ${goBtn}
-            </div>`;
-        });
-
-        list.querySelectorAll('.va-redirect-btn').forEach(el => {
-            el.addEventListener('click', function (e) {
-                e.stopPropagation();
-                const t = this.closest('[data-role-id]') || this;
-                redirectToRole(t.dataset.roleId, t.dataset.roleName, t.dataset.roleSlug, t.dataset
-                    .color);
-            });
-        });
-
-        document.getElementById('vaTotalPerms').textContent = totalPerms;
-        document.getElementById('vaTotalRoles').textContent = totalRoles;
-        window.openModal?.('vaOverlay');
-    }
-
-    function closeViewAs() {
-        window.closeModal?.('vaOverlay');
-
-        window.setTimeout(() => {
-            isModalActive = false;
-            updateFABVisibility();
-        }, 180);
-    }
-
-    let patientAccountsCache = [];
-
-    function escapeHtml(v) {
-        return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;');
-    }
-
-    function closePatientPicker() {
-        window.closeModal?.('patientPickerOverlay');
-
-        window.setTimeout(() => {
-            isModalActive = false;
-            updateFABVisibility();
-        }, 180);
-    }
-
-    function redirectToRole(roleId, roleName, roleSlug, color) {
-        if (roleSlug === 'patient' || roleSlug === 'patient_role') {
-            closeViewAs();
-            openPatientPicker(roleName, roleSlug, color);
-            return;
+                permissionLabel: permission.name ||
+                    humanizePermissionToken(
+                        slug
+                    ),
+            };
         }
 
-        closeViewAs();
-        triggerRedirect(roleName, roleSlug, null, color, `Loading ${roleName} view for Admin`);
-    }
+        function groupPermissions(
+            permissions
+        ) {
+            const groups =
+                new Map();
 
-    function openPatientPicker(roleName, roleSlug, color) {
-        isModalActive = true;
-        updateFABVisibility();
-
-        fetch("{{ route('admin.patients.list') }}", {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json'
-            }
-        })
-            .then(async res => {
-                const d = await res.json();
-                if (!res.ok) throw new Error(d.message || 'Error');
-                patientAccountsCache = Array.isArray(d) ? d : [];
-                renderPatientPicker(patientAccountsCache);
-                document.getElementById('patientPickerSearch').value = '';
-                const patientSearch =
-                    document.getElementById(
-                        'patientPickerSearch'
+            permissions.forEach(permission => {
+                const resolved =
+                    resolvePermissionDisplay(
+                        permission
                     );
 
-                if (patientSearch) {
-                    patientSearch.value = '';
+                const key =
+                    resolved.groupKey;
 
-                    patientSearch.dispatchEvent(
-                        new Event(
-                            'input', {
-                            bubbles: true,
+                if (!groups.has(key)) {
+                    groups.set(
+                        key, {
+                            label: resolved.groupLabel,
+
+                            permissions: [],
                         }
-                        )
                     );
                 }
-                const patientOverlay = document.getElementById('patientPickerOverlay');
 
-                if (patientOverlay && patientOverlay.parentElement !== document.body) {
-                    document.body.appendChild(patientOverlay);
-                }
-                window.openModal?.('patientPickerOverlay');
-            })
-            .catch(err => {
-                if (typeof showToast === 'function') {
-                    showToast('Error', err.message || 'Unable to load patients', 'error');
-                }
+                groups
+                    .get(key)
+                    .permissions
+                    .push({
+                        ...permission,
+
+                        displayName: resolved
+                            .permissionLabel,
+                    });
             });
-    }
 
-    function renderPatientPicker(patients, query = '') {
-        const list = document.getElementById('patientPickerList');
-        if (!list) return;
-        if (!patients.length) {
-            list.innerHTML = `
-        <div
-            id="patientPickerEmptyState"
-            class="empty-state-host">
-        </div>
-    `;
+            return [
+                ...groups.values()
+            ];
+        }
 
-            const host =
+        function canPreviewRole(
+            roleSlug
+        ) {
+            const slug =
+                String(roleSlug || '')
+                .trim()
+                .toLowerCase();
+
+            return [
+                'patient',
+                'patient_role',
+                'dentist'
+            ].includes(slug);
+        }
+
+        function openViewAs() {
+            isModalActive = true;
+            updateFABVisibility();
+
+            const overlay =
                 document.getElementById(
-                    'patientPickerEmptyState'
+                    'vaOverlay'
                 );
 
-            if (query) {
-                window.EmptyState
-                    ?.renderSearch({
-                        host,
-                        input: document.getElementById(
-                            'patientPickerSearch'
-                        ),
-                        query,
-                        message: 'Try a different patient name or email.',
-                    });
-            } else {
+            const list =
+                document.getElementById(
+                    'vaRoleList'
+                );
+
+            if (
+                !overlay ||
+                !list
+            ) {
+                return;
+            }
+
+            if (
+                overlay.parentElement !==
+                document.body
+            ) {
+                document.body.appendChild(
+                    overlay
+                );
+            }
+
+            list.replaceChildren();
+
+            let renderedRoles = 0;
+
+            document
+                .querySelectorAll(
+                    '.role-card'
+                )
+                .forEach(card => {
+                    const roleId =
+                        card.dataset.roleId;
+
+                    const roleName =
+                        card.dataset.roleName ||
+                        'Role';
+
+                    const roleSlug =
+                        String(
+                            card.dataset.slug ||
+                            ''
+                        )
+                        .trim()
+                        .toLowerCase();
+
+                    if (
+                        !canPreviewRole(
+                            roleSlug
+                        )
+                    ) {
+                        return;
+                    }
+
+                    const permissions =
+                        savedGrants[
+                            roleId
+                        ] || [];
+
+                    if (
+                        permissions.length ===
+                        0
+                    ) {
+                        return;
+                    }
+
+                    renderedRoles++;
+
+                    const groups =
+                        groupPermissions(
+                            permissions
+                        );
+
+                    const groupHtml =
+                        groups
+                        .map(group => {
+                            const permissionHtml =
+                                group.permissions
+                                .map(permission => {
+                                    return `
+                                        <span
+                                            class="global-info-pill"
+                                        >
+                                            ${escapeHtml(
+                                                permission
+                                                    .displayName
+                                            )}
+                                        </span>
+                                    `;
+                                })
+                                .join('');
+
+                            return `
+                            <div
+                                class="va-permission-row"
+                            >
+                                <div
+                                    class="va-permission-module"
+                                >
+                                    ${escapeHtml(
+                                        group.label
+                                    )}
+                                </div>
+
+                                <div
+                                    class="global-info-group"
+                                >
+                                    ${permissionHtml}
+                                </div>
+                            </div>
+                        `;
+                        })
+                        .join('');
+
+                    const roleIcon =
+                        roleSlug === 'dentist' ?
+                        'fa-user-doctor' :
+                        'fa-user';
+
+                    list.insertAdjacentHTML(
+                        'beforeend',
+                        `
+        <details
+            class="
+                global-accordion
+                modal-option-panel
+                va-role-card
+            "
+            data-role-id="${escapeHtml(roleId)}"
+            data-role-name="${escapeHtml(roleName)}"
+            data-role-slug="${escapeHtml(roleSlug)}"
+        >
+            <summary
+                class="global-accordion-summary"
+            >
+                <div
+                    class="modal-inline-control"
+                >
+                    <div
+                        class="modal-inline-main"
+                    >
+                        <div
+                            class="modal-section-heading"
+                        >
+                            <div
+                                class="modal-section-icon"
+                            >
+                                <i
+                                    class="
+                                        fa-solid
+                                        ${roleIcon}
+                                    "
+                                    aria-hidden="true"
+                                ></i>
+                            </div>
+
+                            <div>
+                                <h4>
+                                    ${escapeHtml(
+                                        roleName
+                                    )}
+                                </h4>
+
+                                <p
+                                    class="
+                                        va-role-permission-count
+                                    "
+                                >
+                                    <span>
+                                        ${permissions.length}
+                                        permission${permissions.length === 1 ? '' : 's'}
+                                    </span>
+
+                                    <i
+                                        class="
+                                            fa-solid
+                                            fa-chevron-down
+                                            global-accordion-chevron
+                                        "
+                                        aria-hidden="true"
+                                    ></i>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button
+                        type="button"
+                        class="
+                            ui-btn
+                            ui-btn-primary
+                            ui-btn-sm
+                        "
+                        data-va-preview
+                        data-accordion-ignore
+                    >
+                        <i
+                            class="
+                                fa-solid
+                                fa-eye
+                            "
+                            aria-hidden="true"
+                        ></i>
+
+                        <span>
+                            Preview dashboard
+                        </span>
+                    </button>
+                </div>
+            </summary>
+
+            <div
+                class="global-accordion-body"
+            >
+                <div
+                    class="va-permission-list"
+                >
+                    ${groupHtml}
+                </div>
+            </div>
+        </details>
+    `
+                    );
+                });
+
+            if (
+                renderedRoles === 0
+            ) {
                 window.EmptyState
                     ?.render({
-                        host,
-                        icon: 'fa-user-group',
-                        title: 'No patients found',
-                        message: 'Patient accounts will appear here once available.',
+                        host: list,
+
+                        icon: 'fa-user-shield',
+
+                        title: 'No role permissions to preview',
+
+                        message: 'Save at least one permission for a role before previewing its dashboard access.',
+
+                        className: 'empty-state-compact',
                     });
             }
 
-            return;
-        }
-        list.innerHTML = patients.map(p => {
-            const n = (p.name || 'Patient').replace(/'/g, "\\'");
-            const i = (p.name || 'P').charAt(0).toUpperCase();
-            return `<div class="va-role-row" onclick="startPatientImpersonation('patient','patient','#059669',${p.id},'${n}')">
-            <div style="width:40px; height:40px; border-radius:10px; background:#059669; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px;">${i}</div>
-            <div style="flex:1;">
-                <div style="font-size:13px; font-weight:800; color:#111827;">${escapeHtml(p.name || 'Unnamed')}</div>
-                <div style="font-size:11px; color:#6b7280;">${escapeHtml(p.email || '')} | ID: ${p.id}</div>
-            </div>
-            <button class="va-go-btn">Impersonate <i class="fa-solid fa-arrow-right"></i></button>
-        </div>`;
-        }).join('');
-    }
-
-    function filterPatientPicker(q) {
-        q = String(q || '')
-            .toLowerCase()
-            .trim();
-
-        if (!q) {
-            renderPatientPicker(
-                patientAccountsCache
+            window.openModal?.(
+                'vaOverlay'
             );
-            return;
         }
 
-        const filtered =
-            patientAccountsCache.filter(
-                patient => {
-                    const searchable =
-                        `${patient.name || ''} ${patient.email || ''}`
-                            .toLowerCase();
+        document.addEventListener(
+            'DOMContentLoaded',
+            () => {
+                const params =
+                    new URLSearchParams(
+                        window.location.search
+                    );
 
-                    return searchable.includes(q);
-                }
-            );
-
-        renderPatientPicker(
-            filtered,
-            q
-        );
-    }
-
-    function startPatientImpersonation(roleName, roleSlug, color, patientId, patientName) {
-        closePatientPicker();
-        triggerRedirect(patientName, roleSlug, patientId, color, 'Loading patient dashboard for Admin');
-    }
-
-    function triggerRedirect(title, slug, patientId, color, sub) {
-        const ol = document.getElementById('redirectOverlay');
-        ol.style.background = `linear-gradient(135deg, ${color}, #1f2937)`;
-        document.getElementById('redirectText').textContent = `Redirecting to ${title}…`;
-        document.getElementById('redirectSub').textContent = sub;
-        ol.classList.add('show');
-
-        const body = {
-            role: slug
-        };
-        if (patientId) body.patient_id = patientId;
-
-        fetch("{{ route('admin.impersonate') }}", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify(body)
-        })
-            .then(async res => {
-                const d = await res.json();
-                if (!res.ok) throw new Error(d.message || 'Error');
-                if (d.redirect) {
-                    window.location.href = d.redirect;
+                if (
+                    params.get(
+                        'open_view_as'
+                    ) !== '1'
+                ) {
                     return;
                 }
-                throw new Error('No redirect');
-            })
-            .catch(err => {
-                ol.classList.remove('show');
-                if (typeof showToast === 'function') {
-                    showToast('Error', err.message || 'Something went wrong', 'error');
-                }
-            });
-    }
 
-    function hexDarken(hex) {
-        const r = parseInt(hex.slice(1, 3), 16),
-            g = parseInt(hex.slice(3, 5), 16),
-            b = parseInt(hex.slice(5, 7), 16);
-        return '#' + Math.max(0, r - 45).toString(16).padStart(2, '0') + Math.max(0, g - 45).toString(16).padStart(2,
-            '0') + Math.max(0, b - 45).toString(16).padStart(2, '0');
-    }
-</script>
+                window.requestAnimationFrame(
+                    () => {
+                        openViewAs();
+                    }
+                );
+
+                params.delete(
+                    'open_view_as'
+                );
+
+                const query =
+                    params.toString();
+
+                const cleanUrl =
+                    window.location.pathname +
+                    (
+                        query ?
+                        `?${query}` :
+                        ''
+                    ) +
+                    window.location.hash;
+
+                window.history.replaceState({},
+                    document.title,
+                    cleanUrl
+                );
+            }
+        );
+
+        document.addEventListener(
+            'click',
+            event => {
+                const preview =
+                    event.target.closest(
+                        '[data-va-preview]'
+                    );
+
+                if (!preview) {
+                    return;
+                }
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                const role =
+                    preview.closest(
+                        '[data-role-id]'
+                    );
+
+                if (!role) {
+                    return;
+                }
+
+                redirectToRole(
+                    role.dataset.roleId,
+                    role.dataset.roleName,
+                    role.dataset.roleSlug
+                );
+            }
+        );
+
+        function closeViewAs() {
+            window.closeModal?.('vaOverlay');
+
+            window.setTimeout(() => {
+                isModalActive = false;
+                updateFABVisibility();
+            }, 180);
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replace(
+                    /&/g,
+                    '&amp;'
+                )
+                .replace(
+                    /</g,
+                    '&lt;'
+                )
+                .replace(
+                    />/g,
+                    '&gt;'
+                )
+                .replace(
+                    /"/g,
+                    '&quot;'
+                )
+                .replace(
+                    /'/g,
+                    '&#039;'
+                );
+        }
+
+        function redirectToRole(
+            roleId,
+            roleName,
+            roleSlug
+        ) {
+            let normalizedRole =
+                String(
+                    roleSlug || ''
+                )
+                .trim()
+                .toLowerCase();
+
+            if (
+                normalizedRole ===
+                'patient_role'
+            ) {
+                normalizedRole =
+                    'patient';
+            }
+
+            if (
+                ![
+                    'patient',
+                    'dentist'
+                ].includes(
+                    normalizedRole
+                )
+            ) {
+                return;
+            }
+
+            closeViewAs();
+
+            startRolePreview(
+                roleName,
+                normalizedRole
+            );
+        }
+
+        function startRolePreview(
+            roleName,
+            roleSlug
+        ) {
+            window.GlobalLoading
+                ?.show({
+                    title: `Opening ${roleName} preview…`,
+
+                    message: 'Loading synthetic demo data.',
+                });
+
+            fetch(
+                    "{{ route('admin.role_preview.start') }}", {
+                        method: 'POST',
+
+                        headers: {
+                            'Content-Type': 'application/json',
+
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+
+                            'Accept': 'application/json',
+                        },
+
+                        body: JSON.stringify({
+                            role: roleSlug,
+                        }),
+                    }
+                )
+                .then(
+                    async response => {
+                        const data =
+                            await response
+                            .json();
+
+                        if (
+                            !response.ok
+                        ) {
+                            throw new Error(
+                                data.message ||
+                                'Unable to start role preview.'
+                            );
+                        }
+
+                        if (
+                            !data.redirect
+                        ) {
+                            throw new Error(
+                                'No preview URL was returned.'
+                            );
+                        }
+
+                        window.location.href =
+                            data.redirect;
+                    }
+                )
+                .catch(
+                    error => {
+                        window.GlobalLoading
+                            ?.hide();
+
+                        if (
+                            typeof showToast ===
+                            'function'
+                        ) {
+                            showToast(
+                                'Preview Error',
+                                error.message ||
+                                'Unable to open role preview.',
+                                'error'
+                            );
+                        }
+                    }
+                );
+        }
+    </script>
 @endsection

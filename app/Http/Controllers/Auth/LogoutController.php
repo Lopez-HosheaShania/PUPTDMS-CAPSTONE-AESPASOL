@@ -6,9 +6,14 @@ use App\Helpers\AuditLogger;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\ConcurrentSessionService;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Tymon\JWTAuth\Exceptions\JWTException;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class LogoutController extends Controller
 {
@@ -19,7 +24,6 @@ class LogoutController extends Controller
     public function logout(Request $request)
     {
         $user = Auth::user();
-        $idToken = (string) $request->session()->get('oidc_id_token', '');
         $reason = $request->input('reason') === 'idle' ? 'idle' : 'manual';
 
         if (!$user) {
@@ -30,13 +34,27 @@ class LogoutController extends Controller
             }
         }
 
-        $idpLogoutUrl = config('services.oidc.logout_url');
-        $idpLoginUrl = config('services.idp.login_url');
-        $clientId = config('services.oidc.client_id');
+        $accessToken = $request->session()->get('oidc_access_token') ?: $user?->access_token;
+        $jwt = $request->session()->get('auth_jwt_token') ?: $request->cookie('jwt_token');
         $postLogoutRedirect = route('login', [
             'logged_out' => 1,
             'reason' => $reason,
         ]);
+
+        $providerLoggedOut = $this->revokeProviderSession($accessToken);
+
+        if (is_string($jwt) && $jwt !== '') {
+            try {
+                JWTAuth::manager()->setRefreshFlow(true);
+                JWTAuth::setToken($jwt)->invalidate();
+            } catch (JWTException $exception) {
+                Log::notice('Logout JWT invalidation could not be completed', [
+                    'exception_type' => $exception::class,
+                ]);
+            } finally {
+                JWTAuth::manager()->setRefreshFlow(false);
+            }
+        }
 
         if ($user) {
             $user->access_token = null;
@@ -59,6 +77,7 @@ class LogoutController extends Controller
         }
 
         Auth::guard('patient')->logout();
+        Auth::guard('web')->logout();
         Auth::logout();
         $request->session()->forget([
             'oidc_id_token',
@@ -84,65 +103,41 @@ class LogoutController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        if ($idpLogoutUrl && $clientId) {
-            $logoutTargets = $this->buildLogoutTargets(
-                $idpLogoutUrl,
-                $idpLoginUrl,
-                $clientId,
-                $postLogoutRedirect,
-                $idToken
-            );
-
-            return view('auth.oidc-logout', [
-                'logoutTargets' => $logoutTargets,
-                'redirectUrl' => $postLogoutRedirect,
-                'loginRedirectUrl' => $postLogoutRedirect,
-            ]);
+        if (!$providerLoggedOut) {
+            return redirect()->to($postLogoutRedirect)->with('error',
+                'You are signed out of the dental clinic, but the identity provider could not confirm sign-out. Please sign out of the identity provider before signing in again.');
         }
 
         return redirect()->to($postLogoutRedirect);
     }
 
-    protected function buildLogoutTargets(
-        string $idpLogoutUrl,
-        ?string $idpLoginUrl,
-        string $clientId,
-        string $postLogoutRedirect,
-        string $idToken
-    ): array {
-        $params = [
-            'client_id' => $clientId,
-            'post_logout_redirect_uri' => $postLogoutRedirect,
-            'redirect_uri' => $postLogoutRedirect,
-        ];
-
-        if ($idToken !== '') {
-            $params['id_token_hint'] = $idToken;
-        }
-
-        $targets = [];
-
-        $targets[] = $this->appendQuery($idpLogoutUrl, $params);
-
-        if ($idpLoginUrl) {
-            $origin = parse_url($idpLoginUrl, PHP_URL_SCHEME) . '://' . parse_url($idpLoginUrl, PHP_URL_HOST);
-
-            if ($origin && !str_contains($origin, '://')) {
-                $origin = null;
-            }
-
-            if ($origin) {
-                $targets[] = $this->appendQuery($origin . '/logout', $params);
-            }
-        }
-
-        return array_values(array_unique(array_filter($targets)));
-    }
-
-    protected function appendQuery(string $url, array $params): string
+    private function revokeProviderSession(?string $accessToken): bool
     {
-        $separator = str_contains($url, '?') ? '&' : '?';
+        if (!$accessToken) {
+            return true;
+        }
 
-        return $url . $separator . http_build_query(array_filter($params, static fn($value) => $value !== null));
+        $url = config('services.oidc.logout_url');
+        $clientId = config('services.oidc.client_id');
+        if (!$url || !$clientId) {
+            Log::warning('IDP logout is not configured');
+            return false;
+        }
+
+        try {
+            $response = Http::withToken($accessToken)->acceptJson()
+                ->connectTimeout(3)->timeout(5)->withoutRedirecting()
+                ->post($url, ['client_id' => $clientId]);
+
+            if ($response->successful() || $response->status() === 302) {
+                return true;
+            }
+
+            Log::warning('IDP logout was rejected', ['status' => $response->status()]);
+        } catch (ConnectionException) {
+            Log::warning('IDP logout could not connect');
+        }
+
+        return false;
     }
 }

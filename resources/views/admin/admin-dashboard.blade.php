@@ -42,7 +42,7 @@
                             Year</span>
                         <span class="period-value">
                             {{ $activePeriod?->academicYear?->name ?? 'Not Set' }}
-                         </span>
+                        </span>
                     </div>
                     <div class="period-divider"></div>
                     <div class="period-item">
@@ -116,28 +116,18 @@
 
                     <div class="card">
 
-                        <div class="card-header">
-                            <div class="card-header-left">
-                                <div class="card-header-icon">
-                                    <i class="fa-solid fa-clipboard-list"></i>
-                                </div>
-
-                                <span class="card-title">
-                                    System Logs Overview
-                                </span>
-
+                        <x-card-header title="System Logs Overview" icon="fa-solid fa-clipboard-list">
+                            <x-slot:actions>
                                 <x-view-toggle id="dashboardLogsViewToggle" root="#mainContent"
                                     storage-key="admin_dashboard_logs_view" list-view="#dashboardLogsListView"
-                                    grid-view="#dashboardLogsGridView" class="ml-auto" />
-                            </div>
+                                    grid-view="#dashboardLogsGridView" />
 
-                            <div class="card-header-right">
                                 <a href="{{ route('admin.system_logs') }}" class="card-link">
                                     View All
                                     <i class="fa-solid fa-arrow-right"></i>
                                 </a>
-                            </div>
-                        </div>
+                            </x-slot:actions>
+                        </x-card-header>
 
                         <div class="log-stats-row">
                             <div class="log-stat">
@@ -163,14 +153,14 @@
                             <div id="dashboardLogsEmptyState" class="empty-state-host"></div>
                         @else
                             <div class="logs-view" id="dashboardLogsListView">
-                                <div style="overflow-x:auto;">
+                                <div data-ui-presentation="presentation-fbff25e9fc50">
                                     <table class="data-table">
                                         <thead>
                                             <tr>
-                                                <th style="width:60px;">ID</th>
-                                                <th style="width:160px;">Date & Time</th>
+                                                <th data-ui-presentation="presentation-c5f3c1cb4243">ID</th>
+                                                <th data-ui-presentation="presentation-e0db5fbf10d1">Date & Time</th>
                                                 <th>Description</th>
-                                                <th style="width:120px;">User</th>
+                                                <th data-ui-presentation="presentation-b699c17309cd">User</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -187,21 +177,22 @@
                                                     $logRole = data_get($log, 'actor_role', '');
                                                 @endphp
                                                 <tr>
-                                                    <td style="color:#9ca3af;font-size:.72rem;">#{{ $logId }}</td>
+                                                    <td data-ui-presentation="presentation-2a953b0e4120">
+                                                        #{{ $logId }}</td>
                                                     <td>
-                                                        <div style="font-size:.74rem;font-weight:600;">
+                                                        <div data-ui-presentation="presentation-ac79c536cac4">
                                                             {{ $logDate ? \Carbon\Carbon::parse($logDate)->format('M j, Y') : '—' }}
                                                         </div>
-                                                        <div style="font-size:.68rem;color:#9ca3af;">
+                                                        <div data-ui-presentation="presentation-3b9edb0f9a16">
                                                             {{ $logDate ? \Carbon\Carbon::parse($logDate)->format('h:i:s A') : '—' }}
                                                         </div>
                                                     </td>
-                                                    <td style="font-size:.76rem;">{{ $logDesc }}</td>
+                                                    <td data-ui-presentation="presentation-b7b9d5522554">
+                                                        {{ $logDesc }}</td>
                                                     <td>
                                                         <span
-                                                            style="font-size:.72rem;font-weight:600;">{{ $logActor }}</span>
-                                                        <div
-                                                            style="font-size:.65rem;color:#9ca3af;text-transform:capitalize;">
+                                                            data-ui-presentation="presentation-6f522262772c">{{ $logActor }}</span>
+                                                        <div data-ui-presentation="presentation-b7d4e63f99bb">
                                                             {{ $logRole }}
                                                         </div>
                                                     </td>
@@ -252,18 +243,18 @@
 
                     <div class="grid grid-cols-1 xl:grid-cols-2 gap-5 mt-5">
                         <div class="card">
-                            <div class="card-header">
-                                <div class="card-header-left">
-                                    <div class="card-header-icon"><i class="fa-solid fa-chart-pie"></i></div>
-                                    <span class="card-title">GAD Analytics</span>
-                                </div>
-                                <a href="{{ route('admin.reports') }}" class="card-link">
-                                    View
-                                    <i class="fa-solid fa-arrow-right"></i>
-                                </a>
-                            </div>
+
+                            <x-card-header title="GAD Analytics" icon="fa-solid fa-chart-pie">
+                                <x-slot:actions>
+                                    <a href="{{ route('admin.reports') }}" class="card-link">
+                                        View
+                                        <i class="fa-solid fa-arrow-right"></i>
+                                    </a>
+                                </x-slot:actions>
+                            </x-card-header>
+
                             <div id="dashboardGadChartWrap" class="dashboard-empty-state-wrap relative p-4"
-                                style="height: 260px;">
+                                data-ui-presentation="presentation-3d7207316986">
                                 <canvas id="dashboardGadChart"></canvas>
                                 <div id="dashboardGadEmptyState"
                                     class="empty-state-host absolute inset-0 pointer-events-none"></div>
@@ -271,15 +262,15 @@
                         </div>
 
                         <div class="card inventory-overview-card">
-                            <div class="card-header">
-                                <div class="card-header-left">
-                                    <div class="card-header-icon"><i class="fa-solid fa-boxes-stacked"></i></div>
-                                    <span class="card-title">Inventory Overview</span>
-                                </div>
-                                <a href="{{ route('admin.inventory') }}" class="card-link">
-                                    View <i class="fa-solid fa-arrow-right"></i>
-                                </a>
-                            </div>
+
+                            <x-card-header title="Inventory Overview" icon="fa-solid fa-boxes-stacked">
+                                <x-slot:actions>
+                                    <a href="{{ route('admin.inventory') }}" class="card-link">
+                                        View
+                                        <i class="fa-solid fa-arrow-right"></i>
+                                    </a>
+                                </x-slot:actions>
+                            </x-card-header>
 
                             <div class="inventory-chart-card-body">
 
@@ -292,9 +283,9 @@
                                                 <div class="inventory-donut-box">
                                                     <div class="inventory-donut-center">
                                                         <span class="skeleton-line"
-                                                            style="width: 42px; height: 18px;"></span>
+                                                            data-ui-presentation="presentation-2febe2dcf7c3"></span>
                                                         <small class="skeleton-line"
-                                                            style="width: 34px; height: 8px; margin-top: 8px;"></small>
+                                                            data-ui-presentation="presentation-3eae6024334a"></small>
                                                     </div>
                                                 </div>
                                             </div>
@@ -307,14 +298,16 @@
                                                     <div class="inventory-legend-left">
                                                         <span class="inventory-legend-dot in-stock"></span>
                                                         <div class="space-y-2">
-                                                            <div class="skeleton-line" style="width: 74px; height: 12px;">
+                                                            <div class="skeleton-line"
+                                                                data-ui-presentation="presentation-ab9acd4fca12">
                                                             </div>
                                                             <div class="skeleton-line"
-                                                                style="width: 102px; height: 10px;">
+                                                                data-ui-presentation="presentation-6bee5473b01a">
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div class="skeleton-line" style="width: 32px; height: 18px;"></div>
+                                                    <div class="skeleton-line"
+                                                        data-ui-presentation="presentation-0f7350a468c1"></div>
                                                 </div>
 
                                                 <div class="inventory-legend-item pointer-events-none"
@@ -324,14 +317,16 @@
                                                     <div class="inventory-legend-left">
                                                         <span class="inventory-legend-dot low-stock"></span>
                                                         <div class="space-y-2">
-                                                            <div class="skeleton-line" style="width: 66px; height: 12px;">
+                                                            <div class="skeleton-line"
+                                                                data-ui-presentation="presentation-7afaa8eede4f">
                                                             </div>
                                                             <div class="skeleton-line"
-                                                                style="width: 110px; height: 10px;">
+                                                                data-ui-presentation="presentation-ec95c252797e">
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div class="skeleton-line" style="width: 32px; height: 18px;"></div>
+                                                    <div class="skeleton-line"
+                                                        data-ui-presentation="presentation-0f7350a468c1"></div>
                                                 </div>
 
                                                 <div class="inventory-legend-item pointer-events-none"
@@ -341,14 +336,16 @@
                                                     <div class="inventory-legend-left">
                                                         <span class="inventory-legend-dot out-stock"></span>
                                                         <div class="space-y-2">
-                                                            <div class="skeleton-line" style="width: 82px; height: 12px;">
+                                                            <div class="skeleton-line"
+                                                                data-ui-presentation="presentation-be510d0d5823">
                                                             </div>
                                                             <div class="skeleton-line"
-                                                                style="width: 122px; height: 10px;">
+                                                                data-ui-presentation="presentation-4b79035b2acd">
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div class="skeleton-line" style="width: 32px; height: 18px;"></div>
+                                                    <div class="skeleton-line"
+                                                        data-ui-presentation="presentation-0f7350a468c1"></div>
                                                 </div>
                                             </div>
                                         </div>
@@ -357,19 +354,19 @@
                                             <div class="inventory-mini-pill total">
                                                 <div class="inventory-mini-pill-label">Total</div>
                                                 <div class="inventory-mini-pill-value skeleton-line"
-                                                    style="width: 42px; height: 18px; margin: 0 auto;"></div>
+                                                    data-ui-presentation="presentation-86ffbe9be8cb"></div>
                                             </div>
 
                                             <div class="inventory-mini-pill medicine">
                                                 <div class="inventory-mini-pill-label">Medicine</div>
                                                 <div class="inventory-mini-pill-value skeleton-line"
-                                                    style="width: 42px; height: 18px; margin: 0 auto;"></div>
+                                                    data-ui-presentation="presentation-86ffbe9be8cb"></div>
                                             </div>
 
                                             <div class="inventory-mini-pill supplies">
                                                 <div class="inventory-mini-pill-label">Supplies</div>
                                                 <div class="inventory-mini-pill-value skeleton-line"
-                                                    style="width: 42px; height: 18px; margin: 0 auto;"></div>
+                                                    data-ui-presentation="presentation-86ffbe9be8cb"></div>
                                             </div>
                                         </div>
                                     </div>
@@ -382,18 +379,9 @@
                 <div class="flex flex-col gap-5 min-w-0 order-first xl:order-none">
 
                     <div class="card quick-actions-card">
-                        <div class="card-header">
-                            <div class="card-header-left">
-                                <div class="card-header-icon">
-                                    <i class="fa-solid fa-bolt"></i>
-                                </div>
-                                <div>
-                                    <div class="card-title">Quick Actions</div>
-                                    <div class="card-subtitle">Frequently used admin shortcuts</div>
-                                </div>
-                            </div>
-                        </div>
-
+                        <x-card-header title="Quick Actions" subtitle="Frequently used admin shortcuts"
+                            icon="fa-solid fa-bolt" />
+                            
                         <div class="quick-actions-list">
                             <a href="{{ route('admin.reports.ai-generated') }}" class="quick-action quick-action-card">
                                 <span class="quick-action-icon">
@@ -449,7 +437,7 @@
 
 @section('scripts')
     @if (session('activeAppointmentModal'))
-        <script>
+        <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
             document.addEventListener("DOMContentLoaded", function() {
                 var modal = document.getElementById("activeAppointmentModal");
                 var closeBtn = document.getElementById("closeActiveApptModalBtn");
@@ -469,7 +457,7 @@
         </script>
     @endif
 
-    <script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         let adminInventoryOverviewChart = null;
         let adminGadChart = null;
         let adminGadChartData = null;
@@ -486,9 +474,9 @@
         }
 
         function adminDashboardChartGridColor() {
-            return isAdminDashboardDark()
-                ? 'rgba(255,255,255,0.10)'
-                : 'rgba(148,163,184,0.22)';
+            return isAdminDashboardDark() ?
+                'rgba(255,255,255,0.10)' :
+                'rgba(148,163,184,0.22)';
         }
 
         function setDashboardGadEmptyState(message, isError = false) {
@@ -513,9 +501,9 @@
                 icon: isError ? 'fa-triangle-exclamation' : 'fa-venus-mars',
                 title: isError ? 'Unable to load GAD analytics' : 'No GAD analytics data yet',
                 message: message || (
-                    isError
-                        ? 'Gender and development data could not be loaded right now.'
-                        : 'Gender and development insights will appear once completed records are available.'
+                    isError ?
+                    'Gender and development data could not be loaded right now.' :
+                    'Gender and development insights will appear once completed records are available.'
                 )
             });
         }
@@ -528,7 +516,11 @@
             const hasData = female.reduce((sum, value) => sum + Number(value || 0), 0) +
                 male.reduce((sum, value) => sum + Number(value || 0), 0) > 0;
 
-            adminGadChartData = { labels, female, male };
+            adminGadChartData = {
+                labels,
+                female,
+                male
+            };
 
             if (!canvas) {
                 return;
@@ -564,8 +556,7 @@
                 type: 'bar',
                 data: {
                     labels,
-                    datasets: [
-                        {
+                    datasets: [{
                             label: 'Female',
                             data: female,
                             backgroundColor: '#EC4899',
@@ -590,7 +581,9 @@
                             position: 'top',
                             labels: {
                                 color: textColor,
-                                font: { size: 11 },
+                                font: {
+                                    size: 11
+                                },
                                 usePointStyle: true,
                                 boxWidth: 8
                             }
@@ -616,14 +609,20 @@
                                 display: true,
                                 text: 'Number of Cases',
                                 color: textColor,
-                                font: { size: 10 }
+                                font: {
+                                    size: 10
+                                }
                             }
                         },
                         y: {
-                            grid: { display: false },
+                            grid: {
+                                display: false
+                            },
                             ticks: {
                                 color: textColor,
-                                font: { size: 10 }
+                                font: {
+                                    size: 10
+                                }
                             }
                         }
                     }

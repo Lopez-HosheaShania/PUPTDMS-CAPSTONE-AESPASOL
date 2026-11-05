@@ -101,6 +101,11 @@ return [
         'hpanel_url' => env('HOSTINGER_HPANEL_URL', 'https://hpanel.hostinger.com'),
     ],
 
+    'ocms' => [
+        'base_url' => env('OCMS_EXTERNAL_API_URL'),
+        'api_key' => env('OCMS_EXTERNAL_API_KEY'),
+    ],
+
     'ogos' => [
         'base_url' => env('OGOS_API_BASE_URL'),
         'token_url' => env('OGOS_M2M_TOKEN_URL'),

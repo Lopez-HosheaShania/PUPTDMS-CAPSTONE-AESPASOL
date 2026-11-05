@@ -18,6 +18,8 @@ use App\Models\MedicalHistoryAnswer;
 use App\Models\MedicalHistoryDiseaseAnswer;
 use App\Models\Patient;
 use App\Models\PatientOdontogram;
+use App\Support\DentalServicesPatientName;
+use App\Support\DentalServicesProcedureTiming;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -25,6 +27,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use setasign\Fpdi\Fpdi;
 use App\Models\ServiceType;
+use App\Services\MonthlyDentalReport;
 
 class DentistReportController extends Controller
 {
@@ -97,24 +100,16 @@ class DentistReportController extends Controller
             : null;
 
         $lowStockItems = DB::table('inventory_items')
-            ->whereRaw('(qty - used) <= (qty * 0.30)')->count();
+            ->whereRaw(\App\Models\Inventory::lowStockSql())->count();
 
         [$gadLabels, $gadFemale, $gadMale] = $this->buildGadData($thisYear, $thisMonth);
 
         [$weekLabels, $weeklyDatasets] = $this->buildWeeklyData($thisYear, $thisMonth);
 
-        $totalAppointmentsThisMonth = Appointment::whereYear('appointment_date', $thisYear)
-            ->whereMonth('appointment_date', $thisMonth)
-            ->count();
-
-        $cancelledAppointments = Appointment::whereYear('appointment_date', $thisYear)
-            ->whereMonth('appointment_date', $thisMonth)
-            ->where('status', 'cancelled')
-            ->count();
-
-        $cancellationRate = $totalAppointmentsThisMonth > 0
-            ? round(($cancelledAppointments / $totalAppointmentsThisMonth) * 100)
-            : 0;
+        $cancellationBreakdown = app(\App\Services\AppointmentCancellationAnalytics::class)->currentMonth($now);
+        $totalAppointmentsThisMonth = $cancellationBreakdown['total_scheduled'] ?? 0;
+        $cancelledAppointments = $cancellationBreakdown['total_cancelled'] ?? 0;
+        $cancellationRate = $cancellationBreakdown['cancellation_rate'] ?? null;
 
         $daysElapsedThisMonth = max(1, min($now->day, $now->daysInMonth));
         $avgPatientsPerDay = round($patientsThisMonth / $daysElapsedThisMonth, 1);
@@ -134,8 +129,18 @@ class DentistReportController extends Controller
                 '=',
                 'service_types.id'
             )
-            ->whereYear('appointments.appointment_date', $thisYear)
-            ->whereMonth('appointments.appointment_date', $thisMonth)
+            ->whereYear(
+                'appointments.appointment_date',
+                $thisYear
+            )
+            ->whereMonth(
+                'appointments.appointment_date',
+                $thisMonth
+            )
+            ->where(
+                'appointments.status',
+                'completed'
+            )
             ->select(
                 'service_types.name as name',
                 DB::raw('COUNT(*) as total')
@@ -155,7 +160,7 @@ class DentistReportController extends Controller
         $suppliesItems = $inventoryItems->where('category', 'Supplies')->values();
 
         $lowStockRows = DB::table('inventory_items')
-            ->whereRaw('(qty - used) <= (qty * 0.30)')
+            ->whereRaw(\App\Models\Inventory::lowStockSql())
             ->orderByRaw('(qty - used) ASC')->get();
 
         $lowStockMedicine = $lowStockRows->where('category', 'Medicine')->values();
@@ -204,6 +209,7 @@ class DentistReportController extends Controller
         );
 
         return view('shared.reports', [
+            'cancellationBreakdown' => $cancellationBreakdown,
             'layoutRole' => 'dentist',
             'pageTitle' => 'Reports & Analytics',
             'pageShellClass' => 'app-page-shell dentist-report-page',
@@ -288,6 +294,8 @@ class DentistReportController extends Controller
 
             $pdf->AddPage($size['orientation'], [$size['width'], $size['height']]);
             $pdf->useTemplate($templatePage, 0, 0, $size['width'], $size['height'], true);
+            app(\App\Services\ReportSignatory::class)->draw($pdf,
+                $template->document_type === 'monthly_report' ? 'monthly_dental_report' : $template->document_type);
         }
 
         AuditLogger::log(
@@ -319,7 +327,7 @@ class DentistReportController extends Controller
             'gad_report' => 'gad-accomplishment-template.pdf',
             'dental_supplies_inventory' => 'dental-supplies-inventory-template.pdf',
             'medicine_inventory' => 'medicine-inventory-template.pdf',
-            'monthly_report' => 'monthly-report-template.pdf',
+            'monthly_report' => 'dental-monthly-report-template.pdf',
             'dental_cases' => 'dental-cases-template.pdf',
         ];
 
@@ -334,7 +342,7 @@ class DentistReportController extends Controller
             'GADR-DEFAULT' => 'gad-accomplishment-template.pdf',
             'DINV-DEFAULT' => 'dental-supplies-inventory-template.pdf',
             'MINV-DEFAULT' => 'medicine-inventory-template.pdf',
-            'MONTHLY-REPORT' => 'monthly-report-template.pdf',
+            'MONTHLY-REPORT' => 'dental-monthly-report-template.pdf',
             'DCASE-DEFAULT' => 'dental-cases-template.pdf',
         ];
 
@@ -446,7 +454,11 @@ class DentistReportController extends Controller
             abort(404, 'GAD report PDF template was not found.');
         }
 
-        $counts = $this->buildGadPdfCounts($from, $to);
+        $appointments = Appointment::with(['patient', 'procedure', 'dentist'])
+            ->where('status', 'completed')->whereHas('patient')
+            ->whereDate('appointment_date', '>=', $from->toDateString())
+            ->whereDate('appointment_date', '<=', $to->toDateString())->get();
+        $counts = $this->buildGadPdfCounts($from, $to, $appointments);
 
         $pdf = new Fpdi('P', 'pt');
         $pdf->SetAutoPageBreak(false);
@@ -482,6 +494,7 @@ class DentistReportController extends Controller
                 $from,
                 $to
             );
+            app(\App\Services\ReportSignatory::class)->draw($pdf, 'gad_report', $appointments);
         }
         AuditLogger::log(
             'download',
@@ -732,6 +745,7 @@ class DentistReportController extends Controller
 
         $records = Appointment::with([
             'patient.medicalHistory',
+            'patient.user.profile',
             'procedure',
         ])
             ->where('status', 'completed')
@@ -1134,6 +1148,7 @@ class DentistReportController extends Controller
                     $chunk->values(),
                     strtoupper(trim((string) ($templateRecord->code ?? '')))
                 );
+                app(\App\Services\ReportSignatory::class)->draw($pdf, 'daily_treatment_record', $chunk);
             }
         }
 
@@ -1346,6 +1361,7 @@ class DentistReportController extends Controller
                     $from,
                     $to
                 );
+                app(\App\Services\ReportSignatory::class)->draw($pdf, 'dental_cases', $appointments);
             }
         }
 
@@ -1368,28 +1384,50 @@ class DentistReportController extends Controller
             ->header('Pragma', 'no-cache');
     }
 
-    public function downloadMonthlyReport(Request $request)
+    private function monthlyReportRules(): array
+    {
+        return [
+            'document_template_id' => ['required', 'integer', Rule::exists('document_templates', 'id')
+                ->where('document_type', 'monthly_report')->where('status', 'active')->whereNull('deleted_at')],
+            'date_from' => ['required', 'date_format:Y-m-d', 'before_or_equal:today'],
+            'date_to' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:date_from', 'before_or_equal:today'],
+        ];
+    }
+
+    public function monthlyReportCounts(Request $request, MonthlyDentalReport $report)
+    {
+        abort_unless(Auth::check(), 403);
+        $validated = $request->validate($this->monthlyReportRules());
+        $from = Carbon::parse($validated['date_from'])->startOfDay();
+        $to = Carbon::parse($validated['date_to'] ?? $validated['date_from'])->endOfDay();
+        $preview = $report->preview($report->appointments($from, $to));
+
+        return response()->json([
+            ...$preview,
+            'counts_period' => $from->toDateString().'|'.$to->toDateString(),
+        ]);
+    }
+
+    public function downloadMonthlyReport(Request $request, MonthlyDentalReport $report)
     {
         if (! Auth::check()) {
             abort(403, 'Unauthorized');
         }
 
-        $validated = $request->validate([
-            'report_name' => ['required', 'string', 'max:100'],
-            'document_template_id' => ['required', 'integer', 'exists:document_templates,id'],
-            'date_from' => ['required', 'date', 'before_or_equal:today'],
-            'date_to' => ['nullable', 'date', 'after_or_equal:date_from', 'before_or_equal:today'],
-            'quantity' => ['required', 'integer', 'min:1', 'max:100'],
-        ]);
-
-        $templateRecord = DocumentTemplate::query()
-            ->whereKey($validated['document_template_id'])
-            ->where('status', 'active')
-            ->firstOrFail();
-
-        if ($templateRecord->document_type !== 'monthly_report') {
-            abort(422, 'This download route is only for Monthly Report.');
+        $countRules = ['report_counts' => ['required', 'array:'.implode(',', array_keys(MonthlyDentalReport::ROWS))]];
+        foreach (MonthlyDentalReport::ROWS as $row => $label) {
+            $countRules['report_counts.'.$row] = ['required', 'array:'.implode(',', array_keys(MonthlyDentalReport::COLUMNS))];
+            foreach (MonthlyDentalReport::COLUMNS as $column => $name) {
+                $countRules['report_counts.'.$row.'.'.$column] = ['required', 'integer', 'min:0', 'max:99999'];
+            }
         }
+        $validated = $request->validate([
+            ...$this->monthlyReportRules(),
+            ...$countRules,
+            'report_name' => ['required', 'string', 'max:100'],
+            'quantity' => ['required', 'integer', 'min:1', 'max:100'],
+            'counts_confirmed' => ['required', 'accepted'],
+        ]);
 
         $from = Carbon::parse($validated['date_from'])->startOfDay();
 
@@ -1397,7 +1435,9 @@ class DentistReportController extends Controller
             ? Carbon::parse($validated['date_to'])->endOfDay()
             : $from->copy()->endOfDay();
 
-        $templatePath = storage_path('app/report-templates/monthly-report-template.pdf');
+        $request->validate(['counts_period' => ['required', Rule::in([$from->toDateString().'|'.$to->toDateString()])]]);
+
+        $templatePath = storage_path('app/report-templates/dental-monthly-report-template.pdf');
 
         if (! file_exists($templatePath)) {
             return response()->json([
@@ -1405,22 +1445,8 @@ class DentistReportController extends Controller
             ], 404);
         }
 
-        $appointments = Appointment::with(['patient', 'procedure'])
-            ->where('status', 'completed')
-            ->whereDate('appointment_date', '>=', $from->toDateString())
-            ->whereDate('appointment_date', '<=', $to->toDateString())
-            ->orderBy('appointment_date')
-            ->orderBy('appointment_time')
-            ->get()
-            ->filter(fn($appointment) => $appointment->patient);
-
-        if ($appointments->isEmpty()) {
-            return response()->json([
-                'message' => 'No completed dental services found for the selected Monthly Report date range.',
-            ], 422);
-        }
-
-        $reportData = $this->buildMonthlyReportData($appointments);
+        $appointments = $report->appointments($from, $to);
+        $counts = $validated['report_counts'];
 
         $pdf = new Fpdi('L', 'pt');
         $pdf->SetAutoPageBreak(false);
@@ -1436,13 +1462,15 @@ class DentistReportController extends Controller
             $pdf->AddPage($size['orientation'], [$size['width'], $size['height']]);
             $pdf->useTemplate($template, 0, 0, $size['width'], $size['height'], true);
 
-            $this->drawMonthlyReportPage($pdf, $reportData, $from, $to);
+            $report->draw($pdf, $counts, $from, $to);
+            app(\App\Services\ReportSignatory::class)->draw($pdf, 'monthly_dental_report', $appointments);
         }
 
         AuditLogger::log(
             'download',
             'dentist_reports',
-            'Dentist downloaded Monthly Report PDF for ' . $appointments->count() . ' completed appointment(s).'
+            'Dentist downloaded Monthly Dental Report PDF with reviewed generation-only counts for '
+                .$appointments->count().' completed appointment(s).'
         );
 
         $safeName = preg_replace('/[^A-Za-z0-9_\-]/', '_', $validated['report_name']);
@@ -1709,7 +1737,9 @@ class DentistReportController extends Controller
                 $groups[$groupKey][$diagnosis] = 0;
             }
 
-            $groups[$groupKey][$diagnosis]++;
+            $groups[$groupKey][$diagnosis] += \App\Support\DentalCaseTeeth::count(
+                $appointment->procedure?->odontogram_data
+            );
         }
 
         foreach ($groups as $groupKey => $cases) {
@@ -1725,167 +1755,6 @@ class DentistReportController extends Controller
         }
 
         return $groups;
-    }
-
-    private function buildMonthlyReportData($appointments): array
-    {
-        $rows = ['student', 'faculty', 'administrative', 'dependent'];
-
-        $columns = [
-            'actual_patient',
-            'rde',
-            'charting',
-            'inquiry',
-            'rx',
-            'med_rx',
-            'extraction',
-            'prophylaxis',
-            'temporary',
-            'permanent',
-            'panoramic',
-            'periapical',
-            'consent',
-            'clearance',
-            'certification',
-            'referral_dentist',
-            'referral_medical',
-            'suture_removal',
-            'reinstall_jacket',
-        ];
-
-        $data = [];
-
-        foreach ($rows as $row) {
-            foreach ($columns as $column) {
-                $data[$row][$column] = 0;
-            }
-
-            $data[$row]['patient_ids'] = [];
-        }
-
-        foreach ($appointments as $appointment) {
-            $patient = $appointment->patient;
-
-            if (! $patient) {
-                continue;
-            }
-
-            $rowKey = $this->classifyMonthlyReportPatient($patient);
-            $data[$rowKey]['patient_ids'][$patient->id] = true;
-
-            $columnKey = $this->classifyMonthlyReportService(
-                $this->getMonthlyReportServiceLabel($appointment)
-            );
-
-            if ($columnKey && array_key_exists($columnKey, $data[$rowKey])) {
-                $data[$rowKey][$columnKey]++;
-            }
-        }
-
-        foreach ($rows as $row) {
-            $data[$row]['actual_patient'] = count($data[$row]['patient_ids']);
-            unset($data[$row]['patient_ids']);
-        }
-
-        $data['total'] = [];
-
-        foreach ($columns as $column) {
-            $data['total'][$column] = 0;
-
-            foreach ($rows as $row) {
-                $data['total'][$column] += (int) ($data[$row][$column] ?? 0);
-            }
-        }
-
-        return $data;
-    }
-
-    private function classifyMonthlyReportPatient($patient): string
-    {
-        return $this->categorizePatientForReports($patient);
-    }
-
-    private function classifyMonthlyReportService(?string $serviceType): ?string
-    {
-        $service = strtolower(trim((string) $serviceType));
-
-        if ($service === '') {
-            return null;
-        }
-
-        if (str_contains($service, 'rde')) {
-            return 'rde';
-        }
-
-        if (str_contains($service, 'chart')) {
-            return 'charting';
-        }
-
-        if (str_contains($service, 'inquiry') || str_contains($service, 'consult')) {
-            return 'inquiry';
-        }
-
-        if (str_contains($service, 'med') && str_contains($service, 'rx')) {
-            return 'med_rx';
-        }
-
-        if (str_contains($service, 'rx') || str_contains($service, 'prescription')) {
-            return 'rx';
-        }
-
-        if (str_contains($service, 'extract')) {
-            return 'extraction';
-        }
-
-        if (str_contains($service, 'prophy') || str_contains($service, 'cleaning') || str_contains($service, 'oral prophylaxis')) {
-            return 'prophylaxis';
-        }
-
-        if (str_contains($service, 'temporary')) {
-            return 'temporary';
-        }
-
-        if (str_contains($service, 'permanent')) {
-            return 'permanent';
-        }
-
-        if (str_contains($service, 'panoramic')) {
-            return 'panoramic';
-        }
-
-        if (str_contains($service, 'periapical')) {
-            return 'periapical';
-        }
-
-        if (str_contains($service, 'consent')) {
-            return 'consent';
-        }
-
-        if (str_contains($service, 'clearance')) {
-            return 'clearance';
-        }
-
-        if (str_contains($service, 'cert')) {
-            return 'certification';
-        }
-
-        if (str_contains($service, 'dentist') && str_contains($service, 'referral')) {
-            return 'referral_dentist';
-        }
-
-        if (str_contains($service, 'medical') && str_contains($service, 'referral')) {
-            return 'referral_medical';
-        }
-
-        if (str_contains($service, 'suture')) {
-            return 'suture_removal';
-        }
-
-        if (str_contains($service, 'jacket')) {
-            return 'reinstall_jacket';
-        }
-
-        return 'inquiry';
     }
 
     private function dentalCasesPages(
@@ -1970,50 +1839,8 @@ class DentistReportController extends Controller
             return null;
         }
 
-        $diagnosis = $this->normalizeReportServiceLabel($diagnosis, '');
-        if ($this->isDentalCaseProcedureLabel($diagnosis)) {
-            return null;
-        }
-
-        return $diagnosis;
-    }
-
-    private function isDentalCaseProcedureLabel(string $diagnosis): bool
-    {
-        static $procedureLabels = null;
-
-        if ($procedureLabels === null) {
-            $procedureLabels = ServiceType::query()
-                ->pluck('name')
-                ->map(fn($name) => $this->normalizeDentalCaseLabel($name))
-                ->filter()
-                ->all();
-        }
-
-        return in_array(
-            $this->normalizeDentalCaseLabel($diagnosis),
-            $procedureLabels,
-            true
-        );
-    }
-
-    private function normalizeDentalCaseLabel(?string $value): string
-    {
-        return preg_replace(
-            '/[^a-z0-9]+/',
-            '',
-            strtolower(trim((string) $value))
-        ) ?? '';
-    }
-
-    private function getMonthlyReportServiceLabel(Appointment $appointment): string
-    {
-        $service = trim((string) ($appointment->service_type_name ?? ''));
-        if ($service === '' && filled($appointment->procedure?->diagnosis)) {
-            $service = trim((string) $appointment->procedure->diagnosis);
-        }
-
-        return $this->normalizeReportServiceLabel($service, 'Dental Service');
+        // This is an explicitly saved diagnosis, even if a service shares its name.
+        return $this->normalizeReportServiceLabel($diagnosis, '');
     }
 
     private function normalizeReportServiceLabel(?string $value, string $fallback = 'Dental Service'): string
@@ -2021,67 +1848,6 @@ class DentistReportController extends Controller
         $value = preg_replace('/\s+/', ' ', trim((string) $value)) ?? '';
 
         return $value !== '' ? $value : $fallback;
-    }
-
-    private function drawMonthlyReportPage(Fpdi $pdf, array $reportData, Carbon $from, Carbon $to): void
-    {
-        $pdf->SetTextColor(0, 0, 0);
-
-        $pdf->SetFillColor(255, 255, 255);
-        $pdf->Rect(318, 50, 165, 18, 'F');
-
-        $pdf->SetFont('Helvetica', 'B', 8);
-        $this->drawCenteredPdfText(
-            $pdf,
-            397,
-            59,
-            $this->formatReportPeriodLabel($from, $to, 'As of'),
-            165,
-            8
-        );
-
-        $rowY = [
-            'student' => 176.8,
-            'faculty' => 207.2,
-            'administrative' => 237.8,
-            'dependent' => 268.3,
-            'total' => 304.8,
-        ];
-
-        $colX = [
-            'actual_patient' => 73.7,
-            'rde' => 134.6,
-            'charting' => 169.4,
-            'inquiry' => 205.2,
-            'rx' => 238.0,
-            'med_rx' => 273.1,
-            'extraction' => 308.9,
-            'prophylaxis' => 345.4,
-            'temporary' => 383.5,
-            'permanent' => 421.0,
-            'panoramic' => 458.9,
-            'periapical' => 497.3,
-            'consent' => 531.8,
-            'clearance' => 564.8,
-            'certification' => 602.4,
-            'referral_dentist' => 635.0,
-            'referral_medical' => 661.7,
-            'suture_removal' => 696.0,
-            'reinstall_jacket' => 735.5,
-        ];
-
-        foreach ($rowY as $rowKey => $y) {
-            foreach ($colX as $colKey => $x) {
-                $value = (int) ($reportData[$rowKey][$colKey] ?? 0);
-
-                if ($value === 0) {
-                    continue;
-                }
-
-                $pdf->SetFont('Helvetica', 'B', 7);
-                $this->drawPdfCell($pdf, $x, $y, (string) $value, 18, 7, 'C');
-            }
-        }
     }
 
     private function classifyDentalCasesPatient($patient): string
@@ -2110,6 +1876,10 @@ class DentistReportController extends Controller
             160,
             10
         );
+
+        // The source PDF omits this heading in the administrative section.
+        $pdf->SetFont('Helvetica', '', 11.04);
+        $this->drawPdfCell($pdf, 252, 405, 'DIAGNOSIS', 208, 12, 'L');
 
         $this->drawDentalCasesSection(
             $pdf,
@@ -2495,7 +2265,7 @@ class DentistReportController extends Controller
                 $treatment = 'Dental Service';
             }
 
-            $attending = trim((string) ($appointment->dentist->name ?? ''));
+            $attending = (string) $appointment->dentist_name;
 
             if ($attending === '') {
                 $attending = 'Not assigned';
@@ -3369,28 +3139,10 @@ class DentistReportController extends Controller
                 $procedure = $appointment->procedure;
                 $demographics = $this->getPatientDemographics($patient);
 
-                $requestedDateTime = '';
-
-                if (!empty($appointment->appointment_date)) {
-                    $requestedDateTime = Carbon::parse($appointment->appointment_date)->format('m/d/y');
-                }
-
-                if (!empty($appointment->appointment_time)) {
-                    $timeText = $this->formatPdfTime($appointment->appointment_time);
-                    $requestedDateTime .= $requestedDateTime !== '' ? '  |  ' . $timeText : $timeText;
-                }
-
-                $processedDateTime = '';
-
-                if ($procedure?->procedure_completed_at) {
-                    $processedDateTime = Carbon::parse($procedure->procedure_completed_at)->format('m/d/y')
-                        . '  |  '
-                        . Carbon::parse($procedure->procedure_completed_at)->format('h:i A');
-                } elseif (!empty($appointment->updated_at)) {
-                    $processedDateTime = Carbon::parse($appointment->updated_at)->format('m/d/y')
-                        . '  |  '
-                        . Carbon::parse($appointment->updated_at)->format('h:i A');
-                }
+                $timeIn = DentalServicesProcedureTiming::requestedTimeIn($appointment);
+                $timeProcessed = DentalServicesProcedureTiming::timeProcessed($appointment);
+                $requestedDateTime = $timeIn?->format('m/d/y  |  h:i A') ?? '';
+                $processedDateTime = $timeProcessed?->format('m/d/y  |  h:i A') ?? '';
 
                 return [
                     'id' => $appointment->id,
@@ -3408,12 +3160,8 @@ class DentistReportController extends Controller
                     'minutes_processed' => $this->formatPdfDurationMinutes(
                         (int) ($procedure?->procedure_duration_seconds ?? 0)
                     ),
-                    'time_in' => !empty($appointment->appointment_time)
-                        ? $this->formatPdfTime($appointment->appointment_time)
-                        : null,
-                    'time_out' => $procedure?->procedure_completed_at
-                        ? Carbon::parse($procedure->procedure_completed_at)->format('h:i A')
-                        : null,
+                    'time_in' => $timeIn?->format('h:i A'),
+                    'time_out' => $timeProcessed?->format('h:i A'),
                     'has_signature' => filled($patient?->medicalHistory?->patient_signature),
                     'signature_path' => $patient?->medicalHistory?->patient_signature,
                     'signature_url' => filled($patient?->medicalHistory?->patient_signature)
@@ -3441,8 +3189,13 @@ class DentistReportController extends Controller
             return '';
         }
 
-        if ($this->categorizePatientForReports($patient) === 'faculty') {
-            return 'Faculty';
+        $category = $this->categorizePatientForReports($patient);
+        if ($category !== 'student') {
+            return match ($category) {
+                'faculty' => 'Faculty',
+                'administrative' => 'Administrative',
+                default => 'Dependent',
+            };
         }
 
         $programOrDept = trim((string) ($patient->course_code ?? ''));
@@ -3480,11 +3233,7 @@ class DentistReportController extends Controller
         }
 
         if ($category === 'faculty') {
-            return trim((string) (
-                $patient->faculty_code
-                ?? $patient->course_name
-                ?? 'Faculty'
-            )) ?: 'Faculty';
+            return 'Faculty';
         }
 
         if ($category === 'dependent') {
@@ -3560,8 +3309,18 @@ class DentistReportController extends Controller
                 '=',
                 'service_types.id'
             )
-            ->whereYear('appointments.appointment_date', $year)
-            ->whereMonth('appointments.appointment_date', $month)
+            ->whereYear(
+                'appointments.appointment_date',
+                $year
+            )
+            ->whereMonth(
+                'appointments.appointment_date',
+                $month
+            )
+            ->where(
+                'appointments.status',
+                'completed'
+            )
             ->select(
                 'service_types.id',
                 'service_types.name',
@@ -3592,13 +3351,28 @@ class DentistReportController extends Controller
                 '=',
                 'service_types.id'
             )
-            ->whereYear('appointments.appointment_date', $year)
-            ->whereMonth('appointments.appointment_date', $month)
-            ->whereIn('appointments.service_type_id', $topServiceIds)
+            ->whereYear(
+                'appointments.appointment_date',
+                $year
+            )
+            ->whereMonth(
+                'appointments.appointment_date',
+                $month
+            )
+            ->where(
+                'appointments.status',
+                'completed'
+            )
+            ->whereIn(
+                'appointments.service_type_id',
+                $topServiceIds
+            )
             ->select(
                 'appointments.service_type_id',
                 'service_types.name as service_type',
-                DB::raw('CEIL(DAY(appointments.appointment_date) / 7) as week_num'),
+                DB::raw(
+                    'CEIL(DAY(appointments.appointment_date) / 7) as week_num'
+                ),
                 DB::raw('COUNT(*) as total')
             )
             ->groupBy(
@@ -3607,6 +3381,7 @@ class DentistReportController extends Controller
                 'week_num'
             )
             ->get();
+
 
         $chartColors = [
             ['border' => '#8B0000', 'bg' => 'rgba(139,0,0,0.08)'],
@@ -3700,7 +3475,7 @@ class DentistReportController extends Controller
         $pdf->Cell($width, $height, $text, 0, 0, 'C');
     }
 
-    private function buildGadPdfCounts(Carbon $from, Carbon $to): array
+    private function buildGadPdfCounts(Carbon $from, Carbon $to, ?\Illuminate\Support\Collection $appointments = null): array
     {
         $counts = [
             'gad_male' => [0, 0, 0, 0, 0],
@@ -3712,7 +3487,7 @@ class DentistReportController extends Controller
             'total' => [0, 0, 0, 0, 0],
         ];
 
-        $appointments = Appointment::with('patient')
+        $appointments ??= Appointment::with('patient')
             ->where('status', 'completed')
             ->whereDate('appointment_date', '>=', $from->toDateString())
             ->whereDate('appointment_date', '<=', $to->toDateString())
@@ -3899,9 +3674,6 @@ class DentistReportController extends Controller
             ? Carbon::parse($documentRequest->approved_at)->format('F d, Y')
             : Carbon::parse($documentRequest->updated_at)->format('F d, Y');
 
-        $dentistName = $this->getCurrentDentistNameForPdf();
-        $licenseNumber = (string) config('app.dentist_license_no', '');
-
         $pdf->SetTextColor(0, 0, 0);
 
         $pdf->SetFont('Helvetica', '', 10.5);
@@ -3913,39 +3685,7 @@ class DentistReportController extends Controller
         $pdf->SetFont('Helvetica', '', 10.5);
         $this->drawCenteredPdfText($pdf, 492, 302, $examinedDate, 140, 12);
 
-        if ($dentistName !== '') {
-            $pdf->SetFont('Helvetica', 'B', 10.5);
-            $this->drawCenteredPdfText($pdf, 448, 418, $dentistName, 134, 12);
-        }
-
-        if ($licenseNumber !== '') {
-            $pdf->SetFont('Helvetica', '', 10.5);
-            $this->drawCenteredPdfText($pdf, 492, 440, $licenseNumber, 129, 12);
-        }
-    }
-
-    private function getCurrentDentistNameForPdf(): string
-    {
-        /** @var \App\Models\User|null $user */
-        $user = Auth::user();
-
-        if (! $user) {
-            return '';
-        }
-
-        $directName = trim((string) ($user->name ?? ''));
-
-        if ($directName !== '') {
-            return $directName;
-        }
-
-        $parts = array_filter([
-            $user->first_name ?? null,
-            $user->middle_name ?? null,
-            $user->last_name ?? null,
-        ]);
-
-        return trim(implode(' ', $parts));
+        $this->drawClearanceSignatory($pdf, $documentRequest, 419.611, 441.68);
     }
 
     private function drawDentalClearancePage(Fpdi $pdf, DocumentRequest $documentRequest): void
@@ -3961,9 +3701,6 @@ class DentistReportController extends Controller
             ? Carbon::parse($documentRequest->approved_at)->format('F d, Y')
             : Carbon::parse($documentRequest->updated_at)->format('F d, Y');
 
-        $dentistName = $this->getCurrentDentistNameForPdf();
-        $licenseNumber = (string) config('app.dentist_license_no', '');
-
         $pdf->SetTextColor(0, 0, 0);
 
         $pdf->SetFont('Helvetica', '', 10.5);
@@ -3975,14 +3712,33 @@ class DentistReportController extends Controller
         $pdf->SetFont('Helvetica', '', 10.5);
         $this->drawCenteredPdfText($pdf, 492, 302, $examinedDate, 140, 12);
 
-        if ($dentistName !== '') {
-            $pdf->SetFont('Helvetica', 'B', 10.5);
-            $this->drawCenteredPdfText($pdf, 448, 418, $dentistName, 134, 12);
-        }
+        $this->drawClearanceSignatory($pdf, $documentRequest, 423.766, 445.835);
+    }
 
-        if ($licenseNumber !== '') {
+    private function drawClearanceSignatory(Fpdi $pdf, DocumentRequest $documentRequest, float $nameLineY, float $licenseLineY): void
+    {
+        $profile = app(\App\Services\ReportSignatory::class)->documentProfile($documentRequest);
+        $name = $this->preparePdfText(\App\Services\ReportSignatory::dentistNameForReport(
+            $profile?->name ?? \App\Support\DentistName::forDocumentRequest($documentRequest),
+            addSuffix: false,
+        ));
+        $pdf->SetTextColor(0, 0, 0);
+        $pdf->SetFont('Helvetica', 'B', 10.5);
+        $nameWidth = $pdf->GetStringWidth($name);
+        if ($nameWidth > 134) {
+            $pdf->SetFont('Helvetica', 'B', 10.5 * 134 / $nameWidth);
+            $nameWidth = $pdf->GetStringWidth($name);
+        }
+        if ($path = $profile?->signaturePath()) {
+            $this->drawPdfImageInBox($pdf, $path, 448, $nameLineY - 19, min(125, max(1, $nameWidth)), 26, false);
+        }
+        if ($name !== '') {
+            $pdf->Text(448 - $nameWidth / 2, $nameLineY - 1.5, $name);
+        }
+        if ($profile?->license_number) {
             $pdf->SetFont('Helvetica', '', 10.5);
-            $this->drawCenteredPdfText($pdf, 492, 440, $licenseNumber, 129, 12);
+            $license = $this->preparePdfText($profile->license_number);
+            $pdf->Text(491.64 - $pdf->GetStringWidth($license) / 2, $licenseLineY - 1.5, $license);
         }
     }
 
@@ -4200,9 +3956,9 @@ class DentistReportController extends Controller
                 ? Carbon::parse($appointment->appointment_date)->format('m/d/y')
                 : '';
 
-            $timeIn = $this->formatPdfTime($appointment->appointment_time ?? null);
+            $timeIn = DentalServicesProcedureTiming::requestedTimeIn($appointment)?->format('h:i A') ?? '';
 
-            $patientName = $this->formatPdfPatientNameSurnameFirst($patient?->name);
+            $patientName = DentalServicesPatientName::surnameFirst($patient);
             $patientName = $patientName !== '' ? $patientName : 'Unknown Patient';
 
             $programOrDept = $this->dentalServicesCourseYearSectionDisplay($patient);
@@ -4219,19 +3975,12 @@ class DentistReportController extends Controller
             $isPwd = (bool) ($patient->is_pwd ?? false);
 
             $procedure = $appointment->procedure;
-            $visitType = strtolower(trim((string) ($appointment->visit_type ?? $appointment->concern ?? '')));
-            $isWalkIn = (bool) ($appointment->is_walk_in ?? false);
-
-            $isEmergency = $isWalkIn || str_contains($visitType, 'emergency');
+            $isEmergency = $appointment->is_emergency;
             $isNonEmergency = ! $isEmergency;
 
-            $timeProcessed = $procedure?->procedure_started_at
-                ? $procedure->procedure_started_at->format('h:i A')
-                : $timeIn;
-
-            $processingTime = $this->formatPdfDurationMinutes(
-                (int) ($procedure?->procedure_duration_seconds ?? 0)
-            );
+            $timeProcessed = DentalServicesProcedureTiming::timeProcessed($appointment)?->format('h:i A') ?? '';
+            $minutesProcessed = DentalServicesProcedureTiming::minutesProcessed($appointment);
+            $processingTime = $minutesProcessed !== null ? (string) $minutesProcessed : '';
 
             if ($processingTime !== '') {
                 $processingTime .= ((int) $processingTime === 1) ? ' min' : ' mins';
@@ -4587,16 +4336,7 @@ class DentistReportController extends Controller
 
             $patient = $appointment->patient;
 
-            $requestedDateTime = '';
-
-            if (! empty($appointment->appointment_date)) {
-                $requestedDateTime = Carbon::parse($appointment->appointment_date)->format('m/d/y');
-            }
-
-            if (! empty($appointment->appointment_time)) {
-                $timeText = $this->formatPdfTime($appointment->appointment_time);
-                $requestedDateTime .= $requestedDateTime !== '' ? '  |  ' . $timeText : $timeText;
-            }
+            $requestedDateTime = DentalServicesProcedureTiming::requestedTimeIn($appointment)?->format('m/d/y  |  h:i A') ?? '';
 
             $patientName = trim((string) ($patient->name ?? 'Unknown Patient'));
 
@@ -4622,17 +4362,7 @@ class DentistReportController extends Controller
             }
 
             $procedure = $appointment->procedure;
-            $processedDateTime = '';
-
-            if ($procedure?->procedure_completed_at) {
-                $processedDateTime = Carbon::parse($procedure->procedure_completed_at)->format('m/d/y')
-                    . '  |  '
-                    . Carbon::parse($procedure->procedure_completed_at)->format('h:i A');
-            } elseif (! empty($appointment->updated_at)) {
-                $processedDateTime = Carbon::parse($appointment->updated_at)->format('m/d/y')
-                    . '  |  '
-                    . Carbon::parse($appointment->updated_at)->format('h:i A');
-            }
+            $processedDateTime = DentalServicesProcedureTiming::timeProcessed($appointment)?->format('m/d/y  |  h:i A') ?? '';
 
             $minutesProcessed = $this->formatPdfDurationMinutes(
                 (int) ($procedure?->procedure_duration_seconds ?? 0)
@@ -4936,29 +4666,6 @@ class DentistReportController extends Controller
         ], fn($value) => $value !== ''));
 
         return implode('  |  ', $parts);
-    }
-
-    private function formatPdfPatientNameSurnameFirst(?string $fullName): string
-    {
-        $fullName = trim((string) $fullName);
-
-        if ($fullName === '') {
-            return '';
-        }
-
-        $parts = preg_split('/\s+/', $fullName) ?: [];
-        $parts = array_values(array_filter($parts, fn($part) => trim((string) $part) !== ''));
-
-        if (count($parts) === 1) {
-            return $parts[0];
-        }
-
-        $surname = array_pop($parts);
-        $firstName = array_shift($parts) ?? '';
-        $remainingNames = trim(implode(' ', $parts));
-        $givenNames = trim($firstName . ' ' . $remainingNames);
-
-        return trim($surname . ', ' . $givenNames);
     }
 
     private function formatPdfDurationMinutes(int $seconds): string

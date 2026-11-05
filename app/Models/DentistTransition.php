@@ -32,6 +32,7 @@ class DentistTransition extends Model
         'pending_review',
         'handover_in_progress',
         'scheduled',
+        'active',
         'completed',
         'cancelled',
     ];
@@ -42,10 +43,20 @@ class DentistTransition extends Model
         'transfer',
         'long_term_leave',
         'termination',
+        'temporary_leave',
+        'deactivation',
+        'internal_reassignment',
+        'schedule_unavailability',
+        'emergency_replacement',
+        'suspension',
         'other',
     ];
 
     protected $fillable = [
+        'coverage_type',
+        'effective_date',
+        'end_date',
+        'activated_at',
         'dentist_id',
         'transition_type',
         'default_successor_dentist_id',
@@ -63,6 +74,9 @@ class DentistTransition extends Model
     ];
 
     protected $casts = [
+        'effective_date' => 'date',
+        'end_date' => 'date',
+        'activated_at' => 'datetime',
         'last_working_date' => 'date',
         'access_ends_at' => 'datetime',
         'completed_at' => 'datetime',
@@ -106,13 +120,14 @@ class DentistTransition extends Model
 
     public function getProgressPercentageAttribute(): int
     {
-        $total = $this->checklistItems->count();
-
+        if ($this->status === 'completed') {
+            return 100;
+        }
+        $total = $this->items->count();
         if ($total === 0) {
             return 0;
         }
-
-        $completed = $this->checklistItems->where('is_completed', true)->count();
+        $completed = $this->items->whereIn('transfer_status', ['transferred', 'excluded', 'manually_resolved'])->count();
 
         return (int) round(($completed / $total) * 100);
     }

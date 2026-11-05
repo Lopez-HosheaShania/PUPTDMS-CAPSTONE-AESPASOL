@@ -1,5 +1,5 @@
 <div id="rescheduleModal" class="ui-modal modal-theme-warning" aria-hidden="true" role="dialog" aria-modal="true"
-    aria-labelledby="rescheduleModalTitle" onclick="handleRescheduleBackdropClick(event)">
+    aria-labelledby="rescheduleModalTitle" data-ui-click="action-2c27020b29c8">
     <div class="ui-modal-card modal-xl modal-split-card">
 
         <div class="modal-hd">
@@ -162,7 +162,7 @@
             mb-2
             w-full
         "
-                                onclick="clearRescheduleSlotSelection()">
+                                data-ui-click="action-bfa80e93ba29">
                                 Clear selection
                             </button>
 
@@ -226,7 +226,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     function openRescheduleModalFromDay(id, name, datetime, serviceType, updateUrl) {
         openRescheduleModal({
             id,

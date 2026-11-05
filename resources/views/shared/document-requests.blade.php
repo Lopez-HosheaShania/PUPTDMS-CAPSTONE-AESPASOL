@@ -29,19 +29,7 @@ $docRequestsCollection = $docRequestsSource->getCollection();
 $docRequestsCollection = collect($docRequestsSource);
 }
 
-$normalizeStatus = function ($status) {
-$status = strtolower(str_replace('_', '-', (string) ($status ?: 'pending')));
-
-if (in_array($status, ['ready', 'ready-for-pickup', 'ready-for-release', 'released'], true)) {
-return 'approved';
-}
-
-if (!in_array($status, ['pending', 'approved', 'rejected'], true)) {
-return 'pending';
-}
-
-return $status;
-};
+$normalizeStatus = fn ($status) => \App\Models\DocumentRequest::normalizedStatus($status);
 
 $formatDocumentType = function ($type) {
 return ucwords(str_replace(['_', '-'], ' ', (string) ($type ?: 'Document')));
@@ -197,15 +185,7 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
                 </div>
             </div>
             @else
-            <div class="page-banner">
-                <div class="page-banner-inner">
-                    <div>
-                        <h1 class="page-title">
-                            Document Requests
-                        </h1>
-                    </div>
-                </div>
-            </div>
+            <x-page-banner title="Document Requests" />
             @endif
         </div>
 
@@ -228,17 +208,18 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
                         :options="$docRequestStatusOptions" callback="handleDocumentRequestStatusSelect" searchable
                         multiple search-placeholder="Search status..." />
 
-                    <button id="filterBtn" type="button" onclick="openFilterModal()" class="global-filter-btn"
+                    <button id="filterBtn" type="button" data-ui-click="action-6f3d9ae5533d" class="global-filter-btn"
                         data-tooltip="Filter" data-tooltip-tone="neutral" aria-label="Filter requests">
                         <i class="fa-solid fa-sliders"></i>
                         <span>Filter</span>
-                        <span id="filterBadge" class="filter-badge" style="display:none;"></span>
+                        <span id="filterBadge" class="filter-badge"
+                            data-ui-presentation="presentation-d0466aa33fa8"></span>
                     </button>
 
                     <x-view-toggle id="documentRequestsViewToggle" root="#mainContent"
                         storage-key="documentRequestsViewMode" list-label="List" grid-label="Grid" />
 
-                    <button id="externalClearFilterBtn" type="button" onclick="resetAdvancedFilters()"
+                    <button id="externalClearFilterBtn" type="button" data-ui-click="action-3c9443718a88"
                         class="global-filter-reset-btn hidden" aria-label="Reset filters" data-tooltip="Reset filters"
                         data-tooltip-tone="neutral">
                         <i class="fa-solid fa-rotate-left"></i>
@@ -303,10 +284,10 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
                 Active Filters
             </span>
 
-            <button id="clearAllChipsBtn" type="button" class="filter-clear-all ui-btn ui-btn-secondary ui-btn-sm">
-                <i class="fa-solid fa-rotate-left"></i>
-                <span>Clear All</span>
-            </button>
+            <x-button id="clearAllChipsBtn" type="button" variant="secondary" size="sm" icon="fa-solid fa-rotate-left"
+                class="filter-clear-all">
+                Clear All
+            </x-button>
         </div>
 
         <div id="activeChipsContainer" class="active-filters-container"></div>
@@ -335,7 +316,7 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
     <x-filter-group title="Document Details">
 
         <div data-global-selects>
-            <select id="fDocType" class="js-custom-select" aria-label="Document type">
+            <x-select id="fDocType" aria-label="Document type">
                 <option value="">
                     All document types
                 </option>
@@ -345,7 +326,7 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
                     {{ $type }}
                 </option>
                 @endforeach
-            </select>
+            </x-select>
         </div>
 
     </x-filter-group>
@@ -381,15 +362,15 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
         <div class="filter-date-grid">
 
             <div class="filter-date-input-wrap">
-                <input type="text" id="fDateFrom" class="form-input-custom js-flatpickr-date-range-from" placeholder="Start date" readonly
-                    autocomplete="off">
+                <input type="text" id="fDateFrom" class="form-input-custom js-flatpickr-date-range-from"
+                    placeholder="Start date" readonly autocomplete="off">
 
                 <i class="fa-regular fa-calendar"></i>
             </div>
 
             <div class="filter-date-input-wrap">
-                <input type="text" id="fDateTo" class="form-input-custom js-flatpickr-date-range-to" placeholder="End date" readonly
-                    autocomplete="off">
+                <input type="text" id="fDateTo" class="form-input-custom js-flatpickr-date-range-to"
+                    placeholder="End date" readonly autocomplete="off">
 
                 <i class="fa-regular fa-calendar"></i>
             </div>
@@ -402,7 +383,7 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
 
 <div id="approveModal" class="ui-modal modal-theme-success" aria-hidden="true">
 
-    <div class="ui-modal-card modal-md" onclick="event.stopPropagation()">
+    <div class="ui-modal-card modal-md" data-ui-click="action-22499e15f3ee">
 
         <div class="modal-hd">
             <div class="modal-heading">
@@ -485,14 +466,13 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
         </div>
 
         <div class="modal-ft">
-            <button type="button" class="ui-btn ui-btn-secondary" id="approveCancelBtn2">
+            <x-button id="approveCancelBtn2" type="button" variant="secondary">
                 Cancel
-            </button>
+            </x-button>
 
-            <button type="button" class="ui-btn ui-btn-success" id="approveConfirmBtn">
-                <i class="fa-solid fa-check"></i>
-                <span>Confirm Approval</span>
-            </button>
+            <x-button id="approveConfirmBtn" type="button" variant="success" icon="fa-solid fa-check">
+                Confirm Approval
+            </x-button>
         </div>
     </div>
 </div>
@@ -502,7 +482,7 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
 
 <div id="rejectModal" class="ui-modal modal-theme-danger" aria-hidden="true">
 
-    <div class="ui-modal-card modal-md" onclick="event.stopPropagation()">
+    <div class="ui-modal-card modal-md" data-ui-click="action-22499e15f3ee">
 
         <form id="rejectRequestForm" data-global-validation data-discard-form novalidate>
 
@@ -614,14 +594,13 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
             </div>
 
             <div class="modal-ft">
-                <button type="button" class="ui-btn ui-btn-secondary" data-discard-close="rejectModal">
+                <x-button type="button" variant="secondary" data-discard-close="rejectModal">
                     Cancel
-                </button>
+                </x-button>
 
-                <button type="submit" class="ui-btn ui-btn-danger" id="rejectConfirmBtn">
-                    <i class="fa-solid fa-ban"></i>
-                    <span>Confirm Rejection</span>
-                </button>
+                <x-button id="rejectConfirmBtn" type="submit" variant="danger" icon="fa-solid fa-ban">
+                    Confirm Rejection
+                </x-button>
             </div>
         </form>
     </div>
@@ -631,12 +610,12 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
 @endsection
 
 @section('scripts')
-<script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     const CSRF = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
-    const ADMIN_DOC_REQUESTS = @json($docRequestsPayload -> values());
+    const ADMIN_DOC_REQUESTS = @json($docRequestsPayload->values());
     const ADMIN_DOC_STATS = @json($docRequestStats);
-    const ADMIN_DOC_TYPES = @json($docRequestTypes -> values());
-    const DOCREQ_DEFAULT_DOC_TYPES = @json($defaultDocumentTypes -> values());
+    const ADMIN_DOC_TYPES = @json($docRequestTypes->values());
+    const DOCREQ_DEFAULT_DOC_TYPES = @json($defaultDocumentTypes->values());
 
     let allRequests = Array.isArray(ADMIN_DOC_REQUESTS) ? ADMIN_DOC_REQUESTS : [];
 
@@ -680,6 +659,10 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
     let currentViewMode = 'list';
 
     const DOCREQ_ROUTES = @json($routes ?? []);
+    const CAN_APPROVE_DOCUMENT_REQUESTS = @json(
+        auth()->user()?->hasPermission('approve_document_requests') ?? false);
+    const CAN_REJECT_DOCUMENT_REQUESTS = @json(
+        auth()->user()?->hasPermission('reject_document_requests') ?? false);
     const DOCREQ_METHODS = @json($methods ?? []);
     const DOCREQ_REFRESH_ITEMS = @json($refreshItems ?? []);
     const DOCREQ_INDEX_URL = DOCREQ_ROUTES.index || window.location.pathname;
@@ -1326,7 +1309,7 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
         if (filterSort !== 'newest') parts.push('Sort');
         const label = parts.length ? `Clear filter${parts.length > 1 ? 's' : ''} (${parts.join(', ')})` :
             'Reset';
-        return `<div style="margin-top:1.25rem;"><button class="btn-clear-filter" onclick="resetAllFilters()"><i class="fa-solid fa-filter-circle-xmark"></i>${label}</button></div>`;
+        return `<div data-ui-presentation="presentation-a3c9c5afaa4d"><button class="btn-clear-filter" data-ui-click="action-339eff24b32d"><i class="fa-solid fa-filter-circle-xmark"></i>${label}</button></div>`;
     }
 
     function resetAllFilters() {
@@ -1704,7 +1687,7 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
     }
 
     function jsStringArg(value) {
-        return JSON.stringify(String(value ?? '')).replace(/"/g, '&quot;');
+        return JSON.stringify(String(value ?? ''));
     }
 
     function getStatusBadgeClass(status) {
@@ -1728,29 +1711,33 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
                 request.status
             );
 
-        if (status !== 'pending') {
+        if (status !== 'pending' || (!CAN_APPROVE_DOCUMENT_REQUESTS && !CAN_REJECT_DOCUMENT_REQUESTS)) {
             return '';
         }
 
         return `
         <div class="ui-action-group">
+            ${CAN_APPROVE_DOCUMENT_REQUESTS ? `
             <button
                 type="button"
                 class="ui-action-btn ui-action-success"
                 data-tooltip="Approve request" data-tooltip-tone="start"
                 aria-label="Approve request"
-                onclick="event.stopPropagation(); openApprove(${request.id}, ${patientArg})">
+                data-ui-click="action-6f1c12e1421c" data-ui-click-arg-0="${window.uiAttribute(request.id)}" data-ui-click-arg-1="${window.uiAttribute(patientArg)}">
                 <i class="fa-solid fa-check"></i>
             </button>
+            ` : ''}
 
+            ${CAN_REJECT_DOCUMENT_REQUESTS ? `
             <button
                 type="button"
                 class="ui-action-btn ui-action-delete"
                 data-tooltip="Reject request" data-tooltip-tone="cancel"
                 aria-label="Reject request"
-                onclick="event.stopPropagation(); openReject(${request.id}, ${patientArg})">
+                data-ui-click="action-b2e920847258" data-ui-click-arg-0="${window.uiAttribute(request.id)}" data-ui-click-arg-1="${window.uiAttribute(patientArg)}">
                 <i class="fa-solid fa-xmark"></i>
             </button>
+            ` : ''}
         </div>
     `;
     }
@@ -1781,12 +1768,7 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
         return `
         <tr
             id="row-d-${r.id}"
-            onclick="
-                selectDocumentCard(
-                    'd',
-                    ${r.id}
-                )
-            "
+            data-ui-click="action-34bf4e6b59e3" data-ui-click-arg-0="${window.uiAttribute(r.id)}"
         >
             <td class="table-cell-main">
                 <div class="table-primary">
@@ -1872,7 +1854,7 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
         <article
             class="docreq-responsive-record"
             id="row-m-${r.id}"
-            onclick="selectDocumentCard('m', ${r.id})"
+            data-ui-click="action-3d5d881f4339" data-ui-click-arg-0="${window.uiAttribute(r.id)}"
         >
             <div class="docreq-responsive-record-head">
                 <div class="table-primary docreq-responsive-patient">
@@ -1973,7 +1955,7 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
         <article
             class="table-record-card docreq-grid-card"
             id="row-g-${r.id}"
-            onclick="selectDocumentCard('g', ${r.id})"
+            data-ui-click="action-88c34ac00542" data-ui-click-arg-0="${window.uiAttribute(r.id)}"
         >
             <div class="table-record-card-layout">
 
@@ -2421,30 +2403,18 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
                 pagination.to ?? null,
 
             containers: [
-                document.getElementById(
-                    'pagControlsTop'
-                ),
-                document.getElementById(
-                    'pagControls'
-                ),
+                document.getElementById('pagControlsTop'),
+                document.getElementById('documentRequestsPaginationBottom'),
             ],
 
             bars: [
-                document.getElementById(
-                    'docreqPaginationTopBar'
-                ),
-                document.getElementById(
-                    'docreqPaginationBottomBar'
-                ),
+                document.getElementById('docreqPaginationTopBar'),
+                document.getElementById('documentRequestsPagebarBottom'),
             ],
 
             infoElements: [
-                document.getElementById(
-                    'pageInfoTop'
-                ),
-                document.getElementById(
-                    'pageInfo'
-                ),
+                document.getElementById('pageInfoTop'),
+                document.getElementById('documentRequestsPageInfoBottom'),
             ],
 
             itemLabel: 'requests',
@@ -2947,9 +2917,7 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
                 });
         });
 
-        ['approveModal', 'rejectModal', 'filterModal']
-
-            .forEach(id => outside(id));
+        ['approveModal', 'rejectModal'].forEach(id => outside(id));
 
         const filterModal = document.getElementById('filterModal');
         document.getElementById('filterCloseBtn').addEventListener('click', closeFilterModal);

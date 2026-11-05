@@ -8,6 +8,10 @@ export default defineConfig({
             input: [
                 'resources/css/app.css',
                 'resources/js/app.js',
+                'resources/js/security.js',
+                'resources/css/csp-utilities.css',
+                'resources/css/vendor-fonts.css',
+                'resources/js/reports/pdf-tools.js',
                 'resources/css/pages/error-pages.css',
                 'resources/css/pages/auth/login.css',
                 'resources/css/pages/auth/backup-login.css',
@@ -19,7 +23,6 @@ export default defineConfig({
                 'resources/css/pages/admin/dentist-continuity.css',
                 'resources/css/pages/admin/document-templates.css',
                 'resources/css/pages/admin/role-permissions.css',
-                'resources/css/pages/admin/session-management.css',
                 'resources/css/pages/admin/system-logs.css',
                 'resources/css/pages/admin/system-settings.css',
                 'resources/css/pages/admin/user-management.css',
@@ -63,6 +66,10 @@ export default defineConfig({
     ],
 
     server: {
+        host: '127.0.0.1',
+        hmr: {
+            host: '127.0.0.1',
+        },
         watch: {
             ignored: [
                 '**/storage/framework/views/**',

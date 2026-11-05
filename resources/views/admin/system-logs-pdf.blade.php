@@ -58,7 +58,12 @@
                     </td>
                     <td>{{ ucwords(str_replace('_', ' ', $log->action ?? '')) }}</td>
                     <td>{{ ucwords(str_replace('_', ' ', $log->module ?? '')) }}</td>
-                    <td>{{ $log->full_description ?? 'No description provided.' }}</td>
+                    <td>
+                        {{ $log->description ?? 'No description provided.' }}
+                        @if ($log->display_details && $log->display_details !== $log->description)
+                            <div>{!! nl2br(e($log->display_details)) !!}</div>
+                        @endif
+                    </td>
                     <td>
                         @if ($log->is_archived)
                             Archived<br>

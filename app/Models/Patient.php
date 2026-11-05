@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 class Patient extends Model
 {
     use HasFactory;
+    use \App\Models\Concerns\ScopesClinicalPatients;
 
     private const COMMON_INFORMATION_ATTRIBUTES = [
         'phone',
@@ -421,6 +422,11 @@ class Patient extends Model
     public function medicalHistory()
     {
         return $this->hasOne(\App\Models\MedicalHistory::class);
+    }
+
+    public function recordClosure()
+    {
+        return $this->hasOne(PatientRecordClosure::class);
     }
 
     public function appointments()

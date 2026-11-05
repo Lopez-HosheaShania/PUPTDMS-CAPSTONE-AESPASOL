@@ -24,6 +24,9 @@ use App\Models\ServiceType;
 use App\Models\User;
 use App\Services\FacultyApiService;
 use App\Services\StudentApiService;
+use App\Services\CmsApiService;
+use App\Services\StudentTargetOptionService;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -38,8 +41,9 @@ use App\Helpers\BookingQuestions;
 
 class WalkInController extends Controller
 {
-    public function index()
-    {
+    public function index(
+        StudentTargetOptionService $studentTargetOptionService
+    ) {
         $serviceTypes = ServiceType::query()
             ->orderBy('name')
             ->get()
@@ -64,10 +68,13 @@ class WalkInController extends Controller
         $blockedDates = BlockedDate::orderBy('date')
             ->get();
 
+        $studentTargetOptions =
+            $studentTargetOptionService->get();
+
         $startDate = now()->startOfMonth()->subMonth();
         $endDate = now()->endOfMonth()->addMonths(3);
 
-        $appointmentCountsPerDay = Appointment::whereBetween('appointment_date', [
+        $appointmentCountsPerDay = Appointment::withoutGlobalScope('clinical_patients')->whereBetween('appointment_date', [
             $startDate->toDateString(),
             $endDate->toDateString(),
         ])
@@ -88,6 +95,7 @@ class WalkInController extends Controller
                 'diseases',
                 'schedules',
                 'blockedDates',
+                'studentTargetOptions',
                 'appointmentCountsPerDay',
                 'philippineHolidays',
                 'dentalQuestions',
@@ -2118,65 +2126,13 @@ class WalkInController extends Controller
         string $search,
         int $limit
     ): array {
-        $baseUrl = rtrim(
-            (string) env(
-                'OCMS_EXTERNAL_API_URL'
-            ),
-            '/'
-        );
-
-        $apiKey = (string) env(
-            'OCMS_EXTERNAL_API_KEY'
-        );
-
-        if (
-            $baseUrl === '' ||
-            $apiKey === ''
-        ) {
+        $cmsApi = app(CmsApiService::class);
+        if (! $cmsApi->isConfigured()) {
             return [];
         }
 
         try {
-            $response = Http::timeout(15)
-                ->acceptJson()
-                ->withHeaders([
-                    'X-External-Api-Key' =>
-                    $apiKey,
-                ])
-                ->get(
-                    $baseUrl .
-                        '/external/admins',
-
-                    array_filter([
-                        'search' =>
-                        $search !== ''
-                            ? $search
-                            : null,
-                    ])
-                );
-
-            if ($response->failed()) {
-                Log::error(
-                    'OCMS external admin search failed during walk-in',
-                    [
-                        'status' =>
-                        $response->status(),
-
-                        'body' =>
-                        $response->body(),
-                    ]
-                );
-
-                return [];
-            }
-
-            return collect(
-                is_array(
-                    $response->json('data')
-                )
-                    ? $response->json('data')
-                    : []
-            )
+            return collect($cmsApi->getAdmins(array_filter(['search' => $search])))
                 ->take($limit)
                 ->map(function (array $admin) {
                     $name = trim(
@@ -2202,9 +2158,7 @@ class WalkInController extends Controller
                     }
 
                     $externalId =
-                        $admin['external_admin_id']
-                        ?? $admin['id']
-                        ?? null;
+                        $admin['admin_id'];
 
                     $email = strtolower(
                         trim(
@@ -2255,7 +2209,7 @@ class WalkInController extends Controller
                         'email' => $email,
 
                         'phone' =>
-                        $admin['emergency_contact_no'] ?? null,
+                        $admin['contact_number'] ?: null,
 
                         'gender' =>
                         $admin['gender'] ?? null,
@@ -2302,11 +2256,7 @@ class WalkInController extends Controller
             Log::warning(
                 'OCMS external admin search unavailable during walk-in',
                 [
-                    'message' =>
-                    $e->getMessage(),
-
-                    'base_url' =>
-                    $baseUrl,
+                    'exception' => get_class($e),
                 ]
             );
 
@@ -2543,42 +2493,109 @@ class WalkInController extends Controller
         }
     }
 
-    public function storeGuest(Request $request)
+    public function checkGuestIdentity(Request $request)
     {
+        $validated = $request->validate([
+            'field' => [
+                'required',
+                'in:email,student_number',
+            ],
+            'value' => [
+                'required',
+                'string',
+                'max:255',
+            ],
+        ]);
+
+        $field = $validated['field'];
+        $value = trim($validated['value']);
+
+        if ($field === 'email') {
+            $email = strtolower($value);
+
+            $exists =
+                User::whereRaw(
+                    'LOWER(email) = ?',
+                    [$email]
+                )->exists()
+                ||
+                Patient::whereRaw(
+                    'LOWER(email) = ?',
+                    [$email]
+                )->exists();
+
+            return response()->json([
+                'exists' => $exists,
+                'message' => $exists
+                    ? 'This email is already associated with an existing patient account. Please select the patient from Existing / Unified DB instead.'
+                    : null,
+            ]);
+        }
+
+        $studentNumber = strtoupper($value);
+
+        $exists = DB::table(
+            'patient_student_information'
+        )
+            ->where(
+                'student_no',
+                $studentNumber
+            )
+            ->exists();
+
+        return response()->json([
+            'exists' => $exists,
+            'message' => $exists
+                ? 'This student number is already associated with an existing patient. Please select the existing patient instead.'
+                : null,
+        ]);
+    }
+
+    public function storeGuest(
+        Request $request,
+        StudentTargetOptionService $studentTargetOptionService
+    ) {
         $validated = $request->validate([
             'guest_first_name' => [
                 'required',
                 'string',
-                'max:100',
+                'min:2',
+                'max:20',
             ],
 
             'guest_middle_name' => [
                 'nullable',
                 'string',
-                'max:100',
+                'min:1',
+                'max:20',
             ],
 
             'guest_last_name' => [
                 'required',
                 'string',
-                'max:100',
+                'min:2',
+                'max:20',
             ],
 
             'guest_suffix' => [
                 'nullable',
                 'string',
-                'max:20',
+                'in:Jr.,Sr.,II,III,IV,V',
             ],
 
             'guest_email' => [
                 'required',
                 'email',
+                'min:5',
                 'max:255',
+                'unique:users,email',
+                'unique:patients,email',
             ],
 
             'guest_phone' => [
                 'required',
                 'string',
+                'size:11',
                 'regex:/^09\d{9}$/',
             ],
 
@@ -2595,46 +2612,190 @@ class WalkInController extends Controller
             'guest_birthdate' => [
                 'required',
                 'date',
+                'after_or_equal:1900-01-01',
                 'before:today',
             ],
 
             'guest_program' => [
                 'nullable',
                 'string',
+                'min:1',
                 'max:255',
+                'required_if:guest_patient_type,student',
             ],
 
             'guest_student_number' => [
                 'nullable',
                 'string',
-                'max:100',
+                'size:15',
                 'required_if:guest_patient_type,student',
+                'unique:patient_student_information,student_no',
             ],
 
             'guest_faculty_code' => [
                 'nullable',
                 'string',
-                'max:100',
+                'size:12',
                 'required_if:guest_patient_type,faculty',
+                'unique:patient_faculty_information,faculty_code',
             ],
 
             'guest_year_level' => [
                 'nullable',
                 'string',
+                'min:1',
                 'max:50',
+                'required_if:guest_patient_type,student',
             ],
 
             'guest_section' => [
                 'nullable',
                 'string',
+                'min:1',
                 'max:50',
+                'required_if:guest_patient_type,student',
             ],
 
             'guest_is_pwd' => [
                 'required',
                 'boolean',
             ],
+        ], [
+            'guest_first_name.max' => 'First Name must not exceed 20 characters.',
+            'guest_middle_name.max' => 'Middle Name must not exceed 20 characters.',
+            'guest_last_name.max' => 'Last Name must not exceed 20 characters.',
+
+            'guest_email.unique' =>
+            'This email is already associated with an existing patient account. Please select the patient from Existing / Unified DB instead.',
+
+            'guest_student_number.unique' =>
+            'This student number is already associated with an existing patient. Please select the existing patient instead.',
+
+            'guest_faculty_code.unique' =>
+            'This faculty code is already associated with an existing patient. Please select the existing patient instead.',
+
         ]);
+
+        if (
+            ($validated['guest_patient_type'] ?? null) ===
+            'student'
+        ) {
+            $selectedProgram =
+                strtoupper(
+                    trim(
+                        (string) (
+                            $validated['guest_program']
+                            ?? ''
+                        )
+                    )
+                );
+
+            $selectedYear =
+                trim(
+                    (string) (
+                        $validated['guest_year_level']
+                        ?? ''
+                    )
+                );
+
+            $selectedSection =
+                trim(
+                    (string) (
+                        $validated['guest_section']
+                        ?? ''
+                    )
+                );
+
+            $studentTarget =
+                $studentTargetOptionService
+                ->get()
+                ->first(
+                    function ($option) use (
+                        $selectedProgram,
+                        $selectedYear,
+                        $selectedSection
+                    ) {
+                        return
+                            strtoupper(
+                                trim(
+                                    (string) (
+                                        $option['course_code']
+                                        ?? ''
+                                    )
+                                )
+                            ) ===
+                            $selectedProgram
+                            &&
+                            trim(
+                                (string) (
+                                    $option['year_level']
+                                    ?? ''
+                                )
+                            ) ===
+                            $selectedYear
+                            &&
+                            strcasecmp(
+                                trim(
+                                    (string) (
+                                        $option['section']
+                                        ?? ''
+                                    )
+                                ),
+                                $selectedSection
+                            ) === 0;
+                    }
+                );
+
+            if (! $studentTarget) {
+                throw ValidationException::withMessages([
+                    'guest_section' => [
+                        'The selected program, year level, and section combination is not available.',
+                    ],
+                ]);
+            }
+
+            $validated['guest_program'] =
+                trim(
+                    (string) (
+                        $studentTarget['course_code']
+                        ?? ''
+                    )
+                );
+
+            $validated['guest_program_name'] =
+                trim(
+                    (string) (
+                        $studentTarget['course_name']
+                        ?? $validated['guest_program']
+                    )
+                );
+
+            $validated['guest_year_level'] =
+                trim(
+                    (string) (
+                        $studentTarget['year_level']
+                        ?? ''
+                    )
+                );
+
+            $validated['guest_section'] =
+                trim(
+                    (string) (
+                        $studentTarget['section']
+                        ?? ''
+                    )
+                );
+        }
+
+        foreach (['guest_first_name', 'guest_middle_name', 'guest_last_name'] as $field) {
+            if (isset($validated[$field])) {
+                $validated[$field] = mb_convert_case(
+                    mb_strtolower(trim($validated[$field]), 'UTF-8'),
+                    MB_CASE_TITLE,
+                    'UTF-8'
+                );
+            }
+        }
 
         $selectedPatientType = $this->normalizeGuestPatientType(
             $validated['guest_patient_type']
@@ -2702,6 +2863,12 @@ class WalkInController extends Controller
                     'program' =>
                     $validated['guest_program'] ?? null,
 
+                    'program_code' =>
+                    $validated['guest_program'] ?? null,
+
+                    'program_name' =>
+                    $validated['guest_program_name'] ?? null,
+
                     'faculty_code' =>
                     $guestPatientType === 'faculty'
                         ? trim((string) ($validated['guest_faculty_code'] ?? ''))
@@ -2736,6 +2903,13 @@ class WalkInController extends Controller
                 $user = $this->syncWalkInUser($studentLikeData);
                 return $this->syncWalkInPatient($user, $studentLikeData, $patientType);
             });
+
+            $patient->loadMissing([
+                'user',
+                'information',
+                'studentInformation',
+                'facultyInformation',
+            ]);
 
             return response()->json([
                 'success' => true,
@@ -2784,10 +2958,10 @@ class WalkInController extends Controller
                     'program' => $patient->course_name,
 
                     'student_number' =>
-                    $patient
-                        ->information
-                        ?->student_no,
-                    'faculty_code' => $patient->faculty_code,
+                    $patient->studentInformation?->student_no,
+
+                    'faculty_code' =>
+                    $patient->facultyInformation?->faculty_code,
 
                     'year_level' => $patient->year_level,
 
@@ -2864,14 +3038,16 @@ class WalkInController extends Controller
 
         $validated = $request->validate([
             'patient_id' => ['required', 'exists:patients,id'],
+            'is_emergency' => ['required', 'boolean'],
             'service_type' => ['required', 'string', 'max:255'],
             'concern' => ['nullable', 'string', 'max:1000'],
 
             'emergency_person' => [
                 'required',
                 'string',
+                'min:3',
                 'max:50',
-                'regex:/^[A-Za-zÑñ\s.\'-]+$/u',
+                'regex:/^(?=.*[A-Za-zÑñ])[A-Za-zÑñ\s.\'-]+$/u',
             ],
 
             'emergency_number' => ['required', 'string', 'size:11', 'regex:/^09\d{9}$/'],
@@ -2901,7 +3077,18 @@ class WalkInController extends Controller
                 'string',
                 'exists:diseases,code',
             ],
+        ], [
+            'emergency_person.required' => "Please enter the emergency contact person's name.",
+            'emergency_person.regex' => 'Only letters, spaces, apostrophe, period, and hyphen are allowed.',
+            'emergency_person.min' => 'Emergency contact name must contain at least 3 characters.',
+            'emergency_person.max' => 'Emergency contact name must not exceed 50 characters.',
         ]);
+
+        $validated['emergency_person'] = preg_replace_callback(
+            '/(^|[\s-])(\p{L})/u',
+            fn ($match) => $match[1].mb_strtoupper($match[2], 'UTF-8'),
+            mb_strtolower(trim($validated['emergency_person']), 'UTF-8')
+        );
 
         $patient = Patient::findOrFail(
             $validated['patient_id']
@@ -2937,7 +3124,8 @@ class WalkInController extends Controller
 
         $appointmentData = [
             'patient_id' => $patient->id,
-            'dentist_id' => Auth::id(),
+            'is_emergency' => (bool) $validated['is_emergency'],
+            'dentist_id' => app(\App\Services\AssignedDentistService::class)->requireForPatient($patient->id, Auth::user())->id,
             'service_type_id' => $serviceType->id,
             'appointment_date' => $now->toDateString(),
             'appointment_time' => $now->format('H:i:s'),
@@ -3590,7 +3778,6 @@ class WalkInController extends Controller
         }
 
         if (
-            Schema::hasColumn('users', 'first_name') &&
             array_key_exists('first_name', $data)
         ) {
             $userData['first_name'] =
@@ -3600,7 +3787,6 @@ class WalkInController extends Controller
         }
 
         if (
-            Schema::hasColumn('users', 'middle_name') &&
             array_key_exists('middle_name', $data)
         ) {
             $userData['middle_name'] =
@@ -3610,7 +3796,6 @@ class WalkInController extends Controller
         }
 
         if (
-            Schema::hasColumn('users', 'last_name') &&
             array_key_exists('last_name', $data)
         ) {
             $userData['last_name'] =
@@ -3620,7 +3805,6 @@ class WalkInController extends Controller
         }
 
         if (
-            Schema::hasColumn('users', 'suffix_name') &&
             array_key_exists('suffix_name', $data)
         ) {
             $userData['suffix_name'] =
@@ -3865,16 +4049,32 @@ class WalkInController extends Controller
                 (bool) $data['is_pwd'];
         }
 
-        if (
-            array_key_exists('program', $data) &&
-            filled($data['program'])
-        ) {
+        $programCode =
+            trim(
+                (string) (
+                    $data['program_code']
+                    ?? $data['program']
+                    ?? ''
+                )
+            );
 
+        $programName =
+            trim(
+                (string) (
+                    $data['program_name']
+                    ?? $data['program']
+                    ?? $programCode
+                )
+            );
+
+        if ($programCode !== '') {
             $patientData['course_code'] =
-                $data['program'];
+                $programCode;
+        }
 
+        if ($programName !== '') {
             $patientData['course_name'] =
-                $data['program'];
+                $programName;
         }
 
         if (

@@ -1,5 +1,5 @@
 <div id="cancelAppointmentModal" class="ui-modal modal-theme-danger" aria-hidden="true" role="dialog" aria-modal="true"
-    aria-labelledby="cancelAppointmentModalTitle" onclick="handleCancelBackdropClick(event)">
+    aria-labelledby="cancelAppointmentModalTitle" data-ui-click="action-a8a78f310041">
 
     <div class="ui-modal-card modal-md">
 
@@ -25,7 +25,7 @@
 
             </div>
 
-            <button type="button" onclick="closeCancelAppointmentModal()" class="modal-x"
+            <button type="button" data-ui-click="action-021a85adb43d" class="modal-x"
                 aria-label="Close cancellation modal">
                 <i class="fa-solid fa-xmark"></i>
             </button>
@@ -87,7 +87,7 @@
 
                 </div>
 
-                <div class="modal-form-section global-form-group" data-global-field>
+                <div class="modal-form-section global-form-group mt-4" data-global-field>
 
                     <div class="global-label-row">
                         <label class="global-form-label">
@@ -98,53 +98,18 @@
                     <div id="cancelReasonChips" class="flex flex-wrap gap-2" role="radiogroup"
                         aria-label="Cancellation Reason">
 
-                        <div class="reason-chip">
-                            <input type="radio" name="cancelReason" id="r1" value="Patient no-show" required
-                                data-required-message="Select the reason for cancelling this appointment.">
-
-                            <label for="r1">
-                                <i class="fa-regular fa-circle-xmark"></i>
-                                Patient no-show
-                            </label>
-                        </div>
-
-                        <div class="reason-chip">
-                            <input type="radio" name="cancelReason" id="r2" value="Doctor unavailable"
-                                required>
-
-                            <label for="r2">
-                                <i class="fa-solid fa-user-doctor"></i>
-                                Doctor unavailable
-                            </label>
-                        </div>
-
-                        <div class="reason-chip">
-                            <input type="radio" name="cancelReason" id="r3" value="Patient request" required>
-
-                            <label for="r3">
-                                <i class="fa-regular fa-hand"></i>
-                                Patient request
-                            </label>
-                        </div>
-
-                        <div class="reason-chip">
-                            <input type="radio" name="cancelReason" id="r4" value="Emergency" required>
-
-                            <label for="r4">
-                                <i class="fa-solid fa-bolt"></i>
-                                Emergency
-                            </label>
-                        </div>
-
-                        <div class="reason-chip">
-                            <input type="radio" name="cancelReason" id="r5" value="Rescheduled" required>
-
-                            <label for="r5">
-                                <i class="fa-solid fa-rotate"></i>
-                                Rescheduled
-                            </label>
-                        </div>
-
+                        @php($cancellationReasonIcons = ['fa-regular fa-circle-xmark', 'fa-solid fa-user-doctor', 'fa-regular fa-hand', 'fa-solid fa-bolt', 'fa-solid fa-rotate'])
+                        @foreach (\App\Models\Appointment::CANCELLATION_REASONS as $reason)
+                            <div class="reason-chip">
+                                <input type="radio" name="cancelReason" id="r{{ $loop->iteration }}"
+                                    value="{{ $reason }}" required
+                                    data-required-message="Select the reason for cancelling this appointment.">
+                                <label for="r{{ $loop->iteration }}">
+                                    <i class="{{ $cancellationReasonIcons[$loop->index] }}"></i>
+                                    {{ $reason }}
+                                </label>
+                            </div>
+                        @endforeach
                     </div>
 
                     <div class="global-field-error" data-error-for="cancelReason" aria-hidden="true">
@@ -156,11 +121,11 @@
 
             <div class="modal-ft">
 
-                <button type="button" onclick="closeCancelAppointmentModal()" class="ui-btn ui-btn-secondary">
+                <button type="button" data-ui-click="action-021a85adb43d" class="ui-btn ui-btn-secondary">
                     <span>Keep Appointment</span>
                 </button>
 
-                <button type="button" id="confirmCancelBtn" onclick="confirmCancelAppointment()"
+                <button type="button" id="confirmCancelBtn" data-ui-click="action-2428055b77ee"
                     class="ui-btn ui-btn-danger">
                     <span>Cancel Appointment</span>
                 </button>
@@ -173,7 +138,7 @@
 
 </div>
 
-<script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     let selectedCancelUrl = null;
     let selectedCancelAppointmentId = null;
 

@@ -17,6 +17,36 @@ function captureView(presentation, pickObjects) {
     return { ...presentation, pickObjects, fullViewSize, center };
 }
 
+function ensureBabyDentition(
+    state
+) {
+    if (!state?.dentitionViews) {
+        return null;
+    }
+
+    if (
+        state.dentitionViews.baby
+    ) {
+        return state.dentitionViews.baby;
+    }
+
+    const primary =
+        addOdontogramPrimaryArches(
+            state
+        );
+
+    const babyView =
+        captureView(
+            primary,
+            primary.pickObjects
+        );
+
+    state.dentitionViews.baby =
+        babyView;
+
+    return babyView;
+}
+
 function syncToggle(state) {
     const toggle = state.dentitionToggle;
     if (!toggle) return;
@@ -65,64 +95,285 @@ function mountToggle(state) {
     state.container.appendChild(control); state.dentitionToggle = { control, input }; syncToggle(state);
 }
 
-export function setOdontogramDentition(state, dentition = 'adult', { clearSelection = true, event = null } = {}) {
-    if (!state?.dentitionViews) return;
-    const key = dentition === 'primary' ? 'baby' : dentition;
-    if (!['adult', 'baby'].includes(key)) throw new Error('Dentition must be adult or baby.');
-    if (state.activeDentition === key) { syncToggle(state); return; }
-    state.switchingDentition = true;
+export function setOdontogramDentition(
+    state,
+    dentition = 'adult',
+    {
+        clearSelection = true,
+        event = null
+    } = {}
+) {
+    if (!state?.dentitionViews) {
+        return;
+    }
+
+    const key =
+        dentition === 'primary'
+            ? 'baby'
+            : dentition;
+
+    if (
+        ![
+            'adult',
+            'baby'
+        ].includes(key)
+    ) {
+        throw new Error(
+            'Dentition must be adult or baby.'
+        );
+    }
+
+    if (
+        key === 'baby' &&
+        !state.dentitionViews.baby
+    ) {
+        ensureBabyDentition(
+            state
+        );
+    }
+
+    if (
+        state.activeDentition === key
+    ) {
+        syncToggle(
+            state
+        );
+
+        return;
+    }
+
+    const view =
+        state.dentitionViews[key];
+
+    if (!view) {
+        return;
+    }
+
+    state.switchingDentition =
+        true;
+
     try {
-        // Let OrbitControls finish real pointer events normally. Ignore a tooth
-        // click if its press began before the view changed.
         state.dentitionEpoch++;
-        state.activeDentition = key;
-        for (const [name, view] of Object.entries(state.dentitionViews)) view.root.visible = name === key;
-        const view = state.dentitionViews[key];
-        state.model = view.root; state.jaws = view.jaws; state.pickObjects = view.pickObjects; state.oralTissues = view.oralTissues;
-        state.fullViewSize.copy(view.fullViewSize); state.initialControlsTarget.copy(view.center);
-        state.hoverPart = null; state.renderer.domElement.style.cursor = 'grab';
-        if (clearSelection) {
-            // Reuse the editor's empty-canvas callback, including picker, legend
-            // and multi-selection cleanup. No treatment/history data is removed.
-            if (state.mode === 'editor') state.onToothClick?.(null, null, { shiftKey: false, originalEvent: event }, null);
-            state.visualOptions = { ...state.visualOptions, selectedTooth: null, selectedSurfaceKey: null, selectedTargetType: null, selectedTargets: [] };
+
+        state.activeDentition =
+            key;
+
+        for (
+            const [
+                name,
+                dentitionView
+            ] of Object.entries(
+                state.dentitionViews
+            )
+        ) {
+            if (
+                dentitionView?.root
+            ) {
+                dentitionView.root.visible =
+                    name === key;
+            }
         }
-        state.onToothHover?.(null, null, event, null);
-        base.updateOdontogramThreeScene(state, state.data, state.visualOptions);
-        base.resetOdontogramThreeCamera(state);
-        state.scene.updateMatrixWorld(true); syncToggle(state); state.renderScene();
-        state.onDentitionChange?.(key, state);
-    } finally { state.switchingDentition = false; }
+
+        state.model =
+            view.root;
+
+        state.jaws =
+            view.jaws;
+
+        state.pickObjects =
+            view.pickObjects;
+
+        state.oralTissues =
+            view.oralTissues;
+
+
+        state.fullViewSize.copy(
+            view.fullViewSize
+        );
+
+        state.initialControlsTarget.copy(
+            view.center
+        );
+
+        state.hoverPart =
+            null;
+
+        state.renderer.domElement
+            .style.cursor =
+            'grab';
+
+        if (clearSelection) {
+
+            if (
+                state.mode === 'editor'
+            ) {
+                state.onToothClick?.(
+                    null,
+                    null,
+                    {
+                        shiftKey: false,
+                        originalEvent:
+                            event
+                    },
+                    null
+                );
+            }
+
+            state.visualOptions = {
+                ...state.visualOptions,
+
+                selectedTooth:
+                    null,
+
+                selectedSurfaceKey:
+                    null,
+
+                selectedTargetType:
+                    null,
+
+                selectedTargets:
+                    []
+            };
+        }
+
+        state.onToothHover?.(
+            null,
+            null,
+            event,
+            null
+        );
+
+        base.updateOdontogramThreeScene(
+            state,
+            state.data,
+            state.visualOptions
+        );
+
+        base.resetOdontogramThreeCamera(
+            state
+        );
+
+        state.scene.updateMatrixWorld(
+            true
+        );
+
+        syncToggle(
+            state
+        );
+
+        state.renderScene();
+
+        state.onDentitionChange?.(
+            key,
+            state
+        );
+
+    } finally {
+
+        state.switchingDentition =
+            false;
+    }
 }
 
 export function getOdontogramDentition(state) { return state?.activeDentition || 'adult'; }
 
 export function updateOdontogramThreeScene(state, data = [], options = {}) {
-    // Selecting a primary tooth in 2D and moving to 3D reveals the matching view.
     if (state?.dentitionViews && !state.switchingDentition && options.selectedTooth) {
         setOdontogramDentition(state, viewForTooth(options.selectedTooth), { clearSelection: false });
     }
     base.updateOdontogramThreeScene(state, data, options);
 }
 
-export function createOdontogramThreeScene(options) {
-    const { onReady, dentition = 'adult', showDentitionToggle = true, onDentitionChange = null } = options;
+export function createOdontogramThreeScene(
+    options
+) {
+    const {
+        onReady,
+        dentition = 'adult',
+        showDentitionToggle = true,
+        onDentitionChange = null
+    } = options;
+
+
     return base.createOdontogramThreeScene({
         ...options,
+
         onReady(state) {
-            const adult = { root: state.model, jaws: state.jaws, oralTissues: state.oralTissues };
-            const adultPicks = state.pickObjects;
-            const primary = addOdontogramPrimaryArches(state);
-            state.dentitionViews = {
-                adult: { ...adult, pickObjects: adultPicks, fullViewSize: state.fullViewSize.clone(), center: state.initialControlsTarget.clone() },
-                baby: captureView(primary, primary.pickObjects)
+
+            const adult = {
+                root:
+                    state.model,
+
+                jaws:
+                    state.jaws,
+
+                oralTissues:
+                    state.oralTissues
             };
-            state.activeDentition = 'adult'; state.onDentitionChange = onDentitionChange;
-            guardViewGestures(state);
-            base.updateOdontogramThreeScene(state, state.data, state.visualOptions);
-            if (showDentitionToggle) mountToggle(state);
-            if (dentition !== 'adult') setOdontogramDentition(state, dentition, { clearSelection: false });
-            onReady?.(state);
+
+            const adultPicks =
+                state.pickObjects;
+
+            state.dentitionViews = {
+
+                adult: {
+                    ...adult,
+
+                    pickObjects:
+                        adultPicks,
+
+                    fullViewSize:
+                        state.fullViewSize
+                            .clone(),
+
+                    center:
+                        state
+                            .initialControlsTarget
+                            .clone()
+                }
+
+            };
+
+            state.activeDentition =
+                'adult';
+
+            state.onDentitionChange =
+                onDentitionChange;
+
+            guardViewGestures(
+                state
+            );
+
+            base.updateOdontogramThreeScene(
+                state,
+                state.data,
+                state.visualOptions
+            );
+
+            if (
+                showDentitionToggle
+            ) {
+                mountToggle(
+                    state
+                );
+            }
+
+            if (
+                dentition !== 'adult'
+            ) {
+                setOdontogramDentition(
+                    state,
+                    dentition,
+                    {
+                        clearSelection:
+                            false
+                    }
+                );
+            }
+
+            onReady?.(
+                state
+            );
         }
     });
 }
@@ -144,9 +395,6 @@ export function focusOdontogramThreeTooth(state, mesh, surfaceKey = null) {
     if (surfaceKey === 'right') offset.set(3.5, direction * 1.8, .7);
     if (surfaceKey && ['top', 'bottom'].includes(surfaceKey) && surfaceKey !== outward) offset.z = -3.4;
     offset.applyQuaternion(mesh.userData.visualGroup.getWorldQuaternion(new THREE.Quaternion()));
-    // Adult-sized offsets can cross the opposite primary jaw. Keep the same
-    // surface approach directions, with distances fitted to this smaller arch.
-    // Keep this distance inside the inter-arch space on narrow canvases too.
     offset.multiplyScalar(mesh.userData.primaryCameraScale * .75);
     animatePrimaryCamera(state, target.clone().add(offset), target);
 }

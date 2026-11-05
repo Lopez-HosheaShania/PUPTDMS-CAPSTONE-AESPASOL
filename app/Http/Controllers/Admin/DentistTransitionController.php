@@ -4,18 +4,21 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AssignDentistSuccessorsRequest;
-use App\Http\Requests\CancelDentistTransitionRequest;
 use App\Http\Requests\DentistTransitionRequest;
-use App\Http\Requests\FinalizeDentistTransitionRequest;
 use App\Models\DentistTransition;
 use App\Models\User;
+use App\Services\AssignedDentistService;
+use App\Services\ClinicDentistService;
 use App\Services\DentistTransitionService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class DentistTransitionController extends Controller
 {
-    public function __construct(private readonly DentistTransitionService $service) {}
+    public function __construct(
+        private readonly DentistTransitionService $service,
+        private readonly ClinicDentistService $clinicDentist
+    ) {}
 
     public function index(Request $request)
     {
@@ -30,7 +33,7 @@ class DentistTransitionController extends Controller
         ));
 
         $baseQuery = DentistTransition::query()
-            ->with(['dentist.role', 'defaultSuccessor', 'items.successorDentist', 'checklistItems'])
+            ->with(['dentist.role', 'defaultSuccessor', 'items.successorDentist'])
             ->latest();
 
         $search = trim((string) $request->get('search', ''));
@@ -81,7 +84,7 @@ class DentistTransitionController extends Controller
         $statsQuery = clone $baseQuery;
         $stats = [
             'total' => (clone $statsQuery)->count(),
-            'active' => (clone $statsQuery)->whereIn('status', ['draft', 'pending_review', 'handover_in_progress', 'scheduled'])->count(),
+            'active' => (clone $statsQuery)->whereIn('status', ['draft', 'pending_review', 'handover_in_progress', 'scheduled', 'active'])->count(),
             'completed' => (clone $statsQuery)->where('status', 'completed')->count(),
         ];
 
@@ -102,8 +105,23 @@ class DentistTransitionController extends Controller
             ]);
         }
 
+        $clinicAssignment = $this->clinicDentist->assignment();
+        $currentPlan = $clinicAssignment->dentist_id
+            ? DentistTransition::where('dentist_id', $clinicAssignment->dentist_id)
+                ->whereIn('status', ['draft', 'pending_review', 'handover_in_progress', 'scheduled'])->latest('id')->first()
+            : null;
+        if (! $currentPlan && $clinicAssignment->transition?->status === 'active') {
+            $currentPlan = $clinicAssignment->transition;
+        }
+
         return view('admin.dentist-continuity', [
             'pageMode' => 'index',
+            'clinicAssignment' => $clinicAssignment,
+            'currentPlan' => $currentPlan,
+            'currentDentistAvailable' => $clinicAssignment->dentist_id
+                && app(AssignedDentistService::class)->availableDentists()->whereKey($clinicAssignment->dentist_id)->exists(),
+            'availableDentists' => $clinicAssignment->dentist_id
+                ? collect() : $this->clinicDentist->initialCandidates()->orderBy('name')->get(),
             'transitions' => $transitions,
             'stats' => $stats,
             'statuses' => DentistTransition::STATUSES,
@@ -115,14 +133,30 @@ class DentistTransitionController extends Controller
         ]);
     }
 
+    public function assignCurrentDentist(Request $request)
+    {
+        $this->authorizeAction('update_dentist_transitions');
+        $data = $request->validate(['dentist_id' => ['required', 'integer', 'exists:users,id']]);
+        $this->clinicDentist->initialize((int) $data['dentist_id'], $request->user());
+
+        return redirect()->route($this->routeName('index'))->with('success', 'Current clinic dentist assigned. Future changes must use a reviewed continuity plan.');
+    }
+
     public function create()
     {
         $this->authorizeAction('create_dentist_transitions');
 
+        $currentDentistId = $this->clinicDentist->assignment()->dentist_id;
+        if (! $currentDentistId) {
+            return redirect()->route($this->routeName('index'))->with('error', 'Set the current clinic dentist before creating a handover plan.');
+        }
+
         return view('admin.dentist-continuity', [
             'pageMode' => 'form',
             'transition' => new DentistTransition(),
-            'dentists' => $this->activeDentists(),
+            'dentists' => $this->dentists(),
+            'selectedDentistId' => $currentDentistId,
+            'currentDentistId' => $currentDentistId,
             'types' => DentistTransition::TYPES,
             'formAction' => route($this->routeName('store')),
             'formMethod' => 'POST',
@@ -141,7 +175,7 @@ class DentistTransitionController extends Controller
             ->route($this->routeName('show'), $transition)
             ->with(
                 'success',
-                'Dentist handover confirmed successfully.'
+                'Continuity draft saved. Review the scope and confirm the reassignment before approval.'
             );
     }
 
@@ -159,16 +193,14 @@ class DentistTransitionController extends Controller
             'items.originalDentist',
             'items.successorDentist',
             'items.documentRequest',
-            'checklistItems.completedBy',
         ]);
-
-        $transition = $this->service->generateTransitionItems($transition);
 
         return view('admin.dentist-continuity', [
             'pageMode' => 'show',
             'transition' => $transition,
             'summary' => $this->service->generateImpactSummary($transition),
-            'dentists' => $this->activeDentists($transition->dentist_id),
+            'unreviewedResponsibilities' => $this->service->unreviewedResponsibilities($transition),
+            'dentists' => $this->dentists(),
             'readiness' => $this->service->validateTransitionReadiness($transition),
             'layoutRole' => $this->resolveLayoutRole(),
             'routeNames' => $this->routeNames(),
@@ -182,7 +214,7 @@ class DentistTransitionController extends Controller
         return view('admin.dentist-continuity', [
             'pageMode' => 'form',
             'transition' => $transition,
-            'dentists' => $this->activeDentists($transition->dentist_id),
+            'dentists' => $this->dentists(),
             'types' => DentistTransition::TYPES,
             'formAction' => route($this->routeName('update'), $transition),
             'formMethod' => 'PUT',
@@ -195,7 +227,7 @@ class DentistTransitionController extends Controller
     {
         $this->authorizeAction('update_dentist_transitions');
 
-        if (in_array($transition->status, ['scheduled', 'completed', 'cancelled'], true)) {
+        if (in_array($transition->status, ['scheduled', 'active', 'completed', 'cancelled'], true)) {
             return back()->with('error', 'This transition can no longer be edited.');
         }
 
@@ -225,47 +257,36 @@ class DentistTransitionController extends Controller
         return back()->with('success', 'Successor assignments updated successfully.');
     }
 
-    public function checklist(Request $request, DentistTransition $transition)
-    {
-        $this->authorizeAction('update_dentist_transitions');
-
-        $request->validate([
-            'checklist' => ['required', 'array'],
-            'checklist.*.remarks' => ['nullable', 'string'],
-        ]);
-
-        $this->service->updateChecklist(
-            $transition,
-            $request->only('checklist'),
-            $request->user()
-        );
-
-        return back()->with(
-            'success',
-            'Handover checklist updated successfully.'
-        );
-    }
-
-    public function finalize(FinalizeDentistTransitionRequest $request, DentistTransition $transition)
+    public function finalize(DentistTransitionRequest $request, DentistTransition $transition)
     {
         $this->authorizeAction('finalize_dentist_transitions');
 
         try {
             $this->service->finalizeTransition($transition, $request->user());
         } catch (\RuntimeException $exception) {
-            return back()->with('error', $exception->getMessage());
+            report($exception);
+
+            return back()->with('error', 'Unable to finalize this transition. Refresh the plan and try again.');
         }
 
         return back()->with('success', 'Transition finalized successfully.');
     }
 
-    public function cancel(CancelDentistTransitionRequest $request, DentistTransition $transition)
+    public function cancel(DentistTransitionRequest $request, DentistTransition $transition)
     {
         $this->authorizeAction('cancel_dentist_transitions');
 
         $this->service->cancelTransition($transition, $request->validated()['cancellation_reason'], $request->user());
 
         return back()->with('success', 'Transition cancelled successfully.');
+    }
+
+    public function endTemporary(Request $request, DentistTransition $transition)
+    {
+        $this->authorizeAction('finalize_dentist_transitions');
+        $request->validate(['confirmed' => ['accepted']]);
+        $this->service->endTemporaryCoverage($transition, $request->user());
+        return back()->with('success', 'Temporary coverage ended. Care responsibility and open work returned to the original dentist.');
     }
 
     public function extendAccess(Request $request, DentistTransition $transition)
@@ -281,19 +302,12 @@ class DentistTransitionController extends Controller
         return back()->with('success', 'Dentist access extended successfully.');
     }
 
-    private function activeDentists(?int $includeDentistId = null)
+    private function dentists()
     {
         return User::query()
             ->with('role')
             ->whereHas('role', function ($query) {
-                $query->where('slug', 'dentist');
-            })
-            ->where(function ($query) use ($includeDentistId) {
-                $query->where('status', 'active');
-
-                if ($includeDentistId) {
-                    $query->orWhere('id', $includeDentistId);
-                }
+                $query->whereIn('slug', AssignedDentistService::DENTIST_ROLES);
             })
             ->orderBy('name')
             ->get();
@@ -303,7 +317,7 @@ class DentistTransitionController extends Controller
     {
         $user = request()->user();
 
-        abort_unless($user, 403);
+        abort_unless($user && $user->hasAnyRole(['admin', 'super_admin']) && ! session('impersonated_role'), 403);
         $allowed = $user->hasPermission($permission) || $user->hasPermission('manage_dentist_accounts');
 
         abort_unless($allowed, 403, 'Unauthorized.');
@@ -333,7 +347,7 @@ class DentistTransitionController extends Controller
                 $this->resolveLayoutRole() === 'admin'
                 && ! in_array(
                     $status,
-                    ['scheduled', 'completed', 'cancelled'],
+                    ['scheduled', 'active', 'completed', 'cancelled'],
                     true
                 )
             )
@@ -364,7 +378,6 @@ class DentistTransitionController extends Controller
                 'update' => 'dentist.dentist.transitions.update',
                 'generate_items' => 'dentist.dentist.transitions.generate-items',
                 'assignments' => 'dentist.dentist.transitions.assignments',
-                'checklist' => 'dentist.dentist.transitions.checklist',
                 'finalize' => 'dentist.dentist.transitions.finalize',
                 'extend_access' => 'dentist.dentist.transitions.extend-access',
                 'cancel' => 'dentist.dentist.transitions.cancel',
@@ -380,7 +393,6 @@ class DentistTransitionController extends Controller
             'update' => 'admin.dentist-transitions.update',
             'generate_items' => 'admin.dentist-transitions.generate-items',
             'assignments' => 'admin.dentist-transitions.assignments',
-            'checklist' => 'admin.dentist-transitions.checklist',
             'finalize' => 'admin.dentist-transitions.finalize',
             'extend_access' => 'admin.dentist-transitions.extend-access',
             'cancel' => 'admin.dentist-transitions.cancel',

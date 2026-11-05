@@ -15,112 +15,37 @@
         $perPage = $perPage ?? 10;
         $status = $status ?? 'active';
         $authUser = auth()->user();
-        $canViewSystemLogs = $authUser?->hasPermission('view_system_logs') ?? false;
-        $canExportSystemLogs = $authUser?->hasPermission('export_system_logs') ?? false;
-        $canArchiveSystemLogs = $authUser?->hasPermission('archive_system_logs') ?? false;
+        $activeRole = session('impersonated_role') ?: session('role') ?: $authUser?->role?->slug;
+        $isSuperAdmin = $authUser?->role?->slug === 'super_admin' && $activeRole === 'super_admin';
+        $canViewSystemLogs =
+            $isSuperAdmin ||
+            ($authUser?->hasAnyPermission(['view_system_logs', 'export_system_logs', 'archive_system_logs']) ?? false);
+        $canExportSystemLogs = $isSuperAdmin || ($authUser?->hasPermission('export_system_logs') ?? false);
+        $canArchiveSystemLogs = $isSuperAdmin || ($authUser?->hasPermission('archive_system_logs') ?? false);
     @endphp
 
     <main id="mainContent" class="app-page-shell system-logs-page page-enter mode-list">
         <div class="w-full">
 
-            <div class="page-banner rounded-2xl mb-6">
-                <div class="page-banner-inner">
-                    <div>
-                        <h1 class="page-title">System Logs</h1>
-                    </div>
-                </div>
-            </div>
+            <x-page-banner title="System Logs" class="rounded-2xl mb-6" />
 
             <div id="statCards" class="stat-grid">
-                <div class="stat-card s-crimson">
-                    <div class="stat-icon-wrapper">
-                        <i class="fa-solid fa-clipboard-list"></i>
-                    </div>
+                <x-stat-card label="Total Logs" :value="$totalCount" tone="crimson" icon="fa-solid fa-clipboard-list"
+                    footer="All recorded activity" value-class="stat-num" :value-attributes="['id' => 'statTotal']" />
 
-                    <div class="stat-card-info">
-                        <span class="stat-label">
-                            Total Logs
-                        </span>
+                <x-stat-card label="Admin Actions" :value="$adminCount" tone="red" icon="fa-solid fa-user-tie"
+                    footer="Administrator activity" value-class="stat-num" :value-attributes="['id' => 'statAdmin']" />
 
-                        <span class="stat-num" id="statTotal">
-                            {{ $totalCount }}
-                        </span>
+                <x-stat-card label="Dentist Actions" :value="$dentistCount" tone="blue" icon="fa-solid fa-user-doctor"
+                    footer="Dentist activity" value-class="stat-num" :value-attributes="['id' => 'statDentist']" />
 
-                        <span class="stat-footer">
-                            All recorded activity
-                        </span>
-                    </div>
-                </div>
-
-                <div class="stat-card s-red">
-                    <div class="stat-icon-wrapper">
-                        <i class="fa-solid fa-user-tie"></i>
-                    </div>
-
-                    <div class="stat-card-info">
-                        <span class="stat-label">
-                            Admin Actions
-                        </span>
-
-                        <span class="stat-num" id="statAdmin">
-                            {{ $adminCount }}
-                        </span>
-
-                        <span class="stat-footer">
-                            Administrator activity
-                        </span>
-                    </div>
-                </div>
-
-                <div class="stat-card s-blue">
-                    <div class="stat-icon-wrapper">
-                        <i class="fa-solid fa-user-doctor"></i>
-                    </div>
-
-                    <div class="stat-card-info">
-                        <span class="stat-label">
-                            Dentist Actions
-                        </span>
-
-                        <span class="stat-num" id="statDentist">
-                            {{ $dentistCount }}
-                        </span>
-
-                        <span class="stat-footer">
-                            Dentist activity
-                        </span>
-                    </div>
-                </div>
-
-                <div class="stat-card s-green">
-                    <div class="stat-icon-wrapper">
-                        <i class="fa-solid fa-user"></i>
-                    </div>
-
-                    <div class="stat-card-info">
-                        <span class="stat-label">
-                            Patient Actions
-                        </span>
-
-                        <span class="stat-num" id="statPatient">
-                            {{ $patientCount }}
-                        </span>
-
-                        <span class="stat-footer">
-                            Patient activity
-                        </span>
-                    </div>
-                </div>
+                <x-stat-card label="Patient Actions" :value="$patientCount" tone="green" icon="fa-solid fa-user"
+                    footer="Patient activity" value-class="stat-num" :value-attributes="['id' => 'statPatient']" />
             </div>
 
             <div class="card">
-                <div class="card-header">
-                    <div class="card-header-left">
-                        <div class="card-header-icon"><i class="fa-solid fa-clipboard-list"></i></div>
-                        <span class="card-title">Audit Trail</span>
-                    </div>
-
-                    <div class="card-header-right system-logs-toolbar">
+                <x-card-header title="Audit Trail" icon="fa-solid fa-clipboard-list" actions-class="system-logs-toolbar">
+                    <x-slot:actions>
 
                         <div class="table-toolbar-search">
                             <div class="global-voice-row">
@@ -195,14 +120,14 @@
                                     ],
                                 ]" />
 
-                            <button type="button" id="slFilterBtn" class="global-filter-btn" onclick="openSlFilterPanel()"
-                                aria-pressed="false">
+                            <button type="button" id="slFilterBtn" class="global-filter-btn"
+                                data-ui-click="action-23adcae5c050" aria-pressed="false">
                                 <i class="fa-solid fa-sliders"></i>
                                 <span>Filter</span>
                                 <span id="slFilterBadge" class="filter-badge hidden"></span>
                             </button>
 
-                            <button id="slExternalClearFilterBtn" type="button" onclick="clearOnlySlFilters()"
+                            <button id="slExternalClearFilterBtn" type="button" data-ui-click="action-2f4e0d8e81f5"
                                 class="global-filter-reset-btn hidden" title="Reset filters" aria-label="Reset filters">
                                 <i class="fa-solid fa-rotate-left"></i>
                             </button>
@@ -211,15 +136,15 @@
                                 <button type="button" id="slOverflowTrigger" class="ui-action-btn"
                                     aria-label="More actions" aria-haspopup="menu" aria-expanded="false"
                                     data-tooltip="More actions" data-tooltip-tone="neutral"
-                                    onclick="toggleSlOverflowMenu(event)">
+                                    data-ui-click="action-d8c154b64c66">
                                     <i class="fa-solid fa-ellipsis-vertical"></i>
                                 </button>
 
                                 <div id="slOverflowPanel" class="sl-overflow-panel" role="menu"
                                     aria-label="System log actions">
                                     <button type="button" id="slArchiveBtn" class="sl-overflow-item" role="menuitem"
-                                        onclick="closeSlOverflowMenu(); openSlArchiveModal()">
-                                        <span class="sl-overflow-item-icon">
+                                        data-ui-click="action-478b7a7c7da5">
+                                        <span class="sl-overflow-item-icon ui-action-warning">
                                             <i class="fa-solid fa-box-archive"></i>
                                         </span>
 
@@ -230,8 +155,8 @@
                                     </button>
 
                                     <button type="button" id="slExportBtn" class="sl-overflow-item" role="menuitem"
-                                        onclick="closeSlOverflowMenu(); handleSlExportButtonClick()">
-                                        <span class="sl-overflow-item-icon">
+                                        data-ui-click="action-9294a71d2860">
+                                        <span class="sl-overflow-item-icon ui-action-view">
                                             <i class="fa-solid fa-file-pdf"></i>
                                         </span>
 
@@ -247,14 +172,13 @@
                                 grid-view="#slGridView" />
 
                         </div>
-
-                    </div>
-                </div>
+                    </x-slot:actions>
+                </x-card-header>
 
                 <x-pagination-bar id="systemLogsPaginationTopBar" info-id="systemLogsPageInfoTop"
-                    pagination-id="systemLogsPaginationTop" position="top" :show-entries="true" page-size-id="perPageSelect"
-                    page-size-callback="handleSystemLogsPerPageChange" :page-size-value="$perPage" page-size-label="per page"
-                    label="entries" :total="$logs->total()" :from="$logs->firstItem() ?? 0" :to="$logs->lastItem() ?? 0" />
+                    pagination-id="systemLogsPaginationTop" position="top" :show-entries="true"
+                    page-size-id="perPageSelect" page-size-callback="handleSystemLogsPerPageChange" :page-size-value="$perPage"
+                    page-size-label="per page" label="entries" :total="$logs->total()" :from="$logs->firstItem() ?? 0" :to="$logs->lastItem() ?? 0" />
 
                 <div class="table-list-view" id="slListView">
                     <div class="table-scroll">
@@ -273,7 +197,7 @@
                             <tbody id="slTableBody">
                                 @forelse($logs as $log)
                                     @php
-                                        $role = strtolower($log->actor_role ?? 'other');
+                                        $logRole = strtolower($log->actor_role ?? 'other');
                                         $action = strtolower($log->action ?? '');
                                         $moduleName = strtolower($log->module ?? '');
                                         $actionClass = match (true) {
@@ -281,51 +205,74 @@
                                                 str_contains($action, 'failed') ||
                                                 str_contains($action, 'exception')
                                                 => 'error',
+
                                             str_contains($action, 'login') => 'login',
                                             str_contains($action, 'logout') => 'logout',
+                                            str_contains($action, 'view') => 'view',
                                             str_contains($action, 'create') => 'create',
                                             str_contains($action, 'update') => 'update',
                                             str_contains($action, 'delete') => 'delete',
+                                            str_contains($action, 'book') => 'book',
+                                            str_contains($action, 'archive') => 'archive',
+                                            str_contains($action, 'export') => 'export',
                                             default => 'default',
                                         };
+
                                         $actionIcon = match ($actionClass) {
                                             'login' => 'fa-right-to-bracket',
                                             'logout' => 'fa-right-from-bracket',
+                                            'view' => 'fa-eye',
                                             'create' => 'fa-plus',
                                             'update' => 'fa-pen',
                                             'delete' => 'fa-trash',
                                             'error' => 'fa-triangle-exclamation',
+                                            'book' => 'fa-calendar-plus',
+                                            'archive' => 'fa-box-archive',
+                                            'export' => 'fa-file-export',
                                             default => 'fa-bolt',
                                         };
-                                        $roleIcon = match ($role) {
+                                        $roleIcon = match ($logRole) {
                                             'admin' => 'fa-user-tie',
                                             'dentist' => 'fa-user-doctor',
                                             'patient' => 'fa-user',
                                             default => 'fa-circle-user',
                                         };
-                                        $avatarLetter = strtoupper(substr($log->actor_name ?? $role, 0, 1));
-                                        $roleBadgeClass = match ($role) {
+                                        $avatarLetter = strtoupper(substr($log->actor_name ?? $logRole, 0, 1));
+                                        $roleBadgeClass = match ($logRole) {
                                             'admin' => 'role-admin',
                                             'dentist' => 'role-dentist',
                                             'patient' => 'role-patient',
                                             default => 'role-none',
                                         };
                                         $actionStatusClass = match ($actionClass) {
-                                            'login' => 's-active',
-                                            'logout' => 's-ended',
-                                            'create' => 's-neutral',
-                                            'update' => 's-rescheduled',
-                                            'delete' => 's-cancelled',
-                                            'error' => 's-failed',
-                                            default => 's-neutral',
+                                            'login' => 'status-active',
+                                            'logout' => 'status-ended',
+                                            'view' => 'status-all',
+                                            'create' => 'status-approved',
+                                            'update' => 'status-rescheduled',
+                                            'delete' => 'status-cancelled',
+                                            'error' => 'status-failed',
+                                            'book' => 'status-upcoming',
+                                            'archive' => 'status-archived',
+                                            'export' => 'status-released',
+                                            default => 'status-default',
                                         };
-                                        $actionLabel =
-                                            $moduleName === 'inventory' &&
-                                            in_array($actionClass, ['create', 'delete'], true)
-                                                ? ucfirst($actionClass)
-                                                : ucwords(str_replace('_', ' ', $log->action));
+                                        $actionLabel = match ($actionClass) {
+                                            'login' => 'Login',
+                                            'logout' => 'Logout',
+                                            'view' => 'View',
+                                            'create' => 'Create',
+                                            'update' => 'Update',
+                                            'delete' => 'Delete',
+                                            'error' => 'Error',
+                                            'book' => 'Book',
+                                            'archive' => 'Archive',
+                                            'export' => 'Export',
+                                            default => ucwords(str_replace('_', ' ', $log->action)),
+                                        };
                                     @endphp
-                                    <tr data-role="{{ $role }}" data-action="{{ $actionClass }}">
+                                    <tr data-live-item-id="{{ $log->id }}" data-role="{{ $logRole }}"
+                                        data-action="{{ $actionClass }}">
                                         <td><span class="sl-id">#{{ str_pad($log->id, 3, '0', STR_PAD_LEFT) }}</span>
                                         </td>
                                         <td>
@@ -334,7 +281,7 @@
                                         </td>
                                         <td><span class="badge-role {{ $roleBadgeClass }}">
                                                 <i class="fa-solid {{ $roleIcon }}"></i>
-                                                {{ ucfirst($role) }}
+                                                {{ ucfirst($logRole) }}
                                             </span>
                                         </td>
                                         <td>
@@ -351,8 +298,6 @@
                                         </td>
                                         <td>
                                             <span class="status-pill {{ $actionStatusClass }}">
-                                                <span class="status-dot"></span>
-
                                                 <i
                                                     class="fa-solid {{ $actionIcon }}
         {{ $actionClass === 'error' ? 'sl-action-alert' : '' }}"></i>
@@ -375,13 +320,67 @@
                                                 {{ ucfirst(str_replace('_', ' ', $log->module)) }}
                                             </span>
                                         </td>
-                                        <td><span
-                                                class="sl-desc">{{ $log->description ?? 'No description provided.' }}</span>
-                                            @if ($log->full_description !== $log->description)
-                                                <details><summary>Full details</summary>{{ $log->full_description }}</details>
-                                            @endif
+                                        @php
+                                            $description = trim((string) ($log->description ?? ''));
+
+                                            $fullDescription = trim((string) ($log->display_details ?? ''));
+
+                                            $hasMeaningfulDetails =
+                                                $fullDescription !== '' && $fullDescription !== $description;
+
+                                            $displayDescription = trim(
+                                                (string) ($log->display_description ?? $description ?:
+                                                'No description provided.'),
+                                            );
+
+                                            $tableDetailId = 'sl-table-detail-' . $log->id;
+
+                                            $tableCopyId = 'sl-table-full-description-' . $log->id;
+                                        @endphp
+
+                                        <td>
+                                            <div class="global-show-more-disclosure" data-show-more
+                                                data-show-more-mode="disclosure" data-log-show-more
+                                                data-log-id="{{ $log->id }}">
+                                                <span class="sl-desc global-text-clamp-2" data-show-more-summary>
+                                                    {{ $displayDescription }}
+                                                </span>
+
+                                                @if ($hasMeaningfulDetails)
+                                                    <x-show-more variant="disclosure" :target="$tableDetailId" />
+                                                @endif
+                                            </div>
                                         </td>
                                     </tr>
+
+                                    @if ($hasMeaningfulDetails)
+                                        <tr id="{{ $tableDetailId }}" class="sl-log-detail-row" data-show-more-panel
+                                            aria-hidden="true" hidden>
+                                            <td colspan="7" class="sl-log-detail-cell">
+                                                <div
+                                                    class="global-info-item global-info-item-wide slide-down-fade-in
+                                                            sl-log-detail-box">
+                                                    <div class="global-info-copy">
+                                                        <span class="global-info-label">
+                                                            Full Description
+                                                        </span>
+
+                                                        <span id="{{ $tableCopyId }}"
+                                                            class="global-info-value sl-log-detail-value">
+                                                            {{ $fullDescription }}
+                                                        </span>
+                                                    </div>
+
+                                                    <x-button type="button" variant="secondary" size="sm"
+                                                        icon="fa-regular fa-copy"
+                                                        data-log-copy-target="{{ $tableCopyId }}">
+                                                        Copy
+                                                    </x-button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endif
+
                                 @empty
                                 @endforelse
                             </tbody>
@@ -393,7 +392,7 @@
                     <div class="table-record-grid" id="slGridBody">
                         @forelse($logs as $log)
                             @php
-                                $role = strtolower($log->actor_role ?? 'other');
+                                $logRole = strtolower($log->actor_role ?? 'other');
                                 $action = strtolower($log->action ?? '');
                                 $moduleName = strtolower($log->module ?? '');
                                 $actionClass = match (true) {
@@ -401,51 +400,73 @@
                                         str_contains($action, 'failed') ||
                                         str_contains($action, 'exception')
                                         => 'error',
+
                                     str_contains($action, 'login') => 'login',
                                     str_contains($action, 'logout') => 'logout',
+                                    str_contains($action, 'view') => 'view',
                                     str_contains($action, 'create') => 'create',
                                     str_contains($action, 'update') => 'update',
                                     str_contains($action, 'delete') => 'delete',
+                                    str_contains($action, 'book') => 'book',
+                                    str_contains($action, 'archive') => 'archive',
+                                    str_contains($action, 'export') => 'export',
                                     default => 'default',
                                 };
                                 $actionIcon = match ($actionClass) {
                                     'login' => 'fa-right-to-bracket',
                                     'logout' => 'fa-right-from-bracket',
+                                    'view' => 'fa-eye',
                                     'create' => 'fa-plus',
                                     'update' => 'fa-pen',
                                     'delete' => 'fa-trash',
                                     'error' => 'fa-triangle-exclamation',
+                                    'book' => 'fa-calendar-plus',
+                                    'archive' => 'fa-box-archive',
+                                    'export' => 'fa-file-export',
                                     default => 'fa-bolt',
                                 };
-                                $roleIcon = match ($role) {
+                                $roleIcon = match ($logRole) {
                                     'admin' => 'fa-user-tie',
                                     'dentist' => 'fa-user-doctor',
                                     'patient' => 'fa-user',
                                     default => 'fa-circle-user',
                                 };
-                                $avatarLetter = strtoupper(substr($log->actor_name ?? $role, 0, 1));
-                                $roleBadgeClass = match ($role) {
+                                $avatarLetter = strtoupper(substr($log->actor_name ?? $logRole, 0, 1));
+                                $roleBadgeClass = match ($logRole) {
                                     'admin' => 'role-admin',
                                     'dentist' => 'role-dentist',
                                     'patient' => 'role-patient',
                                     default => 'role-none',
                                 };
                                 $actionStatusClass = match ($actionClass) {
-                                    'login' => 's-active',
-                                    'logout' => 's-ended',
-                                    'create' => 's-neutral',
-                                    'update' => 's-rescheduled',
-                                    'delete' => 's-cancelled',
-                                    'error' => 's-failed',
-                                    default => 's-neutral',
+                                    'login' => 'status-active',
+                                    'logout' => 'status-ended',
+                                    'view' => 'status-all',
+                                    'create' => 'status-approved',
+                                    'update' => 'status-rescheduled',
+                                    'delete' => 'status-cancelled',
+                                    'error' => 'status-failed',
+                                    'book' => 'status-upcoming',
+                                    'archive' => 'status-archived',
+                                    'export' => 'status-released',
+                                    default => 'status-default',
                                 };
-                                $actionLabel =
-                                    $moduleName === 'inventory' && in_array($actionClass, ['create', 'delete'], true)
-                                        ? ucfirst($actionClass)
-                                        : ucwords(str_replace('_', ' ', $log->action));
+                                $actionLabel = match ($actionClass) {
+                                    'login' => 'Login',
+                                    'logout' => 'Logout',
+                                    'view' => 'View',
+                                    'create' => 'Create',
+                                    'update' => 'Update',
+                                    'delete' => 'Delete',
+                                    'error' => 'Error',
+                                    'book' => 'Book',
+                                    'archive' => 'Archive',
+                                    'export' => 'Export',
+                                    default => ucwords(str_replace('_', ' ', $log->action)),
+                                };
                             @endphp
-                            <article class="table-record-card" data-role="{{ $role }}"
-                                data-action="{{ $actionClass }}">
+                            <article class="table-record-card" data-live-item-id="{{ $log->id }}"
+                                data-role="{{ $logRole }}" data-action="{{ $actionClass }}">
                                 <div class="table-record-card-layout">
                                     <div class="table-record-content">
 
@@ -459,11 +480,10 @@
                                             </div>
 
                                             <span class="status-pill {{ $actionStatusClass }}">
-                                                <span class="status-dot"></span>
 
                                                 <i
                                                     class="fa-solid {{ $actionIcon }}
-                        {{ $actionClass === 'error' ? 'sl-action-alert' : '' }}">
+                                                    {{ $actionClass === 'error' ? 'sl-action-alert' : '' }}">
                                                 </i>
 
                                                 {{ $actionLabel }}
@@ -501,7 +521,7 @@
                                                 <span class="table-record-value">
                                                     <span class="badge-role {{ $roleBadgeClass }}">
                                                         <i class="fa-solid {{ $roleIcon }}"></i>
-                                                        {{ ucfirst($role) }}
+                                                        {{ ucfirst($logRole) }}
                                                     </span>
                                                 </span>
                                             </div>
@@ -514,31 +534,60 @@
                                                 <span class="table-record-value">
                                                     <span class="table-tag table-tag-neutral">
                                                         <i class="fa-solid fa-cube"></i>
-
                                                         {{ ucfirst(str_replace('_', ' ', $log->module)) }}
                                                     </span>
                                                 </span>
                                             </div>
 
-                                            <div class="table-record-row">
+                                            <div class="table-record-row" data-system-log-description-row>
                                                 <span class="table-record-label">
                                                     Description
                                                 </span>
 
-                                            <span class="table-record-value">
-                                                {{ $log->description ?? 'No description provided.' }}
-                                                @if ($log->full_description !== $log->description)
-                                                    <details><summary>Full details</summary>{{ $log->full_description }}</details>
-                                                @endif
-                                            </span>
-                                        </div>
+                                                @php
+                                                    $description = trim(
+                                                        (string) ($log->description ?? 'No description provided.'),
+                                                    );
+
+                                                    $fullDescription = trim((string) ($log->display_details ?? ''));
+
+                                                    $displayDescription = trim(
+                                                        (string) ($log->display_description ?? $description),
+                                                    );
+
+                                                    $hasExpandableDescription =
+                                                        $fullDescription !== '' && $fullDescription !== $description;
+
+                                                    $gridDetailId = 'sl-grid-detail-' . $log->id;
+                                                @endphp
+
+                                                <div class="table-record-value">
+                                                    <div class="global-show-more-disclosure" data-show-more
+                                                        data-show-more-mode="disclosure" data-log-show-more
+                                                        data-log-id="{{ $log->id }}">
+                                                        <span class="sl-desc global-text-clamp-2" data-show-more-summary>
+                                                            {{ $displayDescription }}
+                                                        </span>
+
+                                                        @if ($hasExpandableDescription)
+                                                            <div id="{{ $gridDetailId }}" class="sl-grid-log-detail"
+                                                                data-show-more-panel aria-hidden="true" hidden>
+                                                                <span class="sl-desc">
+                                                                    {{ $fullDescription }}
+                                                                </span>
+                                                            </div>
+
+                                                            <x-show-more variant="disclosure" :target="$gridDetailId" />
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            </div>
 
                                         </div>
 
                                         @if ($log->is_archived)
                                             <span class="status-pill s-archived"
                                                 title="Archived {{ optional($log->archived_at)->format('M j, Y h:i A') }}">
-                                                <span class="status-dot"></span>
                                                 <i class="fa-solid fa-box-archive"></i>
                                                 Archived
                                             </span>
@@ -562,11 +611,10 @@
         </div>
     </main>
 
-    <x-filter-drawer id="filterModal" title="Filters" close-callback="closeSlFilterPanel()"
-        clear-id="slClearFilterPanelBtn" clear-callback="clearSlFilterPanelDraft()" clear-label="Clear Filters"
-        cancel-id="filterCloseBtn" cancel-callback="closeSlFilterPanel()" cancel-label="Cancel"
-        apply-id="filterApplyBtn" apply-callback="applySlFilters()" apply-label="Show 0 results"
-        results-id="slShowResultsText">
+    <x-filter-drawer id="filterModal" title="Filters" close-callback="action-463079bd5291"
+        clear-id="slClearFilterPanelBtn" clear-callback="action-1e0663440b55" clear-label="Clear Filters"
+        cancel-id="filterCloseBtn" cancel-callback="action-463079bd5291" cancel-label="Cancel" apply-id="filterApplyBtn"
+        apply-callback="action-c059940c46c7" apply-label="Show 0 results" results-id="slShowResultsText">
 
         <div id="slActiveFiltersSection" class="filter-active-section hidden">
 
@@ -576,14 +624,10 @@
                     Active Filters
                 </span>
 
-                <button id="slClearAllChipsBtn" type="button"
-                    class="filter-clear-all ui-btn ui-btn-secondary ui-btn-sm">
-                    <i class="fa-solid fa-rotate-left"></i>
-
-                    <span>
-                        Clear All
-                    </span>
-                </button>
+                <x-button id="slClearAllChipsBtn" type="button" variant="secondary" size="sm"
+                    icon="fa-solid fa-rotate-left" class="filter-clear-all">
+                    Clear All
+                </x-button>
 
             </div>
 
@@ -616,17 +660,17 @@
             <div id="slDatePresetGroup" class="filter-chip-row">
 
                 <button type="button" class="quick-date-chip" data-sl-date-preset="today"
-                    onclick="setSlQuickDate('today')">
+                    data-ui-click="action-ae64a4dd44f5">
                     Today
                 </button>
 
                 <button type="button" class="quick-date-chip" data-sl-date-preset="week"
-                    onclick="setSlQuickDate('week')">
+                    data-ui-click="action-c457a107a6f8">
                     Last 7 Days
                 </button>
 
                 <button type="button" class="quick-date-chip" data-sl-date-preset="month"
-                    onclick="setSlQuickDate('month')">
+                    data-ui-click="action-673f2e1d1880">
                     Last 30 Days
                 </button>
 
@@ -658,21 +702,24 @@
 
         <x-filter-group title="Action Type">
 
-            <select id="slActionType" class="js-custom-select">
-                <option value="">All Actions</option>
-                <option value="login">Login</option>
-                <option value="logout">Logout</option>
-                <option value="error">Error</option>
-                <option value="create">Create</option>
-                <option value="update">Update</option>
-                <option value="delete">Delete</option>
-            </select>
+            <x-select id="slActionType">
+                <option value="">
+                    All Actions
+                </option>
+
+                @foreach ($actionTypes as $value => $label)
+                    <option value="{{ $value }}" @selected($actionType === $value)>
+                        {{ $label }}
+                    </option>
+                @endforeach
+            </x-select>
 
         </x-filter-group>
 
-        <x-filter-group title="Module" class="filter-group-last">
+        <x-filter-group title="Module">
             <div class="global-control-wrap">
                 <i class="fa-solid fa-cube global-control-icon"></i>
+
                 <input type="text" id="slModuleFilter" class="form-input-custom global-form-icon"
                     placeholder="e.g. appointments">
             </div>
@@ -736,25 +783,12 @@
 
                                 <div class="modal-inline-main">
 
-                                    <div class="global-number-stepper" data-global-number-stepper>
-                                        <button type="button" class="global-number-stepper-btn" data-number-step="-1"
-                                            aria-label="Decrease archive age">
-                                            <i class="fa-solid fa-minus"></i>
-                                        </button>
-
-                                        <input type="number" id="slArchiveDaysInput" name="older_than_days"
-                                            value="90" min="1" max="3650" step="1"
-                                            inputmode="numeric" class="global-number-stepper-input"
-                                            data-number-stepper-input data-field-label="Archive Age"
-                                            data-required-message="Please enter the number of days."
-                                            data-validation-rule="wholeNumber" required>
-
-                                        <button type="button" class="global-number-stepper-btn" data-number-step="1"
-                                            aria-label="Increase archive age">
-                                            <i class="fa-solid fa-plus"></i>
-                                        </button>
-
-                                    </div>
+                                    <x-number-stepper id="slArchiveDaysInput" name="older_than_days" value="90"
+                                        min="1" max="3650" step="1" inputmode="numeric" required
+                                        decrease-label="Decrease archive age" increase-label="Increase archive age"
+                                        data-field-label="Archive Age"
+                                        data-required-message="Please enter the number of days."
+                                        data-validation-rule="wholeNumber" />
 
                                 </div>
 
@@ -771,16 +805,14 @@
                 </div>
 
                 <div class="modal-ft">
-                    <button type="button" class="ui-btn ui-btn-secondary" data-discard-close="slArchiveModal">
-                        <span>Cancel</span>
-                    </button>
+                    <x-button type="button" variant="secondary" data-discard-close="slArchiveModal">
+                        Cancel
+                    </x-button>
 
-                    <button type="button" id="slArchiveConfirmBtn" class="ui-btn ui-btn-warning"
-                        onclick="submitSlArchiveModal()">
-
-                        <i class="fa-solid fa-box-archive"></i>
-                        <span>Archive Logs</span>
-                    </button>
+                    <x-button id="slArchiveConfirmBtn" type="button" variant="warning" icon="fa-solid fa-box-archive"
+                        data-ui-click="action-215d4806d34c">
+                        Archive Logs
+                    </x-button>
                 </div>
             </form>
         </div>
@@ -822,13 +854,10 @@
 
                 </div>
 
-
                 <div class="modal-bd">
 
                     <div class="modal-form-grid">
 
-
-                        {{-- Export Filters --}}
                         <div class="modal-field modal-field-full sl-export-filter-section">
 
                             <div class="report-date-range-heading">
@@ -853,28 +882,17 @@
                                         <span class="required-mark">*</span>
                                     </label>
 
-                                    <select id="slExportRole" name="role" class="js-custom-select"
-                                        data-field-label="Role" data-required-message="Please select a role." required>
+                                    <x-select id="slExportRole" name="role" required data-field-label="Role"
+                                        data-required-message="Please select a role.">
                                         <option value="" selected disabled>
                                             Select role
                                         </option>
 
-                                        <option value="all">
-                                            All Roles
-                                        </option>
-
-                                        <option value="admin">
-                                            Admin
-                                        </option>
-
-                                        <option value="dentist">
-                                            Dentist
-                                        </option>
-
-                                        <option value="patient">
-                                            Patient
-                                        </option>
-                                    </select>
+                                        <option value="all">All Roles</option>
+                                        <option value="admin">Admin</option>
+                                        <option value="dentist">Dentist</option>
+                                        <option value="patient">Patient</option>
+                                    </x-select>
 
                                     <div class="global-field-error" data-error-for="slExportRole" aria-live="polite"
                                         aria-hidden="true"></div>
@@ -886,9 +904,8 @@
                                         <span class="required-mark">*</span>
                                     </label>
 
-                                    <select id="slExportAction" name="action_type" class="js-custom-select"
-                                        data-field-label="Action" data-required-message="Please select an action."
-                                        required>
+                                    <x-select id="slExportAction" name="action_type" required data-field-label="Action"
+                                        data-required-message="Please select an action.">
                                         <option value="" selected disabled>
                                             Select action
                                         </option>
@@ -897,26 +914,12 @@
                                             All Actions
                                         </option>
 
-                                        <option value="login">
-                                            Login
-                                        </option>
-
-                                        <option value="view">
-                                            View
-                                        </option>
-
-                                        <option value="book">
-                                            Book
-                                        </option>
-
-                                        <option value="logout">
-                                            Logout
-                                        </option>
-
-                                        <option value="error">
-                                            Error
-                                        </option>
-                                    </select>
+                                        @foreach ($actionTypes as $value => $label)
+                                            <option value="{{ $value }}">
+                                                {{ $label }}
+                                            </option>
+                                        @endforeach
+                                    </x-select>
 
                                     <div class="global-field-error" data-error-for="slExportAction" aria-live="polite"
                                         aria-hidden="true"></div>
@@ -993,28 +996,72 @@
                 </div>
 
                 <div class="modal-ft">
-
-                    <button type="button" class="ui-btn ui-btn-secondary" data-discard-close="slExportModal">
+                    <x-button type="button" variant="secondary" data-discard-close="slExportModal">
                         Cancel
-                    </button>
+                    </x-button>
 
-                    <button type="button" id="slExportConfirmBtn" class="ui-btn ui-btn-primary"
-                        onclick="submitSlExportModal()">
-                        <i class="fa-solid fa-file-pdf"></i>
-
-                        <span>
-                            Export PDF
-                        </span>
-                    </button>
+                    <x-button id="slExportConfirmBtn" type="button" variant="primary" icon="fa-solid fa-file-pdf"
+                        data-ui-click="action-6a1c2afb8e04">
+                        Export PDF
+                    </x-button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <div id="slDetailsModal" class="ui-modal modal-theme-primary" aria-hidden="true">
+        <div class="ui-modal-card modal-lg" role="dialog" aria-modal="true" aria-labelledby="slDetailsModalTitle">
+            <div class="modal-hd">
+                <div class="modal-heading">
+                    <div class="modal-icon">
+                        <i class="fa-solid fa-clipboard-list"></i>
+                    </div>
+
+                    <div class="modal-copy">
+                        <h3 id="slDetailsModalTitle" class="modal-title">
+                            Log Details
+                        </h3>
+
+                        <p class="modal-subtitle">
+                            Additional information recorded
+                            for this activity.
+                        </p>
+                    </div>
+                </div>
+
+                <button type="button" class="modal-x" data-modal-close="slDetailsModal" aria-label="Close log details">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="modal-bd">
+                <div class="global-confirm-alert">
+                    <i class="fa-solid fa-circle-info"></i>
+
+                    <p>
+                        <strong id="slDetailsSummary">
+                            Activity details
+                        </strong>
+
+                        <span id="slDetailsMeta"></span>
+                    </p>
+                </div>
+
+                <div id="slDetailsContent" class="global-info-grid"></div>
+            </div>
+
+            <div class="modal-ft">
+                <x-button type="button" variant="secondary" data-modal-close="slDetailsModal">
+                    Close
+                </x-button>
+            </div>
         </div>
     </div>
 
 @endsection
 
 @section('scripts')
-    <script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         var slArchiveDaysInput = null;
         var slArchiveError = null;
         var slArchiveConfirmBtn = null;
@@ -1029,7 +1076,114 @@
         const CAN_ARCHIVE_SYSTEM_LOGS = @json($canArchiveSystemLogs);
 
         const SYSTEM_LOGS_CHECK_URL =
-            @json(route($routeNames['check'] ?? 'admin.system_logs.check')) + '?status=active';
+            @json(route($routeNames['check'] ?? 'admin.system_logs.check'));
+
+        const SYSTEM_LOGS_FETCH_URL =
+            @json(route($routeNames['fetch'] ?? 'admin.system_logs.fetch'));
+
+        function getSystemLogsLiveParams() {
+            return new URLSearchParams({
+                role: slState.role ||
+                    'all',
+
+                search: slState.search ||
+                    '',
+
+                status: slState.status ||
+                    'active',
+
+                date_from: slState.dateFrom ||
+                    '',
+
+                date_to: slState.dateTo ||
+                    '',
+
+                action_type: slState.actionType ||
+                    '',
+
+                module: slState.module ||
+                    '',
+            });
+        }
+
+        function getSystemLogsLiveCheckUrl(
+            context = {}
+        ) {
+            const params =
+                getSystemLogsLiveParams();
+
+            if (
+                context.cursor !==
+                null &&
+                context.cursor !==
+                undefined &&
+                context.cursor !== ''
+            ) {
+                params.set(
+                    'since_id',
+                    String(
+                        context.cursor
+                    )
+                );
+            }
+
+            if (
+                slStatsCursor !==
+                null &&
+                slStatsCursor !==
+                undefined
+            ) {
+                params.set(
+                    'stats_since_id',
+                    String(
+                        slStatsCursor
+                    )
+                );
+            }
+
+            params.set('batch_limit', '50');
+
+            return (
+                SYSTEM_LOGS_CHECK_URL +
+                '?' +
+                params.toString()
+            );
+        }
+
+        function getSystemLogsLiveFetchUrl(
+            afterId,
+            throughId
+        ) {
+            const params =
+                getSystemLogsLiveParams();
+
+            params.set(
+                'after_id',
+                String(
+                    Number(afterId) ||
+                    0
+                )
+            );
+
+            params.set(
+                'through_id',
+                String(
+                    Number(throughId) ||
+                    0
+                )
+            );
+
+            params.set(
+                'limit',
+                '50'
+            );
+
+            return (
+                SYSTEM_LOGS_FETCH_URL +
+                '?' +
+                params.toString()
+            );
+        }
 
         function showSystemLogsUnauthorized(actionLabel) {
             window.showToast?.({
@@ -1398,13 +1552,8 @@
 
                 } else {
 
-                    modal.classList.add(
-                        'open'
-                    );
-
-                    modal.setAttribute(
-                        'aria-hidden',
-                        'false'
+                    window.openModal(
+                        'slExportModal'
                     );
 
                     document.documentElement
@@ -1594,6 +1743,67 @@
         var slDraftCountController = null;
         var slDraftCountTimer = null;
         var systemLogsRefreshWatcher = null;
+        var slVisibleLogs = @json($initialLogsPayload ?? []);
+        var slCurrentPagination = null;
+        var slStatsCursor = null;
+
+        function updateSystemLogStatCards(counts) {
+            if (
+                !counts ||
+                typeof counts !==
+                'object'
+            ) {
+                return;
+            }
+
+            const cards = {
+                statTotal: 'total',
+                statAdmin: 'admin',
+                statDentist: 'dentist',
+                statPatient: 'patient',
+            };
+
+            Object
+                .entries(cards)
+                .forEach(
+                    ([elementId, key]) => {
+                        const element =
+                            document
+                            .getElementById(
+                                elementId
+                            );
+
+                        if (
+                            !element ||
+                            counts[key] ===
+                            undefined ||
+                            counts[key] ===
+                            null
+                        ) {
+                            return;
+                        }
+
+                        element.textContent =
+                            String(
+                                Number(
+                                    counts[key]
+                                ) || 0
+                            );
+                    }
+                );
+
+            if (
+                counts.total !==
+                undefined &&
+                counts.total !==
+                null
+            ) {
+                slOverallTotal =
+                    Number(
+                        counts.total
+                    ) || 0;
+            }
+        }
 
         document.addEventListener('DOMContentLoaded', function() {
             syncSlFilterInputs();
@@ -1804,10 +2014,11 @@
             }
 
             systemLogsRefreshWatcher =
-                window.initGlobalRefreshWatcher?.({
+                window
+                .initGlobalRefreshWatcher?.({
                     key: 'system-logs',
 
-                    url: SYSTEM_LOGS_CHECK_URL,
+                    url: getSystemLogsLiveCheckUrl,
 
                     interval: 5000,
 
@@ -1815,22 +2026,16 @@
 
                     autoStart: false,
 
-                    anchorSelector: '#mainContent.system-logs-page .card',
-
-                    itemLabel: 'log entry',
+                    autoApply: true,
 
                     getItems: function(payload) {
-                        if (Array.isArray(payload)) {
-                            return payload;
-                        }
-
                         const latestId =
                             Number(
                                 payload?.latest_id || 0
                             );
 
                         return latestId > 0 ? [{
-                            id: latestId
+                            id: latestId,
                         }] : [];
                     },
 
@@ -1838,63 +2043,318 @@
                         return item?.id;
                     },
 
-                    title: function() {
-                        return 'New system activity detected';
+                    shouldApply: function(payload) {
+                        return !!payload?.counts;
                     },
 
-                    subtitle: function() {
-                        return 'Refresh to see the latest system logs.';
+                    getCursor: function(payload) {
+                        return (
+                            payload?.latest_id ??
+                            null
+                        );
                     },
 
-                    onRefresh: async function(payload) {
-                        slState.page = 1;
+                    onRefresh: async function(
+                        payload,
+                        newItems,
+                        context
+                    ) {
+                        const root = document.getElementById('mainContent');
 
-                        await slFetch();
+                        if (
+                            !context
+                            ?.isCurrent?.()
+                        ) {
+                            return;
+                        }
 
-                        try {
-                            const response =
-                                await fetch(
-                                    SYSTEM_LOGS_CHECK_URL, {
-                                        cache: 'no-store',
+                        if (payload?.counts) {
+                            updateSystemLogStatCards(
+                                payload.counts
+                            );
+                        }
 
-                                        credentials: 'same-origin',
+                        if (
+                            payload
+                            ?.stats_latest_id !==
+                            undefined &&
+                            payload
+                            ?.stats_latest_id !==
+                            null
+                        ) {
+                            slStatsCursor =
+                                Number(
+                                    payload
+                                    .stats_latest_id
+                                ) || 0;
+                        }
 
-                                        headers: {
-                                            'Accept': 'application/json',
+                        if (
+                            !newItems.length
+                        ) {
+                            return;
+                        }
 
-                                            'X-Requested-With': 'XMLHttpRequest'
-                                        }
-                                    }
-                                );
+                        if (
+                            payload
+                            ?.requires_full_refresh
+                        ) {
+                            const beforeIds =
+                                window
+                                .GlobalLiveUpdate
+                                ?.collectIds(
+                                    root
+                                ) ||
+                                new Set();
 
-                            if (!response.ok) {
+                            await slFetch(
+                                true
+                            );
+
+                            if (
+                                !context
+                                ?.isCurrent?.()
+                            ) {
                                 return;
                             }
 
-                            const latest =
-                                await response.json();
+                            const afterIds =
+                                window
+                                .GlobalLiveUpdate
+                                ?.collectIds(
+                                    root
+                                ) ||
+                                new Set();
+
+                            const newIds =
+                                Array
+                                .from(
+                                    afterIds
+                                )
+                                .filter(
+                                    id =>
+                                    !beforeIds
+                                    .has(id)
+                                );
+
+                            const latestVisibleId =
+                                Math.max(
+                                    0,
+                                    ...slVisibleLogs
+                                    .map(
+                                        log =>
+                                        Number(
+                                            log?.id
+                                        ) || 0
+                                    )
+                                );
 
                             if (
-                                payload &&
-                                latest?.latest_id
+                                latestVisibleId >
+                                Number(
+                                    payload
+                                    ?.latest_id ||
+                                    0
+                                )
                             ) {
                                 payload.latest_id =
-                                    latest.latest_id;
+                                    latestVisibleId;
                             }
 
-                        } catch (error) {
-                            console.warn(
-                                'Unable to refresh system logs baseline:',
-                                error
+                            window
+                                .GlobalLiveUpdate
+                                ?.highlightItems(
+                                    root,
+                                    newIds, {
+                                        highlightDuration: 5000,
+
+                                        insertDuration: 420,
+                                    }
+                                );
+
+                            return;
+                        }
+
+                        const sinceId =
+                            Number(
+                                payload
+                                ?.since_id ??
+                                context?.cursor ??
+                                0
+                            );
+
+                        const throughId =
+                            Number(
+                                payload
+                                ?.latest_id ||
+                                0
+                            );
+
+                        const response =
+                            await fetch(
+                                getSystemLogsLiveFetchUrl(
+                                    sinceId,
+                                    throughId
+                                ), {
+                                    cache: 'no-store',
+
+                                    credentials: 'same-origin',
+
+                                    headers: {
+                                        'Accept': 'application/json',
+
+                                        'X-Requested-With': 'XMLHttpRequest',
+                                    },
+                                }
+                            );
+
+                        if (!response.ok) {
+                            throw new Error(
+                                'Unable to fetch new system logs.'
                             );
                         }
+
+                        const batch =
+                            await response.json();
+
+                        if (
+                            !context
+                            ?.isCurrent?.()
+                        ) {
+                            return;
+                        }
+
+                        const newLogs =
+                            Array.isArray(
+                                batch.logs
+                            ) ?
+                            batch.logs : [];
+
+                        if (
+                            !newLogs.length
+                        ) {
+                            return;
+                        }
+
+                        const logMap =
+                            new Map();
+
+                        [
+                            ...newLogs,
+                            ...slVisibleLogs,
+                        ]
+                        .forEach(log => {
+                            const id =
+                                String(
+                                    log?.id ??
+                                    ''
+                                );
+
+                            if (
+                                !id ||
+                                logMap.has(id)
+                            ) {
+                                return;
+                            }
+
+                            logMap.set(
+                                id,
+                                log
+                            );
+                        });
+
+                        const perPage =
+                            Number(
+                                slState
+                                .perPage
+                            ) || 10;
+
+                        slVisibleLogs =
+                            Array
+                            .from(
+                                logMap
+                                .values()
+                            )
+                            .sort(
+                                (a, b) =>
+                                Number(
+                                    b.id
+                                ) -
+                                Number(
+                                    a.id
+                                )
+                            )
+                            .slice(
+                                0,
+                                perPage
+                            );
+
+                        slRenderRows(slVisibleLogs);
+
+                        const addedCount =
+                            Number(
+                                payload
+                                ?.new_count ??
+                                newLogs.length
+                            );
+
+                        const oldTotal =
+                            Number(
+                                slCurrentPagination
+                                ?.total ??
+                                0
+                            );
+
+                        const newTotal =
+                            oldTotal +
+                            addedCount;
+
+                        slRenderPagebar({
+                            total: newTotal,
+
+                            from: newTotal > 0 ?
+                                1 : 0,
+
+                            to: Math.min(
+                                perPage,
+                                newTotal
+                            ),
+
+                            current_page: 1,
+
+                            last_page: Math.max(
+                                1,
+                                Math.ceil(
+                                    newTotal /
+                                    perPage
+                                )
+                            ),
+
+                            per_page: perPage,
+                        });
+
+                        const newIds =
+                            newLogs
+                            .map(
+                                log =>
+                                String(
+                                    log.id
+                                )
+                            );
+
+                        window
+                            .GlobalLiveUpdate
+                            ?.highlightItems(
+                                root,
+                                newIds, {
+                                    highlightDuration: 5000,
+
+                                    insertDuration: 420,
+                                }
+                            );
                     },
 
-                    toast: {
-                        type: 'success',
-                        title: 'System logs updated',
-                        message: 'Latest log entries are now shown.'
-                    }
+                    toast: false,
                 });
 
             async function initializeSystemLogsRefreshWatcher() {
@@ -1912,9 +2372,19 @@
                     selectedStatuses.includes('all') ||
                     selectedStatuses.includes('active');
 
+                const canLiveUpdate =
+                    includesActive &&
+                    Number(
+                        slState.page || 1
+                    ) === 1 &&
+                    (
+                        slState.sort ||
+                        'desc'
+                    ) === 'desc';
+
                 if (
                     !systemLogsRefreshWatcher ||
-                    !includesActive
+                    !canLiveUpdate
                 ) {
                     systemLogsRefreshWatcher?.stop();
                     return;
@@ -1923,7 +2393,7 @@
                 try {
                     const response =
                         await fetch(
-                            SYSTEM_LOGS_CHECK_URL, {
+                            getSystemLogsLiveCheckUrl(), {
                                 cache: 'no-store',
 
                                 credentials: 'same-origin',
@@ -1940,12 +2410,16 @@
                         return;
                     }
 
-                    const payload =
-                        await response.json();
+                    const payload = await response.json();
 
-                    systemLogsRefreshWatcher.sync(
-                        payload
-                    );
+                    systemLogsRefreshWatcher.sync(payload);
+
+                    slStatsCursor =
+                        Number(
+                            payload
+                            ?.stats_latest_id ||
+                            0
+                        );
 
                     systemLogsRefreshWatcher.start();
 
@@ -1978,20 +2452,8 @@
                         !selectedStatuses.length ? ['all'] :
                         selectedStatuses;
 
-                    slState.status =
-                        effectiveStatuses.join(',');
-
+                    slState.status = effectiveStatuses.join(',');
                     slState.page = 1;
-
-                    const includesActive =
-                        effectiveStatuses.includes('all') ||
-                        effectiveStatuses.includes('active');
-
-                    if (includesActive) {
-                        initializeSystemLogsRefreshWatcher();
-                    } else {
-                        systemLogsRefreshWatcher?.stop();
-                    }
 
                     return slFetch();
                 };
@@ -2051,6 +2513,177 @@
                     .replaceAll('>', '&gt;')
                     .replaceAll('"', '&quot;')
                     .replaceAll("'", '&#039;');
+            }
+
+            function formatSlDetailLabel(
+                value
+            ) {
+                return String(value || '')
+                    .replaceAll('_', ' ')
+                    .replace(
+                        /\b\w/g,
+                        character =>
+                        character.toUpperCase()
+                    );
+            }
+
+            function renderSlDetailPrimitive(
+                value
+            ) {
+                if (
+                    value === null ||
+                    value === undefined ||
+                    value === ''
+                ) {
+                    return 'Not set';
+                }
+
+                if (
+                    typeof value ===
+                    'boolean'
+                ) {
+                    return value ?
+                        'Yes' :
+                        'No';
+                }
+
+                return escapeSlHtml(
+                    String(value)
+                );
+            }
+
+            function renderSlDetailObject(
+                object
+            ) {
+                if (
+                    !object ||
+                    typeof object !== 'object'
+                ) {
+                    return (
+                        '<div class="global-info-item global-info-item-compact">' +
+                        '<div class="global-info-copy">' +
+                        '<span class="global-info-value">' +
+                        renderSlDetailPrimitive(
+                            object
+                        ) +
+                        '</span>' +
+                        '</div>' +
+                        '</div>'
+                    );
+                }
+
+                if (Array.isArray(object)) {
+                    if (!object.length) {
+                        return (
+                            '<div class="global-info-item global-info-item-compact">' +
+                            '<div class="global-info-copy">' +
+                            '<span class="global-info-value">' +
+                            'None' +
+                            '</span>' +
+                            '</div>' +
+                            '</div>'
+                        );
+                    }
+
+                    return object
+                        .map(
+                            (item, index) => {
+                                if (
+                                    item &&
+                                    typeof item ===
+                                    'object'
+                                ) {
+                                    return (
+                                        '<div class="global-info-item global-info-item-wide">' +
+                                        '<div class="global-info-copy">' +
+                                        '<span class="global-info-label">' +
+                                        'Item ' +
+                                        (index + 1) +
+                                        '</span>' +
+                                        '<div class="global-info-grid">' +
+                                        renderSlDetailObject(
+                                            item
+                                        ) +
+                                        '</div>' +
+                                        '</div>' +
+                                        '</div>'
+                                    );
+                                }
+
+                                return (
+                                    '<div class="global-info-item global-info-item-compact">' +
+                                    '<div class="global-info-copy">' +
+                                    '<span class="global-info-label">' +
+                                    'Item ' +
+                                    (index + 1) +
+                                    '</span>' +
+                                    '<span class="global-info-value">' +
+                                    renderSlDetailPrimitive(
+                                        item
+                                    ) +
+                                    '</span>' +
+                                    '</div>' +
+                                    '</div>'
+                                );
+                            }
+                        )
+                        .join('');
+                }
+
+                return Object
+                    .entries(object)
+                    .map(
+                        ([key, value]) => {
+                            const label =
+                                escapeSlHtml(
+                                    formatSlDetailLabel(
+                                        key
+                                    )
+                                );
+
+                            const isNested =
+                                value &&
+                                typeof value ===
+                                'object';
+
+                            if (isNested) {
+                                return (
+                                    '<div class="global-info-item global-info-item-wide">' +
+                                    '<div class="global-info-copy">' +
+                                    '<span class="global-info-label">' +
+                                    label +
+                                    '</span>' +
+
+                                    '<div class="global-info-grid global-info-grid-2">' +
+                                    renderSlDetailObject(
+                                        value
+                                    ) +
+                                    '</div>' +
+                                    '</div>' +
+                                    '</div>'
+                                );
+                            }
+
+                            return (
+                                '<div class="global-info-item global-info-item-compact">' +
+                                '<div class="global-info-copy">' +
+
+                                '<span class="global-info-label">' +
+                                label +
+                                '</span>' +
+
+                                '<span class="global-info-value">' +
+                                renderSlDetailPrimitive(
+                                    value
+                                ) +
+                                '</span>' +
+
+                                '</div>' +
+                                '</div>'
+                            );
+                        }
+                    )
+                    .join('');
             }
 
             function closeSlOverflowMenu() {
@@ -2218,11 +2851,8 @@
                         )
                     );
                 } else {
-                    modal.classList.add("open");
-                    modal.setAttribute("aria-hidden", "false");
-                    document.documentElement.classList.add(
-                        "modal-open"
-                    );
+                    window.openModal('slArchiveModal');
+                    document.documentElement.classList.add("modal-open");
                     document.body.classList.add("modal-open");
                 }
 
@@ -2664,7 +3294,9 @@
                 }
             }
 
-            function clearOnlySlFilters() {
+            async function clearOnlySlFilters() {
+                slState.role = 'all';
+                slState.status = 'active';
                 slState.sort = 'desc';
                 slState.dateFrom = '';
                 slState.dateTo = '';
@@ -2672,12 +3304,30 @@
                 slState.module = '';
                 slState.page = 1;
 
+                await window
+                    .setGlobalFilterSelectValue?.(
+                        'slRoleSelect',
+                        'all', {
+                            callback: false,
+                            focus: false,
+                        }
+                    );
+
+                await window
+                    .setGlobalFilterSelectValue?.(
+                        'slStatusSelect',
+                        'active', {
+                            callback: false,
+                            focus: false,
+                        }
+                    );
+
                 syncSlFilterInputs();
                 renderSlFilterChips();
                 updateSlClearFilterButton();
-                closeSlFilterPanel();
 
-                slFetch();
+                closeSlFilterPanel();
+                return slFetch();
             }
 
             function clearSlFilterPanelDraft() {
@@ -2953,21 +3603,30 @@
                             }
                         );
 
-                        slRenderRows(
-                            data.logs || []
-                        );
+                        updateSystemLogStatCards(data.counts);
 
-                        slRenderPagebar(
-                            data.pagination
-                        );
+                        slVisibleLogs =
+                            Array.isArray(
+                                data.logs
+                            ) ?
+                            data.logs : [];
 
+                        slRenderRows(slVisibleLogs);
+                        slRenderPagebar(data.pagination);
                         updateSlClearFilterButton();
 
                         updateSlShowResultsButton(
                             Number(
-                                data.pagination?.total ?? 0
+                                data.pagination?.total ??
+                                0
                             )
                         );
+
+                        if (!silent) {
+                            initializeSystemLogsRefreshWatcher();
+                        }
+
+                        return data;
                     })
                     .catch(function(error) {
                         if (
@@ -2986,6 +3645,22 @@
                     });
             }
 
+            function clearSlExpandedLogs() {
+                const mainContent =
+                    document.getElementById(
+                        'mainContent'
+                    );
+
+                if (!mainContent) {
+                    return;
+                }
+
+                window.ShowMore
+                    ?.collapseDisclosures?.(
+                        mainContent
+                    );
+            }
+
             function handleSystemLogsPerPageChange(value) {
                 const nextPerPage = Number(value) || 10;
 
@@ -2993,6 +3668,7 @@
                     return;
                 }
 
+                clearSlExpandedLogs();
                 slState.perPage = nextPerPage;
                 slState.page = 1;
 
@@ -3079,10 +3755,14 @@
                 var actionIcons = {
                     login: 'fa-right-to-bracket',
                     logout: 'fa-right-from-bracket',
+                    view: 'fa-eye',
                     create: 'fa-plus',
                     update: 'fa-pen',
                     delete: 'fa-trash',
                     error: 'fa-triangle-exclamation',
+                    book: 'fa-calendar-plus',
+                    archive: 'fa-box-archive',
+                    export: 'fa-file-export',
                     default: 'fa-bolt'
                 };
 
@@ -3098,14 +3778,40 @@
                 logs.forEach(function(log) {
                     var role = (log.actor_role || 'other').toLowerCase();
                     var action = (log.action || '').toLowerCase();
-                    var actionClass = (action.includes('error') || action.includes('failed') || action
-                            .includes(
-                                'exception')) ? 'error' :
-                        action.includes('login') ? 'login' :
-                        action.includes('logout') ? 'logout' :
-                        action.includes('create') ? 'create' :
-                        action.includes('update') ? 'update' :
-                        action.includes('delete') ? 'delete' :
+                    var actionClass =
+                        (
+                            action.includes('error') ||
+                            action.includes('failed') ||
+                            action.includes('exception')
+                        ) ? 'error' :
+
+                        action.includes('login') ?
+                        'login' :
+
+                        action.includes('logout') ?
+                        'logout' :
+
+                        action.includes('view') ?
+                        'view' :
+
+                        action.includes('create') ?
+                        'create' :
+
+                        action.includes('update') ?
+                        'update' :
+
+                        action.includes('delete') ?
+                        'delete' :
+
+                        action.includes('book') ?
+                        'book' :
+
+                        action.includes('archive') ?
+                        'archive' :
+
+                        action.includes('export') ?
+                        'export' :
+
                         'default';
 
                     var actionIcon = actionIcons[actionClass] || 'fa-bolt';
@@ -3122,37 +3828,60 @@
                         'role-none';
 
                     var actionStatusClasses = {
-                        login: 's-active',
-                        logout: 's-ended',
-                        create: 's-upcoming',
-                        update: 's-rescheduled',
-                        delete: 's-cancelled',
-                        error: 's-failed',
-                        default: 's-neutral'
+                        login: 'status-active',
+                        logout: 'status-ended',
+                        view: 'status-all',
+                        create: 'status-approved',
+                        update: 'status-rescheduled',
+                        delete: 'status-cancelled',
+                        error: 'status-failed',
+                        book: 'status-upcoming',
+                        archive: 'status-archived',
+                        export: 'status-released',
+                        default: 'status-default'
                     };
 
-                    var isInventoryCrudLabel = String(log.module || '').toLowerCase() === 'inventory' && [
-                        'create', 'delete'
-                    ].includes(actionClass);
-                    var actionStatusClass = isInventoryCrudLabel ?
-                        's-neutral' :
-                        (actionStatusClasses[actionClass] || 's-neutral');
+                    var actionStatusClass =
+                        actionStatusClasses[
+                            actionClass
+                        ] || 'status-default';
 
                     var actionIconHtml = '<i class="fa-solid ' + actionIcon + (actionClass === 'error' ?
                         ' sl-action-alert' : '') + '"></i>';
                     var roleIcon = roleIcons[role] || 'fa-circle-user';
                     var letter = escapeSlHtml((log.actor_name || role).charAt(0).toUpperCase());
                     var idPadded = '#' + String(log.id || '').padStart(3, '0');
-                    var actionLabel = isInventoryCrudLabel ?
-                        escapeSlHtml(actionClass.charAt(0).toUpperCase() + actionClass.slice(1)) :
-                        escapeSlHtml((log.action || '').replace(/_/g, ' ').replace(/\b\w/g,
-                            function(c) {
-                                return c.toUpperCase();
-                            }));
+
+                    var actionLabels = {
+                        login: 'Login',
+                        logout: 'Logout',
+                        view: 'View',
+                        create: 'Create',
+                        update: 'Update',
+                        delete: 'Delete',
+                        book: 'Book',
+                        archive: 'Archive',
+                        export: 'Export',
+                        error: 'Error'
+                    };
+
+                    var actionLabel =
+                        escapeSlHtml(
+                            actionLabels[actionClass] ||
+                            (log.action || '')
+                            .replace(/_/g, ' ')
+                            .replace(
+                                /\b\w/g,
+                                function(c) {
+                                    return c.toUpperCase();
+                                }
+                            )
+                        );
                     var moduleLabel = escapeSlHtml((log.module || '').replace(/_/g, ' ').replace(/\b\w/g,
                         function(c) {
                             return c.toUpperCase();
                         }));
+
                     var archiveBadge =
                         log.is_archived ?
                         `
@@ -3170,14 +3899,69 @@
         ` :
                         '';
                     var actorName = escapeSlHtml(log.actor_name ?? log.actor_identifier ?? 'Unknown User');
-                    var description = escapeSlHtml(log.description || 'No description provided.');
-                    var fullDetails = log.full_description && log.full_description !== log.description
-                        ? '<details><summary>Full details</summary>' + escapeSlHtml(log.full_description) + '</details>' : '';
+                    var rawDescription =
+                        String(
+                            log.description ||
+                            'No description provided.'
+                        ).trim();
+
+                    var rawFullDescription =
+                        String(
+                            log.full_description || ''
+                        ).trim();
+
+                    var description =
+                        escapeSlHtml(
+                            rawDescription
+                        );
+
+                    var hasGridExpandableDescription =
+                        rawFullDescription !== '' &&
+                        rawFullDescription !== rawDescription;
+
+                    var hasMeaningfulDetails =
+                        rawFullDescription !== '' &&
+                        rawFullDescription !==
+                        rawDescription;
+
+                    var displayDescription =
+                        escapeSlHtml(
+                            String(
+                                log.display_description ||
+                                rawDescription
+                            ).trim()
+                        );
+
+                    var fullDescription =
+                        escapeSlHtml(
+                            rawFullDescription
+                        );
+
+                    var tableDetailId =
+                        'sl-table-detail-' +
+                        String(log.id || '');
+
+                    var tableCopyId =
+                        'sl-table-full-description-' +
+                        String(log.id || '');
+
                     var createdDay = escapeSlHtml(log.created_at_day || '');
                     var createdTime = escapeSlHtml(log.created_at_time || '');
 
-                    tableHtml += '<tr data-role="' + escapeSlHtml(role) + '" data-action="' + escapeSlHtml(
-                        actionClass) + '">';
+                    tableHtml +=
+                        '<tr data-live-item-id="' +
+                        escapeSlHtml(
+                            log.id || ''
+                        ) +
+                        '" data-role="' +
+                        escapeSlHtml(
+                            role
+                        ) +
+                        '" data-action="' +
+                        escapeSlHtml(
+                            actionClass
+                        ) +
+                        '">';
                     tableHtml += '<td><span class="sl-id">' + idPadded + '</span></td>';
                     tableHtml += '<td><span class="sl-date-day">' + createdDay +
                         '</span><span class="sl-date-time">' + createdTime + '</span></td>';
@@ -3216,7 +4000,6 @@
                         '<span class="status-pill ' +
                         actionStatusClass +
                         '">' +
-                        '<span class="status-dot"></span>' +
                         actionIconHtml +
                         actionLabel +
                         '</span>' +
@@ -3229,16 +4012,200 @@
                         moduleLabel +
                         '</span>' +
                         '</td>';
-                    tableHtml += '<td><span class="sl-desc" title="' + description + '">' + description +
-                        '</span>' + fullDetails + '</td>';
+                    tableHtml +=
+                        '<td>' +
+                        '<div ' +
+                        'class="global-show-more-disclosure" ' +
+                        'data-show-more ' +
+                        'data-show-more-mode="disclosure" ' +
+                        'data-log-show-more ' +
+                        'data-log-id="' +
+                        escapeSlHtml(log.id || '') +
+                        '"' +
+                        '>' +
+
+                        '<span ' +
+                        'class="sl-desc global-text-clamp-2" ' +
+                        'data-show-more-summary' +
+                        '>' +
+                        displayDescription +
+                        '</span>' +
+
+                        (
+                            hasMeaningfulDetails ?
+                            (
+                                '<div ' +
+                                'class="' +
+                                'global-show-more-controls ' +
+                                'global-show-more-controls-inline' +
+                                '" ' +
+                                'data-show-more-controls' +
+                                '>' +
+
+                                '<button ' +
+                                'type="button" ' +
+                                'class="' +
+                                'global-show-more-btn ' +
+                                'global-show-more-btn-inline' +
+                                '" ' +
+                                'data-show-more-button ' +
+                                'data-mode="more" ' +
+                                'aria-expanded="false" ' +
+                                'aria-controls="' +
+                                tableDetailId +
+                                '"' +
+                                '>' +
+
+                                '<span data-show-more-text>' +
+                                'Show more' +
+                                '</span>' +
+
+                                '<i ' +
+                                'class="' +
+                                'fa-solid ' +
+                                'fa-chevron-down' +
+                                '" ' +
+                                'aria-hidden="true"' +
+                                '></i>' +
+
+                                '</button>' +
+
+                                '</div>'
+                            ) :
+                            ''
+                        ) +
+
+                        '</div>' +
+                        '</td>';
+
                     tableHtml += '</tr>';
+
+                    if (hasMeaningfulDetails) {
+                        tableHtml +=
+                            '<tr ' +
+                            'id="' + tableDetailId + '" ' +
+                            'class="sl-log-detail-row" ' +
+                            'data-show-more-panel ' +
+                            'aria-hidden="true" ' +
+                            'hidden' +
+                            '>' +
+
+                            '<td ' +
+                            'colspan="7" ' +
+                            'class="sl-log-detail-cell"' +
+                            '>' +
+
+                            '<div ' +
+                            'class="' +
+                            'global-info-item ' +
+                            'global-info-item-wide ' +
+                            'slide-down-fade-in ' +
+                            'sl-log-detail-box' +
+                            '"' +
+                            '>' +
+
+                            '<div class="global-info-copy">' +
+
+                            '<span class="global-info-label">' +
+                            'Full Description' +
+                            '</span>' +
+
+                            '<span ' +
+                            'id="' + tableCopyId + '" ' +
+                            'class="' +
+                            'global-info-value ' +
+                            'sl-log-detail-value' +
+                            '"' +
+                            '>' +
+                            fullDescription +
+                            '</span>' +
+
+                            '</div>' +
+
+                            '<button ' +
+                            'type="button" ' +
+                            'class="' +
+                            'ui-btn ' +
+                            'ui-btn-secondary ' +
+                            'ui-btn-sm' +
+                            '" ' +
+                            'data-log-copy-target="' +
+                            tableCopyId +
+                            '"' +
+                            '>' +
+
+                            '<i class="fa-regular fa-copy"></i>' +
+                            '<span>Copy</span>' +
+
+                            '</button>' +
+
+                            '</div>' +
+
+                            '</td>' +
+
+                            '</tr>';
+                    }
+
+                    var gridDetailId =
+                        'sl-grid-detail-' +
+                        String(log.id || '');
+
+                    var gridDetailsHtml =
+                        hasGridExpandableDescription ?
+                        `
+        <div
+            id="${gridDetailId}"
+            class="sl-grid-log-detail"
+            data-show-more-panel
+            aria-hidden="true"
+            hidden
+        >
+            <span class="sl-desc">
+                ${fullDescription}
+            </span>
+        </div>
+
+        <div
+            class="
+                global-show-more-controls
+                global-show-more-controls-inline
+            "
+            data-show-more-controls
+        >
+            <button
+                type="button"
+                class="
+                    global-show-more-btn
+                    global-show-more-btn-inline
+                "
+                data-show-more-button
+                data-mode="more"
+                aria-expanded="false"
+                aria-controls="${gridDetailId}"
+            >
+                <span data-show-more-text>
+                    Show more
+                </span>
+
+                <i
+                    class="
+                        fa-solid
+                        fa-chevron-down
+                        global-accordion-chevron
+                    "
+                    aria-hidden="true"
+                ></i>
+            </button>
+        </div>
+    ` :
+                        '';
 
                     gridHtml += `
     <article
     class="table-record-card"
+    data-live-item-id="${escapeSlHtml(log.id || '')}"
     data-role="${escapeSlHtml(role)}"
-    data-action="${escapeSlHtml(actionClass)}"
->
+    data-action="${escapeSlHtml(actionClass)}">
     <div class="table-record-card-layout">
         <div class="table-record-content">
 
@@ -3252,7 +4219,6 @@
                 </div>
 
                 <span class="status-pill ${actionStatusClass}">
-                    <span class="status-dot"></span>
 
                     ${actionIconHtml}
 
@@ -3316,16 +4282,30 @@
                     </span>
                 </div>
 
-                <div class="table-record-row">
-                    <span class="table-record-label">
-                        Description
-                    </span>
+                <div
+    class="table-record-row"
+    data-system-log-description-row>
+    <span class="table-record-label">
+        Description
+    </span>
 
-                    <span class="table-record-value">
-                        ${description}
-                        ${fullDetails}
-                    </span>
-                </div>
+    <div class="table-record-value">
+        <div
+            class="global-show-more-disclosure"
+            data-show-more
+            data-show-more-mode="disclosure"
+            data-log-show-more
+            data-log-id="${escapeSlHtml(log.id || '')}">
+            <span
+    class="sl-desc global-text-clamp-2"
+    data-show-more-summary>
+    ${displayDescription}
+</span>
+
+            ${gridDetailsHtml}
+        </div>
+    </div>
+</div>
 
             </div>
 
@@ -3344,10 +4324,17 @@
                     );
                 }
 
+                window.ShowMore?.init(tableBody);
+
                 if (gridBody) {
-                    gridBody.innerHTML = gridHtml;
+                    gridBody.innerHTML =
+                        gridHtml;
 
                     window.PatientUI?.initAvatars(
+                        gridBody
+                    );
+
+                    window.ShowMore?.init(
                         gridBody
                     );
                 }
@@ -3357,6 +4344,32 @@
                 if (!p) {
                     return;
                 }
+
+                slCurrentPagination = {
+                    total: Number(
+                        p.total
+                    ) || 0,
+
+                    from: p.from ?? null,
+
+                    to: p.to ?? null,
+
+                    current_page: Number(
+                        p.current_page
+                    ) || 1,
+
+                    last_page: Number(
+                        p.last_page
+                    ) || 1,
+
+                    per_page: Number(
+                            p.per_page
+                        ) ||
+                        Number(
+                            slState.perPage
+                        ) ||
+                        10,
+                };
 
                 window.renderGlobalPagination?.({
                     currentPage: Number(
@@ -3405,7 +4418,11 @@
                     itemLabel: 'entries',
 
                     onPageChange(page) {
-                        slState.page = page;
+                        clearSlExpandedLogs();
+
+                        slState.page =
+                            page;
+
                         slFetch();
                     },
                 });
@@ -3566,33 +4583,64 @@
                 });
             }
 
+            document.addEventListener('click', async function(event) {
+                const button =
+                    event.target.closest(
+                        '[data-log-copy-target]'
+                    );
+
+                if (!button) {
+                    return;
+                }
+
+                const target =
+                    document.getElementById(
+                        button.dataset
+                        .logCopyTarget
+                    );
+
+                const text =
+                    target?.textContent
+                    ?.trim();
+
+                if (!text) {
+                    return;
+                }
+
+                try {
+                    await navigator
+                        .clipboard
+                        .writeText(text);
+
+                    window.showToast?.({
+                        type: 'success',
+                        title: 'Copied',
+                        message: 'Full description copied to clipboard.',
+                    });
+                } catch (error) {
+                    console.error(
+                        'Unable to copy log description.',
+                        error
+                    );
+
+                    window.showToast?.({
+                        type: 'error',
+                        title: 'Copy failed',
+                        message: 'Unable to copy the description.',
+                    });
+                }
+            });
+
             window.openSlFilterPanel = openSlFilterPanel;
             window.closeSlFilterPanel = closeSlFilterPanel;
             window.applySlFilters = applySlFilters;
             window.clearOnlySlFilters = clearOnlySlFilters;
-            window.clearSlFilterPanelDraft =
-                clearSlFilterPanelDraft;
+            window.clearSlFilterPanelDraft = clearSlFilterPanelDraft;
             window.setSlQuickDate = setSlQuickDate;
-
-            window.openSlArchiveModal =
-                openSlArchiveModal;
-            window.closeSlArchiveModal =
-                closeSlArchiveModal;
-            window.submitSlArchiveModal =
-                submitSlArchiveModal;
-
-            window.openSlExportModal =
-                openSlExportModal;
-
-
-            window.handleSlExportButtonClick =
-                handleSlExportButtonClick;
-            window.closeSlExportModal =
-                closeSlExportModal;
-            window.submitSlExportModal =
-                submitSlExportModal;
-            window.exportSystemLogsPdf =
-                exportSystemLogsPdf;
+            window.openSlArchiveModal = openSlArchiveModal;
+            window.submitSlArchiveModal = submitSlArchiveModal;
+            window.handleSlExportButtonClick = handleSlExportButtonClick;
+            window.submitSlExportModal = submitSlExportModal;
         });
     </script>
 @endsection

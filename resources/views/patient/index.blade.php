@@ -11,6 +11,9 @@
 @section('content')
 
     @php
+        // Consume the confirmation only when this dashboard is rendered.
+        $appointmentConfirmation = session()->pull('appointment_confirmation');
+        $appointmentDraftCompleted = (bool) session()->pull('appointment_draft_completed', false);
         $notifications = collect($notifications ?? []);
         $notifCount = $notifications->count();
         $odontogramSnapshotService = app(\App\Services\AppointmentOdontogramSnapshotService::class);
@@ -70,6 +73,8 @@
                     'diagnosis' => $r->procedure?->diagnosis ?? '',
                     'prescription' => $r->procedure?->prescriptions ?? '',
                     'odontogram' => $r->procedure?->odontogram_data ?? [],
+                    'edit_locked' => strtolower($r->status ?? '') === 'completed' && $r->isOdontogramEditLocked(),
+                    'edit_deadline' => $r->odontogramEditDeadline()?->toIso8601String(),
 
                     'previous_odontogram' => $previousOdontogramByAppointment[$r->id] ?? [],
 
@@ -146,7 +151,7 @@
 
         $dashboardDisplayName = optional($patient)->name ?? (auth()->user()->name ?? 'Patient User');
         $dashboardPatientImage = optional($patient)->profile_image ?? null;
-        $dashboardUserImage = auth()->user()->profile_image ?? null;
+        $dashboardUserImage = $rolePreviewActive ?? false ? null : auth()->user()->profile_image ?? null;
 
         if (!empty($dashboardPatientImage)) {
             $dashboardAvatarUrl = asset('storage/' . $dashboardPatientImage);
@@ -161,7 +166,15 @@
 
         $recordCount = collect($homeRecords ?? [])->count();
 
-        $latestRecordDate = $recordCount ? collect($homeRecords)->first()['date'] ?? null : null;
+        $completedHomeRecords = collect($homeRecords ?? [])
+            ->filter(function ($record) {
+                return strtolower($record['status'] ?? '') === 'completed';
+            })
+            ->values();
+
+        $completedVisitCount = $completedHomeRecords->count();
+
+        $latestCompletedVisitDate = $completedVisitCount ? $completedHomeRecords->first()['date'] ?? null : null;
 
         $pendingDocumentRequests = collect($documentRequests ?? [])
             ->whereIn('status', ['pending', 'processing'])
@@ -248,36 +261,24 @@
                                 <span
                                     class="greeting-insight-chip inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/15 px-3 py-1.5 text-xs font-semibold text-white">
                                     <i class="fa-solid fa-tooth"></i>
-                                    {{ $recordCount > 0
-                                        ? 'Last Visit: ' . ($latestRecordDate ?? 'Available')
-                                        : 'No dental
-                                                                                                                                                                                                                                                                                                                                record yet' }}
+                                    {{ $completedVisitCount > 0
+                                        ? 'Last Visit: ' . ($latestCompletedVisitDate ?? 'Available')
+                                        : 'No completed visit yet' }}
                                 </span>
 
                             </div>
                         </div>
 
                         <div class="greeting-banner-actions">
-                            <a href="{{ route('patient.book.appointment') }}" class="ui-btn ui-btn-primary ui-btn-shimmer"
-                                onclick="
-                                if (
-                                    window.UPCOMING_DATA?.exists &&
-                                    ['upcoming', 'rescheduled'].includes(
-                                        String(window.UPCOMING_DATA.status || '').toLowerCase()
-                                    )
-                                ) {
-                                    event.preventDefault();
-                                    window.openModal?.('activeAppointmentModal');
-                                }
-                            ">
-                                <i class="fa-solid fa-calendar-plus"></i>
-                                <span>Book Appointment</span>
-                            </a>
+                            <x-button href="{{ route('patient.book.appointment') }}" variant="primary"
+                                icon="fa-solid fa-calendar-plus" :shimmer="true" data-ui-click="action-fa43d7668e58">
+                                Book Appointment
+                            </x-button>
 
-                            <a href="{{ route('patient.record') }}" class="ui-btn ui-btn-ghost-light">
-                                <i class="fa-solid fa-folder-open"></i>
-                                <span>View Records</span>
-                            </a>
+                            <x-button href="{{ route('patient.record') }}" variant="ghost-light"
+                                icon="fa-solid fa-folder-open">
+                                View Records
+                            </x-button>
                         </div>
                     </div>
                 </div>
@@ -365,14 +366,11 @@
 
                                     </div>
 
-                                    <a href="{{ route('book.appointment.reserved', $reservedPeriod) }}"
-                                        class="ui-btn ui-btn-primary w-full lg:w-auto">
-
-                                        <span>Book Reserved Appointment</span>
-
-                                        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
-
-                                    </a>
+                                    <x-button href="{{ route('book.appointment.reserved', $reservedPeriod) }}"
+                                        variant="primary" icon="fa-solid fa-arrow-right" icon-position="right"
+                                        class="w-full lg:w-auto">
+                                        Book Reserved Appointment
+                                    </x-button>
 
                                 </div>
 
@@ -560,7 +558,7 @@
             @endforeach
 
             <div class="pt-2">
-                <a href="{{ route('patient.record') }}" class="ui-btn ui-btn-primary w-full">
+                <x-button href="{{ route('patient.record') }}" variant="primary" class="w-full">
                     <i class="fa-solid fa-folder-open"></i>
 
                     <span>
@@ -568,16 +566,12 @@
                     </span>
 
                     <i class="fa-solid fa-arrow-right text-[11px]"></i>
-                </a>
+                </x-button>
             </div>
 
         </div>
     </template>
-    @if (session('appointment_confirmation'))
-        @php
-            $appointmentConfirmation = session('appointment_confirmation');
-        @endphp
-
+    @if ($appointmentConfirmation)
         <x-booking.confirmed-modal id="appointmentConfirmedModal" eyebrow="Appointment Booking"
             title="Appointment Confirmed" subtitle="Your appointment has been successfully scheduled."
             header-icon="fa-check" section-icon="fa-calendar-check" section-eyebrow="Booking Status"
@@ -631,112 +625,223 @@
             </div>
 
             <x-slot:footer>
-                <button type="button" id="appointmentConfirmedDoneBtn" class="ui-btn ui-btn-primary">
-                    <i class="fa-solid fa-check"></i>
+                <x-button id="appointmentConfirmedDoneBtn" type="button" variant="primary" icon="fa-solid fa-check">
                     Done
-                </button>
+                </x-button>
             </x-slot:footer>
 
         </x-booking.confirmed-modal>
     @endif
 
-    <div id="privateInformationModal" class="ui-modal modal-theme-warning" role="dialog" aria-modal="true"
+    <x-modal id="privateInformationModal" size="sm" class="modal-theme-warning" :show-close="false"
         aria-labelledby="privateInformationModalTitle" aria-describedby="privateInformationModalDescription">
-        <div class="ui-modal-card modal-sm" tabindex="-1">
-            <div class="modal-hd">
-                <div class="modal-heading">
-                    <div class="modal-icon">
-                        <i class="fa-solid fa-shield-halved"></i>
-                    </div>
-
-                    <div class="modal-copy">
-                        <h2 id="privateInformationModalTitle" class="modal-title">
-                            Show Private Information?
-                        </h2>
-
-                        <p id="privateInformationModalDescription" class="modal-subtitle">
-                            Your personal contact and identification details will become visible.
-                        </p>
-                    </div>
+        <x-slot:header>
+            <div class="modal-heading">
+                <div class="modal-icon" aria-hidden="true">
+                    <i class="fa-solid fa-shield-halved"></i>
                 </div>
 
-                <button type="button" class="modal-x" onclick="closePrivateInformationModal()"
-                    aria-label="Close private information modal">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
+                <div class="modal-copy">
+                    <h2 id="privateInformationModalTitle" class="modal-title" tabindex="-1" data-modal-initial-focus>
+                        Show Private Information?
+                    </h2>
 
-            <div class="modal-bd">
-                <div class="global-confirm-alert">
-                    <i class="fa-solid fa-eye"></i>
-
-                    <div>
-                        <p>Private information will be displayed.</p>
-
-                        <span>
-                            Make sure no one else can see your screen before continuing.
-                        </span>
-                    </div>
+                    <p id="privateInformationModalDescription" class="modal-subtitle">
+                        Your contact and identification details will be shown.
+                    </p>
                 </div>
             </div>
+        </x-slot:header>
 
-            <div class="modal-ft">
-                <button type="button" class="ui-btn ui-btn-secondary" onclick="closePrivateInformationModal()">
-                    Cancel
-                </button>
+        <div class="global-confirm-alert">
+            <i class="fa-solid fa-eye" aria-hidden="true"></i>
 
-                <button type="button" class="ui-btn ui-btn-primary" onclick="confirmShowPrivateInformation()">
-                    <i class="fa-regular fa-eye"></i>
-                    Show Information
-                </button>
-            </div>
+            <p>
+                Make sure no one else can see your screen before continuing.
+            </p>
         </div>
-    </div>
 
-    @include('components.appointment-calendar-script', [
-        'mode' => 'patient-dashboard',
-        'renderStyle' => 'patient',
-        'calendarContainerId' => 'calendarSkeletonContainer',
-        'hasActiveAppointment' => $hasActiveAppointment,
+        <x-slot:footer>
+            <x-button type="button" variant="secondary" data-ui-click="action-a2822b6ec471">
+                Cancel
+            </x-button>
 
-        'dateInputId' => null,
-        'timeInputId' => null,
+            <x-button type="button" variant="primary" icon="fa-regular fa-eye" data-ui-click="action-573f9113de2d">
+                Show Information
+            </x-button>
+        </x-slot:footer>
+    </x-modal>
 
-        'slotEndpoint' => route('book.appointment.slots'),
-        'bookingUrl' => route('patient.book.appointment'),
+    @if ($rolePreviewActive ?? false)
+        <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
+            document.addEventListener(
+                'DOMContentLoaded',
+                () => {
+                    const container =
+                        document.getElementById(
+                            'calendarSkeletonContainer'
+                        );
 
-        'scheduleRules' => isset($schedules)
-            ? $schedules
-            : (isset($scheduleRules)
-                ? $scheduleRules
-                : \App\Models\ClinicSchedule::active()->get()->values()->toArray()),
+                    if (!container) {
+                        return;
+                    }
 
-        'blockedDates' => $unavailableDates ?? [],
-        'appointmentCountsPerDay' => $appointmentCountsPerDay ?? [],
-        'philippineHolidays' => $philippineHolidays ?? [],
-        'personalAppointments' => $calendarAppointments ?? [],
-        'completedAppointments' => $completedCalendarAppointments ?? [],
+                    container.innerHTML = `
+                    <section
+                        class="
+                            card
+                            h-full
+                            min-h-[420px]
+                        "
+                    >
 
-        'useDynamicScheduleRules' => true,
-        'disallowToday' => true,
-        'allowToggleOffDate' => false,
+                        <div
+                            class="
+                                card-header
+                            "
+                        >
+                            <div
+                                class="
+                                    card-header-left
+                                "
+                            >
 
-        'maxFutureMonths' => 6,
-        'historyMonths' => 12,
+                                <span
+                                    class="
+                                        card-header-icon
+                                    "
+                                >
+                                    <i
+                                        class="
+                                            fa-regular
+                                            fa-calendar
+                                        "
+                                    ></i>
+                                </span>
 
-        'appointmentHistoryUrl' => route('patient.record'),
-    ])
+                                <div>
+                                    <h3
+                                        class="
+                                            card-title
+                                        "
+                                    >
+                                        Appointment Calendar
+                                    </h3>
+
+                                    <p
+                                        class="
+                                            card-subtitle
+                                        "
+                                    >
+                                        Demo preview
+                                    </p>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div
+                            class="
+                                card-body
+                                flex
+                                items-center
+                                justify-center
+                                min-h-[330px]
+                            "
+                        >
+
+                            <div
+                                class="
+                                    empty-state
+                                    empty-state-compact
+                                "
+                            >
+
+                                <div
+                                    class="
+                                        empty-state-icon
+                                    "
+                                >
+                                    <i
+                                        class="
+                                            fa-solid
+                                            fa-calendar-days
+                                        "
+                                    ></i>
+                                </div>
+
+                                <h3
+                                    class="
+                                        empty-state-title
+                                    "
+                                >
+                                    Demo calendar
+                                </h3>
+
+                                <p
+                                    class="
+                                        empty-state-sub
+                                    "
+                                >
+                                    Live clinic availability is hidden during Role Preview.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </section>
+                `;
+
+                    container.classList
+                        .remove(
+                            'skeleton-fade-swap',
+                            'skeleton-section'
+                        );
+                }
+            );
+        </script>
+    @else
+        @include('components.appointment-calendar-script', [
+            'mode' => 'patient-dashboard',
+            'renderStyle' => 'patient',
+            'calendarContainerId' => 'calendarSkeletonContainer',
+            'hasActiveAppointment' => $hasActiveAppointment,
+            'dateInputId' => null,
+            'timeInputId' => null,
+            'slotEndpoint' => route('book.appointment.slots'),
+            'bookingUrl' => route('patient.book.appointment'),
+        
+            'scheduleRules' => isset($schedules)
+                ? $schedules
+                : (isset($scheduleRules)
+                    ? $scheduleRules
+                    : \App\Models\ClinicSchedule::active()->get()->values()->toArray()),
+        
+            'blockedDates' => $unavailableDates ?? [],
+            'appointmentCountsPerDay' => $appointmentCountsPerDay ?? [],
+            'philippineHolidays' => $philippineHolidays ?? [],
+            'personalAppointments' => $calendarAppointments ?? [],
+            'completedAppointments' => $completedCalendarAppointments ?? [],
+            'useDynamicScheduleRules' => true,
+            'disallowToday' => true,
+            'allowToggleOffDate' => false,
+            'maxFutureMonths' => 6,
+            'historyMonths' => 12,
+            'appointmentHistoryUrl' => route('patient.record'),
+        ])
+    @endif
 @endsection
 
 @section('scripts')
-    <script>
-        @if (session('appointment_draft_completed'))
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
+        @if ($appointmentDraftCompleted)
             localStorage.removeItem(
                 "appointmentDraft:v1"
             );
         @endif
 
-        @if (session('appointment_confirmation'))
+        @if ($appointmentConfirmation)
             document.addEventListener(
                 'DOMContentLoaded',
                 () => {
@@ -888,7 +993,7 @@
                     'date' => $uD->format('M d, Y'),
                     'time_raw' => $upcomingAppointment->appointment_time,
                     'time_fmt' => $uT->format('g:i A'),
-                    'dentist' => $upcomingAppointment->dentist_name ?? 'Dr. Nelson P. Angeles',
+                    'dentist' => $upcomingAppointment->dentist_name ?? 'Not assigned',
                     'status' => ucfirst($upcomingAppointment->status),
                     'isRescheduled' => strtolower($upcomingAppointment->status) === 'rescheduled',
                     'indexUrl' => route('patient.appointment.index'),
@@ -906,15 +1011,14 @@
 
         var UPCOMING_DATA = @json($upcomingJs);
         var PATIENT_NAME = "{{ urlencode($patient->name ?? 'Guest') }}";
-
         var PROFILE_COMPLETION = {{ $profileCompletionPercent }};
         var TOTAL_VISITS = {{ $recordCount }};
-        var LAST_VISIT = @json($latestRecordDate ?? 'No record yet');
+        var LAST_VISIT = @json($latestCompletedVisitDate ?? 'No completed visit yet');
         var NEXT_VISIT = @json($nextVisitText);
 
         var PROFILE_DATA = {
             name: @json($patient->name ?? 'Guest'),
-            roleLabel: "{{ $patient->faculty_code ? 'Faculty' : ($patient->student_no ? 'Student' : 'Patient') }}",
+            roleLabel: "{{ \App\Support\PatientClassification::label($patient) }}",
             facultyCode: "{{ $patient->faculty_code ?? '' }}",
             studentNo: "{{ $patient->student_no ?? '' }}",
             age: "{{ $age ?? '' }}",
@@ -971,20 +1075,6 @@
                 ).get(
                     'quick_action'
                 );
-
-            const privateInformationModal =
-                document.getElementById(
-                    'privateInformationModal'
-                );
-
-            privateInformationModal?.addEventListener(
-                'click',
-                function(event) {
-                    if (event.target === privateInformationModal) {
-                        closePrivateInformationModal();
-                    }
-                }
-            );
 
             renderGreeting();
 
@@ -1181,22 +1271,18 @@
                 'privateInformationModal'
             );
 
-            if (!modal) {
-                return;
-            }
+            if (!modal || !button) return;
 
             pendingPrivateInformationButton = button;
 
-            modal.classList.remove('closing');
-            modal.classList.add('open');
+            hideActiveGlobalTooltip();
 
-            document.documentElement.classList.add('modal-lock');
-            document.body.classList.add('modal-lock');
+            window.openModal('privateInformationModal');
 
-            requestAnimationFrame(() => {
-                modal
-                    .querySelector('.ui-modal-card')
-                    ?.focus();
+            modal.querySelector(
+                '[data-modal-initial-focus]'
+            )?.focus({
+                preventScroll: true
             });
         }
 
@@ -1214,22 +1300,22 @@
             );
 
             if (!modal || !modal.classList.contains('open')) {
-                pendingPrivateInformationButton = null;
                 return;
             }
 
+            const previousButton = pendingPrivateInformationButton;
+
             hideActiveGlobalTooltip();
 
-            modal.classList.add('closing');
+            window.closeModal('privateInformationModal');
 
-            window.setTimeout(() => {
-                modal.classList.remove('open', 'closing');
+            pendingPrivateInformationButton = null;
 
-                document.documentElement.classList.remove('modal-lock');
-                document.body.classList.remove('modal-lock');
-
-                pendingPrivateInformationButton = null;
-            }, 170);
+            if (previousButton?.isConnected) {
+                previousButton.focus({
+                    preventScroll: true
+                });
+            }
         }
 
         function confirmShowPrivateInformation() {
@@ -1418,7 +1504,7 @@
                 '</div>' +
 
                 '<button type="button" ' +
-                'onclick="scrollToCalendar(event)" ' +
+                'data-ui-click="action-1e919ba532ca" ' +
                 'class="ui-btn {{ collect($reservedBookingReminders ?? [])->isNotEmpty() ? 'ui-btn-secondary' : 'ui-btn-primary' }}">' +
 
                 '<i class="fa-solid fa-calendar-days"></i>' +
@@ -1490,7 +1576,7 @@
             var globalToggle =
                 '<button type="button" ' +
                 'id="dashboardProfilePrivacyToggle" ' +
-                'onclick="handlePrivateInformationToggle(this)" ' +
+                'data-ui-click="action-d64bd6053e99" ' +
                 'class="ui-icon-btn neutral patient-privacy-toggle" ' +
                 'data-masked="true" ' +
                 'data-tooltip="Show private information" ' +
@@ -1697,8 +1783,7 @@
                 '</div>' +
 
                 '<div class="patient-profile-progress">' +
-                '<span style="width:' +
-                Math.max(0, Math.min(100, Number(PROFILE_COMPLETION) || 0)) +
+                '<span data-ui-style="width:' + Math.max(0, Math.min(100, Number(PROFILE_COMPLETION) || 0)) +
                 '%"></span>' +
                 '</div>' +
 
@@ -1952,13 +2037,41 @@
 
             if (!container) return;
 
-            var count = HOME_RECORDS && HOME_RECORDS.length ? HOME_RECORDS.length : 0;
-            var latestRecord = count ? HOME_RECORDS[0] : null;
+            var recordCount =
+                Array.isArray(HOME_RECORDS) ?
+                HOME_RECORDS.length :
+                0;
 
-            var dispLatestDate = latestRecord && latestRecord.date ? latestRecord.date : "No record yet";
-            var dispOverviewStatus = count === 0 ?
+            var completedRecords =
+                Array.isArray(HOME_RECORDS) ?
+                HOME_RECORDS.filter(
+                    record =>
+                    String(
+                        record.status || ''
+                    ).toLowerCase() ===
+                    'completed'
+                ) : [];
+
+            var completedCount = completedRecords.length;
+
+            var latestCompletedRecord =
+                completedCount ?
+                completedRecords[0] :
+                null;
+
+            var dispLatestDate =
+                latestCompletedRecord?.date ||
+                "No completed visit yet";
+
+            var dispOverviewStatus =
+                completedCount === 0 ?
                 "Waiting for first completed visit" :
-                (count === 1 ? "1 completed visit recorded" : count + " completed visits recorded");
+                (
+                    completedCount === 1 ?
+                    "1 completed visit recorded" :
+                    completedCount +
+                    " completed visits recorded"
+                );
 
             if (!HOME_RECORDS || HOME_RECORDS.length === 0) {
                 window.swapSkeletonContent(
@@ -1977,7 +2090,7 @@
                     '<div class="min-w-0">' +
 
                     '<h2 class="card-title">' +
-                    'Dental Overview' +
+                    'Dental Activity Overview' +
                     '</h2>' +
 
                     '<p class="card-subtitle">' +
@@ -2079,7 +2192,7 @@
                 '<div class="min-w-0">' +
 
                 '<h2 class="card-title">' +
-                'Dental Overview' +
+                'Dental Activity Overview' +
                 '</h2>' +
 
                 '<p class="card-subtitle">' +
@@ -2103,12 +2216,12 @@
                 '<div class="dental-summary-stat">' +
                 '<span class="dental-summary-stat-label">Total Visits</span>' +
                 '<strong class="dental-summary-stat-value">' +
-                count +
+                recordCount +
                 '</strong>' +
                 '</div>' +
 
                 '<div class="dental-summary-stat">' +
-                '<span class="dental-summary-stat-label">Latest Record</span>' +
+                '<span class="dental-summary-stat-label">Latest Completed Visit</span>' +
                 '<strong class="dental-summary-stat-value dental-summary-stat-value-sm">' +
                 window.escapeHtml(dispLatestDate) +
                 '</strong>' +
@@ -2180,6 +2293,13 @@
         function scrollToCalendar(event) {
             event?.preventDefault();
 
+            return window.verifyPersonalInformationBeforeBooking(() => {
+                scrollToVerifiedCalendar();
+            }, event?.currentTarget);
+        }
+
+        function scrollToVerifiedCalendar() {
+
             const calendar =
                 document.getElementById(
                     'calendarSkeletonContainer'
@@ -2204,16 +2324,5 @@
                 );
             }, 1200);
         }
-
-        document.addEventListener('keydown', function(event) {
-            if (
-                event.key === 'Escape' &&
-                document
-                .getElementById('privateInformationModal')
-                ?.classList.contains('open')
-            ) {
-                closePrivateInformationModal();
-            }
-        });
     </script>
 @endsection

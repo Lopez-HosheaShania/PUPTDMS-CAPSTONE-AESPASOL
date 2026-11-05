@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 
 use App\Models\Appointment;
+use App\Models\SystemSetting;
 use App\Models\DentalHistory;
 use App\Models\DentalHistoryCondition;
 use App\Models\DentalHistoryAnswer;
@@ -29,7 +30,6 @@ use App\Helpers\PhilippineHolidays;
 use App\Helpers\AuditLogger;
 use App\Notifications\AppointmentBookedNotification;
 use App\Notifications\AppointmentRescheduledNotification;
-use App\Notifications\SignatureReuploadRequiredNotification;
 use App\Services\SignatureAiVerifier;
 use App\Helpers\BookingQuestions;
 use App\Models\AppointmentDraft;
@@ -50,13 +50,117 @@ class AppointmentController extends Controller
         private readonly StudentApiService $studentApiService
     ) {}
 
-    private function resolveBookableDentist(): ?User
+    private function resolveBookableDentist(int $patientId): ?User
     {
-        return User::query()
-            ->where('status', 'active')
-            ->whereHas('role', fn($query) => $query->where('slug', 'dentist'))
-            ->orderBy('id')
-            ->first();
+        return app(\App\Services\AssignedDentistService::class)->findForBooking($patientId);
+    }
+
+    public function verifyPersonalInformation()
+    {
+        $patient = $this->resolveAuthenticatedPatient();
+        abort_unless($patient, 401);
+        $failure = $this->maintenanceBookingFailure() ?? $this->personalInformationBookingFailure($patient);
+
+        $result = $failure ?? ['verified' => true];
+        if (! $failure && $this->usesFacultyBooking($patient)) {
+            $required = [$patient->name, $patient->email, $patient->phone, $patient->birthdate,
+                $patient->gender, $patient->medicalHistory?->emergency_person,
+                $patient->medicalHistory?->emergency_number, $patient->medicalHistory?->emergency_relation];
+            if (collect($required)->contains(fn ($value) => blank($value))) {
+                $result['warning'] = [
+                    'code' => 'faculty_information_incomplete',
+                    'can_continue' => true,
+                    'title' => 'Please Complete Your Information',
+                    'message' => 'Some of your personal information is incomplete. Please complete your information when available. You can still continue booking your appointment.',
+                ];
+            }
+        }
+
+        return response()->json($result, $failure['status'] ?? 200)
+            ->header('Cache-Control', 'no-store');
+    }
+
+    private function maintenanceBookingFailure(): ?array
+    {
+        if (! SystemSetting::isEnabled('maintenance_mode', false)) {
+            return null;
+        }
+
+        return [
+            'verified' => false,
+            'status' => 503,
+            'code' => 'booking_maintenance',
+            'title' => 'Clinic Temporarily Unavailable',
+            'message' => 'The clinic system is temporarily unavailable right now. Appointment booking is temporarily disabled while we perform system maintenance. Please try again later.',
+        ];
+    }
+
+    private function usesFacultyBooking(Patient $patient): bool
+    {
+        $classification = strtolower(trim((string) $patient->classification));
+
+        return in_array($classification, ['faculty', 'administrative'], true)
+            || ($classification !== 'student' && filled($patient->faculty_code));
+    }
+
+    private function personalInformationBookingFailure(Patient $patient): ?array
+    {
+        if ($this->usesFacultyBooking($patient)) {
+            return null;
+        }
+
+        try {
+            $studentNumber = $patient->student_no;
+            if (blank($studentNumber) && filled($patient->email)) {
+                $profile = $this->studentApiService->getStudentByEmail($patient->email, false);
+                $studentNumber = data_get($profile, 'data.studentNumber')
+                    ?: data_get($profile, 'data.student_number');
+            }
+
+            $completion = filled($studentNumber)
+                ? $this->studentApiService->getPersonalInformationCompletion($studentNumber, [
+                    'name' => $patient->name,
+                    'phone' => $patient->phone,
+                    'email' => $patient->email,
+                ])
+                : null;
+
+            if ($completion === 100.0) {
+                return null;
+            }
+
+            if ($completion !== null) {
+                return [
+                    'verified' => false,
+                    'status' => 422,
+                    'code' => 'personal_information_incomplete',
+                    'title' => 'Complete Your Personal Information',
+                    'message' => 'Your Personal Information in GUISIS is not yet complete. Please complete all required information in GUISIS before booking an appointment.',
+                ];
+            }
+        } catch (\Throwable $e) {
+            Log::warning('Appointment personal information verification failed', [
+                'patient_id' => $patient->id,
+                'message' => $e->getMessage(),
+            ]);
+        }
+
+        return [
+            'verified' => false,
+            'status' => 503,
+            'code' => 'personal_information_unverified',
+            'title' => 'Unable to Verify Information',
+            'message' => 'We could not verify your Personal Information from GUISIS.',
+        ];
+    }
+
+    private function rejectPersonalInformationBooking(Request $request, array $failure)
+    {
+        if ($request->expectsJson()) {
+            return response()->json($failure, $failure['status']);
+        }
+
+        return redirect()->route('homepage')->with('booking_verification_error', $failure);
     }
 
     public function index()
@@ -195,13 +299,8 @@ class AppointmentController extends Controller
             "Patient viewed appointment page"
         );
 
-        $clinicDentist = \App\Models\User::with('role')
-            ->whereHas('role', fn($q) => $q->where('slug', 'dentist'))
-            ->first();
-
         return view('patient.appointment', compact(
             'appointments',
-            'clinicDentist',
             'futureVisits',
             'pastVisits',
             'patient',
@@ -227,6 +326,10 @@ class AppointmentController extends Controller
 
         $patient = Patient::findOrFail($patientId);
         $availableReservedSlots = collect();
+
+        if ($failure = $this->maintenanceBookingFailure() ?? $this->personalInformationBookingFailure($patient)) {
+            return $this->rejectPersonalInformationBooking($request, $failure);
+        }
 
         Appointment::cancelElapsedScheduledAppointments();
 
@@ -387,8 +490,6 @@ class AppointmentController extends Controller
             $patient->medicalHistory?->signature_review_status !==
             'invalid_reupload_required';
 
-
-        // DO NOT REMOVE
         $hasActiveAppointment = Appointment::where('patient_id', $patientId)
             ->activeAndNotElapsed()
             ->exists();
@@ -513,11 +614,6 @@ class AppointmentController extends Controller
             return false;
         }
 
-        // Temporarily disabled: reserved periods previously had to be after today.
-        // return Carbon::parse($period->reserved_date)
-        //     ->startOfDay()
-        //     ->isAfter(now()->startOfDay());
-
         $reservedDate = Carbon::parse($period->reserved_date)->startOfDay();
 
         if ($reservedDate->isBefore(now()->startOfDay())) {
@@ -570,9 +666,6 @@ class AppointmentController extends Controller
             return true;
         }
 
-        // Student profile synchronization may create a medical history row using
-        // emergency-contact data alone. That partial row does not mean the patient
-        // has completed the medical questionnaire and must not skip its booking step.
         if (filled($patient->medicalHistory?->patient_signature)) {
             return true;
         }
@@ -691,14 +784,15 @@ class AppointmentController extends Controller
             'deleted' => true,
         ]);
     }
-
-    /* =======================
-       STORE APPOINTMENT
-    ======================= */
+    
     public function store(
         Request $request,
         SignatureAiVerifier $signatureVerifier
     ) {
+        if ($failure = $this->maintenanceBookingFailure()) {
+            return $this->rejectPersonalInformationBooking($request, $failure);
+        }
+
         $request->merge([
             'emergency_number' => $this->normalizePhilippineMobile(
                 (string) $request->input('emergency_number', '')
@@ -720,6 +814,10 @@ class AppointmentController extends Controller
             'medicalHistory.answers.question',
             'medicalHistory.diseaseAnswers.disease',
         ])->findOrFail($patientId);
+
+        if ($failure = $this->personalInformationBookingFailure($patient)) {
+            return $this->rejectPersonalInformationBooking($request, $failure);
+        }
 
         Appointment::cancelElapsedScheduledAppointments();
 
@@ -843,6 +941,7 @@ class AppointmentController extends Controller
             'diseases.*' => 'string|exists:diseases,code',
         ]);
 
+        $this->ensureBookingSignatureSourceAllowed($request);
 
         if (!ServiceType::where('name', $request->service_type)
             ->where('is_active_for_booking', true)
@@ -994,9 +1093,6 @@ class AppointmentController extends Controller
                 ->withInput()
                 ->with('error', 'Sorry, that time slot was already taken. Please choose another time.');
         }
-
-        // The database also prevents a patient from holding two records at one
-        // exact date and time. Check it here to return a normal form error.
         $duplicatePatientSchedule = Appointment::query()
             ->where('patient_id', $patientId)
             ->whereDate('appointment_date', $request->appointment_date)
@@ -1037,9 +1133,6 @@ class AppointmentController extends Controller
                 'source' => 'existing',
                 'reason' => 'Existing patient signature reused.',
                 'confidence' => $existingMedicalHistory->signature_ai_confidence,
-                'review_required' =>
-                $signatureReviewStatus === 'pending_manual_review',
-                'review_status' => $signatureReviewStatus,
                 'detected_type' => 'existing_signature',
             ];
         } else {
@@ -1086,8 +1179,6 @@ class AppointmentController extends Controller
                     'reason' =>
                     'Drawn signature skipped AI validation.',
                     'confidence' => 1,
-                    'review_required' => false,
-                    'review_status' => 'verified',
                     'detected_type' => 'drawn_signature',
                 ];
 
@@ -1106,19 +1197,8 @@ class AppointmentController extends Controller
                 );
             }
 
-            $signatureReviewStatus =
-                ($aiResult['review_status'] ?? null)
-                === 'pending_manual_review'
-                ? 'pending_manual_review'
-                : 'verified';
-
-            $signatureReviewNotes =
-                $aiResult['review_required'] ?? false
-                ? (
-                    $aiResult['reason']
-                    ?? 'Accepted for manual review.'
-                )
-                : null;
+            $signatureReviewStatus = 'verified';
+            $signatureReviewNotes = null;
 
             $signaturePath =
                 $signatureFile->store(
@@ -1130,6 +1210,8 @@ class AppointmentController extends Controller
         $appointment = null;
 
         DB::transaction(function () use ($request, $signaturePath, $mysqlTime, $patientId, $patient, $reservedBookingPeriod, $reservedSlot, $preserveExistingDentalHistory, $preserveExistingMedicalHistory, $signatureReviewStatus, $signatureReviewNotes, $aiResult, &$appointment) {
+
+            app(\App\Services\ClinicDentistService::class)->lockAssignment();
 
             $lockedReservedPeriod = null;
 
@@ -1185,7 +1267,7 @@ class AppointmentController extends Controller
                 }
             }
 
-            $assignedDentist = $this->resolveBookableDentist();
+            $assignedDentist = $this->resolveBookableDentist($patientId);
 
             if (! $assignedDentist) {
                 throw \Illuminate\Validation\ValidationException::withMessages([
@@ -1195,7 +1277,6 @@ class AppointmentController extends Controller
 
             $serviceType = ServiceType::where('name', $request->service_type)->firstOrFail();
 
-            // 1) APPOINTMENT
             $appointment = Appointment::create([
                 'patient_id'       => $patientId,
                 'reserved_booking_period_id' => $lockedReservedPeriod?->id,
@@ -1216,10 +1297,8 @@ class AppointmentController extends Controller
 
             $patient->save();
 
-            // Notify the dentist who will handle this appointment.
             $assignedDentist->notify(new AppointmentBookedNotification($appointment, $appointment->patient));
 
-            //  Notify admins
             $admins = User::whereHas('role', function ($q) {
                 $q->where('slug', 'admin');
             })->get();
@@ -1228,7 +1307,6 @@ class AppointmentController extends Controller
                 $admin->notify(new AppointmentBookedNotification($appointment, $appointment->patient));
             }
 
-            // 2) DENTAL HISTORY (patient-based)
             if (! $preserveExistingDentalHistory) {
                 DentalHistory::updateOrCreate(
                     ['patient_id' => $patientId],
@@ -1254,7 +1332,6 @@ class AppointmentController extends Controller
                     ]
                 );
 
-                // YES/NO answers (dental_history_answers)
                 $dentalAnswerMap = [
                     'bleeding_gums'      => $request->bleeding_gums,
                     'sensitive_temp'     => $request->sensitive_temp,
@@ -1300,7 +1377,6 @@ class AppointmentController extends Controller
                 }
             }
 
-            // 3) MEDICAL HISTORY (patient-based)
             if (! $preserveExistingMedicalHistory) {
                 $medicalHistory = MedicalHistory::updateOrCreate(
                     ['patient_id' => $patientId],
@@ -1318,9 +1394,7 @@ class AppointmentController extends Controller
 
                 $tobaccoUse = $this->yesNoValue($request->input('tobacco_use'));
 
-                // Medical answers map
                 $medicalAnswerMap = [
-                    // bool
                     'good_health'       => $request->good_health,
                     'had_medical_exam'  => $request->had_medical_exam,
                     'under_treatment'   => $request->under_treatment,
@@ -1336,7 +1410,6 @@ class AppointmentController extends Controller
                     'earaches'          => $request->earaches,
                     'neck_aches'        => $request->neck_aches,
 
-                    // text
                     'good_health_details' => $request->good_health_details,
                     'treatment_details'   => $request->treatment_details,
                     'hospital_details'    => $request->hospital_details,
@@ -1350,7 +1423,6 @@ class AppointmentController extends Controller
                         ? $request->input('tobacco_per_week')
                         : null,
 
-                    // date
                     'medical_exam_date'   => $request->medical_exam_date,
                 ];
 
@@ -1362,7 +1434,6 @@ class AppointmentController extends Controller
                     $q = $questions->get($code);
                     if (!$q) continue;
 
-                    // Normalize by type
                     if ($q->type === 'bool') {
                         $bool = ($this->yesNoValue($rawValue) === 'YES');
 
@@ -1385,7 +1456,6 @@ class AppointmentController extends Controller
                     if ($q->type === 'text') {
                         $text = ($rawValue === null) ? '' : trim((string) $rawValue);
 
-                        // remove row if empty text 
                         if ($text === '') {
                             MedicalHistoryAnswer::where([
                                 'patient_id'         => $patientId,
@@ -1414,7 +1484,6 @@ class AppointmentController extends Controller
                     if ($q->type === 'date') {
                         $date = $rawValue ? trim((string) $rawValue) : '';
 
-                        // remove row if empty date
                         if ($date === '') {
                             MedicalHistoryAnswer::where([
                                 'patient_id'         => $patientId,
@@ -1451,7 +1520,6 @@ class AppointmentController extends Controller
                     })
                     ->delete();
 
-                // 4) DISEASES (selected codes from form)
                 $selectedDiseaseCodes = $request->input('diseases', []);
                 $selectedDiseaseIds = Disease::whereIn('code', $selectedDiseaseCodes)
                     ->pluck('id')
@@ -1517,51 +1585,21 @@ class AppointmentController extends Controller
         }
 
 
-        $successMessage =
-            $signatureReviewStatus ===
-            'pending_manual_review'
-            ? 'Appointment booked successfully! The signature was accepted and flagged for manual review.'
-            : ($reservedBookingPeriod
-                ? 'Reserved appointment booked successfully!'
-                : 'Appointment booked successfully!');
+        $successMessage = $reservedBookingPeriod
+            ? 'Reserved appointment booked successfully!'
+            : 'Appointment booked successfully!';
 
-        return redirect()
-            ->route('homepage')
-            ->with(
-                'success',
-                $successMessage
-            )
-            ->with(
-                'appointment_draft_completed',
-                true
-            )
-            ->with(
-                'appointment_confirmation',
-                [
-                    'date' =>
-                    Carbon::parse(
-                        $appointment
-                            ->appointment_date
-                    )->format(
-                        'F d, Y'
-                    ),
+        $request->session()->put([
+            'appointment_draft_completed' => true,
+            'appointment_confirmation' => [
+                'date' => Carbon::parse($appointment->appointment_date)->format('F d, Y'),
+                'time' => Carbon::parse($appointment->appointment_time)->format('g:i A'),
+                'service' => $appointment->service_type_name,
+                'status' => 'Confirmed',
+            ],
+        ]);
 
-                    'time' =>
-                    Carbon::parse(
-                        $appointment
-                            ->appointment_time
-                    )->format(
-                        'g:i A'
-                    ),
-
-                    'service' =>
-                    $appointment
-                        ->service_type_name,
-
-                    'status' =>
-                    'Confirmed',
-                ]
-            );
+        return redirect()->route('homepage')->with('success', $successMessage);
     }
 
     public function slotsForDate(Request $request)
@@ -1726,9 +1764,7 @@ class AppointmentController extends Controller
             ->values();
     }
 
-    /* =======================
-   VALIDATE SIGNATURE AJAX
-======================= */
+  
     public function validateSignature(Request $request, SignatureAiVerifier $signatureVerifier)
     {
         $request->validate([
@@ -1741,6 +1777,8 @@ class AppointmentController extends Controller
         ]);
 
         $signatureFile = $request->file('patient_signature');
+
+        $this->ensureBookingSignatureSourceAllowed($request);
 
         if ($this->isDrawnSignatureSubmission($request)) {
             return response()->json([
@@ -1771,155 +1809,14 @@ class AppointmentController extends Controller
         return response()->json([
             'valid' => true,
             'accepted' => true,
-            'message' => $aiResult['review_required'] ?? false
-                ? 'Signature accepted for manual review.'
-                : 'Signature verified and accepted',
+            'message' => 'Signature verified and accepted',
             'detected_type' => $aiResult['detected_type'] ?? 'signature',
             'confidence' => $aiResult['confidence'] ?? 0,
             'reason' => $aiResult['reason'] ?? '',
-            'review_required' => (bool) ($aiResult['review_required'] ?? false),
-            'review_status' => $aiResult['review_status'] ?? 'verified',
         ]);
     }
 
-    public function showSignatureReview()
-    {
-        $patient = $this->resolveAuthenticatedPatient();
 
-        if (!$patient) {
-            return redirect()->route('login')->with('error', 'Please login first!');
-        }
-
-        $patient->load('medicalHistory');
-        $medicalHistory = $patient->medicalHistory;
-
-        if (!$medicalHistory || $medicalHistory->signature_review_status !== 'invalid_reupload_required') {
-            return redirect()->route('homepage')->with('info', 'There is no pending signature re-upload request for your account.');
-        }
-
-        return view('patient.signature-review', compact('patient', 'medicalHistory'));
-    }
-
-    public function updateSignatureReview(Request $request, SignatureAiVerifier $signatureVerifier)
-    {
-        $patient = $this->resolveAuthenticatedPatient();
-
-        if (!$patient) {
-            return redirect()->route('login')->with('error', 'Please login first!');
-        }
-
-        $patient->load('medicalHistory');
-        $medicalHistory = $patient->medicalHistory;
-
-        if (!$medicalHistory || $medicalHistory->signature_review_status !== 'invalid_reupload_required') {
-            return redirect()->route('homepage')->with('error', 'There is no signature re-upload request to update.');
-        }
-
-        $request->validate([
-            'patient_signature' => [
-                'required',
-                'file',
-                'mimes:jpg,jpeg,png',
-                'max:25600',
-            ],
-        ]);
-
-        $signatureFile = $request->file('patient_signature');
-        $isDrawnSignature = $this->isDrawnSignatureSubmission($request);
-
-        if (! $isDrawnSignature) {
-            $aiResult = $signatureVerifier->verify($signatureFile);
-
-            \Log::info('Signature Reupload Verification Result', $aiResult);
-
-            if (!($aiResult['accepted'] ?? false)) {
-                return redirect()->back()
-                    ->withInput()
-                    ->withErrors([
-                        'patient_signature' => $aiResult['reason'] ?? 'The uploaded image did not pass signature validation.',
-                    ]);
-            }
-        } else {
-            $aiResult = [
-                'accepted' => true,
-                'reason' => 'Drawn signature accepted.',
-                'confidence' => 1,
-                'review_required' => false,
-                'review_status' => 'verified',
-            ];
-        }
-
-        $oldSignaturePath = $medicalHistory->patient_signature;
-        $newSignaturePath = $signatureFile->store('signatures', 'public');
-        $signatureReviewStatus = ($aiResult['review_status'] ?? null) === 'pending_manual_review'
-            ? 'pending_manual_review'
-            : 'verified';
-        $signatureReviewNotes = $aiResult['review_required'] ?? false
-            ? ($aiResult['reason'] ?? 'Accepted for manual review.')
-            : null;
-
-        $medicalHistory->update([
-            'patient_signature' => $newSignaturePath,
-            'signature_review_status' => $signatureReviewStatus,
-            'signature_review_notes' => $signatureReviewNotes,
-            'signature_ai_provider' => 'openai',
-            'signature_ai_confidence' => $aiResult['confidence'] ?? null,
-        ]);
-
-        if ($oldSignaturePath && $oldSignaturePath !== $newSignaturePath) {
-            Storage::disk('public')->delete($oldSignaturePath);
-        }
-
-        AuditLogger::log(
-            'update',
-            'medical_histories',
-            "Patient re-uploaded signature for manual review follow-up (patient_id: {$patient->id})"
-        );
-
-        $successMessage = $signatureReviewStatus === 'pending_manual_review'
-            ? 'Your new signature was uploaded successfully and is pending manual review.'
-            : 'Your new signature was uploaded and verified successfully.';
-
-        return redirect()->route('homepage')->with('success', $successMessage);
-    }
-
-    public function markSignatureInvalid(Request $request, Patient $patient)
-    {
-        $patient->load('medicalHistory', 'user');
-
-        $medicalHistory = $patient->medicalHistory;
-
-        if (!$medicalHistory || !$medicalHistory->patient_signature) {
-            return redirect()->back()->with('error', 'No uploaded signature was found for this patient.');
-        }
-
-        if ($medicalHistory->signature_review_status !== 'pending_manual_review') {
-            return redirect()->back()->with('error', 'Only signatures awaiting manual review can be marked invalid.');
-        }
-
-        $reason = 'The uploaded image is not a valid patient signature. Please upload a clearer or correct signature image.';
-
-        $medicalHistory->update([
-            'signature_review_status' => 'invalid_reupload_required',
-            'signature_review_notes' => $reason,
-        ]);
-
-        if ($patient->user) {
-            $patient->user->notify(new SignatureReuploadRequiredNotification($patient, $reason));
-        }
-
-        AuditLogger::log(
-            'update',
-            'medical_histories',
-            "Signature marked invalid during manual review (patient_id: {$patient->id})"
-        );
-
-        return redirect()->back()->with('success', 'The signature was marked invalid and the patient was notified to upload a new one.');
-    }
-
-    /* =======================
-       HELPERS
-    ======================= */
     private function toMysqlTime(string $time12h): string
     {
         return Carbon::createFromFormat('g:i A', trim($time12h))->format('H:i:s');
@@ -1938,6 +1835,10 @@ class AppointmentController extends Controller
 
     private function backfillStudentEmergencyContactIfNeeded(Patient $patient): void
     {
+        if ($this->usesFacultyBooking($patient)) {
+            return;
+        }
+
         $isStudent = ! empty($patient->student_no) || (! empty($patient->email) && ! empty($patient->course_code));
 
         if (! $isStudent) {
@@ -2159,9 +2060,6 @@ class AppointmentController extends Controller
         ));
     }
 
-    /**
-     * Update the rescheduled appointment
-     */
     public function updateReschedule(Request $request, $id)
     {
         $request->validate([
@@ -2254,6 +2152,17 @@ class AppointmentController extends Controller
         }
 
         return response()->json(['success' => true]);
+    }
+
+    private function ensureBookingSignatureSourceAllowed(Request $request): void
+    {
+        if ($request->hasFile('patient_signature')
+            && ! app(\App\Services\AiServiceManager::class)->featureEnabled('signature')
+            && ! $this->isDrawnSignatureSubmission($request)) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'patient_signature' => 'Please draw your signature. Signature uploads are currently disabled.',
+            ]);
+        }
     }
 
     private function isDrawnSignatureSubmission(Request $request): bool

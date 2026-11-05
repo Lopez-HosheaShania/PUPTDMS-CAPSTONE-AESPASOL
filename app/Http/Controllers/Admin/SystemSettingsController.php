@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Helpers\AuditLogger;
 use App\Http\Controllers\Controller;
 use App\Models\SystemSetting;
+use App\Models\RetentionPolicy;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -19,7 +20,6 @@ class SystemSettingsController extends Controller
 
     private const BOOLEAN_KEYS = [
         'maintenance_mode',
-        'debug_mode',
         'ai_chatbot_enabled',
         'ai_signature_enabled',
         'ai_reports_enabled',
@@ -45,7 +45,6 @@ class SystemSettingsController extends Controller
         'general' => [
             'language',
             'maintenance_mode',
-            'debug_mode',
             'ai_mode',
             'ai_chatbot_enabled',
             'ai_signature_enabled',
@@ -91,6 +90,12 @@ class SystemSettingsController extends Controller
     {
         $settings = SystemSetting::query()->get()->keyBy('key');
         $notifications = collect([]);
+        $user = auth()->user();
+        $canManageRetention = $user && $user->status === 'active'
+            && $user->hasAnyRole(['admin', 'super_admin'])
+            && ! session()->has('impersonated_role')
+            && $user->hasPermission('manage_system_settings');
+
 
         AuditLogger::log(
             'view',
@@ -99,6 +104,10 @@ class SystemSettingsController extends Controller
         );
 
         return view('admin.system-settings', [
+            'canManageRetention' => $canManageRetention,
+            'retentionPolicies' => $canManageRetention ? RetentionPolicy::current()->get()
+                ->sortBy(fn ($policy) => array_search($policy->category, array_keys(config('retention.categories')), true))
+                ->values() : collect(),
             'settings' => $settings,
             'notifications' => $notifications,
             'layoutRole' => $this->resolveLayoutRole(),
@@ -214,7 +223,6 @@ class SystemSettingsController extends Controller
             'language' => ['nullable', Rule::in(['English (US)', 'Filipino'])],
 
             'maintenance_mode' => ['nullable', 'boolean'],
-            'debug_mode' => ['nullable', 'boolean'],
             'ai_mode' => ['nullable', Rule::in(['normal', 'degraded', 'offline'])],
             'ai_chatbot_enabled' => ['nullable', 'boolean'],
             'ai_signature_enabled' => ['nullable', 'boolean'],

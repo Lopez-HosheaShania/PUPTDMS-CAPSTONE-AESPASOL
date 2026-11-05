@@ -14,5 +14,5 @@ class DocumentRequestState extends Model
 
     protected $guarded = [];
 
-    protected $casts = ['request_date' => 'date'];
+    protected $casts = ['request_date' => 'date', 'closed_at' => 'datetime'];
 }

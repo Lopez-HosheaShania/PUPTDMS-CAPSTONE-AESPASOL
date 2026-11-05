@@ -37,10 +37,15 @@
         $openRules = $activeSchedules->where('status', '!=', 'closed');
         $openDays = $openRules->sum(fn($s) => count($s->days ?? []));
         $maxSlots = $openRules->max('max_slots') ?? 0;
-        $blockedThisMonth = $blockedDates->filter(fn($b) => \Carbon\Carbon::parse($b->date)->isCurrentMonth())->count();
-        $holidaysThisMonth = collect($philippineHolidays)
-            ->filter(fn($holiday, $date) => \Carbon\Carbon::parse($date)->isCurrentMonth())
-            ->count();
+        $blockedDatesCount = $blockedDates->count();
+
+        $today = \Carbon\Carbon::now('Asia/Manila')->startOfDay();
+
+        $allUpcomingHolidays = collect($philippineHolidays)
+            ->filter(fn($holiday, $date) => \Carbon\Carbon::parse($date, 'Asia/Manila')->startOfDay()->gte($today))
+            ->sortKeys();
+
+        $upcomingHolidaysCount = $allUpcomingHolidays->count();
 
         $scheduleByDay = [];
         foreach ($activeSchedules as $s) {
@@ -90,7 +95,7 @@
         <div class="w-full">
 
             @if ($errors->any())
-                <script>
+                <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
                     document.addEventListener('DOMContentLoaded', function() {
                         const hasRuleErrors =
                             @json(
@@ -188,43 +193,31 @@
                     </div>
 
                     <div class="dentist-hero-actions">
-                        <button type="button" onclick="openRuleModal()" class="ui-btn ui-btn-primary">
+                        <x-button type="button" variant="primary" icon="fa-solid fa-plus"
+                            data-ui-click="action-3658b7ca536b">
+                            Add Schedule Rule
+                        </x-button>
 
-                            <i class="fa-solid fa-plus"></i>
-                            <span>Add Schedule Rule</span>
-                        </button>
-
-                        <button type="button" onclick="openBlockModal()" class="ui-btn ui-btn-secondary">
-
-                            <i class="fa-solid fa-ban"></i>
-                            <span>Block Date</span>
-                        </button>
+                        <x-button type="button" variant="secondary" icon="fa-solid fa-calendar-xmark"
+                            data-ui-click="action-35e136a0c602">
+                            Block Date
+                        </x-button>
                     </div>
                 </section>
             @else
-                <div class="page-banner">
-                    <div class="page-banner-inner">
-                        <div>
-                            <h1 class="page-title">
-                                Clinic Schedule
-                            </h1>
-                        </div>
+                <x-page-banner title="Clinic Schedule" actions-class="flex items-center gap-3 flex-wrap page-actions">
+                    <x-slot:actions>
+                        <x-button type="button" variant="primary" icon="fa-solid fa-plus"
+                            data-ui-click="action-3658b7ca536b">
+                            Add Schedule Rule
+                        </x-button>
 
-                        <div class="flex items-center gap-3 flex-wrap page-actions">
-                            <button type="button" onclick="openRuleModal()" class="ui-btn ui-btn-primary">
-
-                                <i class="fa-solid fa-plus"></i>
-                                <span>Add Schedule Rule</span>
-                            </button>
-
-                            <button type="button" onclick="openBlockModal()" class="ui-btn ui-btn-secondary">
-
-                                <i class="fa-solid fa-ban"></i>
-                                <span>Block Date</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                        <x-button type="button" variant="secondary" icon="fa-solid fa-calendar-xmark"
+                            data-ui-click="action-35e136a0c602">
+                            Block Date
+                        </x-button>
+                    </x-slot:actions>
+                </x-page-banner>
             @endif
 
             <div class="admin-page-body">
@@ -237,44 +230,31 @@
                                 'class' => 's-crimson',
                                 'val' => $openDays,
                                 'label' => 'Open Days/Week',
-                                'sub' => 'Active schedule days',
                             ],
                             [
                                 'icon' => 'fa-clock',
                                 'class' => 's-blue',
                                 'val' => $maxSlots,
                                 'label' => 'Daily Slot Cap',
-                                'sub' => 'Max patients/day',
                             ],
                             [
                                 'icon' => 'fa-ban',
                                 'class' => 's-green',
-                                'val' => $blockedThisMonth,
+                                'val' => $blockedDatesCount,
                                 'label' => 'Blocked Dates',
-                                'sub' => 'This month',
                             ],
                             [
                                 'icon' => 'fa-umbrella-beach',
                                 'class' => 's-amber',
-                                'val' => $holidaysThisMonth,
-                                'label' => 'Holidays',
-                                'sub' => 'This month',
+                                'val' => $upcomingHolidaysCount,
+                                'label' => 'Upcoming Holidays',
                             ],
                         ];
                     @endphp
 
                     @foreach ($statCards as $card)
-                        <div class="stat-card {{ $card['class'] }}">
-                            <div class="stat-card-info">
-                                <div class="stat-label">{{ $card['label'] }}</div>
-                                <div class="stat-num">{{ $card['val'] }}</div>
-                                <div class="stat-footer">{{ $card['sub'] }}</div>
-                            </div>
-
-                            <div class="stat-icon-wrapper">
-                                <i class="fa-solid {{ $card['icon'] }}"></i>
-                            </div>
-                        </div>
+                        <x-stat-card :label="$card['label']" :value="$card['val']" :tone="$card['class']" :icon="'fa-solid ' . $card['icon']"
+                            value-class="stat-num" />
                     @endforeach
                 </div>
 
@@ -292,12 +272,10 @@
                                 </div>
 
                                 <div class="card-header-right">
-                                    <button type="button" onclick="openRuleModal()"
-                                        class="ui-btn ui-btn-primary ui-btn-sm">
-
-                                        <i class="fa-solid fa-plus"></i>
-                                        <span>Add</span>
-                                    </button>
+                                    <x-button type="button" variant="primary" size="sm" icon="fa-solid fa-plus"
+                                        data-ui-click="action-3658b7ca536b">
+                                        Add
+                                    </x-button>
                                 </div>
                             </div>
 
@@ -348,11 +326,10 @@
                                 </div>
 
                                 <div class="card-header-right">
-                                    <button type="button" onclick="openBlockModal()"
-                                        class="ui-btn ui-btn-primary ui-btn-sm">
-                                        <i class="fa-solid fa-plus"></i>
-                                        <span>Add</span>
-                                    </button>
+                                    <x-button type="button" variant="primary" size="sm" icon="fa-solid fa-plus"
+                                        data-ui-click="action-35e136a0c602">
+                                        Add
+                                    </x-button>
                                 </div>
                             </div>
 
@@ -391,16 +368,14 @@
                                                     Blocked
                                                 </span>
 
-                                                <button type="button" class="ui-action-btn ui-action-delete"
-                                                    data-tooltip="Remove blocked date" aria-label="Remove blocked date"
-                                                    onclick='openBlockedDateDeleteModal(
-                    @json(route($clinicScheduleRouteNames['unblock'], $blocked)),
-                    @json($blockedDisplayName)
-                )'>
-
-                                                    <i class="fa-solid fa-trash"></i>
-
-                                                </button>
+                                                <x-action-button type="button" variant="delete" icon="fa-solid fa-trash"
+                                                    label="Remove blocked date" tooltip="Remove blocked date"
+                                                    data-ui-click="action-28b22a237020"
+                                                    data-ui-click-arg-0="{{ json_encode(
+                                                        route($clinicScheduleRouteNames['unblock'], $blocked),
+                                                        JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT,
+                                                    ) }}"
+                                                    data-ui-click-arg-1="{{ json_encode($blockedDisplayName, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" />
 
                                             </div>
 
@@ -456,12 +431,10 @@
 
                                     </div>
 
-                                    <button type="button" id="todayBtn" class="ui-btn ui-btn-secondary ui-btn-sm">
-
-                                        <i class="fa-solid fa-calendar-day"></i>
-                                        <span>Today</span>
-
-                                    </button>
+                                    <x-button id="todayBtn" type="button" variant="secondary" size="sm"
+                                        icon="fa-solid fa-calendar-day">
+                                        Today
+                                    </x-button>
 
                                 </div>
 
@@ -493,8 +466,6 @@
                         <section id="holidaysCard" class="card flex flex-col xl:self-start">
 
                             @php
-                                $today = now()->startOfDay();
-
                                 $MONTHS_SHORT = [
                                     'Jan',
                                     'Feb',
@@ -509,12 +480,6 @@
                                     'Nov',
                                     'Dec',
                                 ];
-
-                                $allUpcomingHolidays = collect($philippineHolidays)
-                                    ->filter(
-                                        fn($holiday, $date) => \Carbon\Carbon::parse($date)->startOfDay()->gte($today),
-                                    )
-                                    ->sortKeys();
 
                                 $upcoming = $allUpcomingHolidays->take(5);
                             @endphp
@@ -556,11 +521,7 @@
                                                 : true;
                                         @endphp
 
-                                        <div class="table-list-row {{ $loop->first ? 'status-cancelled' : '' }}"
-                                            @if ($loop->first) style="
-                            background: var(--status-bg);
-                            border-left: 3px solid var(--crimson);
-                        " @endif>
+                                        <div class="table-list-row {{ $loop->first ? 'status-cancelled' : '' }}">
 
                                             <div class="flex items-start gap-3 px-4 py-3">
 
@@ -571,7 +532,7 @@
                                                     </div>
 
                                                     <div class="text-xl font-extrabold leading-none"
-                                                        style="color: var(--text-1);">
+                                                        data-ui-presentation="presentation-23b8d2e99754">
 
                                                         {{ $hC->day }}
 
@@ -592,7 +553,7 @@
                                                     @if ($loop->first)
                                                         @if ($isBlockedHoliday)
                                                             <div class="global-info-subvalue status-cancelled mt-2"
-                                                                style="color: var(--status-text);">
+                                                                data-ui-presentation="presentation-420e169b733d">
 
                                                                 <i class="fa-solid fa-triangle-exclamation"></i>
 
@@ -601,7 +562,7 @@
                                                             </div>
                                                         @else
                                                             <div class="global-info-subvalue status-active mt-2"
-                                                                style="color: var(--status-text);">
+                                                                data-ui-presentation="presentation-420e169b733d">
 
                                                                 <i class="fa-solid fa-circle-check"></i>
 
@@ -617,7 +578,7 @@
 
                                                     @if ($isBlockedHoliday)
                                                         <div class="global-info-group status-pending flex-nowrap"
-                                                            style="color: var(--status-text);">
+                                                            data-ui-presentation="presentation-420e169b733d">
 
                                                             <i class="fa-solid fa-star text-[9px]"></i>
 
@@ -628,7 +589,7 @@
                                                         </div>
                                                     @else
                                                         <div class="global-info-group status-all flex-nowrap"
-                                                            style="color: var(--status-text);">
+                                                            data-ui-presentation="presentation-420e169b733d">
 
                                                             <i class="fa-solid fa-briefcase text-[9px]"></i>
 
@@ -648,7 +609,7 @@
 
                                 </div>
 
-                                <div class="border-t px-4 py-4" style="border-color: var(--border);">
+                                <div class="border-t px-4 py-4" data-ui-presentation="presentation-7c1d0a16a55f">
 
                                     <div class="table-record-label mb-3">
                                         Good to Know
@@ -658,7 +619,7 @@
 
                                         <div class="flex items-start gap-2">
                                             <span class="global-info-icon status-active"
-                                                style="width:20px;height:20px;min-width:20px;" aria-hidden="true">
+                                                data-ui-presentation="presentation-3d6d2187b3e9" aria-hidden="true">
 
                                                 <i class="fa-solid fa-check text-[9px]"></i>
                                             </span>
@@ -670,7 +631,7 @@
 
                                         <div class="flex items-start gap-2">
                                             <span class="global-info-icon status-active"
-                                                style="width:20px;height:20px;min-width:20px;" aria-hidden="true">
+                                                data-ui-presentation="presentation-3d6d2187b3e9" aria-hidden="true">
 
                                                 <i class="fa-solid fa-check text-[9px]"></i>
                                             </span>
@@ -682,7 +643,7 @@
 
                                         <div class="flex items-start gap-2">
                                             <span class="global-info-icon status-active"
-                                                style="width:20px;height:20px;min-width:20px;" aria-hidden="true">
+                                                data-ui-presentation="presentation-3d6d2187b3e9" aria-hidden="true">
 
                                                 <i class="fa-solid fa-check text-[9px]"></i>
                                             </span>
@@ -696,17 +657,12 @@
 
                                 </div>
 
-                                <div class="border-t px-4 py-3" style="border-color: var(--border);">
+                                <div class="border-t px-4 py-3" data-ui-presentation="presentation-7c1d0a16a55f">
 
-                                    <button type="button" class="ui-btn ui-btn-secondary w-full"
-                                        onclick="window.openModal('holidayListModal')">
-
-                                        <i class="fa-regular fa-calendar-days"></i>
-
-                                        <span>
-                                            View Full List
-                                        </span>
-                                    </button>
+                                    <x-button type="button" variant="secondary" icon="fa-regular fa-calendar-days"
+                                        class="w-full" data-ui-click="action-62d7209e5e45">
+                                        View Full List
+                                    </x-button>
 
                                 </div>
                             @else
@@ -811,7 +767,7 @@
                                                                 @if ($rule->status !== 'closed')
                                                                     <div class="cap-bar" aria-hidden="true">
                                                                         <div class="cap-fill"
-                                                                            style="width:{{ min(100, ($rule->max_slots / 30) * 100) }}%">
+                                                                            data-ui-style="width:{{ min(100, ($rule->max_slots / 30) * 100) }}%">
                                                                         </div>
                                                                     </div>
                                                                 @endif
@@ -832,28 +788,22 @@
                                                         </td>
                                                         <td data-label="Actions" class="table-action-cell">
                                                             <div class="ui-action-group">
-                                                                <button type="button"
-                                                                    onclick='openRuleModal(
-                                                                                "edit",
-                                                                                {{ $rule->id }},
-                                                                                {{ json_encode($rule) }}
-                                                                            )'
-                                                                    class="ui-action-btn ui-action-edit"
-                                                                    data-tooltip="Edit schedule"
-                                                                    aria-label="Edit schedule">
-                                                                    <i class="fa-solid fa-pen"></i>
-                                                                </button>
+                                                                <x-action-button type="button" variant="edit"
+                                                                    icon="fa-solid fa-pen" label="Edit schedule"
+                                                                    tooltip="Edit schedule"
+                                                                    data-ui-click="action-5ae65e27acd4"
+                                                                    data-ui-click-arg-0="{{ json_encode($rule->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                                    data-ui-click-arg-1="{{ json_encode($rule) }}" />
 
-                                                                <button type="button"
-                                                                    class="ui-action-btn ui-action-delete"
-                                                                    data-tooltip="Delete schedule"
-                                                                    aria-label="Delete schedule"
-                                                                    onclick='openScheduleDeleteModal(
-                                                                                @json(route($clinicScheduleRouteNames['destroy'], $rule)),
-                                                                                @json($rule->days_label)
-                                                                            )'>
-                                                                    <i class="fa-solid fa-trash"></i>
-                                                                </button>
+                                                                <x-action-button type="button" variant="delete"
+                                                                    icon="fa-solid fa-trash" label="Delete schedule"
+                                                                    tooltip="Delete schedule"
+                                                                    data-ui-click="action-6d843152ccce"
+                                                                    data-ui-click-arg-0="{{ json_encode(
+                                                                        route($clinicScheduleRouteNames['destroy'], $rule),
+                                                                        JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT,
+                                                                    ) }}"
+                                                                    data-ui-click-arg-1="{{ json_encode($rule->days_label, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" />
                                                             </div>
                                                         </td>
                                                     </tr>
@@ -953,7 +903,7 @@
                                                                 @if ($rule->status !== 'closed')
                                                                     <span class="cap-bar" aria-hidden="true">
                                                                         <span class="cap-fill"
-                                                                            style="display:block;width:{{ min(100, ($rule->max_slots / 30) * 100) }}%">
+                                                                            data-ui-style="display:block;width:{{ min(100, ($rule->max_slots / 30) * 100) }}%">
                                                                         </span>
                                                                     </span>
                                                                 @endif
@@ -966,27 +916,20 @@
                                                 <div class="table-record-actions">
                                                     <div class="ui-action-group">
 
-                                                        <button type="button"
-                                                            onclick='openRuleModal(
-                            "edit",
-                            {{ $rule->id }},
-                            {{ json_encode($rule) }}
-                        )'
-                                                            class="ui-action-btn ui-action-edit"
-                                                            data-tooltip="Edit schedule" aria-label="Edit schedule">
+                                                        <x-action-button type="button" variant="edit"
+                                                            icon="fa-solid fa-pen" label="Edit schedule"
+                                                            tooltip="Edit schedule" data-ui-click="action-cf79ab3d24c0"
+                                                            data-ui-click-arg-0="{{ json_encode($rule->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                            data-ui-click-arg-1="{{ json_encode($rule) }}" />
 
-                                                            <i class="fa-solid fa-pen"></i>
-                                                        </button>
-
-                                                        <button type="button" class="ui-action-btn ui-action-delete"
-                                                            data-tooltip="Delete schedule" aria-label="Delete schedule"
-                                                            onclick='openScheduleDeleteModal(
-                            @json(route($clinicScheduleRouteNames['destroy'], $rule)),
-                            @json($rule->days_label)
-                        )'>
-
-                                                            <i class="fa-solid fa-trash"></i>
-                                                        </button>
+                                                        <x-action-button type="button" variant="delete"
+                                                            icon="fa-solid fa-trash" label="Delete schedule"
+                                                            tooltip="Delete schedule" data-ui-click="action-899c015d05d8"
+                                                            data-ui-click-arg-0="{{ json_encode(
+                                                                route($clinicScheduleRouteNames['destroy'], $rule),
+                                                                JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT,
+                                                            ) }}"
+                                                            data-ui-click-arg-1="{{ json_encode($rule->days_label, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" />
 
                                                     </div>
                                                 </div>
@@ -1082,7 +1025,7 @@
                                                                 @if ($rule->status !== 'closed')
                                                                     <span class="cap-bar" aria-hidden="true">
                                                                         <span class="cap-fill"
-                                                                            style="display:block;width:{{ min(100, ($rule->max_slots / 30) * 100) }}%">
+                                                                            data-ui-style="display:block;width:{{ min(100, ($rule->max_slots / 30) * 100) }}%">
                                                                         </span>
                                                                     </span>
                                                                 @endif
@@ -1093,25 +1036,20 @@
 
                                                 <div class="table-record-actions">
                                                     <div class="ui-action-group">
-                                                        <button type="button"
-                                                            onclick='openRuleModal(
-                                                                        "edit",
-                                                                        {{ $rule->id }},
-                                                                        {{ json_encode($rule) }}
-                                                                    )'
-                                                            class="ui-action-btn ui-action-edit"
-                                                            data-tooltip="Edit schedule" aria-label="Edit schedule">
-                                                            <i class="fa-solid fa-pen"></i>
-                                                        </button>
+                                                        <x-action-button type="button" variant="edit"
+                                                            icon="fa-solid fa-pen" label="Edit schedule"
+                                                            tooltip="Edit schedule" data-ui-click="action-b1e8100ff8f6"
+                                                            data-ui-click-arg-0="{{ json_encode($rule->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                            data-ui-click-arg-1="{{ json_encode($rule) }}" />
 
-                                                        <button type="button" class="ui-action-btn ui-action-delete"
-                                                            data-tooltip="Delete schedule" aria-label="Delete schedule"
-                                                            onclick='openScheduleDeleteModal(
-                                                                        @json(route($clinicScheduleRouteNames['destroy'], $rule)),
-                                                                        @json($rule->days_label)
-                                                                    )'>
-                                                            <i class="fa-solid fa-trash"></i>
-                                                        </button>
+                                                        <x-action-button type="button" variant="delete"
+                                                            icon="fa-solid fa-trash" label="Delete schedule"
+                                                            tooltip="Delete schedule" data-ui-click="action-84a17b07f767"
+                                                            data-ui-click-arg-0="{{ json_encode(
+                                                                route($clinicScheduleRouteNames['destroy'], $rule),
+                                                                JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT,
+                                                            ) }}"
+                                                            data-ui-click-arg-1="{{ json_encode($rule->days_label, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" />
                                                     </div>
                                                 </div>
                                             </div>
@@ -1143,17 +1081,12 @@
                                     list-view="#reservedPeriodsListView" grid-view="#reservedPeriodsGridView" />
 
                                 @if ($canCreateReservedPeriods)
-                                    <button type="button" onclick="openReservedPeriodModal()"
-                                        class="ui-btn ui-btn-primary ui-btn-sm" data-tooltip="Add reserved booking period"
-                                        aria-label="Add reserved booking period">
-
-                                        <i class="fa-solid fa-plus"></i>
-
+                                    <x-button type="button" variant="primary" size="sm" icon="fa-solid fa-plus"
+                                        data-ui-click="action-210cc7fbd9be" aria-label="Add reserved booking period">
                                         <span class="reserved-period-add-label">
                                             Add Period
                                         </span>
-
-                                    </button>
+                                    </x-button>
                                 @endif
 
                             </div>
@@ -1299,26 +1232,26 @@
                                                             <td data-label="Actions" class="table-action-cell">
                                                                 <div class="ui-action-group">
                                                                     @if ($canUpdateReservedPeriods && !$isPastPeriod)
-                                                                        <button type="button"
-                                                                            onclick='openReservedPeriodModal("edit", {{ $period->id }}, @json($periodPayload))'
-                                                                            class="ui-action-btn ui-action-edit"
-                                                                            data-tooltip="Edit reserved period"
-                                                                            aria-label="Edit reserved period">
-                                                                            <i class="fa-solid fa-pen"></i>
-                                                                        </button>
+                                                                        <x-action-button type="button" variant="edit"
+                                                                            icon="fa-solid fa-pen"
+                                                                            label="Edit reserved period"
+                                                                            tooltip="Edit reserved period"
+                                                                            data-ui-click="action-f2843b92493b"
+                                                                            data-ui-click-arg-0="{{ json_encode($period->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                                            data-ui-click-arg-1="{{ json_encode($periodPayload, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" />
                                                                     @endif
 
                                                                     @if ($canDeleteReservedPeriods)
-                                                                        <button type="button"
-                                                                            class="ui-action-btn ui-action-delete"
-                                                                            data-tooltip="Remove reserved period"
-                                                                            aria-label="Remove reserved period"
-                                                                            onclick='openReservedPeriodDeleteModal(
-                                                                                @json(route($clinicScheduleRouteNames['reserved_destroy'], $period)),
-                                                                                @json($period->title)
-                                                                            )'>
-                                                                            <i class="fa-solid fa-trash"></i>
-                                                                        </button>
+                                                                        <x-action-button type="button" variant="delete"
+                                                                            icon="fa-solid fa-trash"
+                                                                            label="Remove reserved period"
+                                                                            tooltip="Remove reserved period"
+                                                                            data-ui-click="action-bad117ef6f8f"
+                                                                            data-ui-click-arg-0="{{ json_encode(
+                                                                                route($clinicScheduleRouteNames['reserved_destroy'], $period),
+                                                                                JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT,
+                                                                            ) }}"
+                                                                            data-ui-click-arg-1="{{ json_encode($period->title, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" />
                                                                     @endif
                                                                 </div>
                                                             </td>
@@ -1450,26 +1383,25 @@
                                                     <div class="reserved-periods-list-actions table-action-cell">
                                                         <div class="ui-action-group">
                                                             @if ($canUpdateReservedPeriods && !$isPastPeriod)
-                                                                <button type="button"
-                                                                    onclick='openReservedPeriodModal("edit", {{ $period->id }}, @json($periodPayload))'
-                                                                    class="ui-action-btn ui-action-edit"
-                                                                    data-tooltip="Edit reserved period"
-                                                                    aria-label="Edit reserved period">
-                                                                    <i class="fa-solid fa-pen"></i>
-                                                                </button>
+                                                                <x-action-button type="button" variant="edit"
+                                                                    icon="fa-solid fa-pen" label="Edit reserved period"
+                                                                    tooltip="Edit reserved period"
+                                                                    data-ui-click="action-f2843b92493b"
+                                                                    data-ui-click-arg-0="{{ json_encode($period->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                                    data-ui-click-arg-1="{{ json_encode($periodPayload, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" />
                                                             @endif
 
                                                             @if ($canDeleteReservedPeriods)
-                                                                <button type="button"
-                                                                    class="ui-action-btn ui-action-delete"
-                                                                    data-tooltip="Remove reserved period"
-                                                                    aria-label="Remove reserved period"
-                                                                    onclick='openReservedPeriodDeleteModal(
-                                                                        @json(route($clinicScheduleRouteNames['reserved_destroy'], $period)),
-                                                                        @json($period->title)
-                                                                    )'>
-                                                                    <i class="fa-solid fa-trash"></i>
-                                                                </button>
+                                                                <x-action-button type="button" variant="delete"
+                                                                    icon="fa-solid fa-trash"
+                                                                    label="Remove reserved period"
+                                                                    tooltip="Remove reserved period"
+                                                                    data-ui-click="action-d584b12ca4ac"
+                                                                    data-ui-click-arg-0="{{ json_encode(
+                                                                        route($clinicScheduleRouteNames['reserved_destroy'], $period),
+                                                                        JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT,
+                                                                    ) }}"
+                                                                    data-ui-click-arg-1="{{ json_encode($period->title, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" />
                                                             @endif
                                                         </div>
                                                     </div>
@@ -1597,26 +1529,25 @@
                                                     <div class="table-record-actions">
                                                         <div class="ui-action-group">
                                                             @if ($canUpdateReservedPeriods && !$isPastPeriod)
-                                                                <button type="button"
-                                                                    onclick='openReservedPeriodModal("edit", {{ $period->id }}, @json($periodPayload))'
-                                                                    class="ui-action-btn ui-action-edit"
-                                                                    data-tooltip="Edit reserved period"
-                                                                    aria-label="Edit reserved period">
-                                                                    <i class="fa-solid fa-pen"></i>
-                                                                </button>
+                                                                <x-action-button type="button" variant="edit"
+                                                                    icon="fa-solid fa-pen" label="Edit reserved period"
+                                                                    tooltip="Edit reserved period"
+                                                                    data-ui-click="action-f2843b92493b"
+                                                                    data-ui-click-arg-0="{{ json_encode($period->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                                    data-ui-click-arg-1="{{ json_encode($periodPayload, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" />
                                                             @endif
 
                                                             @if ($canDeleteReservedPeriods)
-                                                                <button type="button"
-                                                                    class="ui-action-btn ui-action-delete"
-                                                                    data-tooltip="Remove reserved period"
-                                                                    aria-label="Remove reserved period"
-                                                                    onclick='openReservedPeriodDeleteModal(
-                                                                            @json(route($clinicScheduleRouteNames['reserved_destroy'], $period)),
-                                                                            @json($period->title)
-                                                                        )'>
-                                                                    <i class="fa-solid fa-trash"></i>
-                                                                </button>
+                                                                <x-action-button type="button" variant="delete"
+                                                                    icon="fa-solid fa-trash"
+                                                                    label="Remove reserved period"
+                                                                    tooltip="Remove reserved period"
+                                                                    data-ui-click="action-a10af097fbc8"
+                                                                    data-ui-click-arg-0="{{ json_encode(
+                                                                        route($clinicScheduleRouteNames['reserved_destroy'], $period),
+                                                                        JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT,
+                                                                    ) }}"
+                                                                    data-ui-click-arg-1="{{ json_encode($period->title, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" />
                                                             @endif
                                                         </div>
                                                     </div>
@@ -1637,141 +1568,121 @@
         </div>
     </main>
 
-    <div id="holidayListModal" class="ui-modal" aria-hidden="true">
-        <div class="ui-modal-card modal-md" role="dialog" aria-modal="true" aria-labelledby="holidayListModalTitle"
-            onclick="event.stopPropagation()">
-            <div class="modal-hd">
-                <div class="modal-heading">
-                    <div class="modal-icon">
-                        <i class="fa-solid fa-umbrella-beach"></i>
-                    </div>
-                    <div class="modal-copy">
-                        <h3 id="holidayListModalTitle" class="modal-title">
-                            Upcoming Holidays
-                        </h3>
-                        <p class="modal-subtitle">
-                            Working and non-working holidays
-                        </p>
-                    </div>
-                </div>
-                <button type="button" class="modal-x" onclick="window.closeModal('holidayListModal')"
-                    aria-label="Close holiday list">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
+    <x-modal id="holidayListModal" title="Upcoming Holidays" title-id="holidayListModalTitle"
+        subtitle="Working and non-working holidays" icon="fa-solid fa-umbrella-beach" size="md"
+        body-class="modal-scroll-body" close-label="Close holiday list" :card-attributes="[
+            'data-ui-click' => 'action-22499e15f3ee',
+        ]" :close-attributes="[
+            'data-ui-click' => 'action-a96098d272f6',
+        ]">
+        <div class="table-list-view">
+            @foreach ($allUpcomingHolidays as $hDate => $holiday)
+                @php
+                    $hC = \Carbon\Carbon::parse($hDate);
 
-            <div class="modal-bd modal-scroll-body">
-                <div class="table-list-view">
-                    @foreach ($allUpcomingHolidays as $hDate => $holiday)
-                        @php
-                            $hC = \Carbon\Carbon::parse($hDate);
+                    $diff = (int) $today->diffInDays($hC, false);
 
-                            $diff = (int) $today->diffInDays($hC, false);
+                    $holidayName = is_array($holiday) ? $holiday['name'] ?? 'Philippine Holiday' : (string) $holiday;
 
-                            $holidayName = is_array($holiday)
-                                ? $holiday['name'] ?? 'Philippine Holiday'
-                                : (string) $holiday;
+                    $isBlockedHoliday = is_array($holiday) ? $holiday['is_blocked_for_booking'] ?? true : true;
+                @endphp
 
-                            $isBlockedHoliday = is_array($holiday) ? $holiday['is_blocked_for_booking'] ?? true : true;
-                        @endphp
+                <div class="table-list-row">
+                    <div class="flex items-center gap-3 px-4 py-3">
+                        <div class="w-11 shrink-0 text-center">
+                            <div class="appt-visit-month">
+                                {{ $MONTHS_SHORT[$hC->month - 1] }}
+                            </div>
 
-                        <div class="table-list-row">
-                            <div class="flex items-center gap-3 px-4 py-3">
-                                <div class="w-11 shrink-0 text-center">
-                                    <div class="appt-visit-month">
-                                        {{ $MONTHS_SHORT[$hC->month - 1] }}
-                                    </div>
-
-                                    <div class="text-xl font-extrabold leading-none" style="color: var(--text-1);">
-                                        {{ $hC->day }}
-                                    </div>
-                                </div>
-
-                                <div class="min-w-0 flex-1">
-                                    <div class="appt-visit-title">
-                                        {{ $holidayName }}
-                                    </div>
-                                    <span class="global-info-subvalue">
-                                        {{ $diff === 0 ? 'Today' : ($diff === 1 ? 'Tomorrow' : "In $diff days") }}
-                                    </span>
-                                </div>
-
-                                <div class="shrink-0">
-                                    @if ($isBlockedHoliday)
-                                        <span class="cal-pill cal-pill-yellow">
-                                            <i class="fa-solid fa-star text-[10px]"></i>
-                                            Non-Working
-                                        </span>
-                                    @else
-                                        <span class="cal-pill cal-pill-working-holiday">
-                                            <i class="fa-solid fa-briefcase text-[10px]"></i>
-                                            Working Holiday
-                                        </span>
-                                    @endif
-                                </div>
+                            <div class="text-xl font-extrabold leading-none"
+                                data-ui-presentation="presentation-23b8d2e99754">
+                                {{ $hC->day }}
                             </div>
                         </div>
-                    @endforeach
+
+                        <div class="min-w-0 flex-1">
+                            <div class="appt-visit-title">
+                                {{ $holidayName }}
+                            </div>
+
+                            <span class="global-info-subvalue">
+                                {{ $diff === 0 ? 'Today' : ($diff === 1 ? 'Tomorrow' : "In $diff days") }}
+                            </span>
+                        </div>
+
+                        <div class="shrink-0">
+                            @if ($isBlockedHoliday)
+                                <span class="cal-pill cal-pill-yellow">
+                                    <i class="fa-solid fa-star text-[10px]"></i>
+                                    Non-Working
+                                </span>
+                            @else
+                                <span class="cal-pill cal-pill-working-holiday">
+                                    <i class="fa-solid fa-briefcase text-[10px]"></i>
+                                    Working Holiday
+                                </span>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+
+        <x-slot:footer>
+            <x-button type="button" variant="secondary" data-ui-click="action-a96098d272f6">
+                Close
+            </x-button>
+        </x-slot:footer>
+    </x-modal>
+
+    <x-modal id="appointmentDetailModal" title="Appointment Details" subtitle="Selected booked slot information"
+        icon="fa-solid fa-calendar-check" size="md" body-class="modal-scroll-body"
+        close-label="Close appointment details" :card-attributes="[
+            'data-ui-click' => 'action-22499e15f3ee',
+        ]" :close-attributes="[
+            'data-ui-click' => 'action-755e543aec03',
+        ]">
+        <div class="modal-form-grid">
+            <div>
+                <label class="form-label">
+                    Patient Name
+                </label>
+
+                <div id="detailPatientName" class="global-readonly-field">
+                    —
                 </div>
             </div>
 
-            <div class="modal-ft">
-                <button type="button" class="ui-btn ui-btn-secondary" onclick="window.closeModal('holidayListModal')">
-                    Close
-                </button>
+            <div>
+                <label class="form-label">
+                    Service Type
+                </label>
+
+                <div id="detailServiceType" class="global-readonly-field">
+                    —
+                </div>
+            </div>
+
+            <div>
+                <label class="form-label">
+                    Schedule
+                </label>
+
+                <div id="detailSchedule" class="global-readonly-field">
+                    —
+                </div>
             </div>
         </div>
-    </div>
 
-    <div id="appointmentDetailModal" class="ui-modal">
-        <div class="ui-modal-card modal-md" onclick="event.stopPropagation()">
-            <div class="modal-hd">
-                <div class="modal-heading">
-                    <div class="modal-icon">
-                        <i class="fa-solid fa-calendar-check"></i>
-                    </div>
-
-                    <div class="modal-copy">
-                        <h3 class="modal-title">Appointment Details</h3>
-                        <p class="modal-subtitle">Selected booked slot information</p>
-                    </div>
-                </div>
-
-                <button type="button" class="modal-x" onclick="closeAppointmentDetailModal()"
-                    aria-label="Close appointment details">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-
-            <div class="modal-bd modal-scroll-body">
-                <div class="modal-form-grid">
-                    <div>
-                        <label class="form-label">Patient Name</label>
-                        <div id="detailPatientName" class="global-readonly-field">—</div>
-                    </div>
-
-                    <div>
-                        <label class="form-label">Service Type</label>
-                        <div id="detailServiceType" class="global-readonly-field">—</div>
-                    </div>
-
-                    <div>
-                        <label class="form-label">Schedule</label>
-                        <div id="detailSchedule" class="global-readonly-field">—</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="modal-ft">
-                <button type="button" onclick="closeAppointmentDetailModal()" class="ui-btn ui-btn-primary">
-                    Close
-                </button>
-            </div>
-        </div>
-    </div>
+        <x-slot:footer>
+            <x-button type="button" variant="primary" data-ui-click="action-755e543aec03">
+                Close
+            </x-button>
+        </x-slot:footer>
+    </x-modal>
 
     <div id="ruleModalBackdrop" class="ui-modal modal-theme-primary">
-        <div class="ui-modal-card modal-xl" onclick="event.stopPropagation()">
+        <div class="ui-modal-card modal-xl" data-ui-click="action-22499e15f3ee">
 
             <div class="modal-hd">
                 <div class="modal-heading">
@@ -1840,7 +1751,8 @@
         ] as $abbr => $lbl)
                                         <button type="button" class="day-toggle" data-day="{{ $abbr }}"
                                             data-discard-track data-discard-key="schedule-day-{{ $abbr }}"
-                                            data-discard-value="false" onclick="toggleDay(this)" aria-pressed="false">
+                                            data-discard-value="false" data-ui-click="action-9ac08cc75f07"
+                                            aria-pressed="false">
 
                                             <span class="day-toggle-label">
                                                 {{ $lbl }}
@@ -1883,7 +1795,7 @@
                             <div class="global-label-row">
                                 <label class="form-label" for="ruleNotes">
                                     Notes
-                                    <span class="field-optional">optional</span>
+                                    <span class="field-optional">(Optional)</span>
                                 </label>
                             </div>
 
@@ -1945,11 +1857,15 @@
                                         Schedule State
                                     </label>
 
-                                    <select id="ruleActivationState" class="form-select-custom js-custom-select"
-                                        data-placeholder="Select schedule state">
-                                        <option value="0" selected>Inactive</option>
-                                        <option value="1">Active</option>
-                                    </select>
+                                    <x-select id="ruleActivationState" data-placeholder="Select schedule state">
+                                        <option value="0" selected>
+                                            Inactive
+                                        </option>
+
+                                        <option value="1">
+                                            Active
+                                        </option>
+                                    </x-select>
 
                                     <div class="field-help">
                                         New schedule rules start as Inactive. Active rules cannot share the same
@@ -1966,12 +1882,21 @@
                                         Clinic Status
                                     </label>
 
-                                    <select id="ruleStatus" class="form-select-custom js-custom-select"
-                                        data-placeholder="Select clinic status" onchange="toggleStatusFields(this.value)">
-                                        <option value="open">Open</option>
-                                        <option value="closed">Closed</option>
-                                        <option value="limited">Limited Hours</option>
-                                    </select>
+                                    <x-select id="ruleStatus" data-placeholder="Select clinic status"
+                                        data-ui-change="action-958c6da8d111">
+                                        <option value="open">
+                                            Open
+                                        </option>
+
+                                        <option value="closed">
+                                            Closed
+                                        </option>
+
+                                        <option value="limited">
+                                            Limited Hours
+                                        </option>
+                                    </x-select>
+
                                     <div id="ruleStatusError" class="global-field-error" data-error-for="ruleStatus"
                                         aria-hidden="true">
                                     </div>
@@ -1986,15 +1911,12 @@
                                                 Opening Time
                                             </label>
 
-                                            <select id="ruleOpenTime" class="form-select-custom js-custom-select"
-                                                data-placeholder="Select opening time">
-
+                                            <x-select id="ruleOpenTime" data-placeholder="Select opening time">
                                                 <option value="07:00">7:00 AM</option>
                                                 <option value="08:00">8:00 AM</option>
                                                 <option value="09:00" selected>9:00 AM</option>
                                                 <option value="10:00">10:00 AM</option>
-
-                                            </select>
+                                            </x-select>
 
                                             <div id="ruleOpenTimeError" class="global-field-error"
                                                 data-error-for="ruleOpenTime" aria-hidden="true">
@@ -2007,15 +1929,12 @@
                                                 Closing Time
                                             </label>
 
-                                            <select id="ruleCloseTime" class="form-select-custom js-custom-select"
-                                                data-placeholder="Select closing time">
-
+                                            <x-select id="ruleCloseTime" data-placeholder="Select closing time">
                                                 <option value="15:00">3:00 PM</option>
                                                 <option value="16:00">4:00 PM</option>
                                                 <option value="17:00" selected>5:00 PM</option>
                                                 <option value="18:00">6:00 PM</option>
-
-                                            </select>
+                                            </x-select>
 
                                             <div id="ruleCloseTimeError" class="global-field-error"
                                                 data-error-for="ruleCloseTime" aria-hidden="true">
@@ -2030,26 +1949,11 @@
                                             Max Appointments / Day
                                         </label>
 
-                                        <div class="global-number-stepper mt-1" data-global-number-stepper>
-
-                                            <button type="button" class="global-number-stepper-btn"
-                                                data-number-step="-1" aria-label="Decrease maximum appointments">
-
-                                                <i class="fa-solid fa-minus"></i>
-                                            </button>
-
-                                            <input type="number" id="ruleMaxSlots" class="global-number-stepper-input"
-                                                value="5" min="1" max="30" step="1"
-                                                inputmode="numeric" autocomplete="off" data-number-stepper-input
-                                                data-field-label="Max Appointments" data-validation-rule="wholeNumber">
-
-                                            <button type="button" class="global-number-stepper-btn" data-number-step="1"
-                                                aria-label="Increase maximum appointments">
-
-                                                <i class="fa-solid fa-plus"></i>
-                                            </button>
-
-                                        </div>
+                                        <x-number-stepper id="ruleMaxSlots" value="5" min="1" max="30"
+                                            step="1" wrapper-class="mt-1"
+                                            decrease-label="Decrease maximum appointments"
+                                            increase-label="Increase maximum appointments" autocomplete="off"
+                                            data-field-label="Max Appointments" data-validation-rule="wholeNumber" />
 
                                         <div id="ruleMaxSlotsError" class="global-field-error"
                                             data-error-for="ruleMaxSlots" aria-hidden="true">
@@ -2065,23 +1969,11 @@
                                             Slot Duration (minutes)
                                         </label>
 
-                                        <div class="global-number-stepper mt-1" data-global-number-stepper>
-                                            <button type="button" class="global-number-stepper-btn"
-                                                data-number-step="-5" aria-label="Decrease slot duration">
-                                                <i class="fa-solid fa-minus"></i>
-                                            </button>
-
-                                            <input type="number" id="ruleSlotDuration"
-                                                class="global-number-stepper-input" value="60" min="5" max="240"
-                                                step="5" inputmode="numeric" autocomplete="off"
-                                                data-number-stepper-input data-field-label="Slot Duration"
-                                                data-validation-rule="wholeNumber">
-
-                                            <button type="button" class="global-number-stepper-btn"
-                                                data-number-step="5" aria-label="Increase slot duration">
-                                                <i class="fa-solid fa-plus"></i>
-                                            </button>
-                                        </div>
+                                        <x-number-stepper id="ruleSlotDuration" value="60" min="5"
+                                            max="240" step="5" wrapper-class="mt-1"
+                                            decrease-label="Decrease slot duration"
+                                            increase-label="Increase slot duration" autocomplete="off"
+                                            data-field-label="Slot Duration" data-validation-rule="wholeNumber" />
 
                                         <div id="ruleSlotDurationError" class="global-field-error"
                                             data-error-for="ruleSlotDuration" aria-hidden="true">
@@ -2092,7 +1984,6 @@
                                         </div>
                                     </div>
 
-
                                     <div data-global-field>
                                         <label class="form-label">
                                             Lunch Break
@@ -2102,19 +1993,19 @@
 
                                             <button type="button" class="break-chip selected" data-val="12:00-13:00"
                                                 data-discard-track data-discard-key="schedule-break-12-13"
-                                                data-discard-value="true" onclick="selectBreak(this)">
+                                                data-discard-value="true" data-ui-click="action-f9d97e5305b3">
                                                 12:00 – 1:00 PM
                                             </button>
 
                                             <button type="button" class="break-chip" data-val="13:00-14:00"
                                                 data-discard-track data-discard-key="schedule-break-13-14"
-                                                data-discard-value="false" onclick="selectBreak(this)">
+                                                data-discard-value="false" data-ui-click="action-f9d97e5305b3">
                                                 1:00 – 2:00 PM
                                             </button>
 
                                             <button type="button" class="break-chip" data-val="none" data-discard-track
                                                 data-discard-key="schedule-break-none" data-discard-value="false"
-                                                onclick="selectBreak(this)">
+                                                data-ui-click="action-f9d97e5305b3">
 
                                                 <i class="fa-solid fa-ban text-[10px]"></i>
                                                 No Break
@@ -2130,14 +2021,16 @@
                 </div>
 
                 <div class="modal-ft modal-sticky-footer">
-                    <button type="button" class="ui-btn ui-btn-secondary" data-discard-close="ruleModalBackdrop">
+                    <x-button type="button" variant="secondary" data-discard-close="ruleModalBackdrop">
                         Cancel
-                    </button>
+                    </x-button>
 
-                    <button type="button" onclick="submitRule()" id="ruleSubmitBtn" class="ui-btn ui-btn-primary">
-                        <i class="fa-solid fa-floppy-disk"></i>
-                        <span id="ruleSubmitText">Save Rule</span>
-                    </button>
+                    <x-button id="ruleSubmitBtn" type="button" variant="primary" icon="fa-solid fa-floppy-disk"
+                        data-ui-click="action-2f4c982ff581">
+                        <span id="ruleSubmitText">
+                            Save Rule
+                        </span>
+                    </x-button>
                 </div>
             </form>
         </div>
@@ -2150,7 +2043,7 @@
             aria-labelledby="blockDateModalTitle" data-global-validation data-discard-form
             data-discard-title="Discard blocked date?" data-discard-subtitle="You have unsaved blocked-date details."
             data-discard-message="Closing this modal will remove the blocked-date details you entered."
-            onclick="event.stopPropagation()" novalidate>
+            data-ui-click="action-22499e15f3ee" novalidate>
             @csrf
 
             <div class="modal-hd">
@@ -2223,21 +2116,29 @@
                             <span class="required-mark">*</span>
                         </label>
 
-                        <select id="blockReason" name="reason" class="form-select-custom js-custom-select"
-                            data-placeholder="Select reason" data-field-label="Reason" required>
+                        <x-select id="blockReason" name="reason" required data-placeholder="Select reason"
+                            data-field-label="Reason">
+                            <option value="Holiday">
+                                Holiday
+                            </option>
 
-                            <option value="Holiday">Holiday</option>
                             <option value="Dentist Unavailable">
                                 Dentist Unavailable
                             </option>
+
                             <option value="Clinic Maintenance">
                                 Clinic Maintenance
                             </option>
+
                             <option value="Special Event">
                                 Special Event
                             </option>
-                            <option value="Other">Other</option>
-                        </select>
+
+                            <option value="Other">
+                                Other
+                            </option>
+                        </x-select>
+
                         <div id="blockReasonError" class="global-field-error" data-error-for="blockReason"
                             aria-hidden="true">
                         </div>
@@ -2248,7 +2149,7 @@
                         <div class="global-label-row">
                             <label class="form-label" for="blockNote">
                                 Notes
-                                <span class="field-optional">optional</span>
+                                <span class="field-optional">(Optional)</span>
                             </label>
 
                             <span id="blockNoteCount" class="char-counter">
@@ -2282,512 +2183,528 @@
             </div>
 
             <div class="modal-ft modal-sticky-footer">
-                <button type="button" class="ui-btn ui-btn-secondary" data-discard-close="blockModalBackdrop">
+                <x-button type="button" variant="secondary" data-discard-close="blockModalBackdrop">
                     Cancel
-                </button>
+                </x-button>
 
-                <button type="submit" class="ui-btn ui-btn-primary">
-                    <i class="fa-solid fa-ban"></i>
-                    <span>Block Date</span>
-                </button>
+                <x-button type="submit" variant="primary">
+                    Block Date
+                </x-button>
             </div>
         </form>
     </div>
 
-    <div id="reservedPeriodModalBackdrop" class="ui-modal modal-theme-primary" aria-hidden="true">
-        <div class="ui-modal-card modal-xl" onclick="event.stopPropagation()">
-            <div class="modal-hd">
-                <div class="modal-heading">
-                    <div class="modal-icon">
-                        <i id="reservedPeriodModalIcon" class="fa-solid fa-calendar-check"></i>
-                    </div>
+    <x-modal id="reservedPeriodModalBackdrop" title="Create Reserved Booking Period" title-id="reservedPeriodModalTitle"
+        size="xl" class="modal-theme-primary" body-class="modal-scroll-body" form-id="reservedPeriodForm"
+        form-class="modal-card-form" :card-attributes="[
+            'data-ui-click' => 'action-22499e15f3ee',
+        ]" :form-attributes="[
+            'method' => 'POST',
+            'action' => route($clinicScheduleRouteNames['reserved_store']),
+            'data-global-validation' => '',
+            'data-form-validation-rule' => 'reservedBookingPeriod',
+        
+            'data-discard-form' => '',
+            'data-discard-title' => 'Discard reserved period changes?',
+            'data-discard-subtitle' => 'You have unsaved reserved booking period details.',
+            'data-discard-message' =>
+                'Closing this modal will remove the reserved period details you entered. Do you want to discard your changes?',
+        
+            'novalidate' => '',
+        ]">
 
-                    <div class="modal-copy">
-                        <h3 id="reservedPeriodModalTitle" class="modal-title">Create Reserved Booking Period</h3>
-                        <p id="reservedPeriodModalSubtitle" class="modal-subtitle">
-                            Reserve part of a clinic day for a selected patient group.
-                        </p>
+        <x-slot:header>
+            <div class="modal-heading">
+                <div class="modal-icon">
+                    <i id="reservedPeriodModalIcon" class="fa-solid fa-calendar-check">
+                    </i>
+                </div>
+
+                <div class="modal-copy">
+                    <h3 id="reservedPeriodModalTitle" class="modal-title">
+                        Create Reserved Booking Period
+                    </h3>
+
+                    <p id="reservedPeriodModalSubtitle" class="modal-subtitle">
+                        Reserve part of a clinic day for a selected patient group.
+                    </p>
+                </div>
+            </div>
+
+            <button type="button" class="modal-x" data-discard-close="reservedPeriodModalBackdrop"
+                aria-label="Close reserved period modal">
+                <i class="fa-solid fa-xmark" aria-hidden="true">
+                </i>
+            </button>
+        </x-slot:header>
+
+        @csrf
+        <div id="reservedPeriodMethodField"></div>
+        <input id="reservedPeriodId" type="hidden" name="reserved_period_id">
+        <input type="hidden" name="allowed_services_present" value="1">
+
+        <div class="modal-form-grid-2">
+            <div class="info-card modal-form-section">
+                <div class="modal-section-heading">
+                    <div class="modal-section-icon">
+                        <i class="fa-solid fa-calendar-day"></i>
+                    </div>
+                    <div>
+                        <h4>Period Details</h4>
+                        <p>Set the purpose, date, and reserved hours.</p>
                     </div>
                 </div>
 
-                <button type="button" class="modal-x" data-discard-close="reservedPeriodModalBackdrop"
-                    aria-label="Close reserved period modal">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-
-            <form id="reservedPeriodForm" method="POST"
-                action="{{ route($clinicScheduleRouteNames['reserved_store']) }}" class="modal-card-form"
-                data-global-validation data-form-validation-rule="reservedBookingPeriod" data-discard-form novalidate>
-
-                <div class="modal-bd modal-scroll-body">
-                    @csrf
-                    <div id="reservedPeriodMethodField"></div>
-                    <input id="reservedPeriodId" type="hidden" name="reserved_period_id">
-                    <input type="hidden" name="allowed_services_present" value="1">
-
-                    <div class="modal-form-grid-2">
-                        <div class="info-card modal-form-section">
-                            <div class="modal-section-heading">
-                                <div class="modal-section-icon">
-                                    <i class="fa-solid fa-calendar-day"></i>
-                                </div>
-                                <div>
-                                    <h4>Period Details</h4>
-                                    <p>Set the purpose, date, and reserved hours.</p>
-                                </div>
-                            </div>
-
-                            <div class="space-y-4">
-                                <div data-global-field>
-                                    <label for="reservedTitle" class="form-label">Purpose <span
-                                            class="text-red-500">*</span></label>
-                                    <div class="global-voice-row" data-voice-field>
-                                        <div class="global-voice-control">
-                                            <input id="reservedTitle" name="title" type="text" maxlength="120"
-                                                required
-                                                class="form-input-custom @error('title', 'reservedPeriod') is-invalid @enderror"
-                                                data-field-label="Purpose" placeholder="e.g. Mandatory Oral Check-up">
-                                        </div>
-
-                                        <x-voice-input target="#reservedTitle" status-id="reservedTitleVoiceStatus"
-                                            label="Voice input for reserved period purpose" title="Voice input" />
-                                    </div>
-                                    <div class="global-field-error @error('title', 'reservedPeriod') show @enderror"
-                                        data-error-for="reservedTitle"
-                                        aria-hidden="{{ $reservedErrors->has('title') ? 'false' : 'true' }}">
-                                        @error('title', 'reservedPeriod')
-                                            {{ $message }}
-                                        @enderror
-                                    </div>
-                                </div>
-
-                                <div data-global-field>
-                                    <label for="reservedDate" class="form-label">
-                                        Date
-                                        <span class="text-red-500">*</span>
-                                    </label>
-
-                                    <div class="fp-date-input-wrap" data-flatpickr-trigger>
-                                        <input id="reservedDate" name="reserved_date" type="text" required readonly
-                                            data-field-label="Date"
-                                            class="form-input-custom fp-date-input js-flatpickr-date-min-today @error('reserved_date', 'reservedPeriod') is-invalid @enderror"
-                                            data-flatpickr-append-to-body
-                                            data-flatpickr-disabled-date-tooltip="This date already has an active reserved booking period"
-                                            data-flatpickr-disabled-dates='[]' placeholder="Select date">
-                                    </div>
-
-                                    <div class="global-field-error @error('reserved_date', 'reservedPeriod') show @enderror"
-                                        data-error-for="reservedDate"
-                                        aria-hidden="{{ $reservedErrors->has('reserved_date') ? 'false' : 'true' }}">
-                                        @error('reserved_date', 'reservedPeriod')
-                                            {{ $message }}
-                                        @enderror
-                                    </div>
-                                </div>
-
-                                <div class="modal-form-grid-2">
-                                    <div data-global-field>
-                                        <label for="reservedStartTime" class="form-label">Start Time <span
-                                                class="text-red-500">*</span></label>
-                                        <div class="global-control-wrap reserved-time-control" data-flatpickr-trigger>
-                                            <i class="fa-regular fa-clock global-control-icon" aria-hidden="true"></i>
-                                            <input id="reservedStartTime" name="start_time" type="text" required
-                                                readonly data-field-label="Start Time"
-                                                class="form-input-custom global-form-icon js-flatpickr-time @error('start_time', 'reservedPeriod') is-invalid @enderror"
-                                                placeholder="Select start time">
-                                        </div>
-                                        <div class="global-field-error @error('start_time', 'reservedPeriod') show @enderror"
-                                            data-error-for="reservedStartTime"
-                                            aria-hidden="{{ $reservedErrors->has('start_time') ? 'false' : 'true' }}">
-                                            @error('start_time', 'reservedPeriod')
-                                                {{ $message }}
-                                            @enderror
-                                        </div>
-                                    </div>
-
-                                    <div data-global-field>
-                                        <label for="reservedEndTime" class="form-label">End Time <span
-                                                class="text-red-500">*</span></label>
-                                        <div class="global-control-wrap reserved-time-control" data-flatpickr-trigger>
-                                            <i class="fa-regular fa-clock global-control-icon" aria-hidden="true"></i>
-                                            <input id="reservedEndTime" name="end_time" type="text" required readonly
-                                                data-field-label="End Time"
-                                                class="form-input-custom global-form-icon js-flatpickr-time @error('end_time', 'reservedPeriod') is-invalid @enderror"
-                                                placeholder="Select end time">
-                                        </div>
-                                        <div class="global-field-error @error('end_time', 'reservedPeriod') show @enderror"
-                                            data-error-for="reservedEndTime"
-                                            aria-hidden="{{ $reservedErrors->has('end_time') ? 'false' : 'true' }}">
-                                            @error('end_time', 'reservedPeriod')
-                                                {{ $message }}
-                                            @enderror
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div data-global-field>
-                                    <span class="form-label">Patient chooses <span class="text-red-500">*</span></span>
-                                    <div id="reservedBookingModeGroup" class="reserved-booking-mode-grid">
-                                        <label class="reserved-booking-mode-card">
-                                            <input type="radio" name="booking_mode" value="timeslot" required
-                                                onchange="setReservedBookingMode(this.value)">
-                                            <span class="reserved-booking-mode-icon"><i
-                                                    class="fa-regular fa-clock"></i></span>
-                                            <span>
-                                                <strong>Date & timeslot</strong>
-                                                <small>Patient selects an available time.</small>
-                                            </span>
-                                        </label>
-                                        <label class="reserved-booking-mode-card">
-                                            <input type="radio" name="booking_mode" value="date_only" required
-                                                onchange="setReservedBookingMode(this.value)">
-                                            <span class="reserved-booking-mode-icon"><i
-                                                    class="fa-solid fa-list-ol"></i></span>
-                                            <span>
-                                                <strong>Date only</strong>
-                                                <small>Queue-based within the period.</small>
-                                            </span>
-                                        </label>
-                                    </div>
-                                    <div class="global-field-error @error('booking_mode', 'reservedPeriod') show @enderror"
-                                        data-error-for="reserved-booking-mode"
-                                        aria-hidden="{{ $reservedErrors->has('booking_mode') ? 'false' : 'true' }}">
-                                        @error('booking_mode', 'reservedPeriod')
-                                            {{ $message }}
-                                        @enderror
-                                    </div>
-                                </div>
-
-                                <div data-global-field>
-                                    <label for="reservedActivationState" class="form-label">Period State <span
-                                            class="text-red-500">*</span></label>
-                                    <select id="reservedActivationState" name="is_active"
-                                        class="form-select-custom js-custom-select @error('is_active', 'reservedPeriod') is-invalid @enderror"
-                                        data-placeholder="Select period state" data-field-label="Period State"
-                                        onchange="handleReservedPeriodStateChange()" required>
-                                        <option value="0" selected>Inactive</option>
-                                        <option value="1">Active</option>
-                                    </select>
-                                    <p class="field-help">
-                                        Inactive saves the setup only. Active reserves the selected date and time and sends
-                                        booking notifications to eligible users.
-                                    </p>
-                                    <div class="global-field-error @error('is_active', 'reservedPeriod') show @enderror"
-                                        data-error-for="reservedActivationState"
-                                        aria-hidden="{{ $reservedErrors->has('is_active') ? 'false' : 'true' }}">
-                                        @error('is_active', 'reservedPeriod')
-                                            {{ $message }}
-                                        @enderror
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="info-card modal-form-section">
-                            <div class="modal-section-heading">
-                                <div class="modal-section-icon">
-                                    <i class="fa-solid fa-users"></i>
-                                </div>
-                                <div>
-                                    <h4>Target & Capacity</h4>
-                                    <p>Choose who may book and limit the available places.
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div class="space-y-4">
-                                <div data-global-field>
-                                    <label for="reservedPatientType" class="form-label">Patient Type <span
-                                            class="text-red-500">*</span></label>
-                                    <select id="reservedPatientType" name="target_patient_type" required
-                                        data-field-label="Patient Type" class="form-select-custom js-custom-select"
-                                        data-placeholder="Select patient type"
-                                        onchange="toggleReservedStudentFields(this.value)">
-                                        <option value="student">Student</option>
-                                        <option value="faculty">Faculty</option>
-                                        <option value="administrative">Administrative</option>
-                                        <option value="guest">Guest</option>
-                                    </select>
-                                    @error('target_patient_type', 'reservedPeriod')
-                                        <p class="global-field-error show">{{ $message }}</p>
-                                    @enderror
-                                </div>
-
-                                <div id="reservedStudentFields" class="info-card modal-form-grid">
-                                    <div data-global-field>
-                                        <label for="reservedProgramCode" class="form-label">Program <span
-                                                class="text-red-500">*</span></label>
-                                        <select id="reservedProgramCode" name="program_code"
-                                            data-field-label="Program" class="form-select-custom js-custom-select"
-                                            data-placeholder="Select program"
-                                            onchange="updateReservedStudentTargetDropdowns(this.value, '', '')">
-                                            <option value="">Select program</option>
-                                            @foreach ($studentTargetOptions->unique('course_code') as $studentOption)
-                                                <option value="{{ $studentOption['course_code'] }}">
-                                                    {{ $studentOption['course_code'] }}{{ $studentOption['course_name'] && $studentOption['course_name'] !== $studentOption['course_code'] ? ' — ' . $studentOption['course_name'] : '' }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                        <p class="field-help">Programs are loaded from the student information system.</p>
-                                        @error('program_code', 'reservedPeriod')
-                                            <p class="global-field-error show">{{ $message }}</p>
-                                        @enderror
-                                    </div>
-
-                                    <div class="modal-form-grid-2">
-                                        <div data-global-field>
-                                            <label for="reservedYearLevel" class="form-label">Year Level <span
-                                                    class="text-red-500">*</span></label>
-                                            <select id="reservedYearLevel" name="year_level"
-                                                class="form-select-custom js-custom-select"
-                                                data-placeholder="Select year level" data-field-label="Year Level"
-                                                onchange="updateReservedStudentTargetDropdowns(document.getElementById('reservedProgramCode').value, this.value, '')">
-                                                <option value="">Select year</option>
-                                                @foreach ($studentTargetOptions->pluck('year_level')->filter()->unique()->sort() as $year)
-                                                    <option value="{{ $year }}">Year {{ $year }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                            @error('year_level', 'reservedPeriod')
-                                                <p class="global-field-error show">{{ $message }}</p>
-                                            @enderror
-                                        </div>
-
-                                        <div data-global-field>
-                                            <label for="reservedSection" class="form-label">Section <span
-                                                    class="text-red-500">*</span></label>
-                                            <select id="reservedSection" name="section" data-field-label="Section"
-                                                class="form-select-custom js-custom-select"
-                                                data-placeholder="Select section">
-                                                <option value="">Select section</option>
-                                                @foreach ($studentTargetOptions->pluck('section')->filter()->unique() as $sectionOption)
-                                                    <option value="{{ $sectionOption }}">{{ $sectionOption }}</option>
-                                                @endforeach
-                                            </select>
-                                            @error('section', 'reservedPeriod')
-                                                <p class="global-field-error show">{{ $message }}</p>
-                                            @enderror
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div id="reservedOverallCapacityField" data-global-field hidden>
-                                    <label for="reservedMaxCapacity" class="form-label">Maximum Capacity <span
-                                            class="text-red-500">*</span></label>
-                                    <div class="global-number-stepper reserved-capacity-stepper"
-                                        data-global-number-stepper>
-                                        <button type="button" class="global-number-stepper-btn" data-number-step="-1"
-                                            aria-label="Decrease maximum capacity">
-                                            <i class="fa-solid fa-minus"></i>
-                                        </button>
-                                        <input id="reservedMaxCapacity" name="max_capacity"
-                                            data-field-label="Maximum Capacity" type="number" min="1"
-                                            max="{{ \App\Models\ReservedBookingPeriod::MAX_CAPACITY }}" step="1"
-                                            required class="global-number-stepper-input" value="10"
-                                            inputmode="numeric" data-number-stepper-input>
-                                        <button type="button" class="global-number-stepper-btn" data-number-step="1"
-                                            aria-label="Increase maximum capacity">
-                                            <i class="fa-solid fa-plus"></i>
-                                        </button>
-                                    </div>
-                                    <p class="field-help">Maximum eligible patients who can book this period, up to
-                                        {{ \App\Models\ReservedBookingPeriod::MAX_CAPACITY }}.</p>
-                                    @error('max_capacity', 'reservedPeriod')
-                                        <p class="global-field-error show">{{ $message }}</p>
-                                    @enderror
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="info-card modal-form-section mt-5" data-global-field>
-                        <div class="modal-section-heading">
-                            <div class="modal-section-icon">
-                                <i class="fa-solid fa-tooth"></i>
-                            </div>
-                            <div>
-                                <div class="modal-section-title">Allowed Dental Services</div>
-                                <div class="modal-section-sub">
-                                    Select every service patients may choose during this reserved period.
-                                </div>
-                            </div>
-                        </div>
-
-                        <div id="reservedAllowedServicesGroup" class="global-choice-group">
-                            @foreach ($serviceTypes as $serviceType)
-                                <label class="global-choice-card">
-                                    <input type="checkbox" name="allowed_services[]"
-                                        value="{{ $serviceType->name }}" class="global-choice-input"
-                                        data-reserved-service>
-                                    <span class="global-choice-indicator">
-                                        <i class="fa-solid fa-check"></i>
-                                    </span>
-                                    <span class="global-choice-copy">
-                                        <span class="global-choice-title">{{ $serviceType->name }}</span>
-                                        <span class="global-choice-description">
-                                            {{ $serviceType->description ?: 'Available dental service.' }}
-                                        </span>
-                                    </span>
-                                </label>
-                            @endforeach
-                        </div>
-                        <p class="field-help">Only these services will appear when an eligible patient books this period.
-                        </p>
-                        <div class="global-field-error @error('allowed_services', 'reservedPeriod') show @enderror"
-                            data-error-for="reserved-allowed-services"
-                            aria-hidden="{{ $reservedErrors->has('allowed_services') || $reservedErrors->has('allowed_services.*') ? 'false' : 'true' }}">
-                            @if ($reservedErrors->has('allowed_services') || $reservedErrors->has('allowed_services.*'))
-                                {{ $reservedErrors->first('allowed_services') ?: $reservedErrors->first('allowed_services.*') }}
-                            @endif
-                        </div>
-                    </div>
-
-                    <div class="info-card modal-form-section mt-5" data-global-field>
-                        <div class="modal-section-heading">
-                            <div class="modal-section-icon">
-                                <i class="fa-solid fa-note-sticky"></i>
-                            </div>
-
-                            <div>
-                                <h4>
-                                    Additional Notes
-                                </h4>
-
-                                <p>
-                                    Add optional instructions for this reserved booking period.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="global-label-row">
-                            <label for="reservedNotes" class="form-label">
-                                Notes
-                                <span class="field-optional">optional</span>
-                            </label>
-
-                            <span id="reservedNotesCount" class="char-counter">
-                                0 / 500 characters
-                            </span>
-                        </div>
-
+                <div class="space-y-4">
+                    <div data-global-field>
+                        <label for="reservedTitle" class="form-label">Purpose <span class="text-red-500">*</span></label>
                         <div class="global-voice-row" data-voice-field>
                             <div class="global-voice-control">
-                                <div class="global-form-textarea-wrap">
-                                    <textarea id="reservedNotes" name="notes" maxlength="500" rows="3"
-                                        class="form-input-custom global-form-textarea" data-char-limit="500" data-char-counter="#reservedNotesCount"
-                                        data-field-label="Notes" placeholder="Internal instructions for this reserved period.">{{ old('notes') }}</textarea>
-                                </div>
+                                <input id="reservedTitle" name="title" type="text" maxlength="120" required
+                                    class="form-input-custom @error('title', 'reservedPeriod') is-invalid @enderror"
+                                    data-field-label="Purpose" placeholder="e.g. Mandatory Oral Check-up">
                             </div>
 
-                            <x-voice-input target="#reservedNotes" status-id="reservedNotesVoiceStatus"
-                                label="Voice input for reserved period notes" title="Voice input" />
+                            <x-voice-input target="#reservedTitle" status-id="reservedTitleVoiceStatus"
+                                label="Voice input for reserved period purpose" title="Voice input" />
                         </div>
-
-                        <div class="global-field-error @error('notes', 'reservedPeriod') show @enderror"
-                            data-error-for="reservedNotes"
-                            aria-hidden="{{ $reservedErrors->has('notes') ? 'false' : 'true' }}">
-                            @error('notes', 'reservedPeriod')
+                        <div class="global-field-error @error('title', 'reservedPeriod') show @enderror"
+                            data-error-for="reservedTitle"
+                            aria-hidden="{{ $reservedErrors->has('title') ? 'false' : 'true' }}">
+                            @error('title', 'reservedPeriod')
                                 {{ $message }}
                             @enderror
                         </div>
                     </div>
 
-                    <div id="reservedTimeslotBuilder" class="info-card modal-form-section mt-5">
-                        <div class="modal-section-heading reserved-timeslot-heading">
-                            <div class="modal-section-icon">
-                                <i class="fa-solid fa-clock"></i>
-                            </div>
-                            <div>
-                                <h4>Selectable Timeslots</h4>
-                                <p>Create up to
-                                    {{ \App\Models\ReservedBookingPeriod::MAX_CAPACITY }} times patients can choose. Each
-                                    timeslot is for one patient.</p>
-                            </div>
-                            <div class="reserved-timeslot-total">
-                                <span id="reservedTimeslotTotal">0</span>
-                                <small>total patients</small>
-                            </div>
+                    <div data-global-field>
+                        <label for="reservedDate" class="form-label">
+                            Date
+                            <span class="text-red-500">*</span>
+                        </label>
+
+                        <div class="fp-date-input-wrap" data-flatpickr-trigger>
+                            <input id="reservedDate" name="reserved_date" type="text" required readonly
+                                data-field-label="Date"
+                                class="form-input-custom fp-date-input js-flatpickr-date-min-today @error('reserved_date', 'reservedPeriod') is-invalid @enderror"
+                                data-flatpickr-append-to-body
+                                data-flatpickr-disabled-date-tooltip="This date already has an active reserved booking period"
+                                data-flatpickr-disabled-dates='[]' placeholder="Select date">
                         </div>
 
-                        <div class="reserved-timeslot-add-row">
-                            <div data-global-field>
-                                <label for="reservedSlotDuration" class="form-label">
-                                    Duration (minutes)
-                                </label>
-
-                                <div class="global-number-stepper" data-global-number-stepper>
-                                    <button type="button" class="global-number-stepper-btn" data-number-step="-1"
-                                        aria-label="Decrease duration">
-                                        <i class="fa-solid fa-minus"></i>
-                                    </button>
-
-                                    <input id="reservedSlotDuration" name="timeslot_duration_minutes" type="number"
-                                        min="5" max="240" step="5" required
-                                        class="global-number-stepper-input" data-field-label="Duration"
-                                        data-validation-rule="wholeNumber" value="30" inputmode="numeric"
-                                        autocomplete="off" data-number-stepper-input
-                                        onchange="updateReservedSlotDuration()">
-
-                                    <button type="button" class="global-number-stepper-btn" data-number-step="1"
-                                        aria-label="Increase duration">
-                                        <i class="fa-solid fa-plus"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div data-global-field>
-                                <label for="reservedNewSlotTime" class="form-label">
-                                    Timeslot
-                                </label>
-
-                                <div class="global-control-wrap reserved-time-control" data-flatpickr-trigger>
-                                    <i class="fa-regular fa-clock global-control-icon" aria-hidden="true"></i>
-
-                                    <input id="reservedNewSlotTime" type="text" readonly
-                                        class="form-input-custom global-form-icon js-flatpickr-time" value="09:00"
-                                        placeholder="Select timeslot">
-                                </div>
-                            </div>
-                            <button id="reservedAddTimeslotButton" type="button" class="ui-btn ui-btn-primary"
-                                onclick="addReservedTimeslot()">
-                                <i class="fa-solid fa-plus"></i>
-                                <span>Add Timeslot</span>
-                            </button>
+                        <div class="global-field-error @error('reserved_date', 'reservedPeriod') show @enderror"
+                            data-error-for="reservedDate"
+                            aria-hidden="{{ $reservedErrors->has('reserved_date') ? 'false' : 'true' }}">
+                            @error('reserved_date', 'reservedPeriod')
+                                {{ $message }}
+                            @enderror
                         </div>
-
-                        <div class="global-field-error" data-error-for="reservedNewSlotTime" aria-hidden="true">
-                        </div>
-
-                        <div id="reservedTimeslotList" class="reserved-timeslot-list"></div>
-                        <p id="reservedTimeslotEmpty" class="reserved-timeslot-empty">
-                            <i class="fa-regular fa-clock"></i>
-                            No timeslots yet. Add the first selectable time above.
-                        </p>
-                        @if ($reservedErrors->has('timeslots') || $reservedErrors->has('timeslots.*.time'))
-                            <p class="global-field-error show">
-                                {{ $reservedErrors->first('timeslots') ?: $reservedErrors->first('timeslots.*.time') }}
-                            </p>
-                        @endif
                     </div>
 
+                    <div class="modal-form-grid-2">
+                        <div data-global-field>
+                            <label for="reservedStartTime" class="form-label">Start Time <span
+                                    class="required-mark">*</span></label>
+
+                            <div class="global-control-wrap reserved-time-control" data-flatpickr-trigger>
+                                <i class="fa-regular fa-clock global-control-icon" aria-hidden="true">
+                                </i>
+
+                                <input id="reservedStartTime" name="start_time" type="text" required readonly
+                                    data-field-label="Start Time" data-flatpickr-append-to-body
+                                    class="form-input-custom global-form-icon js-flatpickr-time @error('start_time', 'reservedPeriod') is-invalid @enderror"
+                                    placeholder="Select start time">
+                            </div>
+
+                            <div class="global-field-error @error('start_time', 'reservedPeriod') show @enderror"
+                                data-error-for="reservedStartTime"
+                                aria-hidden="{{ $reservedErrors->has('start_time') ? 'false' : 'true' }}">
+                                @error('start_time', 'reservedPeriod')
+                                    {{ $message }}
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div data-global-field>
+                            <label for="reservedEndTime" class="form-label">End Time <span
+                                    class="required-mark">*</span></label>
+
+                            <div class="global-control-wrap reserved-time-control" data-flatpickr-trigger>
+                                <i class="fa-regular fa-clock global-control-icon" aria-hidden="true">
+                                </i>
+
+                                <input id="reservedEndTime" name="end_time" type="text" required readonly
+                                    data-field-label="End Time" data-flatpickr-append-to-body
+                                    class="form-input-custom global-form-icon js-flatpickr-time @error('end_time', 'reservedPeriod') is-invalid @enderror"
+                                    placeholder="Select end time">
+                            </div>
+
+                            <div class="global-field-error @error('end_time', 'reservedPeriod') show @enderror"
+                                data-error-for="reservedEndTime"
+                                aria-hidden="{{ $reservedErrors->has('end_time') ? 'false' : 'true' }}">
+                                @error('end_time', 'reservedPeriod')
+                                    {{ $message }}
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    <div data-global-field>
+                        <span class="form-label">Patient chooses <span class="text-red-500">*</span></span>
+                        <div id="reservedBookingModeGroup" class="reserved-booking-mode-grid">
+                            <label class="reserved-booking-mode-card">
+                                <input type="radio" name="booking_mode" value="timeslot" required
+                                    data-ui-change="action-75f748f7e0aa">
+                                <span class="reserved-booking-mode-icon"><i class="fa-regular fa-clock"></i></span>
+                                <span>
+                                    <strong>Date & timeslot</strong>
+                                    <small>Patient selects an available time.</small>
+                                </span>
+                            </label>
+                            <label class="reserved-booking-mode-card">
+                                <input type="radio" name="booking_mode" value="date_only" required
+                                    data-ui-change="action-75f748f7e0aa">
+                                <span class="reserved-booking-mode-icon"><i class="fa-solid fa-list-ol"></i></span>
+                                <span>
+                                    <strong>Date only</strong>
+                                    <small>Queue-based within the period.</small>
+                                </span>
+                            </label>
+                        </div>
+                        <div class="global-field-error @error('booking_mode', 'reservedPeriod') show @enderror"
+                            data-error-for="reserved-booking-mode"
+                            aria-hidden="{{ $reservedErrors->has('booking_mode') ? 'false' : 'true' }}">
+                            @error('booking_mode', 'reservedPeriod')
+                                {{ $message }}
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div data-global-field>
+                        <label for="reservedActivationState" class="form-label">Period State <span
+                                class="text-red-500">*</span></label>
+                        <x-select id="reservedActivationState" name="is_active" required
+                            class="{{ $reservedErrors->has('is_active') ? 'is-invalid' : '' }}"
+                            data-placeholder="Select period state" data-field-label="Period State"
+                            data-ui-change="action-e5dcc598a9fd">
+                            <option value="0" selected>
+                                Inactive
+                            </option>
+
+                            <option value="1">
+                                Active
+                            </option>
+                        </x-select>
+                        <p class="field-help">
+                            Inactive saves the setup only. Active reserves the selected date and time and sends
+                            booking notifications to eligible users.
+                        </p>
+                        <div class="global-field-error @error('is_active', 'reservedPeriod') show @enderror"
+                            data-error-for="reservedActivationState"
+                            aria-hidden="{{ $reservedErrors->has('is_active') ? 'false' : 'true' }}">
+                            @error('is_active', 'reservedPeriod')
+                                {{ $message }}
+                            @enderror
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-card modal-form-section">
+                <div class="modal-section-heading">
+                    <div class="modal-section-icon">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                    <div>
+                        <h4>Target & Capacity</h4>
+                        <p>Choose who may book and limit the available places.
+                        </p>
+                    </div>
                 </div>
 
-                <div class="modal-ft modal-sticky-footer">
-                    <button type="button" class="ui-btn ui-btn-secondary"
-                        data-discard-close="reservedPeriodModalBackdrop">
-                        Cancel
-                    </button>
+                <div class="space-y-4">
+                    <div data-global-field>
+                        <label for="reservedPatientType" class="form-label">Patient Type <span
+                                class="text-red-500">*</span></label>
+                        <x-select id="reservedPatientType" name="target_patient_type" required
+                            data-field-label="Patient Type" data-placeholder="Select patient type"
+                            data-ui-change="action-6aebdfee76f3">
+                            <option value="student">
+                                Student
+                            </option>
 
-                    <button id="reservedPeriodSubmitButton" type="submit" class="ui-btn ui-btn-primary">
-                        <i class="fa-solid fa-floppy-disk"></i>
-                        <span id="reservedPeriodSubmitText">
-                            Save Reserved Period
-                        </span>
-                    </button>
+                            <option value="faculty">
+                                Faculty
+                            </option>
+
+                            <option value="administrative">
+                                Administrative
+                            </option>
+
+                            <option value="guest">
+                                Guest
+                            </option>
+                        </x-select>
+                        @error('target_patient_type', 'reservedPeriod')
+                            <p class="global-field-error show">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div id="reservedStudentFields" class="info-card modal-form-grid">
+                        <div data-global-field>
+                            <label for="reservedProgramCode" class="form-label">Program <span
+                                    class="required-mark">*</span></label>
+
+                            <x-select id="reservedProgramCode" name="program_code" data-field-label="Program"
+                                data-placeholder="Select program" data-ui-change="action-14444081b07c">
+                                <option value="">
+                                    Select program
+                                </option>
+
+                                @foreach ($studentTargetOptions->unique('course_code') as $studentOption)
+                                    <option value="{{ $studentOption['course_code'] }}">
+                                        {{ $studentOption['course_code'] }}{{ $studentOption['course_name'] && $studentOption['course_name'] !== $studentOption['course_code'] ? ' — ' . $studentOption['course_name'] : '' }}
+                                    </option>
+                                @endforeach
+                            </x-select>
+                            <p class="field-help">Programs are loaded from the student information system.</p>
+                            @error('program_code', 'reservedPeriod')
+                                <p class="global-field-error show">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="modal-form-grid-2">
+                            <div data-global-field>
+                                <label for="reservedYearLevel" class="form-label">Year Level <span
+                                        class="required-mark">*</span></label>
+
+                                <x-select id="reservedYearLevel" name="year_level"
+                                    data-placeholder="Select year level" data-field-label="Year Level"
+                                    data-ui-change="action-a626fa8e15ce">
+                                    <option value="">
+                                        Select year
+                                    </option>
+
+                                    @foreach ($studentTargetOptions->pluck('year_level')->filter()->unique()->sort() as $year)
+                                        <option value="{{ $year }}">
+                                            Year {{ $year }}
+                                        </option>
+                                    @endforeach
+                                </x-select>
+
+                                @error('year_level', 'reservedPeriod')
+                                    <p class="global-field-error show">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div data-global-field>
+                                <label for="reservedSection" class="form-label">Section <span
+                                        class="required-mark">*</span></label>
+                                <x-select id="reservedSection" name="section" data-field-label="Section"
+                                    data-placeholder="Select section">
+                                    <option value="">
+                                        Select section
+                                    </option>
+
+                                    @foreach ($studentTargetOptions->pluck('section')->filter()->unique() as $sectionOption)
+                                        <option value="{{ $sectionOption }}">
+                                            {{ $sectionOption }}
+                                        </option>
+                                    @endforeach
+                                </x-select>
+                                @error('section', 'reservedPeriod')
+                                    <p class="global-field-error show">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="reservedOverallCapacityField" data-global-field hidden>
+                        <label for="reservedMaxCapacity" class="form-label">Maximum Capacity <span
+                                class="required-mark">*</span></label>
+                        <x-number-stepper id="reservedMaxCapacity" name="max_capacity" value="10" min="1"
+                            :max="\App\Models\ReservedBookingPeriod::MAX_CAPACITY" step="1" required wrapper-class="reserved-capacity-stepper"
+                            decrease-label="Decrease maximum capacity" increase-label="Increase maximum capacity"
+                            data-field-label="Maximum Capacity" />
+                        <p class="field-help">Maximum eligible patients who can book this period, up to
+                            {{ \App\Models\ReservedBookingPeriod::MAX_CAPACITY }}.</p>
+                        @error('max_capacity', 'reservedPeriod')
+                            <p class="global-field-error show">{{ $message }}</p>
+                        @enderror
+                    </div>
                 </div>
-            </form>
+            </div>
         </div>
-    </div>
+
+        <div class="info-card modal-form-section mt-5" data-global-field>
+            <div class="modal-section-heading">
+                <div class="modal-section-icon">
+                    <i class="fa-solid fa-tooth"></i>
+                </div>
+                <div>
+                    <h4>
+                        Allowed Dental Services
+                    </h4>
+                    <span class="required-mark">*</span>
+                    <p>
+                        Select every service patients may choose during this reserved period.
+                    </p>
+                </div>
+            </div>
+
+            <div id="reservedAllowedServicesGroup" class="global-choice-group">
+                @foreach ($serviceTypes as $serviceType)
+                    <label class="global-choice-card">
+                        <input type="checkbox" name="allowed_services[]" value="{{ $serviceType->name }}"
+                            class="global-choice-input" data-reserved-service>
+                        <span class="global-choice-indicator">
+                            <i class="fa-solid fa-check"></i>
+                        </span>
+                        <span class="global-choice-copy">
+                            <span class="global-choice-title">{{ $serviceType->name }}</span>
+                            <span class="global-choice-description">
+                                {{ $serviceType->description ?: 'Available dental service.' }}
+                            </span>
+                        </span>
+                    </label>
+                @endforeach
+            </div>
+            <p class="field-help">Only these services will appear when an eligible patient books this period.
+            </p>
+            <div class="global-field-error @error('allowed_services', 'reservedPeriod') show @enderror"
+                data-error-for="reserved-allowed-services"
+                aria-hidden="{{ $reservedErrors->has('allowed_services') || $reservedErrors->has('allowed_services.*') ? 'false' : 'true' }}">
+                @if ($reservedErrors->has('allowed_services') || $reservedErrors->has('allowed_services.*'))
+                    {{ $reservedErrors->first('allowed_services') ?: $reservedErrors->first('allowed_services.*') }}
+                @endif
+            </div>
+        </div>
+
+        <div class="info-card modal-form-section mt-5" data-global-field>
+            <div class="modal-section-heading">
+                <div class="modal-section-icon">
+                    <i class="fa-solid fa-note-sticky"></i>
+                </div>
+
+                <div>
+                    <h4>
+                        Additional Notes
+                    </h4>
+
+                    <p>
+                        Add optional instructions for this reserved booking period.
+                    </p>
+                </div>
+            </div>
+
+            <div class="global-label-row">
+                <label for="reservedNotes" class="form-label">
+                    Notes
+                    <span class="field-optional">(Optional)</span>
+                </label>
+
+                <span id="reservedNotesCount" class="char-counter">
+                    0 / 500 characters
+                </span>
+            </div>
+
+            <div class="global-voice-row" data-voice-field>
+                <div class="global-voice-control">
+                    <div class="global-form-textarea-wrap">
+                        <textarea id="reservedNotes" name="notes" maxlength="500" rows="3"
+                            class="form-input-custom global-form-textarea" data-char-limit="500" data-char-counter="#reservedNotesCount"
+                            data-field-label="Notes" placeholder="Internal instructions for this reserved period.">{{ old('notes') }}</textarea>
+                    </div>
+                </div>
+
+                <x-voice-input target="#reservedNotes" status-id="reservedNotesVoiceStatus"
+                    label="Voice input for reserved period notes" title="Voice input" />
+            </div>
+
+            <div class="global-field-error @error('notes', 'reservedPeriod') show @enderror"
+                data-error-for="reservedNotes" aria-hidden="{{ $reservedErrors->has('notes') ? 'false' : 'true' }}">
+                @error('notes', 'reservedPeriod')
+                    {{ $message }}
+                @enderror
+            </div>
+        </div>
+
+        <div id="reservedTimeslotBuilder" class="info-card modal-form-section mt-5">
+            <div class="modal-section-heading reserved-timeslot-heading">
+                <div class="modal-section-icon">
+                    <i class="fa-solid fa-clock"></i>
+                </div>
+                <div>
+                    <h4>Selectable Timeslots</h4>
+                    <p>Create up to
+                        {{ \App\Models\ReservedBookingPeriod::MAX_CAPACITY }} times patients can choose. Each
+                        timeslot is for one patient.</p>
+                </div>
+                <div class="reserved-timeslot-total">
+                    <span id="reservedTimeslotTotal">0</span>
+                    <small>total patients</small>
+                </div>
+            </div>
+
+            <div class="reserved-timeslot-add-row">
+                <div data-global-field>
+                    <label for="reservedSlotDuration" class="form-label">
+                        Duration (minutes)
+                    </label>
+
+                    <x-number-stepper id="reservedSlotDuration" name="timeslot_duration_minutes" value="30"
+                        min="5" max="240" step="5" required decrease-label="Decrease duration"
+                        increase-label="Increase duration" autocomplete="off" data-field-label="Duration"
+                        data-validation-rule="wholeNumber" data-ui-change="action-443e42f7600e" />
+                </div>
+                <div data-global-field>
+                    <label for="reservedNewSlotTime" class="form-label">
+                        Timeslot
+                    </label>
+
+                    <div class="global-control-wrap reserved-time-control" data-flatpickr-trigger>
+                        <i class="fa-regular fa-clock global-control-icon" aria-hidden="true"></i>
+
+                        <input id="reservedNewSlotTime" type="text" readonly
+                            class="form-input-custom global-form-icon js-flatpickr-time" value="09:00"
+                            placeholder="Select timeslot">
+                    </div>
+                </div>
+                <x-button id="reservedAddTimeslotButton" type="button" variant="primary" icon="fa-solid fa-plus"
+                    data-ui-click="action-9f3a82837bcb">
+                    Add Timeslot
+                </x-button>
+            </div>
+
+            <div class="global-field-error" data-error-for="reservedNewSlotTime" aria-hidden="true">
+            </div>
+
+            <div id="reservedTimeslotList" class="reserved-timeslot-list"></div>
+            <p id="reservedTimeslotEmpty" class="reserved-timeslot-empty">
+                <i class="fa-regular fa-clock"></i>
+                No timeslots yet. Add the first selectable time above.
+            </p>
+            @if ($reservedErrors->has('timeslots') || $reservedErrors->has('timeslots.*.time'))
+                <p class="global-field-error show">
+                    {{ $reservedErrors->first('timeslots') ?: $reservedErrors->first('timeslots.*.time') }}
+                </p>
+            @endif
+        </div>
+
+        <x-slot:footer>
+            <x-button type="button" variant="secondary" data-discard-close="reservedPeriodModalBackdrop">
+                Cancel
+            </x-button>
+
+            <x-button id="reservedPeriodSubmitButton" type="submit" variant="primary"
+                icon="fa-solid fa-floppy-disk">
+                <span id="reservedPeriodSubmitText">
+                    Save Reserved Period
+                </span>
+            </x-button>
+        </x-slot:footer>
+
+    </x-modal>
 
     <x-delete-confirm-modal id="scheduleDeleteModal" form-id="scheduleDeleteForm" name-id="scheduleDeleteName"
         title="Delete Schedule Rule" helper="This schedule rule will be permanently removed." />
@@ -2816,9 +2733,20 @@
         $reservedPeriodUpdateUrlTemplate = route($clinicScheduleRouteNames['reserved_update'], [
             'reservedBookingPeriod' => '__PERIOD_ID__',
         ]);
+
+        $clinicScheduleAjaxState = [
+            'schedules' => $schedules,
+            'weeklyAppointments' => $weeklyAppointments ?? [],
+            'reservedBookingPeriods' => $reservedBookingPeriods,
+        ];
     @endphp
 
-    <script>
+    <script type="application/json" id="clinicScheduleAjaxState"
+    nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
+    @json($clinicScheduleAjaxState)
+</script>
+
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         const clinicScheduleRoutes = {
             store: @json($clinicScheduleStoreUrl),
             update: @json($clinicScheduleUpdateUrlTemplate),
@@ -2833,9 +2761,548 @@
         const reservedPeriodMaxCapacity = @json(\App\Models\ReservedBookingPeriod::MAX_CAPACITY);
         const reservedStudentTargetOptions = @json($studentTargetOptions->values());
 
-        const scheduleRules = @json($schedules);
-        const weeklyAppointments = @json($weeklyAppointments ?? []);
-        const reservedBookingPeriods = @json($reservedBookingPeriods);
+        function readClinicScheduleAjaxState(root = document) {
+            const stateElement =
+                root.getElementById('clinicScheduleAjaxState');
+
+            if (!stateElement) {
+                return {};
+            }
+
+            try {
+                return JSON.parse(
+                    stateElement.textContent || '{}'
+                );
+            } catch (error) {
+                console.error(
+                    'Unable to parse clinic schedule state.',
+                    error
+                );
+
+                return {};
+            }
+        }
+
+        const initialClinicScheduleState = readClinicScheduleAjaxState();
+
+        let scheduleRules =
+            initialClinicScheduleState.schedules ??
+            @json($schedules);
+
+        let weeklyAppointments =
+            initialClinicScheduleState.weeklyAppointments ??
+            @json($weeklyAppointments ?? []);
+
+        let reservedBookingPeriods =
+            initialClinicScheduleState.reservedBookingPeriods ??
+            @json($reservedBookingPeriods);
+
+        const clinicScheduleLiveSelectors = [
+            '#statCards',
+            '#clinicHoursCard',
+            '#blockedDatesCard',
+            '#scheduleRulesCard',
+            '#reservedPeriodsCard',
+        ];
+
+        function clearClinicScheduleAjaxErrors(form) {
+            if (!form) return;
+
+            form
+                .querySelectorAll('.global-field-error')
+                .forEach(error => {
+                    error.textContent = '';
+                    error.classList.remove('show');
+                    error.setAttribute('aria-hidden', 'true');
+                });
+
+            form
+                .querySelectorAll('.is-invalid')
+                .forEach(element => {
+                    element.classList.remove('is-invalid');
+                });
+        }
+
+        function showClinicScheduleAjaxErrors(
+            form,
+            errors = {}
+        ) {
+            if (!form || !errors) {
+                return;
+            }
+
+            const fieldMaps = {
+                ruleForm: {
+                    days: {
+                        groupId: 'ruleDaysGroup',
+                        groupKey: 'rule-days',
+                    },
+                    is_active: {
+                        inputId: 'ruleActivationState',
+                    },
+                    status: {
+                        inputId: 'ruleStatus',
+                    },
+                    open_time: {
+                        inputId: 'ruleOpenTime',
+                    },
+                    close_time: {
+                        inputId: 'ruleCloseTime',
+                    },
+                    max_slots: {
+                        inputId: 'ruleMaxSlots',
+                    },
+                    slot_duration_minutes: {
+                        inputId: 'ruleSlotDuration',
+                    },
+                    notes: {
+                        inputId: 'ruleNotes',
+                    },
+                },
+
+                blockDateForm: {
+                    date: {
+                        inputId: 'blockDate',
+                    },
+                    reason: {
+                        inputId: 'blockReason',
+                    },
+                    note: {
+                        inputId: 'blockNote',
+                    },
+                },
+
+                reservedPeriodForm: {
+                    title: {
+                        inputId: 'reservedTitle',
+                    },
+                    reserved_date: {
+                        inputId: 'reservedDate',
+                    },
+                    start_time: {
+                        inputId: 'reservedStartTime',
+                    },
+                    end_time: {
+                        inputId: 'reservedEndTime',
+                    },
+                    booking_mode: {
+                        groupId: 'reservedBookingModeGroup',
+                        groupKey: 'reserved-booking-mode',
+                    },
+                    is_active: {
+                        inputId: 'reservedActivationState',
+                    },
+                    target_patient_type: {
+                        inputId: 'reservedPatientType',
+                    },
+                    program_code: {
+                        inputId: 'reservedProgramCode',
+                    },
+                    year_level: {
+                        inputId: 'reservedYearLevel',
+                    },
+                    section: {
+                        inputId: 'reservedSection',
+                    },
+                    max_capacity: {
+                        inputId: 'reservedMaxCapacity',
+                    },
+                    timeslot_duration_minutes: {
+                        inputId: 'reservedSlotDuration',
+                    },
+                    allowed_services: {
+                        groupId: 'reservedAllowedServicesGroup',
+                        groupKey: 'reserved-allowed-services',
+                    },
+                    timeslots: {
+                        groupId: 'reservedNewSlotTime',
+                        groupKey: 'reserved-timeslots',
+                    },
+                    notes: {
+                        inputId: 'reservedNotes',
+                    },
+                },
+            };
+
+            const formMap =
+                fieldMaps[form.id] || {};
+
+            let firstInvalid = null;
+
+            Object.entries(errors).forEach(
+                ([fieldName, messages]) => {
+                    const rootField =
+                        String(fieldName).split('.')[0];
+
+                    const message =
+                        Array.isArray(messages) ?
+                        messages[0] :
+                        messages;
+
+                    const fieldConfig =
+                        formMap[rootField];
+
+                    if (!fieldConfig) {
+                        return;
+                    }
+
+                    if (fieldConfig.groupId) {
+                        const group =
+                            document.getElementById(
+                                fieldConfig.groupId
+                            );
+
+                        window.showGlobalGroupError?.(
+                            group,
+                            fieldConfig.groupKey,
+                            message
+                        );
+
+                        firstInvalid ||= group;
+
+                        return;
+                    }
+
+                    const input =
+                        document.getElementById(
+                            fieldConfig.inputId
+                        );
+
+                    if (!input) {
+                        return;
+                    }
+
+                    window.showFormInputValidationMessage?.(
+                        input,
+                        message
+                    );
+
+                    input.classList.add('is-invalid');
+
+                    firstInvalid ||= input;
+                }
+            );
+
+            if (firstInvalid) {
+                firstInvalid.scrollIntoView?.({
+                    behavior: 'smooth',
+                    block: 'center',
+                });
+
+                firstInvalid.focus?.({
+                    preventScroll: true,
+                });
+            }
+        }
+
+        function applyClinicScheduleAjaxState(
+            nextDocument
+        ) {
+            const nextState =
+                readClinicScheduleAjaxState(
+                    nextDocument
+                );
+
+            scheduleRules =
+                Array.isArray(nextState.schedules) ?
+                nextState.schedules : [];
+
+            weeklyAppointments =
+                Array.isArray(
+                    nextState.weeklyAppointments
+                ) ?
+                nextState.weeklyAppointments : [];
+
+            reservedBookingPeriods =
+                Array.isArray(
+                    nextState.reservedBookingPeriods
+                ) ?
+                nextState.reservedBookingPeriods : [];
+
+            const currentStateElement =
+                document.getElementById(
+                    'clinicScheduleAjaxState'
+                );
+
+            const nextStateElement =
+                nextDocument.getElementById(
+                    'clinicScheduleAjaxState'
+                );
+
+            if (
+                currentStateElement &&
+                nextStateElement
+            ) {
+                currentStateElement.textContent =
+                    nextStateElement.textContent;
+            }
+        }
+
+        function refreshClinicScheduleSectionsFromHtml(
+            html
+        ) {
+            const parser =
+                new DOMParser();
+
+            const nextDocument =
+                parser.parseFromString(
+                    html,
+                    'text/html'
+                );
+
+            applyClinicScheduleAjaxState(
+                nextDocument
+            );
+
+            clinicScheduleLiveSelectors.forEach(
+                selector => {
+                    const currentElement =
+                        document.querySelector(
+                            selector
+                        );
+
+                    const nextElement =
+                        nextDocument.querySelector(
+                            selector
+                        );
+
+                    if (
+                        !currentElement ||
+                        !nextElement
+                    ) {
+                        return;
+                    }
+
+                    currentElement.replaceWith(
+                        nextElement.cloneNode(true)
+                    );
+                }
+            );
+
+            renderClinicScheduleEmptyStates();
+
+            buildWeekGrid();
+
+            syncReservedDateAvailability(
+                document
+                .getElementById(
+                    'reservedPeriodId'
+                )
+                ?.value || null
+            );
+        }
+
+        async function fetchFreshClinicScheduleHtml() {
+            const response =
+                await fetch(
+                    window.location.href, {
+                        method: 'GET',
+
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+
+                            Accept: 'text/html',
+                        },
+
+                        cache: 'no-store',
+                    }
+                );
+
+            if (!response.ok) {
+                throw new Error(
+                    'Unable to refresh clinic schedule.'
+                );
+            }
+
+            return response.text();
+        }
+
+        async function submitClinicScheduleAjax(
+            form, {
+                modalId = null,
+                successMessage = 'Changes saved successfully.',
+                submitButton = null,
+            } = {}
+        ) {
+            if (
+                !form ||
+                form.dataset.ajaxSubmitting ===
+                'true'
+            ) {
+                return;
+            }
+
+            clearClinicScheduleAjaxErrors(
+                form
+            );
+
+            if (
+                form.hasAttribute(
+                    'data-global-validation'
+                )
+            ) {
+                const validation =
+                    window.validateGlobalForm?.(
+                        form
+                    );
+
+                if (
+                    validation &&
+                    !validation.valid
+                ) {
+                    return;
+                }
+            }
+
+            form.dataset.ajaxSubmitting =
+                'true';
+
+            const button =
+                submitButton ||
+                form.querySelector(
+                    '[type="submit"]'
+                );
+
+            if (button) {
+                button.disabled = true;
+                button.setAttribute(
+                    'aria-busy',
+                    'true'
+                );
+            }
+
+            try {
+                const response =
+                    await fetch(
+                        form.action, {
+                            method: (
+                                form.method ||
+                                'POST'
+                            ).toUpperCase(),
+
+                            body: new FormData(
+                                form
+                            ),
+
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+
+                                Accept: 'application/json',
+                            },
+                        }
+                    );
+
+                const contentType =
+                    response.headers.get(
+                        'content-type'
+                    ) || '';
+
+                if (
+                    response.status === 422
+                ) {
+                    const payload =
+                        await response.json();
+
+                    showClinicScheduleAjaxErrors(
+                        form,
+                        payload.errors || {}
+                    );
+
+                    window.showToast?.({
+                        type: 'warning',
+                        title: 'Check the form',
+                        message: payload.message ||
+                            'Please correct the highlighted fields.',
+                        duration: 5000,
+                    });
+
+                    return;
+                }
+
+                if (!response.ok) {
+                    let message =
+                        'Unable to save the changes.';
+
+                    if (
+                        contentType.includes(
+                            'application/json'
+                        )
+                    ) {
+                        const payload =
+                            await response
+                            .json()
+                            .catch(() => null);
+
+                        message =
+                            payload?.message ||
+                            message;
+                    }
+
+                    throw new Error(
+                        message
+                    );
+                }
+
+                let html = '';
+
+                if (
+                    contentType.includes(
+                        'text/html'
+                    )
+                ) {
+                    html =
+                        await response.text();
+                } else {
+                    html =
+                        await fetchFreshClinicScheduleHtml();
+                }
+
+                refreshClinicScheduleSectionsFromHtml(
+                    html
+                );
+
+                window.DiscardChanges
+                    ?.markSubmitting?.(
+                        form
+                    );
+
+                if (modalId) {
+                    window.closeModal?.(
+                        modalId
+                    );
+                }
+
+                window.showToast?.({
+                    type: 'success',
+                    title: 'Saved',
+                    message: successMessage,
+                    duration: 4000,
+                });
+            } catch (error) {
+                console.error(
+                    'Clinic schedule AJAX error:',
+                    error
+                );
+
+                window.showToast?.({
+                    type: 'error',
+                    title: 'Unable to save',
+                    message: error.message ||
+                        'Something went wrong while saving the changes.',
+                    duration: 5000,
+                });
+            } finally {
+                form.dataset.ajaxSubmitting =
+                    'false';
+
+                if (button) {
+                    button.disabled = false;
+                    button.removeAttribute(
+                        'aria-busy'
+                    );
+                }
+            }
+        }
 
         function reservedPeriodStateIsActive() {
             const value = document.getElementById('reservedActivationState')?.value ?? '0';
@@ -3159,9 +3626,9 @@
                 const isTod = d.getTime() === today.getTime();
                 const cls = isTod ? 'today-hdr' : i >= 5 ? 'weekend-hdr' : '';
                 html += `<div class="wk-hdr ${cls}">
-                    <div style="font-size:.65rem;opacity:.75">${DAY_ABBRS[d.getDay()]}</div>
-                    <div style="font-size:1rem;font-weight:800;line-height:1.2">${d.getDate()}</div>
-                    ${isTod ? '<div style="font-size:.55rem;background:rgba(255,255,255,.25);border-radius:999px;padding:1px 6px;margin-top:2px">Today</div>' : ''}
+                    <div data-ui-presentation="presentation-ffc624773df6">${DAY_ABBRS[d.getDay()]}</div>
+                    <div data-ui-presentation="presentation-53164131daad">${d.getDate()}</div>
+                    ${isTod ? '<div data-ui-presentation="presentation-7c63aa9c4d24">Today</div>' : ''}
                 </div>`;
             });
 
@@ -3212,7 +3679,7 @@
         <button
             type="button"
             class="week-appointment ${statusMeta.className}"
-            onclick='openAppointmentDetailModal(${JSON.stringify(appt)})'
+            data-ui-click="action-d5fde1a38ad6" data-ui-click-arg-0="${window.uiAttribute(JSON.stringify(appt))}"
             title="Click to view details"
         >
             <div class="week-appointment-top">
@@ -3548,7 +4015,7 @@
                 })
             );
 
-            timeFields.style.display = '';
+            timeFields.classList.remove('hidden');
 
             if (mode === 'edit' && rule) {
                 backdrop.classList.remove('modal-theme-primary');
@@ -3668,7 +4135,17 @@
         }
 
         function toggleStatusFields(val) {
-            document.getElementById('ruleTimeFields').style.display = val === 'closed' ? 'none' : '';
+            const timeFields =
+                document.getElementById('ruleTimeFields');
+
+            if (!timeFields) {
+                return;
+            }
+
+            timeFields.classList.toggle(
+                'hidden',
+                val === 'closed'
+            );
         }
 
         function selectBreak(selectedButton) {
@@ -3714,8 +4191,7 @@
 
                 const ruleDays =
                     Array.isArray(rule.days) ?
-                    rule.days :
-                    [];
+                    rule.days : [];
 
                 return selectedDays.some(day =>
                     ruleDays.includes(day)
@@ -4081,8 +4557,6 @@
                 document.getElementById('ruleNotes')?.value || ''
             );
 
-            window.DiscardChanges?.markSubmitting?.(form);
-
             form.requestSubmit();
         }
 
@@ -4127,6 +4601,19 @@
                 document.getElementById('blockReason'),
                 'Holiday'
             );
+
+            const blockNote =
+                document.getElementById('blockNote');
+
+            if (blockNote) {
+                blockNote.value = '';
+
+                blockNote.dispatchEvent(
+                    new Event('input', {
+                        bubbles: true
+                    })
+                );
+            }
 
             window.openModal('blockModalBackdrop');
 
@@ -4478,13 +4965,13 @@
                         <input id="reservedSlotTime${index}" name="timeslots[${index}][time]" type="text"
                             required readonly class="form-input-custom global-form-icon js-flatpickr-time"
                             value="${slot.time}" placeholder="Select time"
-                            onchange="updateReservedTimeslot(${index}, 'time', this.value)">
+                            data-ui-change="action-5d12ccc88311" data-ui-change-arg-0="${window.uiAttribute(index)}">
                     </div>
                 </div>
                 <span class="reserved-timeslot-one-patient">
                     <i class="fa-solid fa-user"></i> 1 patient · ${getReservedSlotDuration()} min
                 </span>
-                <button type="button" class="reserved-remove-timeslot" onclick="removeReservedTimeslot(${index})"
+                <button type="button" class="reserved-remove-timeslot" data-ui-click="action-fcae67819c6f" data-ui-click-arg-0="${window.uiAttribute(index)}"
                     aria-label="Remove timeslot" title="Remove timeslot">
                     <i class="fa-solid fa-trash-can"></i>
                 </button>
@@ -4590,6 +5077,80 @@
                     }
                 }
             }
+        }
+
+        async function openReservedPeriodPicker(input) {
+            if (!input) {
+                return;
+            }
+
+            const modal = document.getElementById(
+                'reservedPeriodModalBackdrop'
+            );
+
+            if (!modal) {
+                return;
+            }
+
+            if (!input._flatpickr) {
+                try {
+                    await window.initGlobalDatePickers?.(
+                        modal
+                    );
+                } catch (error) {
+                    console.error(
+                        'Unable to initialize reserved period picker.',
+                        error
+                    );
+                }
+            }
+
+            input._flatpickr?.open();
+        }
+
+        function bindReservedPeriodPickerTriggers() {
+            const modal = document.getElementById(
+                'reservedPeriodModalBackdrop'
+            );
+
+            if (
+                !modal ||
+                modal.dataset.flatpickrTriggersBound === 'true'
+            ) {
+                return;
+            }
+
+            modal.dataset.flatpickrTriggersBound = 'true';
+
+            modal.addEventListener(
+                'click',
+                async event => {
+                    const trigger =
+                        event.target.closest(
+                            '[data-flatpickr-trigger]'
+                        );
+
+                    if (
+                        !trigger ||
+                        !modal.contains(trigger)
+                    ) {
+                        return;
+                    }
+
+                    const input =
+                        trigger.querySelector(
+                            '.js-flatpickr-date-min-today, .js-flatpickr-time'
+                        );
+
+                    if (!input) {
+                        return;
+                    }
+
+                    await openReservedPeriodPicker(
+                        input
+                    );
+                }
+            );
         }
 
         function openReservedPeriodModal(mode = 'create', periodId = null, period = null) {
@@ -4731,10 +5292,29 @@
             setReservedBookingMode(values.booking_mode || 'timeslot');
 
             toggleReservedStudentFields(
-                document.getElementById('reservedPatientType').value
+                document.getElementById(
+                    'reservedPatientType'
+                ).value
             );
 
             window.openModal('reservedPeriodModalBackdrop');
+
+            Promise.resolve(
+                    window.initGlobalDatePickers?.(
+                        modal
+                    )
+                )
+                .then(() => {
+                    syncReservedDateAvailability(
+                        mode === 'edit' ? periodId : null
+                    );
+                })
+                .catch(error => {
+                    console.error(
+                        'Unable to initialize reserved period pickers.',
+                        error
+                    );
+                });
         }
 
         function openReservedPeriodDeleteModal(action, title) {
@@ -4963,7 +5543,7 @@
                     message: 'Add clinic hours and availability rules to begin scheduling appointments.',
                     className: 'empty-state-compact clinic-schedule-empty-state',
                     actionHtml: `
-                    <button type="button" onclick="openRuleModal()" class="empty-state-btn">
+                    <button type="button" data-ui-click="action-3658b7ca536b" class="empty-state-btn">
                         <i class="fa-solid fa-plus" aria-hidden="true"></i>
                         <span>Add schedule rule</span>
                     </button>
@@ -4980,7 +5560,7 @@
                     className: 'empty-state-compact clinic-schedule-empty-state',
                     @if ($canCreateReservedPeriods)
                         actionHtml: `
-                    <button type="button" onclick="openReservedPeriodModal()" class="empty-state-btn">
+                    <button type="button" data-ui-click="action-210cc7fbd9be" class="empty-state-btn">
                         <i class="fa-solid fa-plus" aria-hidden="true"></i>
                         <span>Create reserved period</span>
                     </button>
@@ -4990,15 +5570,155 @@
             }
         }
 
+        function bindClinicScheduleAjaxForms() {
+            const bindAjaxForm = (
+                formId,
+                optionsFactory
+            ) => {
+                const form =
+                    document.getElementById(
+                        formId
+                    );
+
+                if (
+                    !form ||
+                    form.dataset.ajaxBound ===
+                    'true'
+                ) {
+                    return;
+                }
+
+                form.dataset.ajaxBound =
+                    'true';
+
+                form.addEventListener(
+                    'submit',
+                    event => {
+                        event.preventDefault();
+
+                        const options =
+                            typeof optionsFactory ===
+                            'function' ?
+                            optionsFactory(event) :
+                            optionsFactory;
+
+                        submitClinicScheduleAjax(
+                            form,
+                            options
+                        );
+                    }
+                );
+            };
+
+            bindAjaxForm(
+                'ruleForm',
+                () => ({
+                    modalId: 'ruleModalBackdrop',
+
+                    submitButton: document.getElementById(
+                        'ruleSubmitBtn'
+                    ),
+
+                    successMessage: editingId ?
+                        'Schedule rule updated successfully.' : 'Schedule rule added successfully.',
+                })
+            );
+
+            bindAjaxForm(
+                'blockDateForm',
+                event => ({
+                    modalId: 'blockModalBackdrop',
+
+                    submitButton: event.submitter,
+
+                    successMessage: 'Date blocked successfully.',
+                })
+            );
+
+            bindAjaxForm(
+                'reservedPeriodForm',
+                event => {
+                    const periodId =
+                        document
+                        .getElementById(
+                            'reservedPeriodId'
+                        )
+                        ?.value;
+
+                    return {
+                        modalId: 'reservedPeriodModalBackdrop',
+
+                        submitButton: event.submitter ||
+                            document.getElementById(
+                                'reservedPeriodSubmitButton'
+                            ),
+
+                        successMessage: periodId ?
+                            'Reserved booking period updated successfully.' :
+                            'Reserved booking period created successfully.',
+                    };
+                }
+            );
+
+            bindAjaxForm(
+                'scheduleDeleteForm',
+                event => ({
+                    modalId: 'scheduleDeleteModal',
+
+                    submitButton: event.submitter,
+
+                    successMessage: 'Schedule rule deleted successfully.',
+                })
+            );
+
+            bindAjaxForm(
+                'blockedDateDeleteForm',
+                event => ({
+                    modalId: 'blockedDateDeleteModal',
+
+                    submitButton: event.submitter,
+
+                    successMessage: 'Blocked date removed successfully.',
+                })
+            );
+
+            /*
+             * Remove Reserved Period
+             */
+            bindAjaxForm(
+                'reservedPeriodDeleteForm',
+                event => ({
+                    modalId: 'reservedPeriodDeleteModal',
+
+                    submitButton: event.submitter,
+
+                    successMessage: 'Reserved booking period removed successfully.',
+                })
+            );
+        }
+
         function initializeClinicScheduleDynamicUi() {
+            bindClinicScheduleAjaxForms();
+
+            bindReservedPeriodPickerTriggers();
+
             renderClinicScheduleEmptyStates();
 
-            if (!reservedPeriodValidationFailed) return;
+            if (
+                !reservedPeriodValidationFailed
+            ) {
+                return;
+            }
 
-            const periodId = reservedPeriodOldInput.reserved_period_id || null;
+            const periodId =
+                reservedPeriodOldInput
+                .reserved_period_id ||
+                null;
 
             openReservedPeriodModal(
-                periodId ? 'edit' : 'create',
+                periodId ?
+                'edit' :
+                'create',
                 periodId,
                 reservedPeriodOldInput
             );

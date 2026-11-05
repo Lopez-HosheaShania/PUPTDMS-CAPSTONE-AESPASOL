@@ -16,4 +16,4 @@ Schedule::command('appointments:auto-end-dentist-duty')
     ->dailyAt('20:00')
     ->timezone(config('app.timezone', 'Asia/Manila'))
     ->withoutOverlapping();
-Schedule::command('dentists:deactivate-expired')->everyFifteenMinutes();
+Schedule::command('dentists:deactivate-expired')->everyMinute()->withoutOverlapping();

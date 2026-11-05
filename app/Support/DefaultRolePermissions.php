@@ -173,8 +173,6 @@ final class DefaultRolePermissions
             'create_clinic_schedule',
             'delete_clinic_schedule',
             'view_document_requests',
-            'approve_document_requests',
-            'reject_document_requests',
             'view_academic_periods',
             'update_academic_period',
             'create_academic_period',
@@ -191,6 +189,7 @@ final class DefaultRolePermissions
         'dentist' => [
             'access_dentist_dashboard',
             'view_patient_profiles',
+            'view_dental_records',
             'view_appointments',
             'reschedule_appointments',
             'cancel_appointments',

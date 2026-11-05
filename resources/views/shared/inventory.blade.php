@@ -3,6 +3,12 @@
 @php
     $layoutRole = $layoutRole ?? 'admin';
     $isDentistView = $isDentistView ?? false;
+    $canViewProcedureInventoryNotes =
+        $isDentistView &&
+        auth()
+            ->user()
+            ?->hasAnyRole(['dentist', 'dentist_role']) &&
+        !session()->has('impersonated_role');
 
     $pageShellClass = $pageShellClass ?? ($isDentistView ? 'app-page-shell' : 'app-page-shell');
 
@@ -36,7 +42,7 @@
             @if ($isDentistView)
                 <div class="inventory-header-wrap">
                     <div class="dentist-hero">
-                        <div class="dentist-hero-content">
+                        <div class="dentist-hero-content w-full justify-between">
                             <div class="inventory-title-left">
                                 <div class="dentist-hero-icon">
                                     <i class="fa-solid fa-boxes-stacked"></i>
@@ -53,56 +59,37 @@
                                     </h2>
                                 </div>
                             </div>
+                            @if ($canViewProcedureInventoryNotes)
+                                <x-button type="button" variant="secondary" size="sm" class="shrink-0"
+                                    data-open-modal="procedureInventoryNotesModal" aria-label="Procedure Inventory Notes"
+                                    aria-haspopup="dialog" aria-controls="procedureInventoryNotesModal">
+                                    <span>Procedure Inventory Notes</span>
+                                    <span id="procedureInventoryNotesCount" class="filter-badge">
+                                        0
+                                    </span>
+                                </x-button>
+                            @endif
                         </div>
                     </div>
                 </div>
             @else
-                <div class="page-banner inventory-admin-banner">
-                    <div class="page-banner-inner">
-                        <div class="min-w-0">
-                            <h1 class="page-title">
-                                Admin Inventory
-                            </h1>
-                        </div>
-                    </div>
-                </div>
+                <x-page-banner title="Admin Inventory" class="inventory-admin-banner" />
             @endif
 
             <div class="relative z-10 mt-4 pb-8 inventory-page-content">
 
                 <div class="stat-grid inventory-stat-grid" id="inventoryStats">
-                    <div class="stat-card s-crimson">
-                        <div class="stat-card-info">
-                            <div class="stat-label">Total Items</div>
-                            <div class="stat-value" id="statTotal">—</div>
-                            <div class="stat-footer">all categories</div>
-                        </div>
-                        <div class="stat-icon"><i class="fa-solid fa-boxes-stacked"></i></div>
-                    </div>
-                    <div class="stat-card s-blue">
-                        <div class="stat-card-info">
-                            <div class="stat-label">Medicines</div>
-                            <div class="stat-value" id="statMedicine">—</div>
-                            <div class="stat-footer">pharmaceutical</div>
-                        </div>
-                        <div class="stat-icon"><i class="fa-solid fa-pills"></i></div>
-                    </div>
-                    <div class="stat-card s-green">
-                        <div class="stat-card-info">
-                            <div class="stat-label">Supplies</div>
-                            <div class="stat-value" id="statSupplies">—</div>
-                            <div class="stat-footer">consumables</div>
-                        </div>
-                        <div class="stat-icon"><i class="fa-solid fa-syringe"></i></div>
-                    </div>
-                    <div class="stat-card s-amber">
-                        <div class="stat-card-info">
-                            <div class="stat-label">Low Stock</div>
-                            <div class="stat-value" id="statLow">—</div>
-                            <div class="stat-footer">need restocking</div>
-                        </div>
-                        <div class="stat-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
-                    </div>
+                    <x-stat-card label="Total Items" value="—" tone="crimson" icon="fa-solid fa-boxes-stacked"
+                        footer="all categories" :value-attributes="['id' => 'statTotal']" />
+
+                    <x-stat-card label="Medicines" value="—" tone="blue" icon="fa-solid fa-pills"
+                        footer="pharmaceutical" :value-attributes="['id' => 'statMedicine']" />
+
+                    <x-stat-card label="Supplies" value="—" tone="green" icon="fa-solid fa-syringe"
+                        footer="consumables" :value-attributes="['id' => 'statSupplies']" />
+
+                    <x-stat-card label="Low Stock" value="—" tone="amber" icon="fa-solid fa-triangle-exclamation"
+                        footer="need restocking" :value-attributes="['id' => 'statLow']" />
                 </div>
 
                 <div class="table-card">
@@ -113,17 +100,17 @@
                             <div class="tab-group" role="tablist" aria-label="Inventory category">
 
                                 <button type="button" data-tab="all" aria-selected="true" class="tab-btn active"
-                                    onclick="setTab('all', this)">
+                                    data-ui-click="action-0f4a99c12b4d">
                                     All
                                 </button>
 
                                 <button type="button" data-tab="medicine" aria-selected="false" class="tab-btn"
-                                    onclick="setTab('medicine', this)">
+                                    data-ui-click="action-6af6d8c34f27">
                                     Medicine
                                 </button>
 
                                 <button type="button" data-tab="supplies" aria-selected="false" class="tab-btn"
-                                    onclick="setTab('supplies', this)">
+                                    data-ui-click="action-527a7d205eda">
                                     Supplies
                                 </button>
 
@@ -144,7 +131,7 @@
 
                         <div class="table-toolbar-actions">
 
-                            <button id="filterBtn" type="button" onclick="openFilterDrawer('filterModal')"
+                            <button id="filterBtn" type="button" data-ui-click="action-3b869f2f8687"
                                 class="global-filter-btn">
 
                                 <i class="fa-solid fa-sliders"></i>
@@ -155,18 +142,16 @@
 
                             <x-view-toggle id="inventoryViewToggle" root="#mainContent" storage-key="inventoryViewMode" />
 
-                            <button id="externalClearFilterBtn" type="button" onclick="clearFilterPanel()"
+                            <button id="externalClearFilterBtn" type="button" data-ui-click="action-eb2a40caced3"
                                 class="global-filter-reset-btn hidden" title="Reset filters">
 
                                 <i class="fa-solid fa-rotate-left"></i>
                             </button>
 
-                            <button type="button" onclick="openAddModal()"
-                                class="ui-btn ui-btn-primary ui-btn-sm table-toolbar-primary-action">
-
-                                <i class="fa-solid fa-plus"></i>
-                                <span>Add Item</span>
-                            </button>
+                            <x-button type="button" variant="primary" size="sm" class="table-toolbar-primary-action"
+                                icon="fa-solid fa-plus" data-ui-click="action-0d547826d7f9">
+                                Add Item
+                            </x-button>
 
                         </div>
 
@@ -206,10 +191,10 @@
         </div>
     </main>
 
-    <x-filter-drawer id="filterModal" title="Filters" close-callback="closeFilterDrawer('filterModal')"
-        clear-id="clearFilterPanelBtn" clear-callback="clearFilterPanelModal()" clear-label="Clear Filters"
-        cancel-callback="closeFilterDrawer('filterModal')" cancel-label="Cancel" apply-id="saveFilterPanelBtn"
-        apply-callback="saveFilterPanel()" apply-label="Show 0 results" results-id="showResultsText">
+    <x-filter-drawer id="filterModal" title="Filters" close-callback="action-945b15a06543"
+        clear-id="clearFilterPanelBtn" clear-callback="action-109110749c54" clear-label="Clear Filters"
+        cancel-callback="action-945b15a06543" cancel-label="Cancel" apply-id="saveFilterPanelBtn"
+        apply-callback="action-362188adc405" apply-label="Show 0 results" results-id="showResultsText">
 
         <div id="activeFiltersSection" class="filter-active-section hidden">
 
@@ -219,16 +204,10 @@
                     Active Filters
                 </span>
 
-                <button id="clearAllChipsBtn" type="button"
-                    class="
-                    filter-clear-all
-                    ui-btn
-                    ui-btn-secondary
-                    ui-btn-sm
-                ">
-                    <i class="fa-solid fa-rotate-left"></i>
-                    <span>Clear All</span>
-                </button>
+                <x-button id="clearAllChipsBtn" type="button" variant="secondary" size="sm"
+                    icon="fa-solid fa-rotate-left" class="filter-clear-all">
+                    Clear All
+                </x-button>
 
             </div>
 
@@ -350,7 +329,7 @@
 
     <div id="addModal" class="ui-modal modal-theme-primary inventory-form-modal" aria-hidden="true">
 
-        <form id="addInventoryForm" class="ui-modal-card modal-xl modal-card-form" data-global-validation
+        <form id="addInventoryForm" class="ui-modal-card modal-lg modal-card-form" data-global-validation
             data-form-validation-rule="inventoryAdd" data-discard-form data-discard-title="Discard new inventory item?"
             data-discard-subtitle="You have unsaved item details."
             data-discard-message="Closing this modal will remove the inventory draft you entered. Do you want to discard your changes?"
@@ -368,7 +347,7 @@
                         </h3>
 
                         <p class="modal-subtitle">
-                            A new row will be appended every time you save
+                            Enter the item details and starting stock.
                         </p>
                     </div>
                 </div>
@@ -379,206 +358,194 @@
                 </button>
             </div>
 
-            <div class="modal-bd">
-                <div class="modal-form-grid-2">
+            <div class="modal-bd space-y-5">
+                <section class="modal-form-section">
+                    <x-section-label label="Item" />
 
-                    <div class="inventory-field" data-global-field>
-                        <label for="addCategory" class="inventory-field-label">
-                            Category <span class="required-mark">*</span>
-                        </label>
-                        <select id="addCategory" name="category" class="js-custom-select"
-                            data-placeholder="Select category" data-field-label="Category"
-                            data-required-message="Please select a category." required>
-
-                            <option value="">Select category</option>
-                            <option value="Medicine">Medicine</option>
-                            <option value="Supplies">Supplies</option>
-                        </select>
-                    </div>
-
-                    <div class="inventory-field" data-global-field>
-                        <label for="addDate" class="inventory-field-label">
-                            Date Received <span class="required-mark">*</span>
-                        </label>
-
-                        <div class="inventory-date-control">
-                            <input id="addDate" name="date_received" type="text"
-                                class="field-input form-input-custom js-flatpickr-date-max-today"
-                                data-field-label="Date Received" data-required-message="Please select a date."
-                                data-validation-rule="notFutureDate" data-flatpickr-append-to-body
-                                placeholder="Select date" required readonly>
-                        </div>
-                    </div>
-
-                    <div class="inventory-field" data-global-field>
-                        <label for="addExpirationDate" class="inventory-field-label">
-                            Expiration Date
-                        </label>
-
-                        <div class="inventory-date-control">
-                            <input id="addExpirationDate" name="expiration_date" type="text"
-                                class="field-input form-input-custom js-flatpickr-date" data-field-label="Expiration Date"
-                                data-flatpickr-append-to-body placeholder="Optional" readonly>
-                        </div>
-                    </div>
-
-                    <div class="inventory-field" data-global-field>
-                        <label for="addStock" class="inventory-field-label">
-                            Stock Number
-                            <span class="required-mark">*</span>
-                        </label>
-
-                        <div class="global-voice-row" data-voice-field>
-                            <div class="global-voice-control">
-                                <input id="addStock" name="stock_no"
-                                    class="field-input form-input-custom inventory-stock-input" placeholder="00-000"
-                                    maxlength="6" pattern="\d{2}-\d{3}" data-field-label="Stock Number"
-                                    data-required-message="Please enter a stock number."
-                                    data-pattern-message="Stock number must use the format 00-000."
-                                    data-validation-rule="uniqueInventoryStock" oninput="formatStockNo(this)" required>
-                            </div>
-
-                            <x-voice-input target="#addStock" status-id="addStockVoiceStatus"
-                                label="Voice input for stock number" title="Voice input" />
-                        </div>
-                    </div>
-
-                    <div class="inventory-field" data-global-field>
-                        <label for="addUnit" class="inventory-field-label">
-                            Unit <span class="required-mark">*</span>
-                        </label>
-
-                        <input id="addUnit" name="unit" type="text" class="form-input-custom"
-                            placeholder="e.g. Box, Piece, Bottle" maxlength="50" data-field-label="Unit"
-                            data-required-message="Please enter a unit." required>
-                    </div>
-
-                    <div class="inventory-field" data-global-field>
-
-                        <div class="global-label-row">
-                            <label for="addName" class="inventory-field-label">
-
-                                Supply / Medicine Name
+                    <div class="modal-form-grid-2">
+                        <div class="inventory-field" data-global-field>
+                            <label for="addCategory" class="inventory-field-label">
+                                Category
                                 <span class="required-mark">*</span>
                             </label>
 
-                            <span class="char-counter" id="charCounter-addName">
-                                0 / 100 characters
-                            </span>
+                            <x-select id="addCategory" name="category" required data-placeholder="Select category"
+                                data-field-label="Category" data-required-message="Please select a category.">
+                                <option value="">Select category</option>
+                                <option value="Medicine">Medicine</option>
+                                <option value="Supplies">Supplies</option>
+                            </x-select>
                         </div>
 
-                        <div class="global-voice-row" data-voice-field>
+                        <div class="inventory-field" data-global-field>
+                            <label for="addStock" class="inventory-field-label">
+                                Stock Number
+                                <span class="field-optional">(Optional)</span>
+                            </label>
 
-                            <div class="global-voice-control">
-                                <input id="addName" name="name" class="form-input-custom"
-                                    placeholder="e.g. Nitrile Gloves Large" minlength="2" maxlength="100"
-                                    data-field-label="Supply / Medicine Name"
-                                    data-required-message="Please enter an item name." data-char-limit="100"
-                                    data-char-counter="#charCounter-addName" required>
+                            <div class="global-voice-row" data-voice-field>
+                                <div class="global-voice-control">
+                                    <input id="addStock" name="stock_no"
+                                        class="field-input form-input-custom inventory-stock-input" placeholder="00-000"
+                                        maxlength="6" pattern="\d{2}-\d{3}" data-field-label="Stock Number"
+                                        data-pattern-message="Stock number must use the format 00-000."
+                                        data-validation-rule="uniqueInventoryStock" data-ui-input="action-32e9868b0600">
+                                </div>
+
+                                <x-voice-input target="#addStock" status-id="addStockVoiceStatus"
+                                    label="Voice input for stock number" title="Voice input" />
+                            </div>
+                        </div>
+
+                        <div class="inventory-field inventory-field-full" data-global-field>
+
+                            <div class="global-label-row">
+                                <label for="addName" class="inventory-field-label">
+                                    Supply / Medicine Name
+                                    <span class="required-mark">*</span>
+                                </label>
+
+                                <span class="char-counter" id="charCounter-addName">
+                                    0 / 100 characters
+                                </span>
                             </div>
 
-                            <x-voice-input target="#addName" status-id="addNameVoiceStatus"
-                                label="Voice input for item name" title="Voice input" />
-                        </div>
-                    </div>
+                            <div class="global-voice-row" data-voice-field>
+                                <div class="global-voice-control">
+                                    <input id="addName" name="name" class="form-input-custom"
+                                        placeholder="e.g. Nitrile Gloves Large" minlength="2" maxlength="100"
+                                        data-field-label="Supply / Medicine Name"
+                                        data-required-message="Please enter an item name." data-char-limit="100"
+                                        data-char-counter="#charCounter-addName" required>
+                                </div>
 
-                    <div class="inventory-field" data-global-field>
-
-                        <label for="addQty" class="inventory-field-label">
-
-                            Quantity
-                            <span class="required-mark">*</span>
-                        </label>
-
-                        <div class="global-voice-row" data-voice-field>
-
-                            <div class="global-number-stepper" data-global-number-stepper>
-
-                                <button type="button" class="global-number-stepper-btn" data-number-step="-1"
-                                    aria-label="Decrease quantity">
-
-                                    <i class="fa-solid fa-minus"></i>
-                                </button>
-
-                                <input id="addQty" name="qty" type="number" class="global-number-stepper-input"
-                                    value="1" min="1" max="99999" step="1" inputmode="numeric"
-                                    data-number-stepper-input data-field-label="Quantity"
-                                    data-required-message="Please enter a quantity." data-validation-rule="wholeNumber"
-                                    oninput="computeAddBalance()" required>
-
-                                <button type="button" class="global-number-stepper-btn" data-number-step="1"
-                                    aria-label="Increase quantity">
-
-                                    <i class="fa-solid fa-plus"></i>
-                                </button>
+                                <x-voice-input target="#addName" status-id="addNameVoiceStatus"
+                                    label="Voice input for supply or medicine name" title="Voice input" />
                             </div>
-
-                            <x-voice-input target="#addQty" status-id="addQtyVoiceStatus"
-                                label="Voice input for quantity" title="Voice input" />
                         </div>
                     </div>
+                </section>
 
-                    <div class="inventory-field" data-global-field>
+                <section class="modal-form-section">
+                    <x-section-label label="Stock" />
 
-                        <label for="addUsed" class="inventory-field-label">
+                    <div id="addStockFieldsGrid" class="grid grid-cols-1 md:grid-cols-3 gap-[0.85rem]">
 
-                            Consumed
-                            <span class="required-mark">*</span>
-                        </label>
+                        <div class="inventory-field" data-global-field>
+                            <label for="addUnit" class="inventory-field-label">
+                                Unit
+                                <span class="required-mark">*</span>
+                            </label>
 
-                        <div class="global-voice-row" data-voice-field>
+                            <input id="addUnit" name="unit" type="text" class="form-input-custom"
+                                placeholder="e.g. Bottle" maxlength="50" data-field-label="Unit"
+                                data-required-message="Please enter a unit." required>
+                        </div>
 
-                            <div class="global-number-stepper" data-global-number-stepper>
+                        <div id="addBottleFields" hidden>
+                            <div class="inventory-field" data-global-field>
+                                <label for="addBottleCapacity" class="inventory-field-label">
+                                    Volume per Bottle (mL)
+                                    <span class="required-mark">*</span>
+                                </label>
 
-                                <button type="button" class="global-number-stepper-btn" data-number-step="-1"
-                                    aria-label="Decrease consumed quantity">
-
-                                    <i class="fa-solid fa-minus"></i>
-                                </button>
-
-                                <input id="addUsed" name="used" type="number" class="global-number-stepper-input"
-                                    value="0" min="0" max="99999" step="1" inputmode="numeric"
-                                    data-number-stepper-input data-field-label="Consumed"
-                                    data-required-message="Please enter the consumed quantity."
-                                    data-validation-rule="inventoryConsumed" oninput="computeAddBalance()" required>
-
-                                <button type="button" class="global-number-stepper-btn" data-number-step="1"
-                                    aria-label="Increase consumed quantity">
-
-                                    <i class="fa-solid fa-plus"></i>
-                                </button>
+                                <x-number-stepper id="addBottleCapacity" name="volume_per_bottle_ml" min="0.01"
+                                    max="99999999.99" step="1" inputmode="decimal" disabled
+                                    decrease-label="Decrease volume per bottle"
+                                    increase-label="Increase volume per bottle" placeholder="e.g. 100"
+                                    data-field-label="Volume per Bottle"
+                                    data-required-message="Please enter the volume per bottle." />
                             </div>
+                        </div>
 
-                            <x-voice-input target="#addUsed" status-id="addUsedVoiceStatus"
-                                label="Voice input for consumed quantity" title="Voice input" />
+                        <div class="inventory-field" data-global-field>
+                            <label for="addQty" class="inventory-field-label">
+                                <span id="addQtyLabel">Quantity</span>
+                                <span class="required-mark">*</span>
+                            </label>
+
+                            <x-number-stepper id="addQty" name="qty" value="1" min="1"
+                                max="99999" step="1" inputmode="numeric" required
+                                decrease-label="Decrease quantity" increase-label="Increase quantity"
+                                data-field-label="Quantity" data-required-message="Please enter a quantity."
+                                data-validation-rule="wholeNumber" data-ui-input="action-ea53196008ea" />
+                        </div>
+
+                        <div class="inventory-field" data-global-field>
+                            <label for="addUsed" class="inventory-field-label">
+                                <span id="addUsedLabel">Consumed</span>
+                                <span class="field-optional">(Optional)</span>
+                            </label>
+
+                            <x-number-stepper id="addUsed" name="used" value="0" min="0"
+                                max="99999" step="1" inputmode="numeric" required
+                                decrease-label="Decrease consumed quantity" increase-label="Increase consumed quantity"
+                                data-field-label="Consumed" data-required-message="Please enter the consumed quantity."
+                                data-validation-rule="inventoryConsumed" data-ui-input="action-ea53196008ea" />
                         </div>
                     </div>
 
-                    <div class="inventory-field inventory-field-full" data-global-field>
-                        <label for="addBalance" class="inventory-field-label">
-                            Balance (auto-calculated)
-                        </label>
-                        <input id="addBalance" class="form-input-custom" readonly placeholder="—">
+                    <input id="addBalance" type="hidden" value="0">
+
+                    <div class="global-info-item global-info-item-compact justify-between mt-3">
+                        <span class="global-info-subvalue m-0">
+                            Total stock
+                        </span>
+
+                        <strong id="addBalanceSummary" class="global-info-value m-0 text-right" aria-live="polite">
+                            1 item
+                        </strong>
                     </div>
-                </div>
+                </section>
+
+                <section class="modal-form-section">
+                    <x-section-label label="Dates" />
+
+                    <div class="modal-form-grid-2">
+                        <div class="inventory-field" data-global-field>
+                            <label for="addDate" class="inventory-field-label">
+                                Date Received
+                                <span class="required-mark">*</span>
+                            </label>
+
+                            <div class="inventory-date-control">
+                                <input id="addDate" name="date_received" type="text"
+                                    class="field-input form-input-custom js-flatpickr-date-max-today"
+                                    data-field-label="Date Received" data-required-message="Please select a date."
+                                    data-validation-rule="notFutureDate" placeholder="Select date" required readonly>
+                            </div>
+                        </div>
+
+                        <div class="inventory-field" data-global-field>
+                            <label for="addExpirationDate" class="inventory-field-label">
+                                Expiration Date <span class="field-optional">(optional)</span>
+                            </label>
+
+                            <div class="inventory-date-control">
+                                <input id="addExpirationDate" name="expiration_date" type="text"
+                                    class="field-input form-input-custom js-flatpickr-date"
+                                    data-field-label="Expiration Date" placeholder="Select date" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </section>
             </div>
 
-            <div class="modal-ft">
-                <button type="button" class="ui-btn ui-btn-secondary" data-discard-close="addModal">
+            <div class="modal-ft items-center">
+                <x-button type="button" variant="secondary" data-discard-close="addModal">
                     Cancel
-                </button>
+                </x-button>
 
-                <button type="submit" id="btnSaveAdd" class="ui-btn ui-btn-primary">
-                    <i class="fa-solid fa-floppy-disk"></i>
-                    <span>Save Item</span>
-                </button>
+                <x-button id="btnSaveAdd" type="submit" variant="primary">
+                    Save Item
+                </x-button>
             </div>
         </form>
     </div>
 
-    <div id="editModal" class="ui-modal modal-theme-edit inventory-form-modal" aria-hidden="true">
+    <div id="editModal" class="ui-modal modal-theme-primary inventory-form-modal" aria-hidden="true">
 
-        <form id="editInventoryForm" class="ui-modal-card modal-xl modal-card-form" data-global-validation
+        <form id="editInventoryForm" class="ui-modal-card modal-lg modal-card-form" data-global-validation
             data-form-validation-rule="inventoryEdit" data-discard-form data-discard-title="Discard inventory changes?"
             data-discard-subtitle="You have unsaved edits for this item."
             data-discard-message="Closing this modal will remove the edits you entered. Do you want to discard your changes?"
@@ -595,8 +562,8 @@
                             Edit Inventory Item
                         </h3>
 
-                        <p class="modal-subtitle">
-                            Update the details for this item
+                        <p id="editInventorySubtitle" class="modal-subtitle">
+                            Update the item details and stock usage.
                         </p>
                     </div>
                 </div>
@@ -607,202 +574,192 @@
                 </button>
             </div>
 
-            <div class="modal-bd">
-                <div class="modal-form-grid-2">
+            <div class="modal-bd space-y-5">
+                <section class="modal-form-section">
+                    <x-section-label label="Item" />
 
-                    <div class="inventory-field" data-global-field>
-                        <label for="editCategory" class="inventory-field-label">
-                            Category <span class="required-mark">*</span>
-                        </label>
-
-                        <select id="editCategory" name="category" class="js-custom-select"
-                            data-placeholder="Select category" data-field-label="Category"
-                            data-required-message="Please select a category." required>
-
-                            <option value="">Select category</option>
-                            <option value="Medicine">Medicine</option>
-                            <option value="Supplies">Supplies</option>
-                        </select>
-                    </div>
-
-                    <div class="inventory-field" data-global-field>
-                        <label for="editDate" class="inventory-field-label">
-                            Date Received <span class="required-mark">*</span>
-                        </label>
-
-                        <div class="inventory-date-control">
-                            <input id="editDate" name="date_received" type="text"
-                                class="field-input form-input-custom js-flatpickr-date" data-field-label="Date Received"
-                                data-required-message="Please select a date." data-validation-rule="notFutureDate"
-                                required data-flatpickr-append-to-body readonly>
-                        </div>
-                    </div>
-
-                    <div class="inventory-field" data-global-field>
-                        <label for="editExpirationDate" class="inventory-field-label">
-                            Expiration Date
-                        </label>
-
-                        <div class="inventory-date-control">
-                            <input id="editExpirationDate" name="expiration_date" type="text"
-                                class="field-input form-input-custom js-flatpickr-date" data-field-label="Expiration Date"
-                                data-flatpickr-append-to-body placeholder="Optional" readonly>
-                        </div>
-                    </div>
-
-                    <div class="inventory-field" data-global-field>
-
-                        <label for="editStock" class="inventory-field-label">
-                            Stock Number
-                            <span class="required-mark">*</span>
-                        </label>
-
-                        <div class="global-voice-row" data-voice-field>
-
-                            <div class="global-voice-control">
-                                <input id="editStock" name="stock_no"
-                                    class="field-input form-input-custom inventory-stock-input" placeholder="00-000"
-                                    maxlength="6" pattern="\d{2}-\d{3}" data-field-label="Stock Number"
-                                    data-required-message="Please enter a stock number."
-                                    data-pattern-message="Stock number must use the format 00-000."
-                                    data-validation-rule="uniqueInventoryStockEdit" oninput="formatStockNo(this)"
-                                    required>
-                            </div>
-
-                            <x-voice-input target="#editStock" status-id="editStockVoiceStatus"
-                                label="Voice input for stock number" title="Voice input" />
-                        </div>
-                    </div>
-
-                    <div class="inventory-field" data-global-field>
-                        <label for="editUnit" class="inventory-field-label">
-                            Unit <span class="required-mark">*</span>
-                        </label>
-
-                        <input id="editUnit" name="unit" type="text" class="form-input-custom"
-                            placeholder="e.g. Box, Piece, Bottle" maxlength="50" data-field-label="Unit"
-                            data-required-message="Please enter a unit." required>
-                    </div>
-
-                    <div class="inventory-field" data-global-field>
-
-                        <div class="global-label-row">
-                            <label for="editName" class="inventory-field-label">
-
-                                Supply / Medicine Name
+                    <div class="modal-form-grid-2">
+                        <div class="inventory-field" data-global-field>
+                            <label for="editCategory" class="inventory-field-label">
+                                Category
                                 <span class="required-mark">*</span>
                             </label>
 
-                            <span class="char-counter" id="charCounter-editName">
-                                0 / 100 characters
+                            <x-select id="editCategory" name="category" required data-placeholder="Select category"
+                                data-field-label="Category" data-required-message="Please select a category.">
+                                <option value="">Select category</option>
+                                <option value="Medicine">Medicine</option>
+                                <option value="Supplies">Supplies</option>
+                            </x-select>
+                        </div>
+
+                        <div class="inventory-field" data-global-field>
+                            <label for="editStock" class="inventory-field-label">
+                                Stock Number
+                                <span class="field-optional">(Optional)</span>
+                            </label>
+
+                            <div class="global-voice-row" data-voice-field>
+
+                                <div class="global-voice-control">
+                                    <input id="editStock" name="stock_no"
+                                        class="field-input form-input-custom inventory-stock-input" placeholder="00-000"
+                                        maxlength="6" pattern="\d{2}-\d{3}" data-field-label="Stock Number"
+                                        data-pattern-message="Stock number must use the format 00-000."
+                                        data-validation-rule="uniqueInventoryStockEdit"
+                                        data-ui-input="action-32e9868b0600">
+                                </div>
+
+                                <x-voice-input target="#editStock" status-id="editStockVoiceStatus"
+                                    label="Voice input for stock number" title="Voice input" />
+                            </div>
+                        </div>
+
+                        <div class="inventory-field inventory-field-full" data-global-field>
+
+                            <div class="global-label-row">
+                                <label for="editName" class="inventory-field-label">
+                                    Supply / Medicine Name
+                                    <span class="required-mark">*</span>
+                                </label>
+
+                                <span class="char-counter" id="charCounter-editName">
+                                    0 / 100 characters
+                                </span>
+                            </div>
+
+                            <div class="global-voice-row" data-voice-field>
+                                <div class="global-voice-control">
+                                    <input id="editName" name="name" class="form-input-custom" minlength="2"
+                                        maxlength="100" data-field-label="Supply / Medicine Name"
+                                        data-required-message="Please enter an item name." data-char-limit="100"
+                                        data-char-counter="#charCounter-editName" required>
+                                </div>
+
+                                <x-voice-input target="#editName" status-id="editNameVoiceStatus"
+                                    label="Voice input for supply or medicine name" title="Voice input" />
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="modal-form-section">
+                    <x-section-label label="Stock" />
+
+                    <div class="modal-form-grid-2">
+                        <div class="inventory-field" data-global-field>
+                            <label for="editQty" class="inventory-field-label">
+                                <span id="editQtyLabel">Quantity</span>
+                                <span class="required-mark">*</span>
+                            </label>
+
+                            <x-number-stepper id="editQty" name="qty" min="1" max="99999"
+                                step="1" inputmode="numeric" required decrease-label="Decrease quantity"
+                                increase-label="Increase quantity" data-field-label="Quantity"
+                                data-required-message="Please enter a quantity." data-validation-rule="wholeNumber"
+                                data-ui-input="action-8fba7d16f720" />
+                        </div>
+
+                        <div class="inventory-field" data-global-field>
+                            <label for="editUsed" class="inventory-field-label">
+                                <span id="editUsedLabel">Consumed</span>
+                                <span class="field-optional">(Optional)</span>
+                            </label>
+
+                            <x-number-stepper id="editUsed" name="used" min="0" max="99999"
+                                step="1" inputmode="numeric" required decrease-label="Decrease consumed quantity"
+                                increase-label="Increase consumed quantity" data-field-label="Consumed"
+                                data-required-message="Please enter the consumed quantity."
+                                data-validation-rule="inventoryConsumed" data-ui-input="action-8fba7d16f720" />
+                        </div>
+                    </div>
+
+                    <div class="global-info-group mt-3">
+                        <span class="global-info-pill">
+                            Unit <strong id="editUnitSummary">—</strong>
+                            <span class="required-mark">*</span>
+                        </span>
+
+                        <div id="editBottleFields" class="global-info-group" hidden>
+                            <span class="global-info-pill">
+                                Volume per bottle <strong id="editBottleCapacitySummary">—</strong>
+                            </span>
+
+                            <span class="global-info-pill">
+                                Current bottle <strong id="editBottleRemainingSummary">—</strong>
                             </span>
                         </div>
+                    </div>
 
-                        <div class="global-voice-row" data-voice-field>
+                    <p class="modal-helper-text mt-2 mb-0">
+                        Unit and volume can't be changed after the item is added.
+                    </p>
 
-                            <div class="global-voice-control">
-                                <input id="editName" name="name" class="form-input-custom" minlength="2"
-                                    maxlength="100" data-field-label="Supply / Medicine Name"
-                                    data-required-message="Please enter an item name." data-char-limit="100"
-                                    data-char-counter="#charCounter-editName" required>
+                    <div class="global-info-item global-info-item-compact justify-between mt-3">
+                        <span class="global-info-subvalue m-0">
+                            Balance after saving
+                        </span>
+
+                        <strong id="editBalanceSummary" class="global-info-value m-0 text-right" aria-live="polite">
+                            —
+                        </strong>
+                    </div>
+
+                    <div class="hidden">
+                        <input id="editUnit" name="unit" type="text" class="form-input-custom" required>
+
+                        <div id="editBottleCapacityField" class="hidden" hidden>
+                            <input id="editBottleCapacity" name="volume_per_bottle_ml" type="number"
+                                class="form-input-custom" min="0.01" max="99999999.99" step="0.01"
+                                inputmode="decimal" disabled>
+                        </div>
+
+                        <input id="editBottleRemaining" type="text" readonly>
+                        <input id="editBalance" type="hidden" value="0">
+                    </div>
+                </section>
+
+                <section class="modal-form-section">
+                    <x-section-label label="Dates" />
+
+                    <div class="modal-form-grid-2">
+                        <div class="inventory-field" data-global-field>
+                            <label for="editDate" class="inventory-field-label">
+                                Date Received
+                                <span class="required-mark">*</span>
+                            </label>
+
+                            <div class="inventory-date-control">
+                                <input id="editDate" name="date_received" type="text"
+                                    class="field-input form-input-custom js-flatpickr-date"
+                                    data-field-label="Date Received" data-required-message="Please select a date."
+                                    data-validation-rule="notFutureDate" required readonly>
                             </div>
+                        </div>
 
-                            <x-voice-input target="#editName" status-id="editNameVoiceStatus"
-                                label="Voice input for item name" title="Voice input" />
+                        <div class="inventory-field" data-global-field>
+                            <label for="editExpirationDate" class="inventory-field-label">
+                                Expiration Date <span class="field-optional">(optional)</span>
+                            </label>
+
+                            <div class="inventory-date-control">
+                                <input id="editExpirationDate" name="expiration_date" type="text"
+                                    class="field-input form-input-custom js-flatpickr-date"
+                                    data-field-label="Expiration Date" placeholder="Select date" readonly>
+                            </div>
                         </div>
                     </div>
-
-
-                    <div class="inventory-field" data-global-field>
-
-                        <label for="editQty" class="inventory-field-label">
-
-                            Quantity
-                            <span class="required-mark">*</span>
-                        </label>
-
-                        <div class="global-voice-row" data-voice-field>
-
-                            <div class="global-number-stepper" data-global-number-stepper>
-
-                                <button type="button" class="global-number-stepper-btn" data-number-step="-1"
-                                    aria-label="Decrease quantity">
-
-                                    <i class="fa-solid fa-minus"></i>
-                                </button>
-
-                                <input id="editQty" name="qty" type="number" class="global-number-stepper-input"
-                                    min="1" max="99999" step="1" inputmode="numeric"
-                                    data-number-stepper-input data-field-label="Quantity"
-                                    data-required-message="Please enter a quantity." data-validation-rule="wholeNumber"
-                                    oninput="computeEditBalance()" required>
-
-                                <button type="button" class="global-number-stepper-btn" data-number-step="1"
-                                    aria-label="Increase quantity">
-
-                                    <i class="fa-solid fa-plus"></i>
-                                </button>
-                            </div>
-
-                            <x-voice-input target="#editQty" status-id="editQtyVoiceStatus"
-                                label="Voice input for quantity" title="Voice input" />
-                        </div>
-                    </div>
-
-                    <div class="inventory-field" data-global-field>
-
-                        <label for="editUsed" class="inventory-field-label">
-
-                            Consumed
-                            <span class="required-mark">*</span>
-                        </label>
-
-                        <div class="global-voice-row" data-voice-field>
-
-                            <div class="global-number-stepper" data-global-number-stepper>
-
-                                <button type="button" class="global-number-stepper-btn" data-number-step="-1"
-                                    aria-label="Decrease consumed quantity">
-
-                                    <i class="fa-solid fa-minus"></i>
-                                </button>
-
-                                <input id="editUsed" name="used" type="number" class="global-number-stepper-input"
-                                    min="0" max="99999" step="1" inputmode="numeric"
-                                    data-number-stepper-input data-field-label="Consumed"
-                                    data-required-message="Please enter the consumed quantity."
-                                    data-validation-rule="inventoryConsumed" oninput="computeEditBalance()" required>
-
-                                <button type="button" class="global-number-stepper-btn" data-number-step="1"
-                                    aria-label="Increase consumed quantity">
-
-                                    <i class="fa-solid fa-plus"></i>
-                                </button>
-                            </div>
-
-                            <x-voice-input target="#editUsed" status-id="editUsedVoiceStatus"
-                                label="Voice input for consumed quantity" title="Voice input" />
-                        </div>
-                    </div>
-
-                    <div class="inventory-field" data-global-field>
-                        <label for="editBalance" class="inventory-field-label">
-                            Balance (auto-calculated)
-                        </label>
-                        <input id="editBalance" class="form-input-custom" readonly>
-                    </div>
-                </div>
+                </section>
             </div>
 
-            <div class="modal-ft">
-                <button type="button" class="ui-btn ui-btn-secondary" data-discard-close="editModal">
+            <div class="modal-ft items-center">
+                <x-button type="button" variant="secondary" data-discard-close="editModal">
                     Cancel
-                </button>
+                </x-button>
 
-                <button type="submit" class="ui-btn ui-btn-edit">
-                    <i class="fa-solid fa-floppy-disk"></i>
-                    <span>Save Changes</span>
-                </button>
+                <x-button type="submit" variant="primary">
+                    Save Changes
+                </x-button>
             </div>
         </form>
     </div>
@@ -810,9 +767,535 @@
     <x-delete-confirm-modal id="deleteModal" form-id="inventoryDeleteForm" name-id="inventoryDeleteName"
         title="Delete Inventory Item" helper="This inventory item will be permanently removed." />
 
+    @if ($canViewProcedureInventoryNotes)
+        <div id="procedureInventoryNotesModal" class="ui-modal" role="dialog" aria-modal="true" aria-hidden="true"
+            aria-labelledby="procedureInventoryNotesTitle" aria-describedby="procedureInventoryNotesSubtitle">
+            <div class="ui-modal-card modal-xl">
+                <header class="modal-hd">
+                    <div class="modal-heading">
+                        <div class="modal-icon" aria-hidden="true"><i class="fa-regular fa-clipboard"></i></div>
+                        <div class="modal-copy">
+                            <h2 id="procedureInventoryNotesTitle" class="modal-title">Procedure Inventory Notes</h2>
+                            <p id="procedureInventoryNotesSubtitle" class="modal-subtitle">
+                                Items the dentist recorded during procedures.
+                            </p>
+                        </div>
+                    </div>
+                    <button type="button" class="modal-x" data-modal-close="procedureInventoryNotesModal"
+                        aria-label="Close inventory notes"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+                </header>
+                <div class="modal-bd modal-form-grid">
+                    <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+
+                        <x-search-bar id="procedureInventoryNotesSearch" placeholder="Search patient, procedure or item"
+                            callback="handleProcedureInventoryNotesSearch" :debounce="200" class="flex-1" />
+
+                        <x-filter-select id="procedureInventoryNotesFilter" name="procedure_inventory_notes_filter"
+                            label="Date" value="all" callback="handleProcedureInventoryNotesFilter"
+                            menu-align="right" :searchable="false" :options="[
+                                [
+                                    'value' => 'all',
+                                    'label' => 'All',
+                                    'icon' => 'fa-list',
+                                    'tone' => 's-all',
+                                ],
+                                [
+                                    'value' => 'today',
+                                    'label' => 'Today',
+                                    'icon' => 'fa-calendar-day',
+                                    'tone' => 's-today',
+                                ],
+                                [
+                                    'value' => 'week',
+                                    'label' => 'This week',
+                                    'icon' => 'fa-calendar-week',
+                                    'tone' => 's-upcoming',
+                                ],
+                            ]" />
+
+                    </div>
+
+                    <p class="modal-helper-text">Reference notes only. Stock quantities are managed separately in
+                        Inventory.</p>
+                    <div id="procedureInventoryNotesLoading" class="table-list-view" role="status"
+                        aria-label="Loading procedure inventory notes" hidden>
+                        <div class="table-list-body space-y-2">
+                            @for ($row = 0; $row < 3; $row++)
+                                <div class="table-list-row">
+                                    <div
+                                        class="
+                        grid
+                        grid-cols-1
+                        gap-3
+                        p-3
+                        sm:grid-cols-4
+                        animate-pulse
+                    ">
+                                        @for ($column = 0; $column < 4; $column++)
+                                            <div class="space-y-2">
+                                                <div
+                                                    class="
+                                    h-3
+                                    w-24
+                                    rounded
+                                    bg-[var(--border)]
+                                ">
+                                                </div>
+
+                                                <div
+                                                    class="
+                                    h-2
+                                    w-16
+                                    rounded
+                                    bg-[var(--surface)]
+                                ">
+                                                </div>
+                                            </div>
+                                        @endfor
+                                    </div>
+                                </div>
+                            @endfor
+                        </div>
+                    </div>
+
+                    <div id="procedureInventoryNotesEmptyState"
+                        class="empty-state-host min-h-[16rem] sm:min-h-[22rem] flex items-center justify-center" hidden>
+                    </div>
+
+                    <div id="procedureInventoryNotesTable" class="table-list-view" hidden>
+                        <div class="table-list-header hidden sm:grid sm:grid-cols-4 sm:gap-3">
+                            <div>Date</div>
+                            <div>Patient</div>
+                            <div>Procedure</div>
+                            <div>Items Used</div>
+                        </div>
+
+                        <div id="procedureInventoryNotesEntries" class="table-list-body"></div>
+                    </div>
+
+                    <p id="procedureInventoryNotesShowing" class="modal-helper-text" hidden></p>
+                </div>
+            </div>
+        </div>
+    @endif
+
 @endsection
 
 @section('scripts')
+
+    @if ($canViewProcedureInventoryNotes)
+        <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
+            (() => {
+                const endpoint = @json(route('dentist.inventory.procedure-notes'));
+                const modal = document.getElementById('procedureInventoryNotesModal');
+                const table = document.getElementById('procedureInventoryNotesTable');
+                const entries = document.getElementById('procedureInventoryNotesEntries');
+                const loading = document.getElementById('procedureInventoryNotesLoading');
+                const emptyState = document.getElementById('procedureInventoryNotesEmptyState');
+                const showing = document.getElementById('procedureInventoryNotesShowing');
+                const search = document.getElementById('procedureInventoryNotesSearch');
+                const countBadge = document.getElementById('procedureInventoryNotesCount');
+
+                let requestNumber = 0;
+                let activeRequest;
+                let allNotes = [];
+                let activeFilter = 'all';
+
+                window.handleProcedureInventoryNotesSearch =
+                    function() {
+                        renderNotes();
+                    };
+
+                window.handleProcedureInventoryNotesFilter =
+                    function(value) {
+                        const allowedFilters = [
+                            'all',
+                            'today',
+                            'week'
+                        ];
+
+                        activeFilter =
+                            allowedFilters.includes(value) ?
+                            value :
+                            'all';
+
+                        renderNotes();
+                    };
+
+                function addText(parent, tag, className, value) {
+                    const element = document.createElement(tag);
+                    element.className = className;
+                    element.textContent = value;
+                    parent.append(element);
+                    return element;
+                }
+
+                function updateCount(total) {
+                    if (countBadge) {
+                        countBadge.textContent = String(total);
+                    }
+                }
+
+                function getNoteDate(note) {
+                    const rawDate = note.procedure_date || note.visit_date;
+                    if (!rawDate) return null;
+
+                    const parsed = new Date(rawDate);
+                    return Number.isNaN(parsed.getTime()) ? null : parsed;
+                }
+
+                function isInActiveDateFilter(note) {
+                    if (activeFilter === 'all') return true;
+
+                    const noteDate = getNoteDate(note);
+                    if (!noteDate) return false;
+
+                    const now = new Date();
+                    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                    const tomorrowStart = new Date(todayStart);
+                    tomorrowStart.setDate(tomorrowStart.getDate() + 1);
+
+                    if (activeFilter === 'today') {
+                        return noteDate >= todayStart && noteDate < tomorrowStart;
+                    }
+
+                    const weekStart = new Date(todayStart);
+                    const mondayOffset = (todayStart.getDay() + 6) % 7;
+                    weekStart.setDate(weekStart.getDate() - mondayOffset);
+
+                    const weekEnd = new Date(weekStart);
+                    weekEnd.setDate(weekEnd.getDate() + 7);
+
+                    return noteDate >= weekStart && noteDate < weekEnd;
+                }
+
+                function matchesSearch(note) {
+                    const query = search.value.trim().toLowerCase();
+                    if (!query) return true;
+
+                    return [
+                        note.patient_name,
+                        note.procedure_name,
+                        note.inventory_notes,
+                        note.patient_id,
+                        note.appointment_id,
+                    ].some(value => String(value ?? '').toLowerCase().includes(query));
+                }
+
+                function formatNoteDateTime(note) {
+                    const raw =
+                        note.procedure_date ||
+                        note.visit_date;
+
+                    if (!raw) {
+                        return {
+                            date: 'Unavailable',
+                            time: ''
+                        };
+                    }
+
+                    const parsed =
+                        new Date(raw);
+
+                    if (
+                        Number.isNaN(
+                            parsed.getTime()
+                        )
+                    ) {
+                        return {
+                            date: raw,
+                            time: ''
+                        };
+                    }
+
+                    const hasTime =
+                        /[T\s]\d{1,2}:\d{2}/.test(
+                            String(raw)
+                        );
+
+                    return {
+                        date: new Intl.DateTimeFormat(
+                            'en-US', {
+                                month: 'short',
+                                day: '2-digit',
+                                year: 'numeric'
+                            }
+                        ).format(parsed),
+
+                        time: hasTime ?
+                            new Intl.DateTimeFormat(
+                                'en-US', {
+                                    hour: 'numeric',
+                                    minute: '2-digit',
+                                    hour12: true
+                                }
+                            ).format(parsed) : ''
+                    };
+                }
+
+                function renderNotes() {
+                    const visibleNotes = allNotes.filter(note =>
+                        matchesSearch(note) && isInActiveDateFilter(note)
+                    );
+
+                    entries.replaceChildren();
+
+                    for (const note of visibleNotes) {
+                        const row = addText(entries, 'article', 'table-list-row', '');
+                        const layout = addText(row, 'div', 'grid grid-cols-1 gap-3 p-3 sm:grid-cols-4 sm:items-start', '');
+
+                        const dateCell = addText(layout, 'div', 'min-w-0', '');
+                        const noteDateTime = formatNoteDateTime(note);
+
+                        addText(dateCell, 'strong', 'global-info-value m-0', noteDateTime.date);
+
+                        if (noteDateTime.time) {
+                            addText(
+                                dateCell,
+                                'p',
+                                'modal-helper-text',
+                                noteDateTime.time
+                            );
+                        }
+
+                        const patientCell = addText(layout, 'div', 'min-w-0', '');
+                        addText(patientCell, 'strong', 'global-info-value m-0', note.patient_name || 'Unavailable');
+                        addText(patientCell, 'p', 'modal-helper-text', `Patient #${note.patient_id ?? 'Unavailable'}`);
+
+                        const procedureCell = addText(layout, 'div', 'min-w-0', '');
+                        addText(procedureCell, 'strong', 'global-info-value m-0', note.procedure_name || 'Unavailable');
+                        addText(procedureCell, 'p', 'modal-helper-text', `Visit #${note.appointment_id ?? 'Unavailable'}`);
+
+
+                        const itemsCell = addText(layout, 'div', 'min-w-0 w-full', '');
+
+                        const inventoryItems = String(note.inventory_notes ?? '')
+                            .split(/[\r\n,]+/)
+                            .map(item => item.trim())
+                            .filter(Boolean);
+
+                        if (inventoryItems.length === 0) {
+                            addText(itemsCell, 'span', 'modal-helper-text', 'No items recorded');
+                        } else {
+                            const itemsList = addText(
+                                itemsCell,
+                                'ul',
+                                'flex flex-col items-start gap-1 min-w-0 w-full m-0 p-0 list-none',
+                                ''
+                            );
+
+                            inventoryItems.forEach(item => {
+                                addText(
+                                    itemsList,
+                                    'li',
+                                    'status-pill status-pending !text-[10px] !font-semibold !leading-[1.3] !px-2 !py-1 !rounded-md !whitespace-normal break-words !text-left max-w-full min-w-0',
+                                    item
+                                );
+                            });
+
+                        }
+
+                    }
+
+                    const hasResults =
+                        visibleNotes.length > 0;
+
+                    const query =
+                        search.value
+                        .trim();
+
+                    table.hidden = !hasResults;
+
+                    window.EmptyState?.hide(
+                        emptyState
+                    );
+
+                    emptyState.hidden =
+                        hasResults;
+
+                    if (!hasResults) {
+
+                        emptyState.hidden = false;
+
+                        if (!allNotes.length) {
+
+                            window.EmptyState?.render({
+                                host: emptyState,
+                                icon: 'fa-clipboard',
+                                title: 'No procedure notes yet',
+                                message: 'Inventory notes recorded during procedures will appear here.',
+                                className: 'empty-state-compact',
+                            });
+
+                        } else if (query) {
+
+                            window.EmptyState?.renderSearch({
+                                host: emptyState,
+                                input: search,
+                                query,
+                                message: 'Try a different patient, procedure, or item.',
+                                className: 'empty-state-compact',
+                            });
+
+                        } else if (activeFilter === 'today') {
+
+                            window.EmptyState?.render({
+                                host: emptyState,
+                                icon: 'fa-calendar-day',
+                                title: 'No notes for today',
+                                message: 'No procedure inventory notes were recorded today.',
+                                className: 'empty-state-compact',
+                            });
+
+                        } else if (activeFilter === 'week') {
+
+                            window.EmptyState?.render({
+                                host: emptyState,
+                                icon: 'fa-calendar-week',
+                                title: 'No notes this week',
+                                message: 'No procedure inventory notes were recorded this week.',
+                                className: 'empty-state-compact',
+                            });
+                        }
+                    }
+
+                    showing.hidden = !allNotes.length;
+
+                    showing.textContent =
+                        `Showing ${visibleNotes.length} of ${allNotes.length} ${
+                            allNotes.length === 1
+                                ? 'note'
+                                : 'notes'
+                        }`;
+
+                }
+
+                async function loadNotes({
+                    render = true
+                } = {}) {
+                    const currentRequest = ++requestNumber;
+                    activeRequest?.abort();
+                    activeRequest = new AbortController();
+                    const controller = activeRequest;
+                    const timeout = setTimeout(() => controller.abort(), 20000);
+
+                    if (render) {
+                        entries.replaceChildren();
+
+                        table.hidden = true;
+                        loading.hidden = false;
+                        showing.hidden = true;
+                        emptyState.hidden = true;
+
+                        window.EmptyState?.hide(
+                            emptyState
+                        );
+
+                        modal.setAttribute(
+                            'aria-busy',
+                            'true'
+                        );
+                    }
+
+                    try {
+                        const url = new URL(endpoint, window.location.origin);
+                        const response = await fetch(url, {
+                            headers: {
+                                Accept: 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            credentials: 'same-origin',
+                            cache: 'no-store',
+                            signal: controller.signal
+                        });
+                        const result = await response.json();
+                        if (currentRequest !== requestNumber) return;
+                        if (!response.ok || !Array.isArray(result.data)) throw new Error('Notes unavailable');
+
+                        allNotes = result.data;
+                        updateCount(allNotes.length);
+
+                        if (render) {
+                            renderNotes();
+                        }
+                    } catch (failure) {
+                        if (
+                            currentRequest !==
+                            requestNumber
+                        ) {
+                            return;
+                        }
+
+                        if (
+                            failure?.name ===
+                            'AbortError'
+                        ) {
+                            return;
+                        }
+
+                        if (render) {
+                            table.hidden = true;
+                            showing.hidden = true;
+                            emptyState.hidden = false;
+
+                            window.EmptyState?.render({
+                                host: emptyState,
+                                icon: 'fa-triangle-exclamation',
+                                title: 'Unable to load procedure notes',
+                                message: 'Procedure inventory notes could not be loaded. Please try again.',
+                                className: 'empty-state-compact',
+
+                                actionHtml: `
+                <button
+                    type="button"
+                    class="empty-state-btn"
+                    data-procedure-notes-retry
+                >
+                    <i
+                        class="fa-solid fa-rotate-right"
+                        aria-hidden="true"
+                    ></i>
+
+                    Try again
+                </button>
+            `,
+                            });
+
+                            emptyState
+                                .querySelector(
+                                    '[data-procedure-notes-retry]'
+                                )
+                                ?.addEventListener(
+                                    'click',
+                                    () => {
+                                        loadNotes();
+                                    }, {
+                                        once: true
+                                    }
+                                );
+                        }
+                    } finally {
+                        clearTimeout(timeout);
+
+                        if (render && currentRequest === requestNumber) {
+                            loading.hidden = true;
+                            modal.removeAttribute('aria-busy');
+                        }
+                    }
+                }
+
+                document.addEventListener('ui-modal:opened', event => {
+                    if (event.detail.modal.id === modal.id) {
+                        loadNotes();
+                    }
+                });
+
+                loadNotes({
+                    render: false
+                });
+            })();
+        </script>
+    @endif
 
     @php
         $inventoryDataUrl = route($inventoryRouteNames['data']);
@@ -824,7 +1307,7 @@
         $inventoryDestroyUrlTemplate = route($inventoryRouteNames['destroy'], ['inventory' => '__ID__']);
     @endphp
 
-    <script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         var currentViewMode = 'list';
 
         function bindInventoryGlobalViewToggle() {
@@ -1163,9 +1646,7 @@
         var inventoryActiveDatePreset = '';
 
         function itemBalance(item) {
-            var qty = Number(item?.qty || 0);
-            var used = Number(item?.used || 0);
-            return qty - used;
+            return item?.is_volume_bottle ? Number(item.qty || 0) : Number(item?.qty || 0) - Number(item?.used || 0);
         }
 
         function applyStockMode(data, mode) {
@@ -1246,20 +1727,6 @@
             window.openModal?.(
                 'addModal'
             );
-
-            window.initGlobalVoiceInputs?.(
-                modal
-            );
-
-            document.dispatchEvent(
-                new CustomEvent(
-                    'voice:refresh', {
-                        detail: {
-                            root: modal
-                        }
-                    }
-                )
-            );
         }
 
         function openFilterPanel() {
@@ -1305,15 +1772,9 @@
         }
 
         function closeFilterPanel() {
-            if (window.closeFilterDrawer) {
-                window.closeFilterDrawer('filterModal');
-                return;
-            }
-
-            var modal = document.getElementById('filterModal');
-            if (modal) modal.classList.remove('open', 'closing');
-            document.documentElement.classList.remove('filter-lock');
-            document.body.classList.remove('filter-lock');
+            window.closeFilterDrawer(
+                'filterModal'
+            );
         }
 
         function syncInventoryFilterGroups() {
@@ -1753,7 +2214,7 @@
             class="ui-action-btn ui-action-edit"
             data-tooltip="Edit inventory item"
             aria-label="Edit inventory item"
-            onclick="openEdit(${id})">
+            data-ui-click="action-640c3ab8383f" data-ui-click-arg-0="${window.uiAttribute(id)}">
             <i class="fa-solid fa-pen"></i>
         </button>
 
@@ -1761,7 +2222,7 @@
             class="ui-action-btn ui-action-delete"
             data-tooltip="Delete inventory item"
 aria-label="Delete inventory item"
-            onclick="deleteItem(${id})">
+            data-ui-click="action-a48d004fa9c4" data-ui-click-arg-0="${window.uiAttribute(id)}">
             <i class="fa-solid fa-trash"></i>
         </button>
     `;
@@ -2266,10 +2727,13 @@ aria-label="Delete inventory item"
             paginatedData.forEach(function(item) {
                 const quantity = n(item.qty);
                 const used = n(item.used);
-                const balance = quantity - used;
-                const usagePercent = quantity > 0 ?
-                    Math.min(100, Math.max(0, (used / quantity) * 100)) :
-                    0;
+                const balance = itemBalance(item);
+                const activeBottleUsed = item.is_volume_bottle && quantity > 0 ?
+                    Math.max(0, Number(item.volume_per_bottle_ml) - Number(item.current_bottle_remaining_ml)) : 0;
+                const usagePercent = item.is_volume_bottle ?
+                    (Number(item.volume_per_bottle_ml) > 0 ? activeBottleUsed / Number(item.volume_per_bottle_ml) *
+                        100 : 0) :
+                    (quantity > 0 ? Math.min(100, Math.max(0, used / quantity * 100)) : 0);
 
                 const balLabel =
                     balance <= 0 ?
@@ -2350,12 +2814,16 @@ aria-label="Delete inventory item"
                 const usageMarkup = `
                     <div class="inventory-usage-block">
                         <div class="inventory-usage-label">
-                            <strong>${used}</strong>
-                            <span>/ ${quantity} ${unit}</span>
+                            <strong>${item.is_volume_bottle ? formatMl(activeBottleUsed) : used}</strong>
+                            <span>
+                                / ${item.is_volume_bottle
+                                    ? formatMl(item.volume_per_bottle_ml) + " mL (active bottle)"
+                                    : quantity + " " + getInventoryUnitLabel(unit, quantity)}
+                            </span>
                         </div>
 
                         <div class="inventory-usage-track" aria-hidden="true">
-                            <span style="width:${usagePercent}%"></span>
+                            <span data-ui-style="width:${window.uiAttribute(usagePercent)}%"></span>
                         </div>
                     </div>
                 `;
@@ -2385,8 +2853,8 @@ aria-label="Delete inventory item"
                                     </strong>
 
                                     <span class="inventory-grid-balance-unit">
-                                        ${unit} left
-                                    </span>
+    ${getInventoryUnitLabel(unit, balance)} left
+</span>
                                 </div>
 
                                 <div class="inventory-grid-details">
@@ -2420,7 +2888,9 @@ aria-label="Delete inventory item"
                                         </span>
 
                                         <span class="inventory-grid-detail-value">
-                                            ${used}/${quantity} ${unit}
+                                            ${item.is_volume_bottle
+    ? `${formatMl(activeBottleUsed)} / ${formatMl(item.volume_per_bottle_ml)} mL (active bottle)`
+    : `${used}/${quantity} ${getInventoryUnitLabel(unit, quantity)}`}
                                         </span>
                                     </div>
                                 </div>
@@ -2578,6 +3048,7 @@ aria-label="Delete inventory item"
                 addUsed.value = '0';
             }
 
+            document.getElementById('addBottleCapacity').value = '';
             computeAddBalance();
 
             const form =
@@ -2668,15 +3139,20 @@ aria-label="Delete inventory item"
                         category: document.getElementById('addCategory').value,
                         date_received: document.getElementById('addDate').value,
                         expiration_date: document.getElementById('addExpirationDate').value || null,
-                        stock_no: document.getElementById('addStock').value.trim(),
+                        stock_no: document.getElementById('addStock').value.trim() || null,
                         name: document.getElementById('addName').value.trim(),
                         unit: document.getElementById('addUnit').value.trim(),
                         qty: Number(document.getElementById('addQty').value),
-                        used: Number(document.getElementById('addUsed').value || 0)
+                        used: isBottleUnit(document.getElementById('addUnit').value) ? 0 : Number(document
+                            .getElementById('addUsed').value || 0),
+                        volume_per_bottle_ml: isBottleUnit(document.getElementById('addUnit').value) ?
+                            document.getElementById('addBottleCapacity').value : null,
+                        volume_consumed_ml: isBottleUnit(document.getElementById('addUnit').value) ? (
+                            document.getElementById('addUsed').value || null) : null
                     })
                 });
             btnSave.disabled = false;
-            btnSave.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Item';
+            btnSave.innerHTML = '<span>Save Item</span>';
             if (!res.ok) {
                 const errorPayload = await res.json().catch(function() {
                     return {};
@@ -2691,7 +3167,9 @@ aria-label="Delete inventory item"
                         name: 'addName',
                         unit: 'addUnit',
                         qty: 'addQty',
-                        used: 'addUsed'
+                        used: 'addUsed',
+                        volume_per_bottle_ml: 'addBottleCapacity',
+                        volume_consumed_ml: 'addUsed'
                     };
 
                     Object.entries(errorPayload.errors).forEach(function([key, messages]) {
@@ -2805,6 +3283,11 @@ aria-label="Delete inventory item"
 
             if (!item) return;
 
+            editBottleOriginal = {
+                ...item
+            };
+            document.getElementById('editBottleCapacity').value = item.volume_per_bottle_ml ?? '';
+
             const editCategory =
                 document.getElementById('editCategory');
 
@@ -2828,6 +3311,19 @@ aria-label="Delete inventory item"
 
             document.getElementById('editStock').value =
                 item.stock_no || '';
+
+            const editInventorySubtitle =
+                document.getElementById('editInventorySubtitle');
+
+            if (editInventorySubtitle) {
+                const subtitleParts = [item.name, item.stock_no]
+                    .filter(Boolean);
+
+                editInventorySubtitle.textContent =
+                    subtitleParts.length ?
+                    subtitleParts.join(' · ') :
+                    'Update the item details and stock usage.';
+            }
 
             const editName =
                 document.getElementById('editName');
@@ -2854,7 +3350,7 @@ aria-label="Delete inventory item"
                 document.getElementById('editUsed');
 
             if (editQty) {
-                editQty.value = item.qty ?? 0;
+                editQty.value = isBottleUnit(item.unit) && !item.is_volume_bottle ? itemBalance(item) : (item.qty ?? 0);
 
                 editQty.dispatchEvent(
                     new Event('input', {
@@ -2864,7 +3360,7 @@ aria-label="Delete inventory item"
             }
 
             if (editUsed) {
-                editUsed.value = item.used ?? 0;
+                editUsed.value = isBottleUnit(item.unit) ? '' : (item.used ?? 0);
 
                 editUsed.dispatchEvent(
                     new Event('input', {
@@ -2902,73 +3398,322 @@ aria-label="Delete inventory item"
                 document.getElementById(
                     'editModal'
                 );
-
-            window.initGlobalVoiceInputs?.(
-                editModal
-            );
-
-            document.dispatchEvent(
-                new CustomEvent(
-                    'voice:refresh', {
-                        detail: {
-                            root: editModal
-                        }
-                    }
-                )
-            );
         }
 
         async function saveEdit() {
-            if (!editId) return;
+            if (!editId || inventoryEditSaving) return;
+            inventoryEditSaving = true;
+            const saveButton = document.querySelector('#editInventoryForm button[type="submit"]');
+            if (saveButton) saveButton.disabled = true;
+            try {
+                const res = await fetch(inventoryUrl('update', editId), {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
+                            'content'),
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        category: document.getElementById('editCategory').value,
+                        date_received: document.getElementById('editDate').value,
+                        expiration_date: document.getElementById('editExpirationDate').value || null,
+                        stock_no: document.getElementById('editStock').value.trim() || null,
+                        name: document.getElementById('editName').value.trim(),
+                        unit: document.getElementById('editUnit').value.trim(),
+                        qty: Number(document.getElementById('editQty').value),
+                        used: isBottleUnit(document.getElementById('editUnit').value) ? 0 : Number(
+                            document.getElementById('editUsed').value || 0),
+                        volume_per_bottle_ml: isBottleUnit(document.getElementById('editUnit').value) ?
+                            document.getElementById('editBottleCapacity').value : null,
+                        volume_consumed_ml: isBottleUnit(document.getElementById('editUnit').value) ? (
+                            document.getElementById('editUsed').value || null) : null,
+                        stock_revision: editBottleOriginal?.stock_revision || null
+                    })
+                });
 
-            const res = await fetch(inventoryUrl('update', editId), {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({
-                    category: document.getElementById('editCategory').value,
-                    date_received: document.getElementById('editDate').value,
-                    expiration_date: document.getElementById('editExpirationDate').value || null,
-                    stock_no: document.getElementById('editStock').value.trim(),
-                    name: document.getElementById('editName').value.trim(),
-                    unit: document.getElementById('editUnit').value.trim(),
-                    qty: Number(document.getElementById('editQty').value),
-                    used: Number(document.getElementById('editUsed').value || 0)
-                })
-            });
+                const result = await res.json().catch(function() {
+                    return {};
+                });
 
-            const result = await res.json().catch(function() {
-                return {};
-            });
+                if (!res.ok) {
+                    console.error('Inventory edit failed:', res.status, result);
+                    if (res.status === 409) await loadInventory();
+                    showToast('error', result.message || 'Edit failed — please try again.');
+                    return;
+                }
 
-            if (!res.ok) {
-                console.error('Inventory edit failed:', res.status, result);
-                showToast('error', result.message || 'Edit failed — please try again.');
-                return;
+                if (window.closeModal) {
+                    closeModal('editModal');
+                } else {
+                    document.getElementById('editModal')?.close();
+                }
+
+                editId = null;
+                await loadInventory();
+                showToast('success', 'Item updated successfully!');
+            } catch (error) {
+                showToast('error', 'Inventory could not be updated. Please try again.');
+            } finally {
+                inventoryEditSaving = false;
+                if (saveButton) saveButton.disabled = false;
+            }
+        }
+
+        var editBottleOriginal = null;
+        var inventoryEditSaving = false;
+
+        function isBottleUnit(unit) {
+            return String(unit || '').trim().toLowerCase() === 'bottle';
+        }
+
+        function getInventoryUnitLabel(unit, amount) {
+            const rawUnit =
+                String(unit || 'item')
+                .trim()
+                .toLowerCase();
+
+            const count = Number(amount);
+
+            const singularOverrides = {
+                pieces: 'piece',
+                boxes: 'box'
+            };
+
+            let singular =
+                singularOverrides[rawUnit] ||
+                rawUnit;
+
+            if (!singularOverrides[rawUnit]) {
+                if (
+                    singular.endsWith('ies') &&
+                    singular.length > 3
+                ) {
+                    singular =
+                        singular.slice(0, -3) +
+                        'y';
+                } else if (
+                    /(ches|shes|xes|zes)$/.test(singular)
+                ) {
+                    singular =
+                        singular.slice(0, -2);
+                } else if (
+                    singular.endsWith('s') &&
+                    !singular.endsWith('ss')
+                ) {
+                    singular =
+                        singular.slice(0, -1);
+                }
             }
 
-            if (window.closeModal) {
-                closeModal('editModal');
+            if (count === 1) {
+                return singular;
+            }
+
+            if (/[^aeiou]y$/.test(singular)) {
+                return (
+                    singular.slice(0, -1) +
+                    'ies'
+                );
+            }
+
+            if (/(s|x|z|ch|sh)$/.test(singular)) {
+                return singular + 'es';
+            }
+
+            return singular + 's';
+        }
+
+        function formatMl(value) {
+            const number = Number(value);
+            return Number.isFinite(number) ? number.toLocaleString('en-US', {
+                maximumFractionDigits: 2
+            }) : '0';
+        }
+
+        function syncBottleFields(prefix) {
+            const bottle = isBottleUnit(document.getElementById(prefix + 'Unit').value);
+
+            if (prefix === 'add') {
+                const stockGrid =
+                    document.getElementById(
+                        'addStockFieldsGrid'
+                    );
+
+                if (stockGrid) {
+                    stockGrid.classList.toggle(
+                        'md:grid-cols-2',
+                        bottle
+                    );
+
+                    stockGrid.classList.toggle(
+                        'md:grid-cols-3',
+                        !bottle
+                    );
+                }
+            }
+
+            const wrapper = document.getElementById(prefix + 'BottleFields');
+            const capacity = document.getElementById(prefix + 'BottleCapacity');
+            const used = document.getElementById(prefix + 'Used');
+            document.getElementById(prefix + 'QtyLabel').textContent = bottle ? 'Bottle Quantity' : 'Quantity';
+            wrapper.hidden = !bottle;
+            capacity.disabled = !bottle;
+            capacity.required = bottle;
+            used.disabled = false;
+            used.required = !bottle;
+            used.closest('.inventory-field').style.display = '';
+            document.getElementById(prefix + 'UsedLabel').textContent = bottle ? 'Consumed (mL)' : 'Consumed';
+            used.min = bottle ? '0.01' : '0';
+            used.max = bottle ? '99999999.99' : '99999';
+            used.step = bottle ? '0.01' : '1';
+            used.inputMode = bottle ? 'decimal' : 'numeric';
+            used.placeholder = bottle ? 'e.g. 0.5' : '';
+            if (bottle) {
+                used.removeAttribute('data-validation-rule');
+                if (used.dataset.volumeMode === '0' || used.value === '0') used.value = '';
             } else {
-                document.getElementById('editModal')?.close();
+                used.setAttribute('data-validation-rule', 'inventoryConsumed');
+                if (used.dataset.volumeMode === '1') used.value = '0';
             }
+            used.dataset.volumeMode = bottle ? '1' : '0';
+            if (prefix === 'edit') {
+                document.getElementById('editBottleCapacityField').hidden = true;
+                document.getElementById('editQty').min = bottle ? '0' : '1';
+                const fixedCapacity = editBottleOriginal?.is_volume_bottle && Number(editBottleOriginal.qty) > 0;
+                capacity.readOnly = true;
+                document.getElementById('editUnit').readOnly = true;
+                const quantity = Number(document.getElementById('editQty').value || 0);
+                const cap = Math.round(Number(capacity.value || 0) * 100);
+                const current = fixedCapacity ? Math.round(Number(editBottleOriginal.current_bottle_remaining_ml) * 100) :
+                    cap;
+                const available = quantity > 0 ? current + (quantity - 1) * cap : 0;
+                const consumed = Math.round(Number(document.getElementById('editUsed').value || 0) * 100);
+                const remaining = available - consumed;
+                const bottles = cap > 0 && remaining > 0 ? Math.ceil(remaining / cap) : 0;
+                const currentBottleRemaining = remaining >= 0 && cap > 0 ?
+                    formatMl((bottles > 0 ? remaining - (bottles - 1) * cap : 0) / 100) :
+                    'Unavailable';
 
-            editId = null;
-            await loadInventory();
-            showToast('success', 'Item updated successfully!');
+                const remainingQuantity =
+                    Math.max(
+                        0,
+                        quantity -
+                        Number(used.value || 0)
+                    );
+
+                const balanceValue =
+                    bottle ?
+                    (
+                        remaining < 0 ?
+                        'Consumption exceeds available volume' :
+                        `${bottles} ${getInventoryUnitLabel(
+                            'bottle',
+                            bottles
+                        )} · ${formatMl(remaining / 100)} mL`
+                    ) :
+                    `${remainingQuantity} ${getInventoryUnitLabel(
+                        document.getElementById('editUnit').value || 'item',
+                        remainingQuantity
+                    )}`;
+
+                document.getElementById('editBottleRemaining').value = currentBottleRemaining;
+                document.getElementById('editBalance').value = balanceValue;
+
+                const unitSummary = document.getElementById('editUnitSummary');
+                const capacitySummary = document.getElementById('editBottleCapacitySummary');
+                const remainingSummary = document.getElementById('editBottleRemainingSummary');
+                const balanceSummary = document.getElementById('editBalanceSummary');
+
+                if (unitSummary) unitSummary.textContent = document.getElementById('editUnit').value || '—';
+                if (capacitySummary) capacitySummary.textContent = bottle && capacity.value ?
+                    `${formatMl(capacity.value)} mL` :
+                    '—';
+                if (remainingSummary) remainingSummary.textContent = bottle ?
+                    `${currentBottleRemaining} mL left` :
+                    '—';
+                if (balanceSummary) balanceSummary.textContent = balanceValue;
+            } else {
+                const quantity = Number(document.getElementById('addQty').value || 0);
+                const cap = Math.round(Number(capacity.value || 0) * 100);
+                const remaining = quantity * cap - Math.round(Number(used.value || 0) * 100);
+                const bottles = remaining > 0 && cap > 0 ? Math.ceil(remaining / cap) : 0;
+                const balanceValue = bottle ?
+                    (remaining < 0 ? 'Consumption exceeds available volume' :
+                        `${capacity.value ? bottles : quantity} bottles | ${formatMl(remaining / 100)} mL total`) :
+                    quantity - Number(used.value || 0);
+
+                document.getElementById('addBalance').value = balanceValue;
+
+                const balanceSummary = document.getElementById('addBalanceSummary');
+
+                if (balanceSummary) {
+                    if (bottle) {
+                        balanceSummary.textContent =
+                            balanceValue;
+                    } else {
+                        const unit =
+                            document.getElementById(
+                                'addUnit'
+                            ).value || 'item';
+
+                        const consumed =
+                            Number(
+                                used.value || 0
+                            );
+
+                        const available =
+                            Math.max(
+                                0,
+                                quantity - consumed
+                            );
+
+                        balanceSummary.textContent =
+                            `${available} ${getInventoryUnitLabel(
+                unit,
+                available
+            )}`;
+                    }
+                }
+            }
         }
 
         function computeAddBalance() {
-            document.getElementById('addBalance').value = Number(document.getElementById('addQty').value || 0) - Number(
-                document.getElementById('addUsed').value || 0);
+            syncBottleFields('add');
         }
 
         function computeEditBalance() {
-            document.getElementById('editBalance').value = Number(document.getElementById('editQty').value || 0) - Number(
-                document.getElementById('editUsed').value || 0);
+            syncBottleFields('edit');
         }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            for (const prefix of ['add', 'edit']) {
+                for (const suffix of ['Unit', 'BottleCapacity']) {
+                    document
+                        .getElementById(prefix + suffix)
+                        ?.addEventListener(
+                            'input',
+                            () => syncBottleFields(prefix)
+                        );
+                }
+            }
+
+            [
+                ['addQty', computeAddBalance],
+                ['addUsed', computeAddBalance],
+                ['editQty', computeEditBalance],
+                ['editUsed', computeEditBalance]
+            ].forEach(function([
+                fieldId,
+                callback
+            ]) {
+                document
+                    .getElementById(fieldId)
+                    ?.addEventListener(
+                        'input',
+                        callback
+                    );
+            });
+        });
     </script>
 @endsection

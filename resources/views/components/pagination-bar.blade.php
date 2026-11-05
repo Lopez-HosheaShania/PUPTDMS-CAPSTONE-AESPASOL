@@ -2,20 +2,57 @@
     'id',
     'infoId',
     'paginationId',
+
     'position' => 'bottom',
+
     'showEntries' => false,
     'pageSizeId' => null,
     'pageSizeCallback' => null,
     'pageSizeValue' => 10,
     'pageSizeLabel' => 'entries',
+
     'label' => 'entries',
+    'paginator' => null,
 
     'total' => null,
     'from' => null,
     'to' => null,
+    'currentPage' => null,
+    'lastPage' => null,
 ])
 
-<div id="{{ $id }}"
+@php
+    $hasPaginator =
+        $paginator &&
+        method_exists($paginator, 'total') &&
+        method_exists($paginator, 'currentPage') &&
+        method_exists($paginator, 'lastPage');
+
+    if ($hasPaginator) {
+        $total = $total ?? $paginator->total();
+        $from = $from ?? ($paginator->firstItem() ?? 0);
+        $to = $to ?? ($paginator->lastItem() ?? 0);
+        $currentPage = $currentPage ?? $paginator->currentPage();
+        $lastPage = $lastPage ?? $paginator->lastPage();
+
+        if (method_exists($paginator, 'perPage')) {
+            $pageSizeValue = $paginator->perPage();
+        }
+    }
+
+    $total = max(0, (int) ($total ?? 0));
+
+    $from = $from !== null ? (int) $from : ($total > 0 ? 1 : 0);
+
+    $to = $to !== null ? (int) $to : ($total > 0 ? min((int) $pageSizeValue, $total) : 0);
+
+    $currentPage = max(1, (int) ($currentPage ?? 1));
+
+    $lastPage = max(1, (int) ($lastPage ?? ceil($total / max(1, (int) $pageSizeValue))));
+@endphp
+
+<div id="{{ $id }}" data-current-page="{{ $currentPage }}" data-last-page="{{ $lastPage }}"
+    data-total="{{ $total }}" data-from="{{ $from }}" data-to="{{ $to }}"
     {{ $attributes->class([
         'global-pagebar',
         'global-pagebar-top' => $position === 'top',

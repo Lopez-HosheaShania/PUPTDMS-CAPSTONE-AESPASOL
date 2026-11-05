@@ -88,54 +88,26 @@
                     </div>
                 </div>
             @else
-                <div class="page-banner mt-2 mb-6">
-                    <div class="page-banner-inner">
-                        <div>
-                            <h1 class="page-title">
-                                Dental Records
-                            </h1>
-                        </div>
-
-                        <div class="admin-banner-actions">
-                            <a href="{{ route($routePrefix . '.reports.ai-generated') }}" class="ui-btn ui-btn-primary">
-                                <i class="fa-solid fa-chart-column"></i>
-                                <span>View AI Reports</span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
+                <x-page-banner title="Dental Records" class="mt-2 mb-6" actions-class="admin-banner-actions">
+                    <x-slot:actions>
+                        <x-button :href="route($routePrefix . '.reports.ai-generated')" variant="primary" icon="fa-solid fa-chart-column">
+                            View AI Reports
+                        </x-button>
+                    </x-slot:actions>
+                </x-page-banner>
             @endif
 
             <div id="statCards" class="stat-grid dental-records-stat-grid">
-                <div class="stat-card s-all" data-filter="all">
-                    <div class="stat-card-info">
-                        <div class="stat-label">Total Records</div>
-                        <div class="stat-num">{{ number_format($totalRecordsCount) }}</div>
-                        <div class="stat-footer">all dental records</div>
-                    </div>
-                    <div class="stat-icon"><i class="fa-solid fa-folder-open"></i></div>
-                </div>
 
-                <div class="stat-card s-today" data-filter="all">
-                    <div class="stat-card-info">
-                        <div class="stat-label">Added Today</div>
-                        <div class="stat-num">{{ number_format($recordsTodayCount) }}</div>
-                        <div class="stat-footer">new entries</div>
-                    </div>
-                    <div class="stat-icon"><i class="fa-solid fa-calendar-day"></i></div>
-                </div>
+                <x-stat-card label="Total Records" :value="number_format($totalRecordsCount)" tone="all" icon="fa-solid fa-folder-open"
+                    footer="all dental records" value-class="stat-num" data-filter="all" />
 
-                <div class="stat-card s-pending" data-filter="scheduled">
-                    <div class="stat-card-info">
-                        <div class="stat-label">Scheduled Records</div>
-                        <div class="stat-num">{{ number_format($scheduledRecordsCount) }}</div>
-                        <div class="stat-footer">upcoming visits</div>
-                    </div>
+                <x-stat-card label="Added Today" :value="number_format($recordsTodayCount)" tone="today" icon="fa-solid fa-calendar-day"
+                    footer="new entries" value-class="stat-num" data-filter="all" />
 
-                    <div class="stat-icon">
-                        <i class="fa-solid fa-calendar-check"></i>
-                    </div>
-                </div>
+                <x-stat-card label="Scheduled Records" :value="number_format($scheduledRecordsCount)" tone="pending" icon="fa-solid fa-calendar-check"
+                    footer="upcoming visits" value-class="stat-num" data-filter="scheduled" />
+
             </div>
 
             <div class="dental-records-layout">
@@ -156,7 +128,7 @@
 
                             <div class="table-toolbar-actions">
                                 <button id="dentalRecordFilterBtn" type="button" class="global-filter-btn"
-                                    aria-pressed="false" onclick="openDentalRecordFilters()" data-tooltip="Filter"
+                                    aria-pressed="false" data-ui-click="action-5916d2256d78" data-tooltip="Filter"
                                     data-tooltip-tone="neutral">
                                     <i class="fa-solid fa-sliders"></i>
                                     <span>Filters</span>
@@ -169,7 +141,7 @@
 
                                 <button id="dentalRecordFilterResetBtn" type="button"
                                     class="global-filter-reset-btn hidden" title="Reset filters"
-                                    aria-label="Reset dental record filters" onclick="clearDentalRecordFilters()"
+                                    aria-label="Reset dental record filters" data-ui-click="action-451e2fc88763"
                                     data-tooltip="Reset filters" data-tooltip-tone="neutral">
                                     <i class="fa-solid fa-rotate-left"></i>
                                 </button>
@@ -291,11 +263,10 @@
                                                 <td class="table-action-cell">
                                                     <div class="ui-action-group">
                                                         @if (!empty($record->appointment_id))
-                                                            <button type="button" class="ui-action-btn ui-action-view"
-                                                                onclick="event.stopPropagation(); openRecordPanel({{ $record->id }})"
-                                                                aria-label="View record" data-tooltip="View record">
-                                                                <i class="fa-solid fa-eye"></i>
-                                                            </button>
+                                                            <x-action-button type="button" variant="view"
+                                                                icon="fa-solid fa-eye" label="View record"
+                                                                tooltip="View record" data-ui-click="action-753919bc8ad8"
+                                                                data-ui-click-arg-0="{{ json_encode($record->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" />
                                                         @endif
                                                     </div>
                                                 </td>
@@ -416,11 +387,10 @@
 
                                                 <div class="ui-action-group">
                                                     @if (!empty($record->appointment_id))
-                                                        <button type="button" class="ui-action-btn ui-action-view"
-                                                            onclick="event.stopPropagation(); openRecordPanel({{ $record->id }})"
-                                                            aria-label="View record" data-tooltip="View record">
-                                                            <i class="fa-solid fa-eye"></i>
-                                                        </button>
+                                                        <x-action-button type="button" variant="view"
+                                                            icon="fa-solid fa-eye" label="View record"
+                                                            tooltip="View record" data-ui-click="action-753919bc8ad8"
+                                                            data-ui-click-arg-0="{{ json_encode($record->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" />
                                                     @endif
                                                 </div>
                                             </div>
@@ -499,18 +469,7 @@
                     </section>
 
                     <section class="card quick-actions-card">
-                        <div class="card-header">
-                            <div class="card-header-left">
-                                <div class="card-header-icon">
-                                    <i class="fa-solid fa-bolt"></i>
-                                </div>
-
-                                <div>
-                                    <h2 class="card-title">Quick Actions</h2>
-                                    <p class="card-subtitle">Common tasks</p>
-                                </div>
-                            </div>
-                        </div>
+                        <x-card-header title="Quick Actions" subtitle="Common tasks" icon="fa-solid fa-bolt" />
 
                         <div class="quick-actions-list">
                             @if (!$isDentistView)
@@ -552,21 +511,19 @@
 
 
     <x-filter-drawer id="filterModal" title="Filter Records" close-id="dentalRecordFilterCloseBtn"
-        close-callback="closeDentalRecordFilters()" clear-id="dentalRecordFilterClearBtn"
-        clear-callback="clearDentalRecordFilterDraft()" clear-label="Clear Filters"
-        cancel-id="dentalRecordFilterCancelBtn" cancel-callback="closeDentalRecordFilters()" cancel-label="Cancel"
-        apply-id="dentalRecordFilterApplyBtn" apply-callback="applyDentalRecordFilters()" apply-label="Show Results"
-        results-id="dentalRecordFilterResultsText">
+        close-callback="action-b977f72cb77d" clear-id="dentalRecordFilterClearBtn" clear-callback="action-46ebb44a144d"
+        clear-label="Clear Filters" cancel-id="dentalRecordFilterCancelBtn" cancel-callback="action-b977f72cb77d"
+        cancel-label="Cancel" apply-id="dentalRecordFilterApplyBtn" apply-callback="action-fdd006138fbd"
+        apply-label="Show Results" results-id="dentalRecordFilterResultsText">
 
         <div id="dentalRecordActiveFiltersSection" class="filter-active-section hidden">
             <div class="filter-active-header">
                 <span class="filter-active-title">Active Filters</span>
 
-                <button type="button" class="filter-clear-all ui-btn ui-btn-secondary ui-btn-sm"
-                    onclick="clearDentalRecordFilterDraft()">
-                    <i class="fa-solid fa-rotate-left"></i>
-                    <span>Clear All</span>
-                </button>
+                <x-button type="button" variant="secondary" size="sm" icon="fa-solid fa-rotate-left"
+                    class="filter-clear-all" data-ui-click="action-46ebb44a144d">
+                    Clear All
+                </x-button>
             </div>
 
             <div id="dentalRecordActiveFilters" class="active-filters-container"></div>
@@ -647,7 +604,7 @@
             '365' => 'Last 12 Months',
         ] as $value => $label)
                     <button type="button" class="quick-date-chip" data-record-date="{{ $value }}"
-                        onclick="setDentalRecordDraftFilter('datePreset', '{{ $value }}')">
+                        data-ui-click="action-f5aa0fb428b8" data-ui-click-arg-0="{{ $value }}">
                         {{ $label }}
                     </button>
                 @endforeach
@@ -657,8 +614,9 @@
         <x-filter-group title="Custom Date Range" class="filter-group-last">
             <div class="filter-date-grid">
                 <div class="filter-date-input-wrap">
-                    <input id="dentalRecordDateFrom" type="text" class="form-input-custom js-flatpickr-date-range-from"
-                        placeholder="Start date" readonly autocomplete="off">
+                    <input id="dentalRecordDateFrom" type="text"
+                        class="form-input-custom js-flatpickr-date-range-from" placeholder="Start date" readonly
+                        autocomplete="off">
                     <i class="fa-regular fa-calendar"></i>
                 </div>
 
@@ -689,7 +647,7 @@
                         </h3>
                     </div>
                 </div>
-                <button type="button" class="modal-x" onclick="closeDentalRecordDetailsModal()"
+                <button type="button" class="modal-x" data-ui-click="action-e83e40f120f5"
                     aria-label="Close dental record details">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
@@ -706,9 +664,9 @@
             </div>
 
             <div class="modal-ft">
-                <button type="button" class="btn-close-modal" onclick="closeDentalRecordDetailsModal()">
+                <x-button type="button" variant="secondary" data-ui-click="action-e83e40f120f5">
                     Close
-                </button>
+                </x-button>
             </div>
         </div>
     </div>
@@ -732,7 +690,7 @@
 @endsection
 
 @section('scripts')
-    <script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         const csrfMeta = document.querySelector('meta[name="csrf-token"]');
         const csrfToken = csrfMeta ? csrfMeta.content : '';
 
@@ -993,12 +951,12 @@
             'Emergency Contact',
             'fa-phone',
             `
-                                                                    <div class="grid grid-cols-1 gap-y-1 sm:grid-cols-3 sm:gap-x-8">
-                                                                        ${reviewRow('Name', emergencyContact.name || 'N/A')}
-                                                                        ${reviewRow('Number', emergencyContact.number || 'N/A')}
-                                                                        ${reviewRow('Relation', emergencyContact.relation || 'N/A')}
-                                                                    </div>
-                                                                `
+                                                                                                    <div class="grid grid-cols-1 gap-y-1 sm:grid-cols-3 sm:gap-x-8">
+                                                                                                        ${reviewRow('Name', emergencyContact.name || 'N/A')}
+                                                                                                        ${reviewRow('Number', emergencyContact.number || 'N/A')}
+                                                                                                        ${reviewRow('Relation', emergencyContact.relation || 'N/A')}
+                                                                                                    </div>
+                                                                                                `
         )}
 
                 ${sections
@@ -1316,7 +1274,7 @@
                     <button
                         type="button"
                         class="filter-chip-remove"
-                        onclick="removeDentalRecordDraftFilter('${key}')"
+                        data-ui-click="action-83507c89d4f2" data-ui-click-arg-0="${window.uiAttribute(key)}"
                         aria-label="Remove ${escapeHtml(label)}">
                         <i class="fa-solid fa-xmark"></i>
                     </button>

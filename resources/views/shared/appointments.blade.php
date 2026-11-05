@@ -264,15 +264,7 @@
                         </div>
                     </div>
                 @else
-                    <div class="page-banner admin-appointment-banner">
-                        <div class="page-banner-inner">
-                            <div class="appointment-banner-title-wrap">
-                                <h1 class="page-title">
-                                    Appointment Management
-                                </h1>
-                            </div>
-                        </div>
-                    </div>
+                    <x-page-banner title="Appointment Management" class="admin-appointment-banner" />
                 @endif
 
                 <div class="today-snapshot-card">
@@ -420,14 +412,15 @@
 
                                 <span>Filter</span>
 
-                                <span id="appointmentFilterBadge" class="filter-badge" style="display:none;"></span>
+                                <span id="appointmentFilterBadge" class="filter-badge"
+                                    data-ui-presentation="presentation-d0466aa33fa8"></span>
                             </button>
                         </div>
 
                         <x-view-toggle id="appointmentsViewToggle" root="#mainContent" storage-key="appointmentsViewMode"
                             list-label="List" grid-label="Grid" />
 
-                        <button id="appointmentClearFilterBtn" type="button" onclick="resetAppointmentFilters()"
+                        <button id="appointmentClearFilterBtn" type="button" data-ui-click="action-06d47d859fc5"
                             class="global-filter-reset-btn hidden" aria-label="Reset filters" data-tooltip="Reset filters"
                             data-tooltip-tone="neutral">
                             <i class="fa-solid fa-rotate-left"></i>
@@ -445,19 +438,25 @@
                     $monthLabel = \Carbon\Carbon::createFromFormat('Y-m-d', $monthKey . '-01')->format('F Y');
                 @endphp
 
-                <details class="appt-month-group" data-month="{{ $monthKey }}" data-show-more data-show-more-step="7"
-                    data-show-more-label="appointments" open>
-                    <summary class="appt-month-summary">
-                        <span class="appt-month-left">
+                <details class="appt-month-group global-accordion" data-month="{{ $monthKey }}" data-show-more
+                    data-show-more-step="7" data-show-more-label="appointments" open>
+
+                    <summary class="global-accordion-summary">
+
+                        <span class="global-accordion-left">
+
                             <span class="timeline-dot"></span>
 
-                            <span class="appt-month-title">
+                            <span class="global-accordion-title">
                                 {{ $monthLabel }}
                             </span>
 
                             <span class="global-info-group">
+
                                 <span class="appt-type-icon" aria-hidden="true">
+
                                     <i class="fa-solid fa-calendar-check"></i>
+
                                 </span>
 
                                 <span class="global-info-subvalue" data-month-count data-show-more-count
@@ -465,14 +464,18 @@
 
                                     {{ $items->count() }}
                                     {{ Str::plural('appointment', $items->count()) }}
+
                                 </span>
+
                             </span>
+
                         </span>
 
-                        <i class="fa-solid fa-chevron-down appt-month-chevron"></i>
+                        <i class="fa-solid fa-chevron-down global-accordion-chevron"></i>
+
                     </summary>
 
-                    <div class="appt-month-body">
+                    <div class="global-accordion-body">
 
                         <div class="desktop-appointments-table relative pl-10">
 
@@ -548,9 +551,13 @@
 
                                         $courseName = trim((string) ($patient?->course_name ?? ''));
 
-                                        $isFacultyPatient = filled($patient?->faculty_code);
+                                        $isFacultyPatient =
+                                            $patient?->classification === 'faculty' || filled($patient?->faculty_code);
 
-                                        if ($isFacultyPatient) {
+                                        if (in_array(strtolower(trim((string) $patient?->classification)), ['administrative', 'administrative personnel'], true)) {
+                                            $program = 'Administrative';
+                                            $programFull = 'Administrative';
+                                        } elseif ($isFacultyPatient) {
                                             $program = 'Faculty';
                                             $programFull = 'Faculty';
                                         } else {
@@ -581,8 +588,9 @@
 
                                         $weekday = \Carbon\Carbon::parse($appt->appointment_date)->format('l');
 
-                                        $timeLabel = $appt->appointment_time
-                                            ? \Carbon\Carbon::parse($appt->appointment_time)->format('g:i A')
+                                        $displayTime = \App\Support\DentalServicesProcedureTiming::requestedTimeIn($appt);
+                                        $timeLabel = $displayTime
+                                            ? $displayTime->format('g:i A')
                                             : '—';
 
                                         $serviceLabel =
@@ -735,7 +743,7 @@
                                     <div class="appt-card {{ $shouldHighlightToday ? 'is-today' : '' }}"
                                         data-appt-id="{{ $appt->id }}" data-period="{{ $period }}"
                                         data-date="{{ $appt->appointment_date }}"
-                                        data-time="{{ $appt->appointment_time ?? '' }}"
+                                        data-time="{{ $displayTime?->format('H:i:s') ?? '' }}"
                                         data-patient="{{ strtolower($patientName) }}"
                                         data-student-no="{{ strtolower($studentNumber) }}"
                                         data-program="{{ strtolower($programFull) }}"
@@ -743,7 +751,7 @@
                                         data-patient-id="{{ strtolower((string) ($appt->patient_id ?? '')) }}"
                                         data-status="{{ $normalizedStatus }}"
                                         data-follow-up="{{ $isFollowUpAppointment ? '1' : '0' }}" data-show-more-item
-                                        style="animation-delay:{{ $i * 0.04 }}s">
+                                        data-ui-style="animation-delay:{{ $i * 0.04 }}s">
                                         <div
                                             class="appointment-table-grid
                                            grid gap-4 items-center
@@ -874,7 +882,7 @@
 
                                                 @if (!$isActiveAppointment && $canViewTreatmentRecord)
                                                     <button type="button" class="ui-action-btn ui-action-neutral"
-                                                        data-tooltip="View details" onclick="openRecordModal(this)"
+                                                        data-tooltip="View details" data-ui-click="action-c449c32115b5"
                                                         data-appt-id="{{ $appt->id }}"
                                                         data-service="{{ $serviceLabel }}"
                                                         data-date="{{ $dateLabel }}" data-time="{{ $timeLabel }}"
@@ -891,10 +899,9 @@
                                                 @endif
 
                                                 @if ($profileUrl)
-                                                    <a href="{{ $profileUrl }}" class="ui-action-btn ui-action-view"
-                                                        data-tooltip="View profile" data-tooltip-tone="view">
-                                                        <i class="fa-regular fa-user"></i>
-                                                    </a>
+                                                    <x-action-button :href="$profileUrl" variant="view"
+                                                        icon="fa-regular fa-user" label="View patient profile"
+                                                        tooltip="View patient profile" />
                                                 @else
                                                     <button type="button" class="ui-action-btn ui-action-view" disabled
                                                         data-tooltip="No patient profile">
@@ -902,7 +909,7 @@
                                                     </button>
                                                 @endif
 
-                                                @if ($canStartProcedure)
+                                                @if ($canStartProcedure && $isActiveAppointment)
                                                     <button type="button"
                                                         class="ui-action-btn
                                                            ui-action-success
@@ -912,8 +919,8 @@
                                                         data-start-locked="{{ $canStartThisAppointment ? '0' : '1' }}"
                                                         aria-disabled="{{ $canStartThisAppointment ? 'false' : 'true' }}"
                                                         {{ $canStartThisAppointment ? '' : 'disabled' }}
-                                                        onclick="openStartProcedureModal(this)"
-                                                        data-id="{{ $appt->id }}" data-name="{{ $patientName }}"
+                                                        data-ui-click="action-27b3080a773d" data-id="{{ $appt->id }}"
+                                                        data-name="{{ $patientName }}"
                                                         data-datetime="{{ $modalDatetime }}"
                                                         data-service="{{ $serviceLabel }}"
                                                         data-start-url="{{ route('dentist.odontogram', ['appointment' => $appt->id]) }}?from=appointments&start_procedure=1">
@@ -921,36 +928,36 @@
                                                     </button>
                                                 @endif
 
-                                                @if ($canRescheduleAppointment && !$appt->reserved_booking_period_id)
+                                                @if ($canRescheduleAppointment && $isActiveAppointment && !$appt->reserved_booking_period_id)
                                                     <button type="button"
                                                         class="ui-action-btn ui-action-warning {{ $isActiveAppointment ? '' : 'is-start-locked' }}"
                                                         data-tooltip="{{ $isActiveAppointment ? 'Reschedule appointment' : 'Only upcoming or rescheduled appointments can be changed' }}"
                                                         data-tooltip-tone="{{ $isActiveAppointment ? 'reschedule' : 'locked' }}"
                                                         aria-label="Reschedule appointment"
                                                         {{ $isActiveAppointment ? '' : 'disabled aria-disabled=true' }}
-                                                        onclick="@if ($isActiveAppointment) openRescheduleModal({
-                                                        id: '{{ $appt->id }}',
-                                                        name: @js($patientName),
-                                                        datetime: @js($modalDatetime),
-                                                        serviceType: @js($appt->service_type_name),
-                                                        updateUrl: '{{ route('dentist.dentist.appointments.reschedule.update', $appt->id) }}'
-                                                    }) @endif">
+                                                        data-ui-click="action-29ed24cdc40f"
+                                                        data-ui-click-arg-0="{{ json_encode((bool) $isActiveAppointment) }}"
+                                                        data-ui-click-arg-1="{{ $appt->id }}"
+                                                        data-ui-click-arg-2="{{ json_encode($patientName, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                        data-ui-click-arg-3="{{ json_encode($modalDatetime, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                        data-ui-click-arg-4="{{ json_encode($appt->service_type_name, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                        data-ui-click-arg-5="{{ route('dentist.dentist.appointments.reschedule.update', $appt->id) }}">
                                                         <i class="fa-solid fa-rotate-right"></i>
                                                     </button>
                                                 @endif
 
-                                                @if ($canCancelAppointment)
+                                                @if ($canCancelAppointment && $isActiveAppointment)
                                                     <button type="button"
                                                         class="ui-action-btn ui-action-delete {{ $isActiveAppointment ? '' : 'is-start-locked' }}"
                                                         data-tooltip="{{ $isActiveAppointment ? 'Cancel appointment' : 'Only upcoming or rescheduled appointments can be cancelled' }}"
                                                         data-tooltip-tone="{{ $isActiveAppointment ? 'cancel' : 'locked' }}"
                                                         aria-label="Cancel appointment"
                                                         {{ $isActiveAppointment ? '' : 'disabled aria-disabled=true' }}
-                                                        onclick="@if ($isActiveAppointment) cancelAppointmentFromModal(
-                                                        '{{ route('dentist.dentist.appointments.cancel', $appt->id) }}',
-                                                        @js($patientName),
-                                                        @js($dateLabel . ' | ' . $timeLabel)
-                                                    ) @endif">
+                                                        data-ui-click="action-aaaf28f0e0b0"
+                                                        data-ui-click-arg-0="{{ json_encode((bool) $isActiveAppointment) }}"
+                                                        data-ui-click-arg-1="{{ route('dentist.dentist.appointments.cancel', $appt->id) }}"
+                                                        data-ui-click-arg-2="{{ json_encode($patientName, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                        data-ui-click-arg-3="{{ json_encode($dateLabel . ' | ' . $timeLabel, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
                                                         <i class="fa-solid fa-xmark"></i>
                                                     </button>
                                                 @endif
@@ -994,9 +1001,13 @@
 
                                     $courseName = trim((string) ($patient?->course_name ?? ''));
 
-                                    $isFacultyPatient = filled($patient?->faculty_code);
+                                    $isFacultyPatient =
+                                        $patient?->classification === 'faculty' || filled($patient?->faculty_code);
 
-                                    if ($isFacultyPatient) {
+                                    if (in_array(strtolower(trim((string) $patient?->classification)), ['administrative', 'administrative personnel'], true)) {
+                                        $program = 'Administrative';
+                                        $programFull = 'Administrative';
+                                    } elseif ($isFacultyPatient) {
                                         $program = 'Faculty';
                                         $programFull = 'Faculty';
                                     } else {
@@ -1023,8 +1034,9 @@
 
                                     $weekday = \Carbon\Carbon::parse($appt->appointment_date)->format('l');
 
-                                    $timeLabel = $appt->appointment_time
-                                        ? \Carbon\Carbon::parse($appt->appointment_time)->format('g:i A')
+                                    $displayTime = \App\Support\DentalServicesProcedureTiming::requestedTimeIn($appt);
+                                    $timeLabel = $displayTime
+                                        ? $displayTime->format('g:i A')
                                         : '—';
 
                                     $serviceLabel =
@@ -1156,7 +1168,7 @@
                                 <div class="mobile-appt-card {{ $shouldHighlightToday ? 'is-today' : '' }}"
                                     data-appt-id="{{ $appt->id }}" data-period="{{ $period }}"
                                     data-date="{{ $appt->appointment_date }}"
-                                    data-time="{{ $appt->appointment_time ?? '' }}"
+                                    data-time="{{ $displayTime?->format('H:i:s') ?? '' }}"
                                     data-patient="{{ strtolower($patientName) }}"
                                     data-student-no="{{ strtolower($studentNumber) }}"
                                     data-program="{{ strtolower($programFull) }}"
@@ -1164,7 +1176,7 @@
                                     data-patient-id="{{ strtolower((string) ($appt->patient_id ?? '')) }}"
                                     data-status="{{ $normalizedStatus }}"
                                     data-follow-up="{{ $isFollowUpAppointment ? '1' : '0' }}" data-show-more-item
-                                    style="animation-delay:{{ $i * 0.04 }}s">
+                                    data-ui-style="animation-delay:{{ $i * 0.04 }}s">
 
                                     <div class="mobile-appt-card-head">
 
@@ -1283,7 +1295,7 @@
 
                                         @if (!$isActiveAppointment && $canViewTreatmentRecord)
                                             <button type="button" class="ui-action-btn ui-action-neutral"
-                                                data-tooltip="View details" onclick="openRecordModal(this)"
+                                                data-tooltip="View details" data-ui-click="action-c449c32115b5"
                                                 data-appt-id="{{ $appt->id }}" data-service="{{ $serviceLabel }}"
                                                 data-date="{{ $dateLabel }}" data-time="{{ $timeLabel }}"
                                                 data-status="{{ $statusMeta['label'] }}"
@@ -1305,7 +1317,7 @@
                                             </a>
                                         @endif
 
-                                        @if ($canStartProcedure)
+                                        @if ($canStartProcedure && $isActiveAppointment)
                                             <button type="button"
                                                 class="ui-action-btn
                                                    ui-action-success
@@ -1315,7 +1327,7 @@
                                                 data-start-locked="{{ $canStartThisAppointment ? '0' : '1' }}"
                                                 aria-disabled="{{ $canStartThisAppointment ? 'false' : 'true' }}"
                                                 {{ $canStartThisAppointment ? '' : 'disabled' }}
-                                                onclick="openStartProcedureModal(this)" data-id="{{ $appt->id }}"
+                                                data-ui-click="action-27b3080a773d" data-id="{{ $appt->id }}"
                                                 data-name="{{ $patientName }}" data-datetime="{{ $modalDatetime }}"
                                                 data-service="{{ $serviceLabel }}"
                                                 data-start-url="{{ route('dentist.odontogram', ['appointment' => $appt->id]) }}?from=appointments&start_procedure=1">
@@ -1323,34 +1335,34 @@
                                             </button>
                                         @endif
 
-                                        @if ($canRescheduleAppointment && !$appt->reserved_booking_period_id)
+                                        @if ($canRescheduleAppointment && $isActiveAppointment && !$appt->reserved_booking_period_id)
                                             <button type="button"
                                                 class="ui-action-btn ui-action-warning {{ $isActiveAppointment ? '' : 'is-start-locked' }}"
                                                 data-tooltip="{{ $isActiveAppointment ? 'Reschedule appointment' : 'Only upcoming or rescheduled appointments can be changed' }}"
                                                 data-tooltip-tone="{{ $isActiveAppointment ? 'reschedule' : 'locked' }}"
                                                 {{ $isActiveAppointment ? '' : 'disabled aria-disabled=true' }}
-                                                onclick="@if ($isActiveAppointment) openRescheduleModal({
-                                                id: '{{ $appt->id }}',
-                                                name: @js($patientName),
-                                                datetime: @js($modalDatetime),
-                                                serviceType: @js($appt->service_type_name),
-                                                updateUrl: '{{ route('dentist.dentist.appointments.reschedule.update', $appt->id) }}'
-                                            }) @endif">
+                                                data-ui-click="action-ab60db006e21"
+                                                data-ui-click-arg-0="{{ json_encode((bool) $isActiveAppointment) }}"
+                                                data-ui-click-arg-1="{{ $appt->id }}"
+                                                data-ui-click-arg-2="{{ json_encode($patientName, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                data-ui-click-arg-3="{{ json_encode($modalDatetime, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                data-ui-click-arg-4="{{ json_encode($appt->service_type_name, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                data-ui-click-arg-5="{{ route('dentist.dentist.appointments.reschedule.update', $appt->id) }}">
                                                 <i class="fa-solid fa-rotate-right"></i>
                                             </button>
                                         @endif
 
-                                        @if ($canCancelAppointment)
+                                        @if ($canCancelAppointment && $isActiveAppointment)
                                             <button type="button"
                                                 class="ui-action-btn ui-action-delete {{ $isActiveAppointment ? '' : 'is-start-locked' }}"
                                                 data-tooltip="{{ $isActiveAppointment ? 'Cancel appointment' : 'Only upcoming or rescheduled appointments can be cancelled' }}"
                                                 data-tooltip-tone="{{ $isActiveAppointment ? 'cancel' : 'locked' }}"
                                                 {{ $isActiveAppointment ? '' : 'disabled aria-disabled=true' }}
-                                                onclick="@if ($isActiveAppointment) cancelAppointmentFromModal(
-                                                '{{ route('dentist.dentist.appointments.cancel', $appt->id) }}',
-                                                @js($patientName),
-                                                @js($dateLabel . ' | ' . $timeLabel)
-                                            ) @endif">
+                                                data-ui-click="action-830526eaba30"
+                                                data-ui-click-arg-0="{{ json_encode((bool) $isActiveAppointment) }}"
+                                                data-ui-click-arg-1="{{ route('dentist.dentist.appointments.cancel', $appt->id) }}"
+                                                data-ui-click-arg-2="{{ json_encode($patientName, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                data-ui-click-arg-3="{{ json_encode($dateLabel . ' | ' . $timeLabel, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}">
                                                 <i class="fa-solid fa-xmark"></i>
                                             </button>
                                         @endif
@@ -1386,10 +1398,9 @@
     </main>
 
     <x-filter-drawer id="filterModal" title="Filters" close-id="closeFilterModalBtn"
-        close-callback="window.closeFilterDrawer?.('filterModal')" clear-id="clearFiltersModal"
-        clear-label="Clear Filters" cancel-id="cancelFilterBtn"
-        cancel-callback="window.closeFilterDrawer?.('filterModal')" cancel-label="Cancel" apply-id="applyFilters"
-        apply-callback="applyAppointmentDrawerFilters()" apply-label="Show 0 results" results-id="showResultsText">
+        close-callback="action-9dac37c8b8f2" clear-id="clearFiltersModal" clear-label="Clear Filters"
+        cancel-id="cancelFilterBtn" cancel-callback="action-9dac37c8b8f2" cancel-label="Cancel" apply-id="applyFilters"
+        apply-callback="action-e7e704b5c8bd" apply-label="Show 0 results" results-id="showResultsText">
 
         <div id="activeFiltersSection" class="filter-active-section hidden">
 
@@ -1466,15 +1477,15 @@
 
             <div class="filter-date-grid">
                 <div class="filter-date-input-wrap">
-                    <input id="fromDate" type="text" class="form-input-custom js-flatpickr-date-range-from" placeholder="Start date"
-                        readonly autocomplete="off">
+                    <input id="fromDate" type="text" class="form-input-custom js-flatpickr-date-range-from"
+                        placeholder="Start date" readonly autocomplete="off">
 
                     <i class="fa-regular fa-calendar"></i>
                 </div>
 
                 <div class="filter-date-input-wrap">
-                    <input id="toDate" type="text" class="form-input-custom js-flatpickr-date-range-to" placeholder="End date"
-                        readonly autocomplete="off">
+                    <input id="toDate" type="text" class="form-input-custom js-flatpickr-date-range-to"
+                        placeholder="End date" readonly autocomplete="off">
 
                     <i class="fa-regular fa-calendar"></i>
                 </div>
@@ -1489,7 +1500,7 @@
 @endsection
 
 @section('scripts')
-    <script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         const APPOINTMENT_REFRESH_ITEMS = @json($appointmentRefreshItems);
         const APPOINTMENT_REFRESH_URL = window.location.href;
         let appointmentRefreshWatcher = null;
@@ -1801,44 +1812,6 @@
                 applyAppointmentFilters();
             };
 
-        function setupAppointmentAccordions() {
-            document.querySelectorAll('details.appt-month-group').forEach((group) => {
-                const summary = group.querySelector('summary');
-                if (!summary || group.dataset.accordionReady === 'true') return;
-
-                group.dataset.accordionReady = 'true';
-
-                summary.addEventListener('click', function(event) {
-                    event.preventDefault();
-
-                    if (group.dataset.animating === 'true') return;
-
-                    if (group.open) {
-                        group.dataset.animating = 'true';
-                        group.classList.add('is-closing');
-
-                        setTimeout(() => {
-                            group.open = false;
-                            group.classList.remove('is-closing');
-                            group.dataset.animating = 'false';
-                        }, 220);
-
-                        return;
-                    }
-
-                    group.open = true;
-                    group.dataset.animating = 'true';
-                    group.classList.remove('is-closing');
-                    group.classList.add('is-opening');
-
-                    setTimeout(() => {
-                        group.classList.remove('is-opening');
-                        group.dataset.animating = 'false';
-                    }, 280);
-                });
-            });
-        }
-
         document.addEventListener(
             'DOMContentLoaded',
             () => {
@@ -1870,7 +1843,6 @@
                 applyAppointmentFilters();
                 updateAppointmentFilterButtonState();
                 revealAppointmentContainer?.();
-                setupAppointmentAccordions();
 
                 window.ShowMore?.init(
                     document
@@ -2679,4 +2651,3 @@
         }
     </script>
 @endsection
-

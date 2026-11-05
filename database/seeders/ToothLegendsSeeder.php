@@ -11,6 +11,7 @@ class ToothLegendsSeeder extends Seeder
     {
         $legends = [
             ['code' => 'D',  'description' => 'Decayed (Caries indicated for filling)', 'category' => 'Condition'],
+            ['code' => 'RC', 'description' => 'Recurrent Caries', 'category' => 'Condition'],
             ['code' => 'M',  'description' => 'Missing due to caries', 'category' => 'Condition'],
             ['code' => 'F',  'description' => 'Filled', 'category' => 'Condition'],
             ['code' => 'I',  'description' => 'Caries indicated for extraction', 'category' => 'Condition'],
@@ -24,6 +25,7 @@ class ToothLegendsSeeder extends Seeder
             ['code' => 'P',  'description' => 'Pontic', 'category' => 'Restoration and Prosthetics'],
             ['code' => 'IN', 'description' => 'Inlay', 'category' => 'Restoration and Prosthetics'],
             ['code' => 'LC', 'description' => 'Light cure composite', 'category' => 'Restoration and Prosthetics'],
+            ['code' => 'TP', 'description' => 'Temporary Pasta', 'category' => 'Restoration and Prosthetics'],
             ['code' => 'RM', 'description' => 'Removable denture', 'category' => 'Restoration and Prosthetics'],
 
             ['code' => 'X',  'description' => 'Extraction due to caries', 'category' => 'Surgery'],

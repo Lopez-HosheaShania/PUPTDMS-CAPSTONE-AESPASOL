@@ -90,17 +90,19 @@
         $pageTitle = $savedVisitEditMode ? 'Edit Saved Odontogram' : 'Patient Odontogram';
         $pageSubtitle = '2D / 3D Treatment &amp; Condition Mapping';
 
-        $existingProcedureDuration = $existingAppointmentMode
-            ? data_get($existingAppointmentDraft ?? [], 'procedure_duration_hms', '00:00:00')
-            : ($savedVisitEditMode
+        $manualTimeIn = old('procedure_started_at', $procedure?->procedure_started_at?->format('H:i') ?? '');
+        $savedDurationSeconds = $procedure?->procedure_duration_seconds;
+        $manualDuration = old(
+            'procedure_duration_hms',
+            $savedDurationSeconds !== null
                 ? sprintf(
                     '%02d:%02d:%02d',
-                    floor((int) data_get($procedure, 'procedure_duration_seconds', 0) / 3600),
-                    floor(((int) data_get($procedure, 'procedure_duration_seconds', 0) % 3600) / 60),
-                    (int) data_get($procedure, 'procedure_duration_seconds', 0) % 60,
+                    intdiv($savedDurationSeconds, 3600),
+                    intdiv($savedDurationSeconds % 3600, 60),
+                    $savedDurationSeconds % 60,
                 )
-                : '00:00:00');
-
+                : '',
+        );
         $discardProcedureTitle = $existingAppointmentMode
             ? 'Discard appointment entry?'
             : ($savedVisitEditMode
@@ -182,15 +184,10 @@
 
                                 </div>
 
-                                <button type="button" id="cancelProcedureBtn"
-                                    class="ui-btn {{ $savedVisitEditMode ? 'ui-btn-primary' : 'ui-btn-danger' }}">
-
-                                    <i class="fa-solid fa-arrow-left"></i>
-
-                                    <span>
-                                        Cancel Odontogram
-                                    </span>
-                                </button>
+                                <x-button type="button" id="cancelProcedureBtn" :variant="$savedVisitEditMode ? 'primary' : 'danger'"
+                                    icon="fa-solid fa-arrow-left">
+                                    Cancel Odontogram
+                                </x-button>
 
                             </div>
 
@@ -250,28 +247,36 @@
                                         </div>
                                     </div>
 
-                                    <div id="procedureDurationField"
-                                        class="odontogram-appointment-meta-item odontogram-procedure-duration-item"
-                                        data-global-field>
-                                        <span class="odontogram-appointment-meta-icon">
-                                            <i class="fa-solid fa-stopwatch"></i>
-                                        </span>
-
-                                        <div class="odontogram-procedure-duration-copy">
-                                            <label for="procedureDurationInput" class="odontogram-appointment-meta-label">
-                                                Procedure Duration
-                                            </label>
-
-                                            <input type="text" id="procedureDurationInput" class="form-input-custom"
-                                                value="{{ $existingProcedureDuration !== '00:00:00' ? $existingProcedureDuration : '' }}"
-                                                inputmode="numeric" placeholder="HH:MM:SS" maxlength="8" required
+                                    <div class="odontogram-appointment-meta-item odontogram-procedure-timing-item">
+                                        @foreach (['procedure_started_at' => ['Time In', $manualTimeIn]] as $field => [$label, $value])
+                                            <div class="odontogram-procedure-duration-copy" data-global-field>
+                                                <label for="{{ $field }}" class="odontogram-appointment-meta-label">
+                                                    {{ $label }} <span class="required-mark">*</span>
+                                                </label>
+                                                <input type="text" id="{{ $field }}" name="{{ $field }}"
+                                                    class="form-input-custom js-flatpickr-time" value="{{ $value }}"
+                                                    required readonly placeholder="HH:MM" autocomplete="off"
+                                                    data-time-minute-increment="1" data-field-label="{{ $label }}"
+                                                    data-required-message="Please enter {{ $label }}."
+                                                    aria-describedby="{{ $field }}_error">
+                                                <div id="{{ $field }}_error" class="global-field-error"
+                                                    data-error-for="{{ $field }}" aria-hidden="true"></div>
+                                            </div>
+                                        @endforeach
+                                        <div class="odontogram-procedure-duration-copy" data-global-field>
+                                            <label for="procedureDurationInput"
+                                                class="odontogram-appointment-meta-label">Procedure Duration <span
+                                                    class="required-mark">*</span></label>
+                                            <input type="text" id="procedureDurationInput" name="procedure_duration_hms"
+                                                class="form-input-custom" value="{{ $manualDuration }}"
+                                                placeholder="HH:MM:SS" required inputmode="numeric" autocomplete="off"
+                                                pattern="[0-9]{2}:[0-5][0-9]:[0-5][0-9]"
                                                 data-field-label="Procedure Duration"
-                                                data-required-message="Please enter the procedure duration."
-                                                data-validation-rule="bookingDuration"
-                                                aria-label="Procedure duration in HH:MM:SS format">
-
-                                            <div id="procedureDurationError" class="global-field-error"
-                                                data-error-for="procedureDurationInput" aria-hidden="true"></div>
+                                                data-required-message="Please enter Procedure Duration."
+                                                data-pattern-message="Enter a valid duration in HH:MM:SS format, e.g. 00:30:00."
+                                                aria-describedby="procedure_duration_hms_error">
+                                            <div id="procedure_duration_hms_error" class="global-field-error"
+                                                data-error-for="procedure_duration_hms" aria-hidden="true"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -384,9 +389,19 @@
                                         </div>
                                     </div>
                                     <div id="canvas-container">
-                                        <div id="loadingOverlay" class="odontogram-loading-overlay">
-                                            <i class="fa-solid fa-circle-notch fa-spin"></i>
-                                            <p>Generating 3D Model...</p>
+                                        <div id="loadingOverlay" class="odontogram-loading" role="status"
+                                            aria-live="polite" aria-label="Generating 3D odontogram model.">
+
+                                            <div aria-hidden="true">
+                                                <span></span>
+                                                <span></span>
+                                                <span></span>
+                                            </div>
+
+                                            <p>
+                                                Generating 3D model...
+                                            </p>
+
                                         </div>
 
                                         <div id="toothTooltip" class="tooth-tooltip">
@@ -460,11 +475,10 @@
                                                 <p class="ui-muted-text">
                                                     Choose a surface, select a treatment, then apply.
                                                 </p>
-                                                <button type="button" id="reset3DViewBtn"
-                                                    class="ui-btn ui-btn-secondary ui-btn-sm">
-                                                    <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
+                                                <x-button type="button" id="reset3DViewBtn" variant="secondary"
+                                                    size="sm" icon="fa-solid fa-up-right-and-down-left-from-center">
                                                     Full View
-                                                </button>
+                                                </x-button>
                                             </div>
                                         </div>
                                     </div>
@@ -488,6 +502,8 @@
                                     <div class="global-form-group">
                                         <label for="oralExaminationNotes" class="global-form-label">
                                             Oral Examination
+                                            <span class="field-optional">
+                                                (Optional) </span>
                                         </label>
 
                                         <textarea id="oralExaminationNotes" rows="4" class="form-input-custom global-form-textarea"
@@ -512,10 +528,11 @@
                                     <div class="global-form-group">
                                         <label for="diagnosisNotes" class="global-form-label">
                                             Diagnosis
+                                            <span class="field-optional">
+                                                (Optional) </span>
                                         </label>
 
-                                        <select id="diagnosisNotes" class="form-select-custom js-custom-select"
-                                            data-placeholder="Select diagnosis">
+                                        <x-select id="diagnosisNotes" data-placeholder="Select diagnosis">
                                             <option value="" {{ $selectedDiagnosis === '' ? 'selected' : '' }}>
                                                 Select
                                                 diagnosis</option>
@@ -529,17 +546,17 @@
                                                 {{ $selectedDiagnosis === 'Others' ? 'selected' : '' }}>
                                                 Others
                                             </option>
-                                        </select>
+                                        </x-select>
 
                                         <input type="text" id="diagnosisCustomNotes" class="form-input-custom mt-3"
                                             placeholder="Enter custom diagnosis..." value="{{ $customDiagnosis }}"
                                             @if ($selectedDiagnosis !== 'Others') hidden @endif>
                                     </div>
 
-                                    <div class="global-form-group odontogram-prescription-field">
+                                    <div class="global-form-group">
                                         <label for="prescriptionsNotes" class="global-form-label">
                                             Prescription
-                                            <span class="odontogram-label-optional">
+                                            <span class="field-optional">
                                                 (Optional)
                                             </span>
                                         </label>
@@ -548,22 +565,32 @@
                                             placeholder="Add medication or aftercare instructions...">{{ old('prescriptions', $procedure?->prescriptions) }}</textarea>
                                     </div>
 
+                                    <div class="global-form-group">
+                                        <label for="inventoryNotes" class="global-form-label">
+                                            Inventory Notes
+                                            <span class="field-optional">
+                                                (Optional)
+                                            </span>
+                                        </label>
+                                        <textarea id="inventoryNotes" name="inventory_notes" rows="3" maxlength="10000"
+                                            class="form-input-custom global-form-textarea"
+                                            placeholder="Enter one item per line, e.g.&#10;2x Paracetamol&#10;1x Dental Gloves&#10;1x Composite Resin">{{ old('inventory_notes', $procedure?->inventory_notes) }}</textarea>
+                                    </div>
+
                                     <div class="odontogram-procedure-actions">
                                         @unless ($existingAppointmentMode || $savedVisitEditMode)
-                                            <button type="button" id="followUpBtn" class="ui-btn ui-btn-warning">
-                                                <span>Set Follow-Up Appointment</span>
-                                            </button>
+                                            <x-button type="button" id="followUpBtn" variant="warning">
+                                                Set Follow-Up Appointment
+                                            </x-button>
                                         @endunless
 
-                                        <button type="button" id="finishProcedureBtn" class="ui-btn ui-btn-primary">
-                                            <span>
-                                                {{ $existingAppointmentMode
-                                                    ? 'Save Existing Appointment'
-                                                    : ($savedVisitEditMode
-                                                        ? 'Save Changes'
-                                                        : 'Finish Procedure') }}
-                                            </span>
-                                        </button>
+                                        <x-button type="button" id="finishProcedureBtn" variant="primary">
+                                            {{ $existingAppointmentMode
+                                                ? 'Save Existing Appointment'
+                                                : ($savedVisitEditMode
+                                                    ? 'Save Changes'
+                                                    : 'Finish Procedure') }}
+                                        </x-button>
                                     </div>
                                 </div>
                             </div>
@@ -601,16 +628,14 @@
                         </div>
 
                         <div class="odontogram-target-scope" role="group" aria-label="Treatment target scope">
-                            <button type="button" id="wholeToothScopeBtn" class="ui-btn ui-btn-secondary"
-                                aria-pressed="false">
-                                <i class="fa-solid fa-tooth"></i>
+                            <x-button type="button" id="wholeToothScopeBtn" variant="secondary"
+                                icon="fa-solid fa-tooth" aria-pressed="false">
                                 Whole Tooth
-                            </button>
-                            <button type="button" id="toothSurfaceScopeBtn" class="ui-btn ui-btn-secondary active"
-                                aria-pressed="true">
-                                <i class="fa-solid fa-border-all"></i>
+                            </x-button>
+                            <x-button type="button" id="toothSurfaceScopeBtn" variant="secondary"
+                                icon="fa-solid fa-border-all" class="active" aria-pressed="true">
                                 Tooth Surface
-                            </button>
+                            </x-button>
                         </div>
 
                         <div id="selectedToothDisplay" class="odontogram-selected-display">
@@ -636,14 +661,14 @@
                         </div>
 
                         <div class="odontogram-target-actions">
-                            <button type="button" id="applyTreatmentBtn" class="ui-btn ui-btn-primary w-full" disabled>
+                            <x-button type="button" id="applyTreatmentBtn" variant="primary" class="w-full" disabled>
                                 Apply
-                            </button>
+                            </x-button>
 
-                            <button type="button" id="clearCurrentToothBtn" class="ui-btn ui-btn-secondary w-full"
+                            <x-button type="button" id="clearCurrentToothBtn" variant="secondary" class="w-full"
                                 disabled>
                                 Clear
-                            </button>
+                            </x-button>
                         </div>
                     </div>
 
@@ -651,7 +676,7 @@
                     <span id="drawerSelectedLegendPreview" hidden>None selected</span>
 
                     <div class="odontogram-legend-search-wrap">
-                        <x-search-bar id="legendSearchInput" class="search-compact" placeholder="Search treatments…"
+                        <x-search-bar id="legendSearchInput" class="search-compact" placeholder="Search treatments..."
                             clear-label="Clear treatment search" callback="filterOdontogramLegends" :debounce="150" />
                     </div>
 
@@ -675,7 +700,7 @@
     </main>
 
     @unless ($existingAppointmentMode || $savedVisitEditMode)
-        <x-follow-up-modal :patient-name="$patientName" :patient-avatar-url="$patientAvatarUrl" :service-type="$currentServiceType ?: '—'" :appointment-date="$formattedAppointmentDate" :appointment-time="$formattedAppointmentTime"
+        <x-follow-up-modal :patient-name="$patientName" :patient-avatar-url="$patientAvatarUrl" :service-type="$currentServiceType ?: '-'" :appointment-date="$formattedAppointmentDate" :appointment-time="$formattedAppointmentTime"
             :store-url="route('dentist.dentist.appointments.follow-up.store', $appointment->id)" />
     @endunless
 
@@ -699,7 +724,7 @@
                         </span>
 
                         <strong id="followUpSuccessDate" class="global-info-value">
-                            —
+                            -
                         </strong>
                     </div>
                 </div>
@@ -715,7 +740,7 @@
                         </span>
 
                         <strong id="followUpSuccessTime" class="global-info-value">
-                            —
+                            -
                         </strong>
                     </div>
                 </div>
@@ -731,7 +756,7 @@
                         </span>
 
                         <strong id="followUpSuccessPatient" class="global-info-value">
-                            —
+                            -
                         </strong>
                     </div>
                 </div>
@@ -771,164 +796,197 @@
             </div>
 
             <x-slot:footer>
-                <button type="button" id="followUpSuccessBackBtn" class="ui-btn ui-btn-primary">
-                    <i class="fa-solid fa-arrow-left"></i>
-                    <span>Back to Appointments</span>
-                </button>
+                <x-button type="button" id="followUpSuccessBackBtn" variant="primary" icon="fa-solid fa-arrow-left">
+                    Back to Appointments
+                </x-button>
             </x-slot:footer>
         </x-booking.confirmed-modal>
     @endunless
 
-    <div id="resetTreatmentModal" class="ui-modal modal-theme-danger" aria-hidden="true" role="dialog"
-        aria-modal="true" aria-labelledby="resetTreatmentModalTitle">
-        <div class="ui-modal-card modal-md">
-            <div class="modal-hd">
-                <div class="modal-heading">
-                    <div class="modal-icon">
-                        <i class="fa-solid fa-triangle-exclamation"></i>
-                    </div>
+    <x-modal id="resetTreatmentModal" title="Reset Tooth Treatment" title-id="resetTreatmentModalTitle"
+        subtitle="Remove the treatment currently assigned to this target." icon="fa-solid fa-triangle-exclamation"
+        size="md" theme="danger" :show-close="false">
+        <div class="global-confirm-alert">
+            <i class="fa-solid fa-eraser"></i>
 
-                    <div class="modal-copy">
-                        <h2 id="resetTreatmentModalTitle" class="modal-title">
-                            Reset Tooth Treatment
-                        </h2>
-                        <p class="modal-subtitle">
-                            Remove the treatment currently assigned to this target.
-                        </p>
-                    </div>
-                </div>
-            </div>
+            <div>
+                <strong>Reset selected treatment?</strong>
 
-            <div class="modal-bd">
-                <div class="global-confirm-alert">
-                    <i class="fa-solid fa-eraser"></i>
-
-                    <div>
-                        <strong>Reset selected treatment?</strong>
-                        <span id="resetTreatmentMessage">
-                            Are you sure you want to reset the treatment for this tooth?
-                        </span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="modal-ft">
-                <button type="button" id="cancelResetTreatmentBtn" class="ui-btn ui-btn-secondary">
-                    <span>Keep Treatment</span>
-                </button>
-
-                <button type="button" id="confirmResetTreatmentBtn" class="ui-btn ui-btn-danger">
-                    <span>Reset Treatment</span>
-                </button>
+                <span id="resetTreatmentMessage">
+                    Are you sure you want to reset the treatment for this tooth?
+                </span>
             </div>
         </div>
-    </div>
 
-    <div id="cancelProcedureModal" class="ui-modal modal-theme-danger" aria-hidden="true" role="dialog"
-        aria-modal="true" aria-labelledby="cancelProcedureModalTitle">
-        <div class="ui-modal-card modal-md">
-            <div class="modal-hd">
-                <div class="modal-heading">
-                    <div class="modal-icon">
-                        <i class="fa-solid fa-circle-xmark"></i>
-                    </div>
+        <x-slot:footer>
+            <x-button id="cancelResetTreatmentBtn" type="button" variant="secondary">
+                Keep Treatment
+            </x-button>
 
-                    <div class="modal-copy">
-                        <h2 id="cancelProcedureModalTitle" class="modal-title">
-                            {{ $savedVisitEditMode ? 'Cancel Edit?' : 'Cancel Procedure?' }}
-                        </h2>
-                        <p class="modal-subtitle">
-                            {{ $savedVisitEditMode
-                                ? 'Unsaved changes in this saved visit editor may be lost.'
-                                : 'Unsaved changes in this procedure session may be lost.' }}
-                        </p>
-                    </div>
-                </div>
-            </div>
+            <x-button id="confirmResetTreatmentBtn" type="button" variant="danger">
+                Reset Treatment
+            </x-button>
+        </x-slot:footer>
+    </x-modal>
 
-            <div class="modal-bd">
-                <div class="global-confirm-alert">
-                    <i class="fa-solid fa-triangle-exclamation"></i>
+    <x-modal id="cancelProcedureModal" :title="$savedVisitEditMode ? 'Cancel Edit?' : 'Cancel Procedure?'" title-id="cancelProcedureModalTitle" :subtitle="$savedVisitEditMode
+        ? 'Unsaved changes in this saved visit editor may be lost.'
+        : 'Unsaved changes in this procedure session may be lost.'"
+        icon="fa-solid fa-circle-xmark" size="md" theme="danger" :show-close="false">
+        <div class="global-confirm-alert">
+            <i class="fa-solid fa-triangle-exclamation"></i>
 
-                    <div>
-                        <strong>{{ $savedVisitEditMode ? 'Leave this edit?' : 'Leave this procedure?' }}</strong>
-                        <span>
-                            {{ $savedVisitEditMode
-                                ? 'Are you sure you want to cancel this edit? Any unsaved changes in this saved visit may be
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    lost.'
-                                : 'Are you sure you want to cancel this procedure? Any unsaved progress in this session may be
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    lost.' }}
-                        </span>
-                    </div>
-                </div>
-            </div>
+            <div>
+                <strong>
+                    {{ $savedVisitEditMode ? 'Leave this edit?' : 'Leave this procedure?' }}
+                </strong>
 
-            <div class="modal-ft">
-                <button type="button" id="dismissCancelProcedureBtn" class="ui-btn ui-btn-secondary">
-                    <i class="fa-solid fa-arrow-left"></i>
-                    <span>{{ $savedVisitEditMode ? 'Continue Editing' : 'Continue Procedure' }}</span>
-                </button>
-
-                <button type="button" id="confirmCancelProcedureBtn"
-                    class="ui-btn {{ $savedVisitEditMode ? 'ui-btn-primary' : 'ui-btn-danger' }}">
-                    <i class="fa-solid fa-ban"></i>
-                    <span>{{ $savedVisitEditMode ? 'Cancel Edit' : 'Cancel Procedure' }}</span>
-                </button>
+                <span>
+                    {{ $savedVisitEditMode
+                        ? 'Are you sure you want to cancel this edit? Any unsaved changes in this saved visit may be lost.'
+                        : 'Are you sure you want to cancel this procedure? Any unsaved progress in this session may be lost.' }}
+                </span>
             </div>
         </div>
-    </div>
 
-    <div id="finishProcedureModal" class="ui-modal modal-theme-success" aria-hidden="true" role="dialog"
-        aria-modal="true" aria-labelledby="finishProcedureModalTitle">
-        <div class="ui-modal-card modal-md">
-            <div class="modal-hd">
-                <div class="modal-heading">
-                    <div class="modal-icon">
-                        <i id="finishProcedureModalIcon" class="fa-solid fa-clipboard-check"></i>
-                    </div>
+        <x-slot:footer>
+            <x-button id="dismissCancelProcedureBtn" type="button" variant="secondary" icon="fa-solid fa-arrow-left">
+                {{ $savedVisitEditMode ? 'Continue Editing' : 'Continue Procedure' }}
+            </x-button>
 
-                    <div class="modal-copy">
-                        <h2 id="finishProcedureModalTitle" class="modal-title">
-                            Procedure Completed!
-                        </h2>
-                        <p id="finishProcedureModalMessage" class="modal-subtitle"></p>
-                    </div>
+            <x-button id="confirmCancelProcedureBtn" type="button" :variant="$savedVisitEditMode ? 'primary' : 'danger'" icon="fa-solid fa-ban">
+                {{ $savedVisitEditMode ? 'Cancel Edit' : 'Cancel Procedure' }}
+            </x-button>
+        </x-slot:footer>
+    </x-modal>
+
+    @if ($savedVisitEditMode)
+        <x-modal id="correctionReasonModal" title="Reason for Correction" title-id="correctionReasonModalTitle"
+            subtitle="Document why this previously saved odontogram is being corrected." icon="fa-solid fa-pen-to-square"
+            size="md" theme="warning" :show-close="false">
+            <div class="global-confirm-alert">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+
+                <div>
+                    <strong>Correction will be recorded</strong>
+
+                    <span>
+                        The original version will remain in the revision history
+                        together with your identity, role, date, and reason for this change.
+                    </span>
                 </div>
             </div>
 
-            <div class="modal-bd">
-                <div class="global-confirm-alert">
-                    <i class="fa-solid fa-circle-check"></i>
+            <x-form-field class="mt-4" label="Correction Reason" for="correctionReasonCategory" required>
+                <x-select id="correctionReasonCategory" data-placeholder="Select a reason"
+                    data-field-label="Correction Reason">
+                    <option value="">
+                        Select a reason
+                    </option>
 
-                    <div>
-                        <strong id="finishProcedureModalAlertTitle">
-                            Procedure status
-                        </strong>
-                        <span id="finishProcedureModalAlertMessage">
-                            Review the message above before continuing.
-                        </span>
-                    </div>
+                    @foreach ($revisionReasonTypes ?? [] as $reasonType)
+                        <option value="{{ $reasonType->id }}" data-code="{{ $reasonType->code }}"
+                            data-requires-detail="{{ $reasonType->requires_detail ? '1' : '0' }}">
+                            {{ $reasonType->label }}
+                        </option>
+                    @endforeach
+                </x-select>
+            </x-form-field>
+
+            <x-form-field id="correctionReasonOtherField" class="mt-4" label="Specify Reason"
+                for="correctionReasonOther" required hidden>
+                <input type="text" id="correctionReasonOther" class="form-input-custom" maxlength="255"
+                    data-field-label="Specify Reason" placeholder="Specify the correction reason...">
+            </x-form-field>
+
+            <x-form-field class="mt-4" :show-error="false">
+                <div class="global-label-row">
+                    <label for="correctionReasonNotes" class="global-form-label">
+                        Correction Notes
+                        <span class="field-optional">(Optional)</span>
+                    </label>
+
+                    <span id="correctionReasonNotesCounter" class="char-counter">
+                        0 / 2000 characters
+                    </span>
                 </div>
+
+                <textarea id="correctionReasonNotes" rows="4" maxlength="2000" data-char-limit="2000"
+                    data-char-counter="#correctionReasonNotesCounter" class="form-input-custom global-form-textarea"
+                    placeholder="Add additional details about this correction..."></textarea>
+            </x-form-field>
+
+            <x-slot:footer>
+                <x-button id="dismissCorrectionReasonBtn" type="button" variant="secondary">
+                    Continue Editing
+                </x-button>
+
+                <x-button id="confirmCorrectionReasonBtn" type="button" variant="warning"
+                    icon="fa-solid fa-floppy-disk">
+                    Save Correction
+                </x-button>
+            </x-slot:footer>
+        </x-modal>
+    @endif
+
+    <x-modal id="finishProcedureModal" title="Procedure Completed!" title-id="finishProcedureModalTitle" size="md"
+        theme="success" :show-close="false">
+        <x-slot:header>
+            <div class="modal-heading">
+
+                <div class="modal-icon">
+                    <i id="finishProcedureModalIcon" class="fa-solid fa-clipboard-check"></i>
+                </div>
+
+                <div class="modal-copy">
+                    <h2 id="finishProcedureModalTitle" class="modal-title">
+                        Procedure Completed!
+                    </h2>
+
+                    <p id="finishProcedureModalMessage" class="modal-subtitle"></p>
+                </div>
+
             </div>
+        </x-slot:header>
+
+        <div class="global-confirm-alert">
+            <i class="fa-solid fa-circle-check"></i>
+
+            <div>
+                <strong id="finishProcedureModalAlertTitle">
+                    Procedure status
+                </strong>
+
+                <span id="finishProcedureModalAlertMessage">
+                    Review the message above before continuing.
+                </span>
+            </div>
+        </div>
+
+        <x-slot:footerRaw>
 
             <div id="finishProcedureConfirmActions" class="modal-ft hidden">
-                <button type="button" id="dismissFinishProcedureBtn" class="ui-btn ui-btn-secondary">
-                    <span>Back to Review</span>
-                </button>
+                <x-button id="dismissFinishProcedureBtn" type="button" variant="secondary">
+                    Back to Review
+                </x-button>
 
-                <button type="button" id="confirmFinishProcedureBtn" class="ui-btn ui-btn-warning">
-                    <span>Finish Procedure</span>
-                </button>
+                <x-button id="confirmFinishProcedureBtn" type="button" variant="warning">
+                    Finish Procedure
+                </x-button>
             </div>
 
             <div id="finishProcedureResultActions" class="modal-ft">
-                <button type="button" id="finishProcedureModalActionBtn" class="ui-btn ui-btn-primary">
-                    <span>Back to Appointments</span>
-                </button>
+                <x-button id="finishProcedureModalActionBtn" type="button" variant="primary">
+                    Back to Appointments
+                </x-button>
             </div>
-        </div>
-    </div>
+
+        </x-slot:footerRaw>
+    </x-modal>
 @endsection
+
+@vite('resources/js/odontogram/treatment-colors.js')
+
 
 @section('scripts')
     @unless ($existingAppointmentMode || $savedVisitEditMode)
@@ -976,7 +1034,7 @@
             'renderStyle' => 'dentist',
         ])
     @endunless
-    <script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         document.addEventListener('DOMContentLoaded', function() {
             const cancelProcedureBtn = document.getElementById('cancelProcedureBtn');
             const diagnosisSelect = document.getElementById('diagnosisNotes');
@@ -984,6 +1042,15 @@
             const cancelProcedureModal = document.getElementById('cancelProcedureModal');
             const confirmCancelProcedureBtn = document.getElementById('confirmCancelProcedureBtn');
             const dismissCancelProcedureBtn = document.getElementById('dismissCancelProcedureBtn');
+            const correctionReasonModal = document.getElementById('correctionReasonModal');
+
+            const correctionReasonCategory = document.getElementById('correctionReasonCategory');
+            const correctionReasonNotes = document.getElementById('correctionReasonNotes');
+            const correctionReasonOtherField = document.getElementById('correctionReasonOtherField');
+            const correctionReasonOther = document.getElementById('correctionReasonOther');
+            const dismissCorrectionReasonBtn = document.getElementById('dismissCorrectionReasonBtn');
+            const confirmCorrectionReasonBtn = document.getElementById('confirmCorrectionReasonBtn');
+
             const finishProcedureModal = document.getElementById('finishProcedureModal');
             const finishProcedureModalTitle = document.getElementById('finishProcedureModalTitle');
             const finishProcedureModalMessage = document.getElementById('finishProcedureModalMessage');
@@ -997,7 +1064,6 @@
             const finishProcedureModalAlertMessage = document.getElementById('finishProcedureModalAlertMessage');
             const existingAppointmentMode = @json($existingAppointmentMode);
             const savedVisitEditMode = @json($savedVisitEditMode);
-            const existingProcedureDuration = @json($existingProcedureDuration);
             const allowsProcedureCompletionWithoutOdontogramChanges = @json($allowsProcedureCompletionWithoutOdontogramChanges);
             const procedureDiscardForm = document.getElementById('procedureDiscardForm');
             const procedureDiscardDirtyFlag = document.getElementById('procedureDiscardDirtyFlag');
@@ -1014,6 +1080,7 @@
             const drawerSelectedLegendPreview = document.getElementById('drawerSelectedLegendPreview');
 
             const procedureDurationInput = document.getElementById('procedureDurationInput');
+            const procedureTimeInInput = document.getElementById('procedure_started_at');
             const container = document.getElementById('canvas-container');
             const loadingOverlay = document.getElementById('loadingOverlay');
             const legendDrawer = document.getElementById('legendDrawer');
@@ -1079,9 +1146,41 @@
 
             let odontogramThreeState = null;
 
+            let odontogramThreeLoadPromise =
+                null;
+
+            function waitForThreeSceneIdle() {
+                return new Promise(
+                    resolve => {
+
+                        if (
+                            typeof window.requestIdleCallback ===
+                            'function'
+                        ) {
+                            window.requestIdleCallback(
+                                () => {
+                                    resolve();
+                                }
+                            );
+
+                            return;
+                        }
+
+                        window.setTimeout(
+                            resolve,
+                            180
+                        );
+                    }
+                );
+            }
+
             const legends = [{
                     code: 'D',
                     label: 'Decayed (Caries indicated for Filling)'
+                },
+                {
+                    code: 'RC',
+                    label: 'Recurrent Caries'
                 },
                 {
                     code: 'M',
@@ -1134,6 +1233,10 @@
                     label: 'Light Cure Composite'
                 },
                 {
+                    code: 'TP',
+                    label: 'Temporary Pasta'
+                },
+                {
                     code: 'RM',
                     displayCode: 'Rm',
                     label: 'Removable Denture'
@@ -1162,30 +1265,11 @@
                 }
             ];
 
-            const legendColors = {
-                D: '#ef4444',
-                M: '#111827',
-                F: '#2563eb',
-                I: '#ef4444',
-                RF: '#ef4444',
-                MO: '#111827',
-                IM: '#111827',
-                J: '#2563eb',
-                A: '#2563eb',
-                AB: '#2563eb',
-                P: '#2563eb',
-                IN: '#2563eb',
-                LC: '#2563eb',
-                RM: '#2563eb',
-                X: '#2563eb',
-                XO: '#2563eb',
-                '✓': '#111827',
-                CM: '#111827',
-                SP: '#111827'
-            };
+            const legendColors = window.OdontogramTreatmentColors;
 
             const legendIcons = {
                 D: 'fa-solid fa-bug',
+                RC: 'fa-solid fa-bug',
                 M: 'fa-solid fa-ban',
                 F: 'fa-solid fa-square-check',
                 I: 'fa-solid fa-syringe',
@@ -1198,6 +1282,7 @@
                 P: 'fa-solid fa-link',
                 IN: 'fa-solid fa-puzzle-piece',
                 LC: 'fa-solid fa-wand-magic-sparkles',
+                TP: 'fa-solid fa-clock',
                 RM: 'fa-solid fa-teeth',
                 X: 'fa-solid fa-xmark',
                 XO: 'fa-solid fa-skull-crossbones',
@@ -1210,13 +1295,13 @@
                     key: 'conditions',
                     title: 'Conditions',
                     icon: 'fa-solid fa-heart-pulse',
-                    items: ['D', 'M', 'F', 'I', 'RF', 'MO', 'IM']
+                    items: ['D', 'RC', 'M', 'F', 'I', 'RF', 'MO', 'IM']
                 },
                 {
                     key: 'restoration-prosthetics',
                     title: 'Restorations & Prosthetics',
                     icon: 'fa-solid fa-screwdriver-wrench',
-                    items: ['J', 'A', 'AB', 'P', 'IN', 'LC', 'RM']
+                    items: ['J', 'A', 'AB', 'P', 'IN', 'LC', 'TP', 'RM']
                 },
                 {
                     key: 'surgery',
@@ -1234,115 +1319,162 @@
             const odontogramState = {};
 
             async function initThreeScene() {
+
                 if (odontogramThreeState) {
-                    return;
+                    return odontogramThreeState;
                 }
 
-                if (!window.Odontogram3D) {
-                    try {
-                        await window.loadOdontogramThreeModule?.();
-                    } catch (error) {
-                        console.error(
-                            'Unable to load odontogram 3D module.',
-                            error
-                        );
 
-                        showProcedureToast(
-                            'Unable to load the 3D odontogram.',
-                            'error',
-                            '3D View Unavailable'
-                        );
-
-                        return;
-                    }
+                if (odontogramThreeLoadPromise) {
+                    return odontogramThreeLoadPromise;
                 }
 
-                if (!window.Odontogram3D) {
-                    showProcedureToast(
-                        'The 3D odontogram module is unavailable.',
-                        'error',
-                        '3D View Unavailable'
-                    );
+                odontogramThreeLoadPromise =
+                    (async () => {
 
-                    return;
-                }
+                        await waitForThreeSceneIdle();
 
-                odontogramThreeState =
-                    window.Odontogram3D.create({
-                        container,
-
-                        data: Object.values(
-                            odontogramState
-                        ),
-
-                        mode: 'editor',
-
-                        onToothHover: (
-                            toothNumber,
-                            mesh,
-                            event,
-                            surfaceKey
-                        ) => {
-
-                            if (!toothNumber) {
-                                toothHoverLabel
-                                    .innerText =
-                                    selectedTooth ?
-                                    `Selected: #${selectedTooth}` :
-                                    'Select a tooth';
-
-                                hideTooltip();
-
-                                return;
-                            }
-
-                            toothHoverLabel
-                                .innerText =
-                                `Tooth #${toothNumber} · ${getSurfaceLabel(surfaceKey, toothNumber)}`;
-
-                            showTooltip(event, mesh, surfaceKey);
-                        },
-
-                        onToothClick: (toothNumber, mesh, event, surfaceKey) => {
-                            if (!toothNumber || !mesh) {
-                                if (!event?.shiftKey) clear3DSurfacePickerSelection(false);
-                                hideTooltip();
-                                return;
-                            }
-
-                            const previousTooth = selectedTooth;
-                            const target = {
-                                tooth: toothNumber,
-                                targetType: selectedScope === 'whole' ? 'whole' : 'surface',
-                                surfaceKey: selectedScope === 'whole' ? null : surfaceKey
-                            };
-                            select2DTarget(target, Boolean(event?.shiftKey));
-                            if (selectedTargetType === 'surface' && selectedSurfaceKey) {
-                                ensureToothState(selectedTooth).lastSelectedSurface =
-                                    selectedSurfaceKey;
-                            }
-                            selectedMesh = window.Odontogram3D.getToothMesh(odontogramThreeState,
-                                selectedTooth);
-                            if (selectedMesh && previousTooth !== selectedTooth && !event?.shiftKey) {
-                                window.Odontogram3D.focusTooth(odontogramThreeState, selectedMesh);
-                            }
-                            renderThreeVisuals();
-                            updateScopeButtons();
-                            updateSelectedToothUI();
-                        },
-
-                        onReady: () => {
-                            loadingOverlay.style
-                                .opacity =
-                                '0';
-
-                            setTimeout(() => {
-                                loadingOverlay.style
-                                    .display =
-                                    'none';
-                            }, 500);
+                        if (currentView !== '3d') {
+                            return null;
                         }
-                    });
+
+                        if (!window.Odontogram3D) {
+                            try {
+                                await window.loadOdontogramThreeModule?.();
+                            } catch (error) {
+                                console.error(
+                                    'Unable to load odontogram 3D module.',
+                                    error
+                                );
+
+                                showProcedureToast(
+                                    'Unable to load the 3D odontogram.',
+                                    'error',
+                                    '3D View Unavailable'
+                                );
+
+                                return;
+                            }
+                        }
+                        await waitForThreeSceneIdle();
+
+                        if (currentView !== '3d') {
+                            return null;
+                        }
+                        if (!window.Odontogram3D) {
+                            showProcedureToast(
+                                'The 3D odontogram module is unavailable.',
+                                'error',
+                                '3D View Unavailable'
+                            );
+
+                            return;
+                        }
+
+                        container.style.pointerEvents =
+                            'none';
+
+                        odontogramThreeState =
+                            window.Odontogram3D.create({
+                                container,
+
+                                data: Object.values(
+                                    odontogramState
+                                ),
+
+                                mode: 'editor',
+
+                                onToothHover: (
+                                    toothNumber,
+                                    mesh,
+                                    event,
+                                    surfaceKey
+                                ) => {
+
+                                    if (!toothNumber) {
+                                        toothHoverLabel
+                                            .innerText =
+                                            selectedTooth ?
+                                            `Selected: #${selectedTooth}` :
+                                            'Select a tooth';
+
+                                        hideTooltip();
+
+                                        return;
+                                    }
+
+                                    toothHoverLabel
+                                        .innerText =
+                                        `Tooth #${toothNumber} · ${getSurfaceLabel(surfaceKey, toothNumber)}`;
+
+                                    showTooltip(event, mesh, surfaceKey);
+                                },
+
+                                onToothClick: (toothNumber, mesh, event, surfaceKey) => {
+                                    if (!toothNumber || !mesh) {
+                                        if (!event?.shiftKey) clear3DSurfacePickerSelection(
+                                            false);
+                                        hideTooltip();
+                                        return;
+                                    }
+
+                                    const previousTooth = selectedTooth;
+                                    const target = {
+                                        tooth: toothNumber,
+                                        targetType: selectedScope === 'whole' ? 'whole' :
+                                            'surface',
+                                        surfaceKey: selectedScope === 'whole' ? null :
+                                            surfaceKey
+                                    };
+                                    select2DTarget(target, Boolean(event?.shiftKey));
+                                    if (selectedTargetType === 'surface' &&
+                                        selectedSurfaceKey) {
+                                        ensureToothState(selectedTooth).lastSelectedSurface =
+                                            selectedSurfaceKey;
+                                    }
+                                    selectedMesh = window.Odontogram3D.getToothMesh(
+                                        odontogramThreeState,
+                                        selectedTooth);
+                                    if (selectedMesh && previousTooth !== selectedTooth && !
+                                        event?.shiftKey) {
+                                        window.Odontogram3D.focusTooth(odontogramThreeState,
+                                            selectedMesh);
+                                    }
+                                    renderThreeVisuals();
+                                    updateScopeButtons();
+                                    updateSelectedToothUI();
+                                },
+
+                                onReady: () => {
+
+                                    container.style.removeProperty(
+                                        'pointer-events'
+                                    );
+
+                                    loadingOverlay.style.opacity =
+                                        '0';
+
+                                    setTimeout(() => {
+
+                                        loadingOverlay.style.display =
+                                            'none';
+
+                                    }, 500);
+                                }
+                            });
+
+                        return odontogramThreeState;
+                    })();
+
+                try {
+
+                    return await odontogramThreeLoadPromise;
+
+                } finally {
+
+                    odontogramThreeLoadPromise =
+                        null;
+                }
             }
 
             function renderThreeVisuals() {
@@ -1563,31 +1695,129 @@
             }
 
             function openUiModal(modal) {
-                if (!modal) return;
+                if (!modal?.id) return;
 
-                modal.classList.remove('closing');
-                modal.classList.add('open');
-                modal.setAttribute('aria-hidden', 'false');
-
-                document.documentElement.classList.add('modal-lock');
-                document.body.classList.add('modal-lock');
+                window.openModal?.(modal.id);
             }
 
             function closeUiModal(modal) {
-                if (!modal || !modal.classList.contains('open')) return;
+                if (!modal?.id) return;
 
-                modal.classList.remove('open');
-                modal.classList.add('closing');
-                modal.setAttribute('aria-hidden', 'true');
+                window.closeModal?.(modal.id);
+            }
+
+            function setCorrectionOtherFieldVisible(
+                visible
+            ) {
+                if (!correctionReasonOtherField) {
+                    return;
+                }
+
+                if (
+                    correctionReasonOtherField
+                    .__hideTimer
+                ) {
+                    window.clearTimeout(
+                        correctionReasonOtherField
+                        .__hideTimer
+                    );
+
+                    correctionReasonOtherField
+                        .__hideTimer = null;
+                }
+
+                correctionReasonOtherField
+                    .classList
+                    .remove(
+                        'slide-down-fade-in',
+                        'content-fade-out'
+                    );
+
+                if (visible) {
+
+                    if (
+                        !correctionReasonOtherField.hidden
+                    ) {
+                        return;
+                    }
+
+                    correctionReasonOtherField.hidden =
+                        false;
+
+                    void correctionReasonOtherField
+                        .offsetWidth;
+
+                    correctionReasonOtherField
+                        .classList
+                        .add(
+                            'slide-down-fade-in'
+                        );
+
+                    return;
+                }
+
+                if (
+                    correctionReasonOtherField.hidden
+                ) {
+                    return;
+                }
+
+                void correctionReasonOtherField
+                    .offsetWidth;
+
+                correctionReasonOtherField
+                    .classList
+                    .add(
+                        'content-fade-out'
+                    );
+
+                correctionReasonOtherField
+                    .__hideTimer =
+                    window.setTimeout(
+                        () => {
+
+                            correctionReasonOtherField
+                                .classList
+                                .remove(
+                                    'content-fade-out'
+                                );
+
+                            correctionReasonOtherField
+                                .hidden =
+                                true;
+
+                            correctionReasonOtherField
+                                .__hideTimer =
+                                null;
+
+                        },
+                        180
+                    );
+            }
+
+            function openCorrectionReasonModal() {
+                if (!savedVisitEditMode || !correctionReasonModal) {
+                    return;
+                }
+
+                window.initCustomSelects?.(
+                    correctionReasonModal
+                );
+
+                openUiModal(
+                    correctionReasonModal
+                );
 
                 window.setTimeout(() => {
-                    modal.classList.remove('closing');
+                    correctionReasonCategory
+                        ?.closest('.custom-select')
+                        ?.querySelector('.custom-select-button')
+                        ?.focus();
+                }, 50);
+            }
 
-                    if (!document.querySelector('.ui-modal.open')) {
-                        document.documentElement.classList.remove('modal-lock');
-                        document.body.classList.remove('modal-lock');
-                    }
-                }, 170);
+            function closeCorrectionReasonModal() {
+                closeUiModal(correctionReasonModal);
             }
 
             function markProcedureDiscardDirty() {
@@ -1603,7 +1833,8 @@
 
                 if (!discardProcedureUrl) {
                     window.DiscardChanges?.closeDiscardModal?.();
-                    window.location.href = discardProcedureReturnUrl || cancelProcedureRedirectUrl;
+                    window.location.href = discardProcedureReturnUrl ||
+                        cancelProcedureRedirectUrl;
                     return false;
                 }
 
@@ -1616,7 +1847,8 @@
 
                 if (confirmButton) {
                     confirmButton.disabled = true;
-                    confirmButton.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Discarding...';
+                    confirmButton.innerHTML =
+                        '<i class="fa-solid fa-circle-notch fa-spin"></i> Discarding...';
                 }
 
                 keepButtons.forEach(button => {
@@ -1625,9 +1857,12 @@
 
                 try {
                     const payload = {
-                        context: form?.querySelector('[name="context"]')?.value || 'appointments',
-                        appointment_id: form?.querySelector('[name="appointment_id"]')?.value || null,
-                        patient_id: form?.querySelector('[name="patient_id"]')?.value || null,
+                        context: form?.querySelector('[name="context"]')?.value ||
+                            'appointments',
+                        appointment_id: form?.querySelector('[name="appointment_id"]')
+                            ?.value || null,
+                        patient_id: form?.querySelector('[name="patient_id"]')?.value ||
+                            null,
                     };
 
                     const response = await fetch(discardProcedureUrl, {
@@ -1661,7 +1896,9 @@
                     return false;
                 } catch (error) {
                     console.error(error);
-                    showProcedureToast('Something went wrong while discarding the current procedure.', 'error');
+                    showProcedureToast(
+                        'Something went wrong while discarding the current procedure.',
+                        'error');
                     return false;
                 } finally {
                     procedureDiscardPending = false;
@@ -1771,7 +2008,8 @@
                 openUiModal(finishProcedureModal);
 
                 requestAnimationFrame(() => {
-                    (confirmation ? confirmFinishProcedureBtn : finishProcedureModalActionBtn)?.focus();
+                    (confirmation ? confirmFinishProcedureBtn :
+                        finishProcedureModalActionBtn)?.focus();
                 });
             }
 
@@ -1789,7 +2027,9 @@
                 }
 
                 window.setTimeout(() => {
-                    finishProcedureBtn?.focus();
+                    finishProcedureBtn?.focus({
+                        preventScroll: true
+                    });
                 }, 180);
             }
 
@@ -1819,11 +2059,14 @@
                     top: isUpperTooth ?
                         'Buccal Surface' : (isLowerTooth ? 'Lingual Surface' : 'Top Surface'),
                     bottom: isUpperTooth ?
-                        'Palatal Surface' : (isLowerTooth ? 'Buccal Surface' : 'Bottom Surface'),
+                        'Palatal Surface' : (isLowerTooth ? 'Buccal Surface' :
+                            'Bottom Surface'),
                     left: isPatientRightSide ?
-                        'Distal Surface' : (isPatientLeftSide ? 'Mesial Surface' : 'Left Surface'),
+                        'Distal Surface' : (isPatientLeftSide ? 'Mesial Surface' :
+                            'Left Surface'),
                     right: isPatientRightSide ?
-                        'Mesial Surface' : (isPatientLeftSide ? 'Distal Surface' : 'Right Surface'),
+                        'Mesial Surface' : (isPatientLeftSide ? 'Distal Surface' :
+                            'Right Surface'),
                     center: centerSurfaceLabel,
                     status: 'Status Box',
                     whole: 'Whole Tooth'
@@ -1834,7 +2077,8 @@
             function update3DSurfacePicker() {
                 if (!surfacePicker3D) return;
 
-                const showPicker = currentView === '3d' && !!selectedTooth && selectedScope === 'surface';
+                const showPicker = currentView === '3d' && !!selectedTooth && selectedScope ===
+                    'surface';
                 surfacePicker3D.classList.toggle('hidden', !showPicker);
 
                 if (!showPicker) {
@@ -2185,7 +2429,8 @@
                     surfaceKey
                 }, useMultiSelect);
                 ensureToothState(tooth).lastSelectedSurface = surfaceKey;
-                selectedMesh = window.Odontogram3D.getToothMesh(odontogramThreeState, selectedTooth);
+                selectedMesh = window.Odontogram3D.getToothMesh(odontogramThreeState,
+                    selectedTooth);
                 if (!useMultiSelect && selectedMesh) {
                     window.Odontogram3D.focusTooth(odontogramThreeState, selectedMesh, surfaceKey);
                 }
@@ -2220,7 +2465,8 @@
                 const numericToothNumber = Number(toothNumber);
 
                 if (!odontogramState[numericToothNumber]) {
-                    odontogramState[numericToothNumber] = createDefaultToothState(numericToothNumber);
+                    odontogramState[numericToothNumber] = createDefaultToothState(
+                        numericToothNumber);
                 } else {
                     odontogramState[numericToothNumber] = normalizeOdontogramEntry(odontogramState[
                             numericToothNumber]) ||
@@ -2366,7 +2612,7 @@
                     <span class="odontogram-preview-marking">
                         <span
                             class="odontogram-preview-marking-swatch"
-                            style="background:${legendColors[legend.code]};"
+                            data-ui-style="background:${window.uiAttribute(legendColors[legend.code])};"
                         ></span>
                         <span>
                             ${getLegendDisplayCode(legend.code)} - ${legend.label}
@@ -2389,7 +2635,7 @@
         <span class="odontogram-preview-marking">
             <span
                 class="odontogram-preview-marking-swatch"
-                style="background:${selectedRecord.colorHex};"
+                data-ui-style="background:${window.uiAttribute(selectedRecord.colorHex)};"
             ></span>
 
             <span>
@@ -2462,7 +2708,8 @@
 
                     selectedToothDisplay.textContent =
                         currentView === '2d' ?
-                        (selectedScope === 'whole' ? 'Select a tooth.' : 'Select a tooth surface.') :
+                        (selectedScope === 'whole' ? 'Select a tooth.' :
+                            'Select a tooth surface.') :
                         'Select a tooth.';
 
                     selectedToothName.textContent = '';
@@ -2482,7 +2729,8 @@
                     const targetCount = selectedTargets.size;
 
                     selectedToothDisplay.textContent = `${targetCount} targets selected`;
-                    selectedToothName.textContent = 'Shift + Click to add or remove teeth and surfaces';
+                    selectedToothName.textContent =
+                        'Shift + Click to add or remove teeth and surfaces';
                     toothHoverLabel.innerText = `${targetCount} targets selected`;
                     selectedViewBadge.textContent = currentView === '2d' ? '2D View' : '3D View';
                     legendStatusNote.classList.remove('hidden');
@@ -2497,7 +2745,8 @@
                 }
 
                 if (currentView === '3d' && !selectedTargetType) {
-                    selectedToothDisplay.textContent = `Tooth #${selectedTooth} - Choose a surface below`;
+                    selectedToothDisplay.textContent =
+                        `Tooth #${selectedTooth} - Choose a surface below`;
                     selectedToothName.textContent = getToothName(selectedTooth);
                     toothHoverLabel.innerText = `Selected: #${selectedTooth}`;
                     selectedViewBadge.textContent = '3D View';
@@ -2548,8 +2797,10 @@
                         .filter(legend => {
                             if (!normalizedSearch) return true;
                             return (
-                                legend.code.toLowerCase().includes(normalizedSearch) ||
-                                legend.label.toLowerCase().includes(normalizedSearch)
+                                legend.code.toLowerCase().includes(
+                                    normalizedSearch) ||
+                                legend.label.toLowerCase().includes(
+                                    normalizedSearch)
                             );
                         });
 
@@ -2584,10 +2835,11 @@
                         btn.type = 'button';
                         btn.dataset.code = legend.code;
                         btn.className = 'legend-btn';
-                        btn.title = `${legend.displayCode || legend.code} - ${legend.label}`;
+                        btn.title =
+                            `${legend.displayCode || legend.code} - ${legend.label}`;
 
                         btn.innerHTML = `
-                            <span class="legend-color-dot" style="background:${legendColors[legend.code]};"></span>
+                            <span class="legend-color-dot" data-ui-style="background:${window.uiAttribute(legendColors[legend.code])};"></span>
                             <i class="${legendIcons[legend.code]}"></i>
                             <span class="legend-meta">
                                 <span class="legend-code">${legend.displayCode || legend.code}</span>
@@ -3351,7 +3603,8 @@
                     });
 
                     part.addEventListener('mouseleave', function() {
-                        toothHoverLabel.innerText = selectedTooth ? `Selected: #${selectedTooth}` :
+                        toothHoverLabel.innerText = selectedTooth ?
+                            `Selected: #${selectedTooth}` :
                             'Select a tooth';
                     });
                 });
@@ -3382,7 +3635,8 @@
                 return wrap;
             }
 
-            function createRow(leftTeeth, rightTeeth, statusPlacement = 'top', leftLabel = '', rightLabel = '',
+            function createRow(leftTeeth, rightTeeth, statusPlacement = 'top', leftLabel = '',
+                rightLabel = '',
                 surfaceOrientation = null) {
                 const row = document.createElement('div');
                 row.className = 'odontogram-row';
@@ -3413,13 +3667,15 @@
                 }
                 row.appendChild(left);
 
-                leftTeeth.forEach(tooth => row.appendChild(createToothUnit(tooth, statusPlacement)));
+                leftTeeth.forEach(tooth => row.appendChild(createToothUnit(tooth,
+                    statusPlacement)));
 
                 const spacer = document.createElement('div');
                 spacer.className = 'odontogram-arch-spacer';
                 row.appendChild(spacer);
 
-                rightTeeth.forEach(tooth => row.appendChild(createToothUnit(tooth, statusPlacement)));
+                rightTeeth.forEach(tooth => row.appendChild(createToothUnit(tooth,
+                    statusPlacement)));
 
                 const right = document.createElement('div');
                 right.className = 'status-label-right';
@@ -3443,7 +3699,8 @@
             function render2DOdontogram() {
                 board2d.innerHTML = '';
 
-                const row1 = createRow(primaryUpperRight, primaryUpperLeft, 'top', 'STATUS<br>RIGHT', 'LEFT');
+                const row1 = createRow(primaryUpperRight, primaryUpperLeft, 'top',
+                    'STATUS<br>RIGHT', 'LEFT');
                 row1.classList.add('arch-divider');
                 board2d.appendChild(row1);
 
@@ -3461,7 +3718,8 @@
                 row3.classList.add('arch-divider');
                 board2d.appendChild(row3);
 
-                const row4 = createRow(primaryLowerRight, primaryLowerLeft, 'bottom', 'STATUS<br>RIGHT', 'LEFT');
+                const row4 = createRow(primaryLowerRight, primaryLowerLeft, 'bottom',
+                    'STATUS<br>RIGHT', 'LEFT');
                 board2d.appendChild(row4);
             }
 
@@ -3523,7 +3781,8 @@
             }
 
             view2dBtn.addEventListener('click', () => switchView('2d'));
-            view3dBtn.addEventListener('click', () => switchView('3d'));
+            view3dBtn.addEventListener(
+                'click', () => switchView('3d'));
 
             function updateScopeButtons() {
                 const isWhole = selectedScope === 'whole';
@@ -3563,8 +3822,10 @@
                 renderThreeVisuals();
             }
 
-            wholeToothScopeBtn?.addEventListener('click', () => selectTargetScope('whole'));
-            toothSurfaceScopeBtn?.addEventListener('click', () => selectTargetScope('surface'));
+            wholeToothScopeBtn?.addEventListener('click', () => selectTargetScope(
+                'whole'));
+            toothSurfaceScopeBtn?.addEventListener('click', () => selectTargetScope(
+                'surface'));
 
             function showTooltip(event, mesh, surfaceKey = null) {
                 const toothNumber = mesh.userData.tooth;
@@ -3572,7 +3833,8 @@
                 const state = ensureToothState(toothNumber);
                 const hasSurfaces = Object.values(state.surfaces || {}).some(item => item?.code);
                 const wholeTreatment = state.status || (!hasSurfaces ? state.threeD : null);
-                const treatment = surfaceKey ? state.surfaces[surfaceKey] || wholeTreatment : wholeTreatment;
+                const treatment = surfaceKey ? state.surfaces[surfaceKey] || wholeTreatment :
+                    wholeTreatment;
 
                 toothTooltipContent.innerHTML = `
     <div class="tooth-tooltip-number">
@@ -3608,153 +3870,60 @@
                 toothTooltip.classList.remove('show');
             }
 
-            let procedureDurationDigits = procedureDurationInput?.value.replace(/\D/g, '') || '';
-
-            function formatProcedureDurationInput(digits) {
-                const normalizedDigits = String(digits || '').replace(/\D/g, '').slice(-6);
-
-                if (!normalizedDigits) {
-                    return '';
-                }
-
-                const paddedDigits = normalizedDigits.padStart(6, '0');
-
-                return `${paddedDigits.slice(0, 2)}:${paddedDigits.slice(2, 4)}:${paddedDigits.slice(4, 6)}`;
+            function getProcedureTime24Hour(field) {
+                return /^([01]\d|2[0-3]):[0-5]\d$/.test(field.value) ? field.value : null;
             }
 
             function parseProcedureDurationSeconds() {
-                const rawValue = procedureDurationInput?.value.trim() || '';
-
-                if (!/^\d{2}:\d{2}:\d{2}$/.test(rawValue)) {
-                    return null;
-                }
-
-                const [hours, minutes, seconds] = rawValue.split(':').map(Number);
-
-                if (minutes > 59 || seconds > 59) {
-                    return null;
-                }
-
-                return (hours * 3600) + (minutes * 60) + seconds;
+                if (!/^\d{2,3}:[0-5]\d:[0-5]\d$/.test(procedureDurationInput.value)) return null;
+                const [hours, minutes, seconds] = procedureDurationInput.value.split(':').map(Number);
+                return hours * 3600 + minutes * 60 + seconds;
             }
 
-            function validateProcedureDurationField({
+            function formatProcedureDurationInput(event) {
+                const input = procedureDurationInput;
+                const digits = input.value.replace(/\D/g, '').slice(-6);
+                const padded = digits.padStart(6, '0');
+                const clearedByDeletion = event?.inputType?.startsWith('delete') && !/[1-9]/.test(digits);
+                input.value = digits && !clearedByDeletion ?
+                    `${padded.slice(0, 2)}:${padded.slice(2, 4)}:${padded.slice(4, 6)}` : '';
+                input.setSelectionRange?.(input.value.length, input.value.length);
+            }
+
+            function validateProcedureTimingFields({
                 focus = true
             } = {}) {
-                if (!procedureDurationInput) {
-                    return true;
+                let firstInvalid = null;
+                [procedureTimeInInput, procedureDurationInput].forEach(field => {
+                    const valid = window.validateFormInputField?.(field) ?? field.checkValidity();
+                    if (!valid && !firstInvalid) firstInvalid = field;
+                });
+                if (!firstInvalid && getProcedureTime24Hour(procedureTimeInInput) === null) {
+                    firstInvalid = procedureTimeInInput;
+                    window.showFormInputValidationMessage?.(firstInvalid, 'Please select a valid Time In.');
                 }
-
-                const valid =
-                    window.validateFormInputField?.(
-                        procedureDurationInput
-                    ) ?? (
-                        parseProcedureDurationSeconds() !== null &&
-                        parseProcedureDurationSeconds() > 0
-                    );
-
-                if (
-                    !valid &&
-                    focus
-                ) {
-                    window.focusGlobalInvalidField?.(
-                        procedureDurationInput
-                    );
+                if (!firstInvalid && parseProcedureDurationSeconds() === null) {
+                    firstInvalid = procedureDurationInput;
+                    window.showFormInputValidationMessage?.(firstInvalid,
+                        'Enter a valid duration in HH:MM:SS format, e.g. 00:30:00.');
                 }
-
-                return valid;
+                [procedureTimeInInput, procedureDurationInput].forEach(field => {
+                    field._flatpickr?.altInput?.classList.toggle('is-invalid', field === firstInvalid);
+                });
+                if (firstInvalid && focus) window.focusGlobalInvalidField?.(firstInvalid._flatpickr?.altInput ||
+                    firstInvalid);
+                return !firstInvalid;
             }
 
-            procedureDurationInput?.addEventListener('keydown', function(event) {
-                if (/^\d$/.test(event.key)) {
-                    event.preventDefault();
-
-                    procedureDurationDigits =
-                        `${procedureDurationDigits}${event.key}`
-                        .slice(-6);
-
-                    procedureDurationInput.value =
-                        formatProcedureDurationInput(
-                            procedureDurationDigits
-                        );
-
-                    procedureDurationInput.dispatchEvent(
-                        new Event('input', {
-                            bubbles: true
-                        })
-                    );
-
-                    if (
-                        procedureDurationInput.getAttribute(
-                            'aria-invalid'
-                        ) === 'true'
-                    ) {
-                        window.validateFormInputField?.(
-                            procedureDurationInput
-                        );
-                    }
-
-                    return;
-                }
-
-                if (event.key === 'Backspace') {
-                    event.preventDefault();
-
-                    procedureDurationDigits =
-                        procedureDurationDigits.slice(
-                            0,
-                            -1
-                        );
-
-                    procedureDurationInput.value =
-                        formatProcedureDurationInput(
-                            procedureDurationDigits
-                        );
-
-                    procedureDurationInput.dispatchEvent(
-                        new Event('input', {
-                            bubbles: true
-                        })
-                    );
-
-                    if (
-                        procedureDurationInput.getAttribute(
-                            'aria-invalid'
-                        ) === 'true'
-                    ) {
-                        window.validateFormInputField?.(
-                            procedureDurationInput
-                        );
-                    }
-                }
-            });
-
-            procedureDurationInput?.addEventListener('paste', function(event) {
-                event.preventDefault();
-
-                const pastedDigits =
-                    event.clipboardData
-                    ?.getData('text')
-                    .replace(/\D/g, '')
-                    .slice(-6) || '';
-
-                procedureDurationDigits =
-                    pastedDigits;
-
-                procedureDurationInput.value =
-                    formatProcedureDurationInput(
-                        procedureDurationDigits
-                    );
-
-                procedureDurationInput.dispatchEvent(
-                    new Event('input', {
-                        bubbles: true
-                    })
-                );
-
-                window.validateFormInputField?.(
-                    procedureDurationInput
-                );
+            [procedureTimeInInput, procedureDurationInput].forEach(field => {
+                const onTimeChange = event => {
+                    if (field === procedureDurationInput) formatProcedureDurationInput(event);
+                    window.showFormInputValidationMessage?.(field, '');
+                    field._flatpickr?.altInput?.classList.remove('is-invalid');
+                    markProcedureDiscardDirty();
+                };
+                field.addEventListener('input', onTimeChange);
+                field.addEventListener('change', onTimeChange);
             });
 
             applyTreatmentBtn.addEventListener('click', function() {
@@ -3792,8 +3961,10 @@
                 openResetModal();
             });
 
-            confirmResetTreatmentBtn.addEventListener('click', clearSelectedTargetTreatment);
-            cancelResetTreatmentBtn.addEventListener('click', closeResetModal);
+            confirmResetTreatmentBtn.addEventListener('click',
+                clearSelectedTargetTreatment);
+            cancelResetTreatmentBtn.addEventListener('click',
+                closeResetModal);
 
             resetTreatmentModal.addEventListener('click', function(event) {
                 if (event.target === resetTreatmentModal) {
@@ -4160,13 +4331,15 @@
 
                         const surfaces = entry.surfaces || {};
 
-                        ['top', 'left', 'center', 'right', 'bottom'].forEach(function(surfaceKey) {
+                        ['top', 'left', 'center', 'right', 'bottom'].forEach(function(
+                            surfaceKey) {
                             if (surfaces[surfaceKey] && surfaces[surfaceKey].code) {
                                 cleanEntry.surfaces[surfaceKey] = surfaces[surfaceKey];
                             }
                         });
 
-                        const savedSurfaceKey = ['top', 'left', 'center', 'right', 'bottom'].includes(entry
+                        const savedSurfaceKey = ['top', 'left', 'center', 'right', 'bottom']
+                            .includes(entry
                                 .lastSelectedSurface) ?
                             entry.lastSelectedSurface :
                             null;
@@ -4295,7 +4468,7 @@
                 }
 
                 if (
-                    !validateProcedureDurationField({
+                    !validateProcedureTimingFields({
                         focus: true
                     })
                 ) {
@@ -4351,16 +4524,16 @@
                 }
 
                 if (
-                    !validateProcedureDurationField({
+                    !validateProcedureTimingFields({
                         focus: true
                     })
                 ) {
                     return;
                 }
 
-                const procedureDurationSeconds = parseProcedureDurationSeconds();
 
-                if (!allowsProcedureCompletionWithoutOdontogramChanges && !hasAppliedTreatmentThisSession && !(
+                if (!allowsProcedureCompletionWithoutOdontogramChanges && !
+                    hasAppliedTreatmentThisSession && !(
                         savedVisitEditMode && hasAnySavedTreatment)) {
                     showProcedureToast(
                         'Apply at least one treatment to the tooth chart before finishing the procedure.',
@@ -4371,7 +4544,8 @@
                     return;
                 }
 
-                if (!allowsProcedureCompletionWithoutOdontogramChanges && cleanOdontogramData.length === 0) {
+                if (!allowsProcedureCompletionWithoutOdontogramChanges && cleanOdontogramData
+                    .length === 0) {
                     showProcedureToast(
                         'Apply at least one treatment to the tooth chart before finishing the procedure.',
                         'warning',
@@ -4386,19 +4560,60 @@
                     oral_examination: document.getElementById('oralExaminationNotes').value,
                     diagnosis: diagnosisValue,
                     prescriptions: document.getElementById('prescriptionsNotes').value,
+                    inventory_notes: document.getElementById('inventoryNotes').value,
                     completion_action: completionAction,
                     has_applied_treatment: allowsProcedureCompletionWithoutOdontogramChanges ||
-                        hasAppliedTreatmentThisSession,
-                    procedure_duration_hms: procedureDurationInput?.value.trim() || '00:00:00',
-                    procedure_duration_seconds: procedureDurationSeconds,
+                        hasAppliedTreatmentThisSession ||
+                        (savedVisitEditMode && hasAnySavedTreatment),
+                    procedure_started_at: getProcedureTime24Hour(procedureTimeInInput),
+                    procedure_duration_hms: procedureDurationInput.value,
                 };
+
+                if (savedVisitEditMode) {
+                    const reasonTypeId =
+                        correctionReasonCategory
+                        ?.value || '';
+
+                    const selectedReasonOption =
+                        correctionReasonCategory
+                        ?.selectedOptions?.[0];
+
+                    const requiresReasonDetail =
+                        selectedReasonOption
+                        ?.dataset
+                        ?.requiresDetail === '1';
+
+                    const correctionNotes =
+                        correctionReasonNotes
+                        ?.value
+                        .trim() || '';
+
+                    const reasonDetail =
+                        correctionReasonOther
+                        ?.value
+                        .trim() || '';
+
+                    payload.reason_type_id =
+                        reasonTypeId ?
+                        Number(reasonTypeId) :
+                        null;
+
+                    payload.reason_detail =
+                        requiresReasonDetail ?
+                        reasonDetail :
+                        null;
+
+                    payload.reason_notes =
+                        correctionNotes;
+                }
 
                 finishProcedureBtn.disabled = true;
                 if (followUpBtn) {
                     followUpBtn.disabled = true;
                 }
 
-                clickedButton.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> ${loadingText}`;
+                clickedButton.innerHTML =
+                    `<i class="fa-solid fa-circle-notch fa-spin"></i> ${loadingText}`;
 
                 try {
                     const response = await fetch(saveProcedureUrl, {
@@ -4426,11 +4641,10 @@
                     }
 
                     if (!response.ok) {
-                        console.error(
-                            'Procedure save failed:',
-                            response.status,
-                            responseText
-                        );
+                        Object.entries(result?.errors || {}).forEach(([name, messages]) => {
+                            const field = document.getElementById(name);
+                            if (field) window.showFormInputValidationMessage?.(field, messages[0]);
+                        });
 
                         showProcedureToast(
                             result?.message ||
@@ -4492,14 +4706,23 @@
             }
 
             finishProcedureBtn.addEventListener('click', function() {
-                updateHiddenInput();
-                const cleanOdontogramData = getCleanOdontogramDataForSave();
-                const hasAnySavedTreatment = cleanOdontogramData.length > 0;
+                if (!validateProcedureTimingFields()) {
+                    return;
+                }
 
-                if (!allowsProcedureCompletionWithoutOdontogramChanges &&
+                updateHiddenInput();
+
+                const cleanOdontogramData =
+                    getCleanOdontogramDataForSave();
+
+                const hasAnySavedTreatment =
+                    cleanOdontogramData.length > 0;
+
+                if (
+                    !allowsProcedureCompletionWithoutOdontogramChanges &&
                     (
-                        (!hasAppliedTreatmentThisSession && !(savedVisitEditMode &&
-                            hasAnySavedTreatment)) ||
+                        (!hasAppliedTreatmentThisSession &&
+                            !(savedVisitEditMode && hasAnySavedTreatment)) ||
                         cleanOdontogramData.length === 0
                     )
                 ) {
@@ -4509,33 +4732,190 @@
                         icon: 'fa-tooth',
                         buttonText: 'Back to Odontogram',
                     });
+
+                    return;
+                }
+
+                if (savedVisitEditMode) {
+                    openCorrectionReasonModal();
                     return;
                 }
 
                 openFinishProcedureModal({
                     title: existingAppointmentMode ?
-                        'Save Existing Appointment?' : (savedVisitEditMode ?
-                            'Save Odontogram Changes?' : 'Finish Procedure?'),
+                        'Save Existing Appointment?' : 'Finish Procedure?',
 
                     message: existingAppointmentMode ?
                         'Are you sure you want to save this existing appointment? The old visit details, odontogram, and notes will be stored as a completed appointment.' :
-                        (savedVisitEditMode ?
-                            'Are you sure you want to update this saved visit? The saved 2D/3D odontogram and procedure notes will be replaced with your latest edits.' :
-                            'Are you sure you want to finish this procedure? The odontogram and procedure notes will be saved, and this appointment will be marked as completed.'
-                        ),
+                        'Are you sure you want to finish this procedure? The odontogram and procedure notes will be saved, and this appointment will be marked as completed.',
 
                     icon: 'fa-circle-question',
                     confirmation: true,
                 });
             });
 
+            dismissCorrectionReasonBtn?.addEventListener(
+                'click',
+                closeCorrectionReasonModal
+            );
+
+            confirmCorrectionReasonBtn
+                ?.addEventListener(
+                    'click',
+                    function() {
+
+                        const reasonTypeId =
+                            correctionReasonCategory
+                            ?.value
+                            .trim() || '';
+
+                        if (!reasonTypeId) {
+                            window
+                                .showFormInputValidationMessage?.(
+                                    correctionReasonCategory,
+                                    'Please select a reason for the correction.'
+                                );
+
+                            correctionReasonCategory
+                                ?.closest('.custom-select')
+                                ?.querySelector(
+                                    '.custom-select-button'
+                                )
+                                ?.focus();
+
+                            return;
+                        }
+
+                        const selectedReasonOption =
+                            correctionReasonCategory
+                            ?.selectedOptions?.[0];
+
+                        const requiresReasonDetail =
+                            selectedReasonOption
+                            ?.dataset
+                            ?.requiresDetail === '1';
+
+                        const reasonDetail =
+                            correctionReasonOther
+                            ?.value
+                            .trim() || '';
+
+                        if (
+                            requiresReasonDetail &&
+                            !reasonDetail
+                        ) {
+                            window
+                                .showFormInputValidationMessage?.(
+                                    correctionReasonOther,
+                                    'Please specify the correction reason.'
+                                );
+
+                            correctionReasonOther?.focus();
+
+                            return;
+                        }
+
+                        window
+                            .clearFormInputValidation?.(
+                                correctionReasonOther
+                            );
+
+                        window
+                            .clearFormInputValidation?.(
+                                correctionReasonCategory
+                            );
+
+                        closeCorrectionReasonModal();
+
+                        saveProcedure(
+                            'finished',
+                            finishProcedureBtn,
+                            'Saving Correction...'
+                        );
+                    }
+                );
+
+            correctionReasonOther
+                ?.addEventListener(
+                    'input',
+                    function() {
+
+                        if (
+                            correctionReasonOther
+                            .value
+                            .trim()
+                        ) {
+                            window
+                                .clearFormInputValidation?.(
+                                    correctionReasonOther
+                                );
+                        }
+                    }
+                );
+
+            correctionReasonCategory
+                ?.addEventListener(
+                    'change',
+                    function() {
+
+                        const reasonTypeId =
+                            correctionReasonCategory
+                            ?.value
+                            .trim() || '';
+
+                        if (reasonTypeId) {
+                            window
+                                .clearFormInputValidation?.(
+                                    correctionReasonCategory
+                                );
+                        }
+
+                        const selectedReasonOption =
+                            correctionReasonCategory
+                            ?.selectedOptions?.[0];
+
+                        const requiresReasonDetail =
+                            selectedReasonOption
+                            ?.dataset
+                            ?.requiresDetail === '1';
+
+                        setCorrectionOtherFieldVisible(
+                            requiresReasonDetail
+                        );
+
+                        if (!requiresReasonDetail) {
+
+                            if (correctionReasonOther) {
+                                correctionReasonOther
+                                    .value = '';
+                            }
+
+                            window
+                                .clearFormInputValidation?.(
+                                    correctionReasonOther
+                                );
+                        }
+                    }
+                );
+
+            correctionReasonModal?.addEventListener(
+                'click',
+                function(event) {
+                    if (event.target === correctionReasonModal) {
+                        closeCorrectionReasonModal();
+                    }
+                }
+            );
+
             confirmFinishProcedureBtn.addEventListener('click', function() {
                 closeFinishProcedureModal();
                 saveProcedure('finished', finishProcedureBtn, 'Saving Procedure...');
             });
 
-            dismissFinishProcedureBtn.addEventListener('click', closeFinishProcedureModal);
-            finishProcedureModalActionBtn.addEventListener('click', closeFinishProcedureModal);
+            dismissFinishProcedureBtn.addEventListener('click',
+                closeFinishProcedureModal);
+            finishProcedureModalActionBtn.addEventListener('click',
+                closeFinishProcedureModal);
 
             finishProcedureModal.addEventListener('click', function(event) {
                 if (event.target === finishProcedureModal) {
@@ -4546,7 +4926,7 @@
             followUpBtn?.addEventListener('click', function() {
 
                 if (
-                    !validateProcedureDurationField({
+                    !validateProcedureTimingFields({
                         focus: true
                     })
                 ) {
@@ -4578,7 +4958,8 @@
                 }
             });
 
-            document.getElementById('followUpForm')?.addEventListener('submit', async function(event) {
+            document.getElementById('followUpForm')?.addEventListener('submit', async function(
+                event) {
                 event.preventDefault();
 
                 const form =
@@ -4913,6 +5294,7 @@
                 if (event.key === 'Escape') {
                     closeResetModal();
                     closeCancelProcedureModal();
+                    closeCorrectionReasonModal();
                     closeFinishProcedureModal();
                     closeFollowUpModal();
 
@@ -4973,11 +5355,9 @@
             initSurfacePickerDrag();
             initLegendPanelResize();
 
-            if (procedureDurationInput && existingProcedureDuration && existingProcedureDuration !== '00:00:00') {
-                procedureDurationInput.value = existingProcedureDuration;
-            }
-
-            renderLegendButtons('');
+            renderLegendButtons(
+                ''
+            );
             updateHiddenInput();
             render2DOdontogram();
             updateSelectedToothUI();

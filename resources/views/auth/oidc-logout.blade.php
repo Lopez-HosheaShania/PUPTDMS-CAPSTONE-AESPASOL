@@ -1,15 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    @include('partials.security-bootstrap')
+    @vite('resources/css/vendor-fonts.css')
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Signing out...</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"rel="stylesheet">
-
-    <style>
+    <style nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         body {
             margin: 0;
             font-family: 'Inter', sans-serif;
@@ -65,7 +63,7 @@
     <p>Please wait while we securely close your sign-in session.</p>
 </div>
 
-<script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     window.addEventListener('load', async function () {
         const logoutTargets = @json($logoutTargets ?? []);
         const redirectUrl = @json($redirectUrl);

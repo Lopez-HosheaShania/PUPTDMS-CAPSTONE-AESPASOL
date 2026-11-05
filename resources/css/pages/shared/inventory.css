@@ -84,6 +84,10 @@
     text-transform: uppercase;
 }
 
+.global-label-row .inventory-field-label {
+    margin-bottom: 0;
+}
+
 .inventory-date-control {
     position: relative;
     width: 100%;
@@ -125,12 +129,6 @@
 .inventory-delete-alert strong,
 .inventory-delete-alert p {
     color: var(--status-rejected-text);
-}
-
-#mainContent.inventory-page .table-card {
-    background: var(--card);
-    border-color: var(--border);
-    overflow: hidden;
 }
 
 #mainContent.inventory-page .inventory-list-view,
@@ -800,5 +798,41 @@
 @media (prefers-reduced-motion: reduce) {
     #mainContent.inventory-page .status-pill.status-low-stock {
         animation: none;
+    }
+}
+
+.inventory-bottle-volume {
+    display: block;
+    flex-basis: 100%;
+    color: var(--text-3);
+    font-size: 10px;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+#mainContent.inventory-page .inventory-grid-level-box:has(.inventory-bottle-volume) {
+    flex-wrap: wrap;
+}
+
+#procedureInventoryNotesModal>.ui-modal-card {
+    height: min(860px, calc(100dvh - 48px));
+}
+
+#procedureInventoryNotesModal .modal-hd,
+#procedureInventoryNotesModal .modal-ft {
+    flex: 0 0 auto;
+}
+
+#procedureInventoryNotesModal .modal-bd {
+    flex: 1 1 0;
+    min-height: 0;
+    overflow-y: auto;
+    align-content: start;
+    scrollbar-gutter: stable;
+}
+
+@media (max-width: 640px) {
+    #procedureInventoryNotesModal>.ui-modal-card {
+        height: calc(100dvh - 40px);
     }
 }

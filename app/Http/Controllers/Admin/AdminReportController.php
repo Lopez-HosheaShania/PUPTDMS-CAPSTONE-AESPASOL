@@ -13,6 +13,18 @@ use Illuminate\Support\Facades\DB;
 
 class AdminReportController extends Controller
 {
+    public function cancellationBreakdown(\Illuminate\Http\Request $request, \App\Services\AppointmentCancellationAnalytics $analytics)
+    {
+        $data = $request->validate([
+            'month' => ['required', 'integer', 'between:1,12'],
+            'year' => ['required', 'integer', 'min:1', 'max:'.now()->year],
+        ]);
+        $breakdown = $analytics->forMonth((int) $data['year'], (int) $data['month']);
+
+        return response()->json($breakdown, $breakdown['available'] ? 200 : 503)
+            ->header('Cache-Control', 'no-store');
+    }
+
     public function reportFiles()
     {
         $now = Carbon::now();
@@ -61,7 +73,7 @@ class AdminReportController extends Controller
             : null;
 
         $lowStockItems = DB::table('inventory_items')
-            ->whereRaw('(qty - used) <= (qty * 0.30)')
+            ->whereRaw(\App\Models\Inventory::lowStockSql())
             ->count();
 
         $gadLabels = [];
@@ -71,18 +83,10 @@ class AdminReportController extends Controller
         $weekLabels = [];
         $weeklyDatasets = [];
 
-        $totalAppointmentsThisMonth = Appointment::whereYear('appointment_date', $thisYear)
-            ->whereMonth('appointment_date', $thisMonth)
-            ->count();
-
-        $cancelledAppointments = Appointment::whereYear('appointment_date', $thisYear)
-            ->whereMonth('appointment_date', $thisMonth)
-            ->where('status', 'cancelled')
-            ->count();
-
-        $cancellationRate = $totalAppointmentsThisMonth > 0
-            ? round(($cancelledAppointments / $totalAppointmentsThisMonth) * 100)
-            : 0;
+        $cancellationBreakdown = app(\App\Services\AppointmentCancellationAnalytics::class)->currentMonth($now);
+        $totalAppointmentsThisMonth = $cancellationBreakdown['total_scheduled'] ?? 0;
+        $cancelledAppointments = $cancellationBreakdown['total_cancelled'] ?? 0;
+        $cancellationRate = $cancellationBreakdown['cancellation_rate'] ?? null;
 
         $daysElapsedThisMonth = max(1, min($now->day, $now->daysInMonth));
         $avgPatientsPerDay = round($patientsThisMonth / $daysElapsedThisMonth, 1);
@@ -125,7 +129,7 @@ class AdminReportController extends Controller
         $suppliesItems = $inventoryItems->where('category', 'Supplies')->values();
 
         $lowStockRows = DB::table('inventory_items')
-            ->whereRaw('(qty - used) <= (qty * 0.30)')
+            ->whereRaw(\App\Models\Inventory::lowStockSql())
             ->orderByRaw('(qty - used) ASC')
             ->get();
 
@@ -167,6 +171,7 @@ class AdminReportController extends Controller
             ->values();
 
         return view('shared.reports', [
+            'cancellationBreakdown' => $cancellationBreakdown,
             'layoutRole' => request()->routeIs('dentist.*') ? 'dentist' : 'admin',
             'pageTitle' => 'Reports & Analytics',
             'pageShellClass' => 'dentist-page-shell dentist-report-page',
@@ -746,79 +751,28 @@ class AdminReportController extends Controller
             ],
         ];
 
-        $fallbackReport = [
-            'executive_summary' => "For {$period}, the Dental Management System recorded {$totalPatients} total patients, with {$newThisMonth} new patient registrations this month. Patient growth {$growthDescription} by " . abs($patientGrowthRate) . "% compared to last month. The system also recorded {$appointmentsTotal} appointments, with a completion rate of {$completionRate}% and a cancellation rate of {$cancelledRate}%. Based on the available data, the generated report classifies the current operational risk level as {$riskLevel}.",
-
-            'key_findings' => [
-                "The system currently has {$totalPatients} registered patients.",
-                "There were {$newThisMonth} new patient records created this month.",
-                "Patient growth {$growthDescription} by " . abs($patientGrowthRate) . "% compared to last month.",
-                "A total of {$appointmentsTotal} appointments were recorded for {$period}.",
-                "{$completed} appointments were completed, resulting in a {$completionRate}% completion rate.",
-                "{$cancelled} appointments were cancelled, resulting in a {$cancelledRate}% cancellation rate.",
-                "{$noShow} appointments were marked as no-show, resulting in a {$noShowRate}% no-show rate.",
-                "Document request activity included {$docTotal} total request/s, with {$docPending} pending, {$docApproved} approved, and {$docRejected} rejected.",
-            ],
-
-            'treatment_analysis' => [
-                "The system recorded {$totalTreatments} completed treatment procedures this month.",
-                "The most frequently recorded treatment is {$topTreatmentName}.",
-                "Treatment data can help the clinic identify common patient needs and prepare the required dental materials in advance.",
-            ],
-
-            'inventory_analysis' => [
-                "The system detected {$lowStockCount} item/s below the minimum stock threshold.",
-                "{$criticalStockCount} item/s are considered critical and may require urgent restocking.",
-                $lowStockCount > 0
-                    ? 'Inventory monitoring should be prioritized to prevent service delays during clinic operations.'
-                    : 'Inventory levels appear sufficient based on the current stock threshold data.',
-            ],
-
-            'document_request_analysis' => [
-                "The system recorded {$docTotal} document request/s for {$period}.",
-                "{$docApproved} request/s were approved, resulting in a {$docApprovalRate}% approval rate.",
-                "{$docPending} request/s remain pending, representing {$docPendingRate}% of document request activity.",
-                "{$docRejected} request/s were rejected, resulting in a {$docRejectionRate}% rejection rate.",
-                "The most requested document type is {$docMostRequestedName} with {$docMostRequestedCount} request/s.",
-            ],
-
-            'recommendations' => [
-                $completionRate < 60
-                    ? 'Review appointment workflow and follow-up procedures to improve completion rate.'
-                    : 'Maintain the current appointment monitoring process to sustain completion performance.',
-
-                $cancelledRate >= 15
-                    ? 'Analyze common cancellation reasons and improve reminder or rescheduling procedures.'
-                    : 'Continue monitoring cancellations to keep appointment utilization stable.',
-
-                $noShowRate >= 10
-                    ? 'Strengthen patient reminders through notification channels to reduce no-show incidents.'
-                    : 'Maintain the current patient reminder process to minimize no-shows.',
-
-                $lowStockCount > 0
-                    ? 'Restock low inventory items and review minimum stock thresholds.'
-                    : 'Continue regular inventory audits to maintain sufficient stock levels.',
-
-                $docPendingRate >= 25
-                    ? 'Review pending document requests regularly to prevent processing delays and improve request turnaround time.'
-                    : 'Continue monitoring document request status to maintain timely approval and rejection workflows.',
-
-                'Use monthly report trends to support administrative planning, clinic scheduling, and resource allocation.',
-            ],
+        $unavailableMessage = 'AI-generated analysis is currently unavailable. Please refer to the verified clinic statistics shown in this report.';
+        $unavailableReport = [
+            'executive_summary' => $unavailableMessage,
+            'key_findings' => [],
+            'treatment_analysis' => [],
+            'inventory_analysis' => [],
+            'recommendations' => [],
         ];
 
         $aiContent = $openAIReportService->generate($reportData);
         $usedAi = is_array($aiContent);
 
-        $aiReport = array_merge([
+        $aiReport = array_merge($usedAi ? $aiContent : $unavailableReport, [
             'period' => $period,
             'generated_at' => $now->format('M d, Y h:i A'),
             'risk_level' => $riskLevel,
             'risk_explanation' => $riskExplanation,
-            'generation_source' => $usedAi ? 'ai' : 'fallback',
+            'generation_source' => $usedAi ? 'ai' : 'unavailable',
+            'source_data' => $reportData,
             'generation_note' => $usedAi
                 ? 'The narrative insights were generated using the AI reporting service.'
-                : 'The AI reporting service was unavailable, so the system used the built-in fallback report narrative.',
+                : $unavailableMessage,
             'document_request_analysis' => [
                 "The system recorded {$docTotal} document request/s for {$period}.",
                 "{$docApproved} request/s were approved, resulting in a {$docApprovalRate}% approval rate.",
@@ -852,7 +806,7 @@ class AdminReportController extends Controller
                 'document_requests_most_requested' => $docMostRequestedName,
                 'document_requests_most_requested_count' => $docMostRequestedCount,
             ],
-        ], is_array($aiContent) ? $aiContent : $fallbackReport);
+        ]);
 
         session(['admin_ai_generated_report' => $aiReport]);
 
@@ -863,7 +817,7 @@ class AdminReportController extends Controller
     {
         $aiReport = session('admin_ai_generated_report');
 
-        if (!$aiReport) {
+        if (!$aiReport || !isset($aiReport['source_data'])) {
             return redirect()
                 ->route(request()->routeIs('dentist.*') ? 'dentist.reports.ai-generated' : 'admin.reports.ai-generated')
                 ->with('error', 'Please generate the AI report first before downloading.');

@@ -12,6 +12,7 @@ class LegendSeeder extends Seeder
     {
         $legends = [
             ['code' => 'D',  'description' => 'Decayed (Caries indicated for Filling)', 'category' => 'Condition'],
+            ['code' => 'RC', 'description' => 'Recurrent Caries', 'category' => 'Condition'],
             ['code' => 'M',  'description' => 'Missing due to Caries', 'category' => 'Condition'],
             ['code' => 'F',  'description' => 'Filled', 'category' => 'Condition'],
             ['code' => 'I',  'description' => 'Caries Indicated for Extraction', 'category' => 'Condition'],
@@ -24,6 +25,7 @@ class LegendSeeder extends Seeder
             ['code' => 'P',  'description' => 'Pontic', 'category' => 'Restoration and Prosthetics'],
             ['code' => 'IN', 'description' => 'Inlay', 'category' => 'Restoration and Prosthetics'],
             ['code' => 'LC', 'description' => 'Light Cure Composite', 'category' => 'Restoration and Prosthetics'],
+            ['code' => 'TP', 'description' => 'Temporary Pasta', 'category' => 'Restoration and Prosthetics'],
             ['code' => 'RM', 'description' => 'Removable Denture', 'category' => 'Restoration and Prosthetics'],
             ['code' => 'X',  'description' => 'Extraction due to Caries', 'category' => 'Surgery'],
             ['code' => 'XO', 'description' => 'Extraction due to Other Causes', 'category' => 'Surgery'],

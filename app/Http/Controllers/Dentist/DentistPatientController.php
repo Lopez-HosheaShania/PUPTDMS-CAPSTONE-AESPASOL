@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Dentist;
 
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
+use App\Models\OdontogramRevision;
 use App\Models\Patient;
 use App\Models\ReservedBookingPeriod;
 use App\Services\DentistDutyService;
@@ -118,6 +119,10 @@ class DentistPatientController extends Controller
 
     public function profile(Patient $patient)
     {
+        if (Auth::user()?->hasAnyRole(['admin', 'super_admin'])) {
+            return app(\App\Http\Controllers\Admin\AdminPatientController::class)->show($patient, 'dentist');
+        }
+
         $activeRole = session('impersonated_role') ?: session('role');
 
         if (!optional(Auth::user())->canAccessClinicalArea($activeRole)) {
@@ -168,6 +173,32 @@ class DentistPatientController extends Controller
             ->orderBy('appointment_date', 'desc')
             ->orderBy('appointment_time', 'desc')
             ->get();
+
+        $revisionHistoryByAppointment =
+            OdontogramRevision::query()
+            ->with(['changedBy:id,name', 'reasonType:id,code,label',])
+            ->whereIn(
+                'appointment_id',
+                $pastVisits->pluck('id')
+            )
+            ->orderByDesc('version_number')
+            ->get()
+            ->groupBy('appointment_id');
+
+        $pastVisits->each(
+            function ($visit) use (
+                $revisionHistoryByAppointment
+            ) {
+                $visit->setRelation(
+                    'odontogramRevisions',
+                    $revisionHistoryByAppointment
+                        ->get(
+                            $visit->id,
+                            collect()
+                        )
+                );
+            }
+        );
 
         $completedVisits = $pastVisits
             ->where('status', 'completed')

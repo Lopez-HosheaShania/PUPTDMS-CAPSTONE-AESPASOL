@@ -16,7 +16,9 @@ class Inventory extends Model
         'name',
         'unit',
         'qty',
-        'used'
+        'used',
+        'volume_per_bottle_ml',
+        'current_bottle_remaining_ml',
     ];
 
     protected $appends = [
@@ -26,11 +28,57 @@ class Inventory extends Model
         'expiration_days_remaining',
         'expiration_status',
         'expiration_label',
+        'is_volume_bottle',
+        'total_available_volume_ml',
+        'stock_revision',
     ];
 
     public function getBalanceAttribute()
     {
-        return $this->qty - $this->used;
+        return $this->is_volume_bottle ? (int) $this->qty : $this->qty - $this->used;
+    }
+
+    public function getIsVolumeBottleAttribute(): bool
+    {
+        return strtolower(trim((string) $this->unit)) === 'bottle' && $this->volume_per_bottle_ml > 0;
+    }
+
+    public static function volumeHundredths(string|int|float $value): int
+    {
+        $parts = explode('.', (string) $value);
+
+        return ((int) $parts[0] * 100) + (int) str_pad($parts[1] ?? '', 2, '0');
+    }
+
+    public static function volumeDecimal(int $hundredths): string
+    {
+        return intdiv($hundredths, 100).'.'.str_pad((string) ($hundredths % 100), 2, '0', STR_PAD_LEFT);
+    }
+
+    public function getTotalAvailableVolumeMlAttribute(): ?string
+    {
+        if (!$this->is_volume_bottle) {
+            return null;
+        }
+        $total = $this->qty > 0
+            ? self::volumeHundredths($this->current_bottle_remaining_ml ?? 0)
+                + (((int) $this->qty - 1) * self::volumeHundredths($this->volume_per_bottle_ml))
+            : 0;
+
+        return self::volumeDecimal($total);
+    }
+
+    public function getStockRevisionAttribute(): string
+    {
+        return hash('sha256', json_encode([$this->id, $this->unit, (int) $this->qty, (int) $this->used,
+            $this->volume_per_bottle_ml, $this->current_bottle_remaining_ml, (string) $this->updated_at]));
+    }
+
+    public static function lowStockSql(): string
+    {
+        return "CASE WHEN LOWER(TRIM(unit)) = 'bottle' AND volume_per_bottle_ml > 0 THEN "
+            ."(CASE WHEN qty > 0 THEN current_bottle_remaining_ml + ((qty - 1) * volume_per_bottle_ml) ELSE 0 END) <= volume_per_bottle_ml * 0.30 "
+            ."ELSE (qty - used) <= (qty * 0.30) END";
     }
 
     public function getFormattedDateAttribute()
@@ -89,5 +137,7 @@ class Inventory extends Model
     protected $casts = [
         'date_received' => 'date',
         'expiration_date' => 'date',
+        'volume_per_bottle_ml' => 'decimal:2',
+        'current_bottle_remaining_ml' => 'decimal:2',
     ];
 }

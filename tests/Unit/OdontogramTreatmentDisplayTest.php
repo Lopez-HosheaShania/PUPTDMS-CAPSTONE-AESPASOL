@@ -89,4 +89,37 @@ class OdontogramTreatmentDisplayTest extends TestCase
         $this->assertStringNotContainsString('"remarks":"Finished"', $html);
         $this->assertStringContainsString('"treatment_items":[]', $html);
     }
+
+    public function test_record_card_accepts_homepage_arrays_and_preserves_the_edit_metadata(): void
+    {
+        $deadline = now()->addDays(3)->toIso8601String();
+        foreach (['completed', 'cancelled'] as $status) {
+            $appointment = [
+                'id' => 42, 'service' => 'Cleaning', 'date' => 'October 20, 2026',
+                'time' => '09:00:00', 'status' => $status,
+                'dentist_name' => 'Test Dentist', 'odontogram' => [],
+                'edit_locked' => false, 'edit_deadline' => $status === 'completed' ? $deadline : null,
+            ];
+            $html = Blade::render(
+                '<x-appointment-record-card :appointment="$appointment" variant="past" :show-details="true" />',
+                ['appointment' => $appointment]
+            );
+            preg_match("/data-record='([^']+)'/", $html, $matches);
+            $this->assertNotEmpty($matches[1] ?? null);
+            $payload = json_decode(html_entity_decode($matches[1], ENT_QUOTES | ENT_HTML5), true, flags: JSON_THROW_ON_ERROR);
+            $this->assertSame($status, $payload['status']);
+            $this->assertFalse($payload['edit_locked']);
+            $this->assertSame($appointment['edit_deadline'], $payload['edit_deadline']);
+        }
+    }
+
+    public function test_completed_array_without_edit_metadata_defaults_to_read_only(): void
+    {
+        $html = Blade::render(
+            '<x-appointment-record-card :appointment="$appointment" :show-details="true" />',
+            ['appointment' => ['id' => 42, 'status' => 'completed', 'service' => 'Cleaning']]
+        );
+        $this->assertStringContainsString('"edit_locked":true', $html);
+        $this->assertStringContainsString('"edit_deadline":null', $html);
+    }
 }

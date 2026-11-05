@@ -1,4 +1,4 @@
-<script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     (() => {
         function makeCalendarDot(colorClass, text = '') {
             const sizeClass = text ? 'min-w-[16px] h-4 px-1 text-[9px] font-bold' : 'w-4 h-4 text-[9px]';
@@ -2430,62 +2430,32 @@
             );
 
             if (!container) return;
-
-            const isInitialAnimatedRender = !hasCalendarRenderedOnce &&
+            
+            const isInitialAnimatedRender =
+                !hasCalendarRenderedOnce &&
                 calendarConfig.mode !== 'booking';
-
-            if (
-                isInitialAnimatedRender &&
-                typeof window.swapSkeletonContent === 'function'
-            ) {
-                window.swapSkeletonContent(
-                    calendarConfig.calendarContainerId,
-                    markup
-                );
-            } else {
-                container.innerHTML = markup;
-
-                container.classList.remove(
-                    'skeleton-fade-leave',
-                    'skeleton-fade-enter'
-                );
-
-                container.style.pointerEvents = '';
-            }
 
             hasCalendarRenderedOnce = true;
 
             if (isInitialAnimatedRender) {
-                let initAttempts = 0;
-
-                const initializeCalendarWhenReady = () => {
-                    const customSelect =
-                        container.querySelector(
-                            'select.js-custom-select'
-                        );
-
-                    if (
-                        customSelect ||
-                        initAttempts >= 10
-                    ) {
-                        initializeRenderedCalendar();
-                        return;
-                    }
-
-                    initAttempts++;
-
-                    requestAnimationFrame(
-                        initializeCalendarWhenReady
-                    );
-                };
-
-                requestAnimationFrame(
-                    initializeCalendarWhenReady
-                );
-
-            } else {
-                initializeRenderedCalendar();
+                container.classList.add('skeleton-fade-enter');
             }
+
+            container.innerHTML = markup;
+
+            container.classList.remove('skeleton-fade-leave');
+            container.style.removeProperty('pointer-events');
+
+            const initialization = initializeRenderedCalendar();
+
+            Promise.resolve(initialization)
+                .catch(error => {
+                    console.error(
+                        'Unable to initialize appointment calendar.',
+                        error
+                    );
+                });
+
         }
 
         function renderCalendar() {

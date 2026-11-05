@@ -2,11 +2,12 @@
 <html lang="en" data-theme="{{ session('theme', 'light') }}">
 
 <head>
+    @include('partials.security-bootstrap')
     <meta charset="UTF-8">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         (function() {
             const savedTheme = localStorage.getItem('theme');
             const theme = savedTheme === 'dark' ? 'dark' : 'light';
@@ -42,7 +43,7 @@
 
     <div id="globalActionTooltip" class="global-action-tooltip" role="tooltip" aria-hidden="true"></div>
 
-    <script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         window.chatbotContext = {
             page: 'login',
             pageLabel: 'Login page',
@@ -50,7 +51,7 @@
         };
     </script>
 
-    <script src="{{ asset('vendor/sienna/sienna-accessibility.umd.js') }}" data-position="bottom-right" data-offset="18,118"
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}" src="{{ asset('vendor/sienna/sienna-accessibility.umd.js') }}" data-position="bottom-right" data-offset="18,118"
         defer></script>
 
     @include('partials.chatbot')

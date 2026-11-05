@@ -25,6 +25,10 @@ $dateRaw = $get('appointment_date') ?? $get('date');
 
 $timeRaw = $get('appointment_time') ?? $get('time');
 
+if ($showDetails) {
+$timeRaw = $get('procedure.procedure_started_at') ?? $timeRaw;
+}
+
 $apptDate = null;
 $apptTime = null;
 
@@ -66,7 +70,7 @@ $statusLabel =
 $normalizedStatus === 'default' ? Str::headline($rawStatus ?: 'Status') : Str::headline($normalizedStatus);
 
 $dentistName =
-$get('dentist.name') ??
+$get('dentist_name') ?? $get('dentist.name') ??
 ($get('originalDentist.name') ??
 ($get('dentist_name') ?? ((is_string($get('dentist')) ? $get('dentist') : null) ?? 'Not assigned')));
 
@@ -100,6 +104,7 @@ $countdown = 'In ' . $difference . ' days';
 }
 }
 
+if ($showDetails) {
 $procedure = $get('procedure');
 
 $durationSeconds =
@@ -175,6 +180,122 @@ $followUp = [
 }
 }
 
+   $revisionItems = collect(
+    $get(
+        'odontogramRevisions',
+        []
+    )
+)
+    ->sortByDesc('version_number')
+    ->map(function ($revision) {
+        $createdAt =
+            data_get(
+                $revision,
+                'created_at'
+            );
+
+        return [
+            'id' =>
+                data_get(
+                    $revision,
+                    'id'
+                ),
+
+            'version_number' =>
+                (int) data_get(
+                    $revision,
+                    'version_number',
+                    0
+                ),
+
+            'odontogram_data' =>
+                data_get(
+                    $revision,
+                    'odontogram_data',
+                    []
+                ),
+
+            'changes' =>
+                data_get(
+                    $revision,
+                    'changes',
+                    []
+                ),
+
+           'reason_type_code' =>
+                data_get(
+                    $revision,
+                    'reasonType.code'
+                ),
+
+            'reason_type_label' =>
+                data_get(
+                    $revision,
+                    'reasonType.label'
+                ),
+
+            'reason_detail' =>
+                data_get(
+                    $revision,
+                    'reason_detail'
+                ),
+
+            'reason_notes' =>
+                data_get(
+                    $revision,
+                    'reason_notes'
+                ),
+
+            'changed_by_name' =>
+                data_get(
+                    $revision,
+                    'changedBy.name',
+                    'Unknown user'
+                ),
+
+            'changed_by_role' =>
+                data_get(
+                    $revision,
+                    'changed_by_role'
+                ),
+
+            'created_at' =>
+                $createdAt
+                    ? Carbon::parse(
+                        $createdAt
+                    )->toIso8601String()
+                    : null,
+        ];
+    })
+    ->values()
+    ->all();
+
+$currentRevisionVersion =
+    collect($revisionItems)
+        ->max('version_number');
+
+$odontogramEditLocked = false;
+$odontogramEditDeadline = null;
+
+if ($appointment instanceof \App\Models\Appointment) {
+  $canShowOdontogramEditState =
+    filled($recordEditUrl);
+
+    $odontogramEditLocked =
+        $canShowOdontogramEditState
+        &&
+        $normalizedStatus === 'completed'
+        &&
+        $appointment
+            ->isOdontogramEditLocked();
+
+    $odontogramEditDeadline =
+        $canShowOdontogramEditState
+            ? $appointment
+                ->odontogramEditDeadline()
+            : null;
+}
+
 $recordPayload = [
 'id' => $get('id'),
 
@@ -204,8 +325,24 @@ $recordPayload = [
 
 'follow_up' => $followUp,
 
+'revisions' => $revisionItems,
+
+'current_version' => $currentRevisionVersion,
+
 'edit_url' => $recordEditUrl,
+
+'edit_locked' => $odontogramEditLocked,
+
+'edit_lock_reason' =>
+    $odontogramEditLocked
+        ? 'The 7-day editing period for this completed odontogram has expired.'
+        : null,
+
+'edit_deadline' =>
+    $odontogramEditDeadline
+        ?->toIso8601String(),
 ];
+}
 
 $cardClasses = [
 'global-record-card',
@@ -230,7 +367,7 @@ $timeLabel .= ' – ' . $apptTime->copy()->addHour()->format('g:i A');
 @endphp
 
 <div {{ $attributes->class($cardClasses) }}
-    @if ($animationDelay !== null) style="animation-delay: {{ $animationDelay }}s" @endif>
+    @if ($animationDelay !== null) data-ui-style="animation-delay: {{ $animationDelay }}s" @endif>
     <div class="appt-visit-date
             {{ $isPast ? 'appt-visit-date-muted' : '' }}">
         <span class="appt-visit-day">
@@ -308,6 +445,7 @@ $timeLabel .= ' – ' . $apptTime->copy()->addHour()->format('g:i A');
     </div>
 
     @if ($showDetails)
+
     <div class="appt-visit-actions">
         <button type="button" class="ui-action-btn ui-action-view" data-appointment-id="{{ $get('id') }}" data-record='@json(
         $recordPayload,
@@ -315,11 +453,10 @@ $timeLabel .= ' – ' . $apptTime->copy()->addHour()->format('g:i A');
         JSON_HEX_APOS |
         JSON_HEX_AMP |
         JSON_HEX_QUOT
-    )' onclick="openRecordModal(
-        JSON.parse(this.dataset.record)
-    )" aria-label="View details" data-tooltip="View details" data-tooltip-tone="view">
+    )' data-ui-click="action-31134d4ab8af" aria-label="View details" data-tooltip="View details" data-tooltip-tone="view">
             <i class="fa-regular fa-eye"></i>
         </button>
     </div>
+    
     @endif
 </div>
