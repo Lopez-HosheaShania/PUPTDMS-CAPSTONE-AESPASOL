@@ -12,7 +12,10 @@ class AdminPatientController extends Controller
 {
     public function index()
     {
+        $isBookingMode = request()->routeIs('admin.book_appointments.*');
         $today = Carbon::today()->toDateString();
+
+        Appointment::cancelElapsedScheduledAppointments();
 
         $appointments = Appointment::with('patient')
             ->whereHas('patient')
@@ -79,9 +82,11 @@ class AdminPatientController extends Controller
         return view('shared.patient-list', [
             'layoutRole' => 'admin',
             'pageTitle' => 'Patient List',
-            'pageShellClass' => 'admin-page-shell',
+            'pageShellClass' => 'app-page-shell',
             'isDentistView' => false,
-            'patientProfileRouteName' => 'admin.admin.patient.profile',
+            'patientProfileRouteName' => $isBookingMode
+                ? 'admin.book_appointments.profile'
+                : 'admin.admin.patient.profile',
 
             'appointments' => $appointments,
             'todayCount' => $todayCount,
@@ -94,28 +99,28 @@ class AdminPatientController extends Controller
         ]);
     }
 
-    public function show(Patient $patient)
+    public function show(Patient $patient, string $profileMode = 'admin')
     {
+        $isBookingMode = request()->routeIs('admin.book_appointments.*');
+
         $patient->loadMissing([
             'user',
-            'odontogram',
-            'medicalHistory.answers.question',
-            'medicalHistory.diseaseAnswers.disease',
-            'dentalHistory',
-            'dentalHistoryDates',
-            'dentalHistoryConcerns',
-            'dentalHistoryAnswers.condition',
+            'medicalHistory' => fn ($query) => $query->select([
+                'id', 'patient_id', 'emergency_person', 'emergency_number', 'emergency_relation',
+            ]),
         ]);
 
         $today = Carbon::today()->toDateString();
 
-        $appointments = Appointment::with(['procedure', 'followUpAppointments', 'dentist'])
+        Appointment::cancelElapsedScheduledAppointments();
+
+        $appointments = Appointment::with('dentist')
             ->where('patient_id', $patient->id)
             ->orderBy('appointment_date', 'desc')
             ->orderBy('appointment_time', 'desc')
             ->get();
 
-        $futureVisits = Appointment::with(['procedure', 'followUpAppointments', 'dentist'])
+        $futureVisits = Appointment::with('dentist')
             ->where('patient_id', $patient->id)
             ->whereDate('appointment_date', '>=', $today)
             ->whereIn('status', ['upcoming', 'rescheduled'])
@@ -123,7 +128,7 @@ class AdminPatientController extends Controller
             ->orderBy('appointment_time', 'asc')
             ->get();
 
-        $pastVisits = Appointment::with(['procedure', 'followUpAppointments', 'dentist'])
+        $pastVisits = Appointment::with('dentist')
             ->where('patient_id', $patient->id)
             ->where(function ($query) use ($today) {
                 $query->whereDate('appointment_date', '<', $today)
@@ -147,8 +152,9 @@ class AdminPatientController extends Controller
             'lastVisit' => $lastVisit,
             'nextAppointment' => $nextAppointment,
             'notifications' => $notifications,
-            'profileLayout' => 'layouts.admin',
-            'profileMode' => 'admin',
+            'profileLayout' => 'layouts.' . $profileMode,
+            'profileMode' => $profileMode,
+            'bookingMode' => $isBookingMode,
         ]);
     }
 }

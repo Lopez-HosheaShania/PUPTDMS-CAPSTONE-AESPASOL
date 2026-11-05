@@ -12,9 +12,6 @@
 
 @section('notice_text', 'Wait briefly, then retry the action once. Avoid repeatedly clicking or refreshing.')
 
-@section('primary_label', 'Return Home')
-@section('primary_url', url('/'))
-
 @section('notice_icon')
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01"></path>

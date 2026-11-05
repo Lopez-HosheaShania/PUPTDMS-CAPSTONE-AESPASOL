@@ -13,9 +13,7 @@
     --session-card-shadow:
         0 8px 20px rgba(15, 23, 42, .03);
 
-    padding: 80px 1.5rem 2rem;
     min-width: 0;
-
     color: var(--session-text);
 }
 
@@ -66,8 +64,7 @@
 .session-grid {
     display: grid;
     grid-template-columns:
-        minmax(0, 1.2fr)
-        minmax(360px, .8fr);
+        minmax(0, 1.2fr) minmax(360px, .8fr);
     align-items: start;
     gap: 1rem;
 }
@@ -139,15 +136,11 @@
         var(--status-active-border, #bfe8cb);
 
     background:
-        linear-gradient(
-            180deg,
-            color-mix(
-                in srgb,
+        linear-gradient(180deg,
+            color-mix(in srgb,
                 var(--status-active-bg, #dcfce7) 46%,
-                var(--session-surface)
-            ),
-            var(--session-surface)
-        );
+                var(--session-surface)),
+            var(--session-surface));
 
     box-shadow:
         0 12px 28px rgba(34, 197, 94, .08);
@@ -491,17 +484,13 @@
         var(--session-border-soft) !important;
 }
 
-[data-theme="dark"]
-.session-page .global-info-label,
-.dark
-.session-page .global-info-label {
+[data-theme="dark"] .session-page .global-info-label,
+.dark .session-page .global-info-label {
     color: #94a3b8 !important;
 }
 
-[data-theme="dark"]
-.session-page .global-info-value,
-.dark
-.session-page .global-info-value {
+[data-theme="dark"] .session-page .global-info-value,
+.dark .session-page .global-info-value {
     color: #f8fafc !important;
 }
 
@@ -511,18 +500,12 @@
         rgba(110, 231, 183, .25) !important;
 
     background:
-        linear-gradient(
-            180deg,
+        linear-gradient(180deg,
             rgba(22, 163, 74, .10),
-            var(--session-surface)
-        ) !important;
+            var(--session-surface)) !important;
 }
 
 @media (max-width: 1024px) {
-    .session-page {
-        padding-top: 88px;
-    }
-
     .session-grid {
         grid-template-columns: 1fr;
     }
@@ -534,10 +517,6 @@
 }
 
 @media (max-width: 720px) {
-    .session-page {
-        padding: 84px 12px calc(1.5rem + env(safe-area-inset-bottom));
-    }
-
     .session-stats {
         grid-template-columns: 1fr;
     }

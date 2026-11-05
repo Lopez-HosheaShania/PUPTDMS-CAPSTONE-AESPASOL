@@ -1,6 +1,6 @@
 :root {
-    --voice-mic-size: 42px;
-    --voice-mic-radius: 14px;
+    --voice-mic-size: var(--toolbar-control-height);
+    --voice-mic-radius: 10px;
 
     --voice-mic-bg: var(--card);
     --voice-mic-border: var(--border);
@@ -31,7 +31,7 @@
     gap: 0.65rem;
     width: 100%;
     min-width: 0;
-    overflow: visible !important;
+    overflow: visible;
 }
 
 .global-voice-row.is-textarea,
@@ -60,15 +60,25 @@
     width: auto;
     min-width: var(--voice-mic-size);
     margin: 0;
-    overflow: visible !important;
+    overflow: visible;
     pointer-events: auto;
 }
 
+.voice-input-toggle {
+    position: relative;
+}
+
+.global-voice-waveform,
+.voice-status {
+    transform-origin: bottom right;
+}
+
 .voice-search-mic.external {
-    width: 42px;
-    height: 42px;
-    min-width: 42px;
-    min-height: 42px;
+    width: var(--voice-mic-size);
+    height: var(--voice-mic-size);
+
+    min-width: var(--voice-mic-size);
+    min-height: var(--voice-mic-size);
     padding: 0;
     margin: 0;
     display: inline-flex;
@@ -78,55 +88,69 @@
     background: var(--voice-mic-bg);
     color: var(--voice-mic-icon);
     border-radius: var(--voice-mic-radius);
-    transform: translateY(0) scale(1) !important;
+    transform: translateY(0) scale(1);
     transition:
         background 180ms ease,
         border-color 180ms ease,
         color 180ms ease,
         box-shadow 180ms ease,
-        transform 150ms ease !important;
+        transform 150ms ease;
     cursor: pointer;
-}
-
-.voice-search-mic.external::before {
-    content: "";
 }
 
 .voice-search-mic.external>i {
     position: relative;
     z-index: 2;
-    display: inline-block !important;
-    align-items: center !important;
-    justify-content: center !important;
+
     width: 1rem;
     height: 1rem;
-    color: currentColor !important;
-    font-size: 0.86rem !important;
-    line-height: 1 !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    pointer-events: none !important;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 1rem;
+
+    color: currentColor;
+
+    font-size: .86rem;
+    line-height: 1;
+
+    opacity: 1;
+    visibility: visible;
+
+    pointer-events: none;
+
+    transform: none;
+
     transition:
         color 180ms ease,
-        transform 180ms ease !important;
+        transform 180ms ease;
+}
+
+.voice-search-mic.external>.fa-microphone,
+.voice-search-mic.external>.fa-stop {
+    display: inline-flex;
+    opacity: 1;
+    visibility: visible;
 }
 
 .voice-search-mic.external:hover {
     border-color:
-        var(--voice-mic-hover-border) !important;
+        var(--voice-mic-hover-border);
 
     background:
-        var(--voice-mic-hover-bg) !important;
+        var(--voice-mic-hover-bg);
 
     color:
-        var(--voice-mic-hover-icon) !important;
+        var(--voice-mic-hover-icon);
 
     box-shadow:
         0 2px 4px rgba(139, 0, 0, 0.07),
         0 8px 18px rgba(139, 0, 0, 0.12),
-        inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
 
-    transform: translateY(-2px) !important;
+    transform: translateY(-2px);
 }
 
 .voice-search-mic.external:hover::before {
@@ -140,40 +164,40 @@
 .voice-search-mic.external:active {
     box-shadow:
         0 1px 2px rgba(139, 0, 0, 0.1),
-        0 3px 8px rgba(139, 0, 0, 0.1) !important;
-    transform: translateY(0) scale(0.96) !important;
+        0 3px 8px rgba(139, 0, 0, 0.1);
+    transform: translateY(0) scale(0.96);
 }
 
 .voice-search-mic.external:focus {
-    outline: none !important;
+    outline: none;
 }
 
 .voice-search-mic.external:focus-visible {
-    border-color: #b91c1c !important;
-    outline: none !important;
+    border-color: #b91c1c;
+    outline: none;
     box-shadow:
         0 0 0 4px rgba(139, 0, 0, 0.12),
-        0 8px 18px rgba(139, 0, 0, 0.14) !important;
+        0 8px 18px rgba(139, 0, 0, 0.14);
 }
 
 .voice-search-mic.external.mic-active,
 .voice-search-mic.external.is-listening,
 .voice-search-mic.external[aria-pressed="true"] {
-    border-color: rgba(127, 29, 29, 0.45) !important;
+    border-color: rgba(127, 29, 29, 0.45);
 
     background:
         linear-gradient(135deg,
             var(--voice-mic-active-start) 0%,
-            var(--voice-mic-active-end) 100%) !important;
+            var(--voice-mic-active-end) 100%);
 
-    color: #ffffff !important;
+    color: #ffffff;
 
     box-shadow:
         0 0 0 3px rgba(139, 0, 0, 0.10),
         0 7px 12px rgba(139, 0, 0, 0.20),
-        inset 0 1px 0 rgba(255, 255, 255, 0.14) !important;
+        inset 0 1px 0 rgba(255, 255, 255, 0.14);
 
-    transform: scale(1.02) !important;
+    transform: scale(1.02);
     animation: globalVoiceMicPulse 1.25s ease-in-out infinite;
 }
 
@@ -187,7 +211,7 @@
 .voice-search-mic.external.mic-active>i,
 .voice-search-mic.external.is-listening>i,
 .voice-search-mic.external[aria-pressed="true"]>i {
-    color: #ffffff !important;
+    color: #ffffff;
     transform: scale(1.04);
 }
 
@@ -195,69 +219,53 @@
 .st-voice-row .voice-search-mic.external.is-listening,
 .voice-search-row .voice-search-mic.external.mic-active,
 .voice-search-row .voice-search-mic.external.is-listening {
-    transform: scale(1.02) !important;
+    transform: scale(1.02);
 }
 
 .voice-status {
     position: absolute;
     right: 0;
-    bottom: calc(100% + 10px);
     top: auto;
+    bottom: calc(100% + 8px);
     z-index: 9999;
-
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.35rem;
-
+    gap: .35rem;
     width: max-content;
-    max-width: min(220px,
-            calc(100vw - 24px));
-
-    padding: 0.42rem 0.65rem;
-
-    border:
-        1px solid var(--border);
-
+    max-width: min(280px, calc(100vw - 32px));
+    padding: .42rem .65rem;
+    box-sizing: border-box;
+    border: 1px solid var(--border);
     border-radius: 8px;
-
-    background:
-        var(--card);
-
-    color:
-        var(--text-2);
-
+    background: var(--card);
+    color: var(--text-2);
     box-shadow:
-        0 10px 26px rgba(15, 23, 42, 0.13),
-        0 2px 6px rgba(15, 23, 42, 0.07);
-
-    font-size: 0.73rem;
+        0 10px 26px rgba(15, 23, 42, .13),
+        0 2px 6px rgba(15, 23, 42, .07);
+    font-size: .73rem;
     font-weight: 700;
-    line-height: 1.25;
+    line-height: 1.3;
     text-align: center;
-    white-space: nowrap;
-
+    white-space: normal;
+    overflow-wrap: anywhere;
     pointer-events: none;
-
     opacity: 1;
     visibility: visible;
-
-    transform: translateY(0);
-
-    overflow: visible !important;
 }
 
 .voice-status::after {
     content: "";
     position: absolute;
     right: 15px;
+    top: auto;
     bottom: -5px;
     width: 9px;
     height: 9px;
     background: inherit;
     border-right: 1px solid currentColor;
     border-bottom: 1px solid currentColor;
-    opacity: 0.18;
+    opacity: .18;
     transform: rotate(45deg);
 }
 
@@ -265,7 +273,7 @@
 .st-voice-row .voice-status.hidden,
 .voice-search-row .voice-status.hidden,
 .patient-voice-status.hidden {
-    display: none !important;
+    display: none;
 }
 
 .voice-status.is-default {
@@ -292,24 +300,23 @@
     color: #b91c1c;
 }
 
-
 .voice-input-wrap,
 .global-voice-control,
 .st-input-wrap,
 .search-wrap,
 .voice-input-toggle {
-    overflow: visible !important;
+    overflow: visible;
 }
 
 [data-theme="dark"] .voice-search-mic.external,
 .dark .voice-search-mic.external {
-    border-color: var(--border) !important;
-    background: var(--surface) !important;
-    color: var(--text-2) !important;
+    border-color: var(--border);
+    background: var(--surface);
+    color: var(--text-2);
 
     box-shadow:
         0 8px 20px rgba(0, 0, 0, 0.26),
-        inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 [data-theme="dark"] .voice-search-mic.external:hover,
@@ -317,14 +324,14 @@
     border-color:
         color-mix(in srgb,
             var(--border) 65%,
-            var(--crimson) 35%) !important;
+            var(--crimson) 35%);
 
     background:
         color-mix(in srgb,
             var(--surface) 82%,
-            var(--crimson) 18%) !important;
+            var(--crimson) 18%);
 
-    color: #FCA5A5 !important;
+    color: #FCA5A5;
 }
 
 [data-theme="dark"] .voice-status.is-listening,
@@ -364,38 +371,28 @@
     }
 }
 
-@media (max-width: 575px) {
-
-    .global-voice-row,
-    .st-voice-row,
-    .voice-search-row {
-        gap: 0.5rem;
-    }
-
-    .voice-status {
-        right: 0;
-        max-width: calc(100vw - 24px);
-        font-size: 0.7rem;
-        white-space: normal;
-    }
-}
-
 @media (prefers-reduced-motion: reduce) {
 
     .voice-search-mic.external,
     .voice-search-mic.external::before,
     .voice-search-mic.external>i {
-        transition: none !important;
+        transition: none;
     }
 
     .voice-search-mic.external.mic-active,
     .voice-search-mic.external.is-listening,
     .voice-search-mic.external[aria-pressed="true"] {
-        animation: none !important;
+        animation: none;
     }
 }
 
 .global-voice-waveform {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + 8px);
+
+    z-index: 9999;
+
     display: none;
     align-items: center;
     justify-content: center;
@@ -426,8 +423,53 @@
     overflow: hidden;
 }
 
-.global-voice-waveform.is-active {
+.global-voice-waveform.is-active,
+.global-voice-waveform.is-leaving {
     display: inline-flex;
+}
+
+.global-voice-waveform.is-active {
+    animation:
+        globalVoiceWaveformEnter 220ms cubic-bezier(.2, .9, .3, 1.25) both;
+}
+
+.global-voice-waveform.is-leaving {
+    animation:
+        globalVoiceWaveformLeave 180ms ease both;
+}
+
+@keyframes globalVoiceWaveformEnter {
+    0% {
+        opacity: 0;
+        transform:
+            translateX(8px) scale(.72);
+    }
+
+    60% {
+        opacity: 1;
+        transform:
+            translateX(-2px) scale(1.08);
+    }
+
+    100% {
+        opacity: 1;
+        transform:
+            translateX(0) scale(1);
+    }
+}
+
+@keyframes globalVoiceWaveformLeave {
+    0% {
+        opacity: 1;
+        transform:
+            translateX(0) scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform:
+            translateX(6px) scale(.78);
+    }
 }
 
 .global-voice-waveform span {
@@ -441,7 +483,7 @@
 }
 
 .global-voice-waveform.is-idle span {
-    height: 5px !important;
+    height: 5px;
 }
 
 [data-theme="dark"] .global-voice-waveform,
@@ -470,4 +512,113 @@
         height: 30px;
         padding-inline: 6px;
     }
+
+    .global-voice-row,
+    .st-voice-row,
+    .voice-search-row {
+        gap: 0.5rem;
+    }
+
+    .voice-status {
+        right: 0;
+        max-width: calc(100vw - 24px);
+        font-size: 0.7rem;
+        white-space: normal;
+    }
+}
+
+@media (max-width: 767px) {
+
+    :root {
+        --voice-mic-radius: 11px;
+    }
+
+    .global-voice-row,
+    .st-voice-row,
+    .voice-search-row {
+        gap: 8px;
+    }
+
+    .voice-search-mic.external>i {
+        width: 13px;
+        height: 13px;
+
+        flex-basis: 13px;
+
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 380px) {
+
+    :root {
+        --voice-mic-radius: 10px;
+    }
+
+    .voice-search-mic.external>i {
+        font-size: 10px;
+    }
+}
+
+.table-card:has(.voice-status:not(.hidden)),
+.table-card:has(.global-voice-waveform.is-active),
+.table-card:has(.global-voice-waveform.is-leaving) {
+    overflow: visible;
+}
+
+.table-card:has(.voice-status:not(.hidden)) .table-toolbar,
+.table-card:has(.global-voice-waveform.is-active) .table-toolbar,
+.table-card:has(.global-voice-waveform.is-leaving) .table-toolbar {
+    position: relative;
+    z-index: 100;
+}
+
+.card:has(.voice-status:not(.hidden))>.card-header,
+.card:has(.global-voice-waveform.is-active)>.card-header,
+.card:has(.global-voice-waveform.is-leaving)>.card-header {
+    position: relative;
+    z-index: 100;
+}
+
+.voice-search-row:has(.voice-status:not(.hidden)),
+.voice-search-row:has(.global-voice-waveform.is-active),
+.voice-search-row:has(.global-voice-waveform.is-leaving) {
+    position: relative;
+    z-index: 150;
+}
+
+.voice-input-toggle:has(.voice-status:not(.hidden)),
+.voice-input-toggle:has(.global-voice-waveform.is-active),
+.voice-input-toggle:has(.global-voice-waveform.is-leaving) {
+    z-index: 200;
+}
+
+.card:has(.voice-search-row .voice-status:not(.hidden),
+    .voice-search-row .global-voice-waveform.is-active,
+    .voice-search-row .global-voice-waveform.is-leaving) {
+    overflow: visible;
+}
+
+.card:has(.voice-search-row .voice-status:not(.hidden),
+    .voice-search-row .global-voice-waveform.is-active,
+    .voice-search-row .global-voice-waveform.is-leaving)>.card-header {
+    position: relative;
+    z-index: 100;
+    overflow: visible;
+}
+
+.card-header:has(.voice-search-row .voice-status:not(.hidden),
+    .voice-search-row .global-voice-waveform.is-active,
+    .voice-search-row .global-voice-waveform.is-leaving) .card-header-right {
+    position: relative;
+    z-index: 101;
+    overflow: visible;
+}
+
+.voice-search-row:has(.voice-status:not(.hidden),
+    .global-voice-waveform.is-active,
+    .global-voice-waveform.is-leaving) {
+    position: relative;
+    z-index: 102;
+    overflow: visible;
 }

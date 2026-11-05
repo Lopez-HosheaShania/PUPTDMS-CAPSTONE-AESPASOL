@@ -1,395 +1,53 @@
 {
-  "node_modules/@fontsource/inter/files/inter-cyrillic-300-normal.woff": {
-    "file": "assets/inter-cyrillic-300-normal-LR1W_oT8.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-cyrillic-300-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-cyrillic-300-normal.woff2": {
-    "file": "assets/inter-cyrillic-300-normal-BnqRxXuy.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-cyrillic-300-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-cyrillic-400-normal.woff": {
-    "file": "assets/inter-cyrillic-400-normal-HOLc17fK.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-cyrillic-400-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-cyrillic-400-normal.woff2": {
-    "file": "assets/inter-cyrillic-400-normal-obahsSVq.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-cyrillic-400-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-cyrillic-500-normal.woff": {
-    "file": "assets/inter-cyrillic-500-normal-CxZf_p3X.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-cyrillic-500-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-cyrillic-500-normal.woff2": {
-    "file": "assets/inter-cyrillic-500-normal-BasfLYem.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-cyrillic-500-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-cyrillic-600-normal.woff": {
-    "file": "assets/inter-cyrillic-600-normal-4D_pXhcN.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-cyrillic-600-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-cyrillic-600-normal.woff2": {
-    "file": "assets/inter-cyrillic-600-normal-CWCymEST.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-cyrillic-600-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-cyrillic-700-normal.woff": {
-    "file": "assets/inter-cyrillic-700-normal-DrXBdSj3.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-cyrillic-700-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-cyrillic-700-normal.woff2": {
-    "file": "assets/inter-cyrillic-700-normal-CjBOestx.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-cyrillic-700-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-cyrillic-800-normal.woff": {
-    "file": "assets/inter-cyrillic-800-normal-CCHyn08d.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-cyrillic-800-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-cyrillic-800-normal.woff2": {
-    "file": "assets/inter-cyrillic-800-normal-C7MGvYyJ.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-cyrillic-800-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-cyrillic-900-normal.woff": {
-    "file": "assets/inter-cyrillic-900-normal-BAVML7y5.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-cyrillic-900-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-cyrillic-900-normal.woff2": {
-    "file": "assets/inter-cyrillic-900-normal-CjyCg421.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-cyrillic-900-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-cyrillic-ext-300-normal.woff": {
-    "file": "assets/inter-cyrillic-ext-300-normal-RId2JxDB.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-cyrillic-ext-300-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-cyrillic-ext-300-normal.woff2": {
-    "file": "assets/inter-cyrillic-ext-300-normal-CgCALhwJ.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-cyrillic-ext-300-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-cyrillic-ext-400-normal.woff": {
-    "file": "assets/inter-cyrillic-ext-400-normal-DQukG94-.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-cyrillic-ext-400-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-cyrillic-ext-400-normal.woff2": {
-    "file": "assets/inter-cyrillic-ext-400-normal-BQZuk6qB.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-cyrillic-ext-400-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-cyrillic-ext-500-normal.woff": {
-    "file": "assets/inter-cyrillic-ext-500-normal-BmqWE9Dz.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-cyrillic-ext-500-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-cyrillic-ext-500-normal.woff2": {
-    "file": "assets/inter-cyrillic-ext-500-normal-B0yAr1jD.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-cyrillic-ext-500-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-cyrillic-ext-600-normal.woff": {
-    "file": "assets/inter-cyrillic-ext-600-normal-Bcila6Z-.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-cyrillic-ext-600-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-cyrillic-ext-600-normal.woff2": {
-    "file": "assets/inter-cyrillic-ext-600-normal-Dfes3d0z.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-cyrillic-ext-600-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-cyrillic-ext-700-normal.woff": {
-    "file": "assets/inter-cyrillic-ext-700-normal-LO58E6JB.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-cyrillic-ext-700-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-cyrillic-ext-700-normal.woff2": {
-    "file": "assets/inter-cyrillic-ext-700-normal-BjwYoWNd.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-cyrillic-ext-700-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-cyrillic-ext-800-normal.woff": {
-    "file": "assets/inter-cyrillic-ext-800-normal-Ca-gJeZY.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-cyrillic-ext-800-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-cyrillic-ext-800-normal.woff2": {
-    "file": "assets/inter-cyrillic-ext-800-normal-BZOjs1Xv.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-cyrillic-ext-800-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-cyrillic-ext-900-normal.woff": {
-    "file": "assets/inter-cyrillic-ext-900-normal-BUlv-ou0.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-cyrillic-ext-900-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-cyrillic-ext-900-normal.woff2": {
-    "file": "assets/inter-cyrillic-ext-900-normal-buRuWz4h.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-cyrillic-ext-900-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-greek-300-normal.woff": {
-    "file": "assets/inter-greek-300-normal-BrhSP0vQ.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-greek-300-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-greek-300-normal.woff2": {
-    "file": "assets/inter-greek-300-normal-DmGD3g_f.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-greek-300-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-greek-400-normal.woff": {
-    "file": "assets/inter-greek-400-normal-q2sYcFCs.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-greek-400-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-greek-400-normal.woff2": {
-    "file": "assets/inter-greek-400-normal-B4URO6DV.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-greek-400-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-greek-500-normal.woff": {
-    "file": "assets/inter-greek-500-normal-Xzm54t5V.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-greek-500-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-greek-500-normal.woff2": {
-    "file": "assets/inter-greek-500-normal-BIZE56-Y.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-greek-500-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-greek-600-normal.woff": {
-    "file": "assets/inter-greek-600-normal-BZpKdvQh.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-greek-600-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-greek-600-normal.woff2": {
-    "file": "assets/inter-greek-600-normal-plRanbMR.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-greek-600-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-greek-700-normal.woff": {
-    "file": "assets/inter-greek-700-normal-BUv2fZ6O.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-greek-700-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-greek-700-normal.woff2": {
-    "file": "assets/inter-greek-700-normal-C3JjAnD8.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-greek-700-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-greek-800-normal.woff": {
-    "file": "assets/inter-greek-800-normal-BU00tryP.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-greek-800-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-greek-800-normal.woff2": {
-    "file": "assets/inter-greek-800-normal-CLIouy3y.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-greek-800-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-greek-900-normal.woff": {
-    "file": "assets/inter-greek-900-normal-7n5hB3DA.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-greek-900-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-greek-900-normal.woff2": {
-    "file": "assets/inter-greek-900-normal-Clii5heL.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-greek-900-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-greek-ext-300-normal.woff": {
-    "file": "assets/inter-greek-ext-300-normal-DLbbeei1.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-greek-ext-300-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-greek-ext-300-normal.woff2": {
-    "file": "assets/inter-greek-ext-300-normal-l2DDyC6M.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-greek-ext-300-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-greek-ext-400-normal.woff": {
-    "file": "assets/inter-greek-ext-400-normal-KugGGMne.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-greek-ext-400-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-greek-ext-400-normal.woff2": {
-    "file": "assets/inter-greek-ext-400-normal-DGGRlc-M.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-greek-ext-400-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-greek-ext-500-normal.woff": {
-    "file": "assets/inter-greek-ext-500-normal-2j5mBUwD.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-greek-ext-500-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-greek-ext-500-normal.woff2": {
-    "file": "assets/inter-greek-ext-500-normal-C4iEst2y.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-greek-ext-500-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-greek-ext-600-normal.woff": {
-    "file": "assets/inter-greek-ext-600-normal-B8X0CLgF.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-greek-ext-600-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-greek-ext-600-normal.woff2": {
-    "file": "assets/inter-greek-ext-600-normal-DRtmH8MT.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-greek-ext-600-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-greek-ext-700-normal.woff": {
-    "file": "assets/inter-greek-ext-700-normal-BoQ6DsYi.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-greek-ext-700-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-greek-ext-700-normal.woff2": {
-    "file": "assets/inter-greek-ext-700-normal-qfdV9bQt.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-greek-ext-700-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-greek-ext-800-normal.woff": {
-    "file": "assets/inter-greek-ext-800-normal-DUe57HfS.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-greek-ext-800-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-greek-ext-800-normal.woff2": {
-    "file": "assets/inter-greek-ext-800-normal-B--PVpEC.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-greek-ext-800-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-greek-ext-900-normal.woff": {
-    "file": "assets/inter-greek-ext-900-normal-LVqH4fM3.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-greek-ext-900-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-greek-ext-900-normal.woff2": {
-    "file": "assets/inter-greek-ext-900-normal-voj7phVX.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-greek-ext-900-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-latin-300-normal.woff": {
-    "file": "assets/inter-latin-300-normal-i8F0SvXL.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-latin-300-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-latin-300-normal.woff2": {
-    "file": "assets/inter-latin-300-normal-BVlfKGgI.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-latin-300-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-latin-400-normal.woff": {
-    "file": "assets/inter-latin-400-normal-CyCys3Eg.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-latin-400-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2": {
-    "file": "assets/inter-latin-400-normal-C38fXH4l.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-latin-500-normal.woff": {
-    "file": "assets/inter-latin-500-normal-BL9OpVg8.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-latin-500-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2": {
-    "file": "assets/inter-latin-500-normal-Cerq10X2.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-latin-600-normal.woff": {
-    "file": "assets/inter-latin-600-normal-CiBQ2DWP.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-latin-600-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2": {
-    "file": "assets/inter-latin-600-normal-LgqL8muc.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-latin-700-normal.woff": {
-    "file": "assets/inter-latin-700-normal-BLAVimhd.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-latin-700-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2": {
-    "file": "assets/inter-latin-700-normal-Yt3aPRUw.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-latin-800-normal.woff": {
-    "file": "assets/inter-latin-800-normal-D1mf63XC.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-latin-800-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-latin-800-normal.woff2": {
-    "file": "assets/inter-latin-800-normal-BYj_oED-.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-latin-800-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-latin-900-normal.woff": {
-    "file": "assets/inter-latin-900-normal-EUCDUbiG.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-latin-900-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-latin-900-normal.woff2": {
-    "file": "assets/inter-latin-900-normal-D4nM5aha.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-latin-900-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-latin-ext-300-normal.woff": {
-    "file": "assets/inter-latin-ext-300-normal-Dp1L8vcn.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-latin-ext-300-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-latin-ext-300-normal.woff2": {
-    "file": "assets/inter-latin-ext-300-normal-CPgO9Ksf.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-latin-ext-300-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-latin-ext-400-normal.woff": {
-    "file": "assets/inter-latin-ext-400-normal-77YHD8bZ.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-latin-ext-400-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-latin-ext-400-normal.woff2": {
-    "file": "assets/inter-latin-ext-400-normal-C1nco2VV.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-latin-ext-400-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-latin-ext-500-normal.woff": {
-    "file": "assets/inter-latin-ext-500-normal-BxGbmqWO.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-latin-ext-500-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-latin-ext-500-normal.woff2": {
-    "file": "assets/inter-latin-ext-500-normal-CV4jyFjo.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-latin-ext-500-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-latin-ext-600-normal.woff": {
-    "file": "assets/inter-latin-ext-600-normal-CIVaiw4L.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-latin-ext-600-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-latin-ext-600-normal.woff2": {
-    "file": "assets/inter-latin-ext-600-normal-D2bJ5OIk.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-latin-ext-600-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-latin-ext-700-normal.woff": {
-    "file": "assets/inter-latin-ext-700-normal-TidjK2hL.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-latin-ext-700-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-latin-ext-700-normal.woff2": {
-    "file": "assets/inter-latin-ext-700-normal-Ca8adRJv.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-latin-ext-700-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-latin-ext-800-normal.woff": {
-    "file": "assets/inter-latin-ext-800-normal-BOMpwxm3.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-latin-ext-800-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-latin-ext-800-normal.woff2": {
-    "file": "assets/inter-latin-ext-800-normal-DZJjya6U.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-latin-ext-800-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-latin-ext-900-normal.woff": {
-    "file": "assets/inter-latin-ext-900-normal-DG9wZIMw.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-latin-ext-900-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-latin-ext-900-normal.woff2": {
-    "file": "assets/inter-latin-ext-900-normal-ty8Tfvw5.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-latin-ext-900-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-vietnamese-300-normal.woff": {
-    "file": "assets/inter-vietnamese-300-normal-DDGmYYdT.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-vietnamese-300-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-vietnamese-300-normal.woff2": {
-    "file": "assets/inter-vietnamese-300-normal-Bdr24Bqb.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-vietnamese-300-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-vietnamese-400-normal.woff": {
-    "file": "assets/inter-vietnamese-400-normal-Bbgyi5SW.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-vietnamese-400-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-vietnamese-400-normal.woff2": {
-    "file": "assets/inter-vietnamese-400-normal-DMkecbls.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-vietnamese-400-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-vietnamese-500-normal.woff": {
-    "file": "assets/inter-vietnamese-500-normal-mJboJaSs.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-vietnamese-500-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-vietnamese-500-normal.woff2": {
-    "file": "assets/inter-vietnamese-500-normal-DOriooB6.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-vietnamese-500-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-vietnamese-600-normal.woff": {
-    "file": "assets/inter-vietnamese-600-normal-BuLX-rYi.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-vietnamese-600-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-vietnamese-600-normal.woff2": {
-    "file": "assets/inter-vietnamese-600-normal-Cc8MFFhd.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-vietnamese-600-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-vietnamese-700-normal.woff": {
-    "file": "assets/inter-vietnamese-700-normal-BZaoP0fm.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-vietnamese-700-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-vietnamese-700-normal.woff2": {
-    "file": "assets/inter-vietnamese-700-normal-DlLaEgI2.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-vietnamese-700-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-vietnamese-800-normal.woff": {
-    "file": "assets/inter-vietnamese-800-normal-DDlpr_Ee.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-vietnamese-800-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-vietnamese-800-normal.woff2": {
-    "file": "assets/inter-vietnamese-800-normal-Cm7tD1pz.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-vietnamese-800-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-vietnamese-900-normal.woff": {
-    "file": "assets/inter-vietnamese-900-normal-DBSPUrC7.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-vietnamese-900-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-vietnamese-900-normal.woff2": {
-    "file": "assets/inter-vietnamese-900-normal-C4P836tE.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-vietnamese-900-normal.woff2"
+  "_booking-signature-2G5OvK7m.js": {
+    "file": "assets/booking-signature-2G5OvK7m.js",
+    "name": "booking-signature",
+    "isDynamicEntry": true
+  },
+  "_jspdf.es.min-MMuTz6kX.js": {
+    "file": "assets/jspdf.es.min-MMuTz6kX.js",
+    "name": "jspdf.es.min",
+    "isDynamicEntry": true,
+    "imports": [
+      "_preload-helper-I4rgV-VL.js"
+    ],
+    "dynamicImports": [
+      "node_modules/html2canvas/dist/html2canvas.esm.js",
+      "node_modules/dompurify/dist/purify.es.mjs",
+      "node_modules/canvg/lib/index.es.js"
+    ]
+  },
+  "_preload-helper-I4rgV-VL.js": {
+    "file": "assets/preload-helper-I4rgV-VL.js",
+    "name": "preload-helper"
+  },
+  "node_modules/@fontsource-variable/inter/files/inter-cyrillic-ext-wght-normal.woff2": {
+    "file": "assets/inter-cyrillic-ext-wght-normal-BOeWTOD4.woff2",
+    "src": "node_modules/@fontsource-variable/inter/files/inter-cyrillic-ext-wght-normal.woff2"
+  },
+  "node_modules/@fontsource-variable/inter/files/inter-cyrillic-wght-normal.woff2": {
+    "file": "assets/inter-cyrillic-wght-normal-DqGufNeO.woff2",
+    "src": "node_modules/@fontsource-variable/inter/files/inter-cyrillic-wght-normal.woff2"
+  },
+  "node_modules/@fontsource-variable/inter/files/inter-greek-ext-wght-normal.woff2": {
+    "file": "assets/inter-greek-ext-wght-normal-DlzME5K_.woff2",
+    "src": "node_modules/@fontsource-variable/inter/files/inter-greek-ext-wght-normal.woff2"
+  },
+  "node_modules/@fontsource-variable/inter/files/inter-greek-wght-normal.woff2": {
+    "file": "assets/inter-greek-wght-normal-CkhJZR-_.woff2",
+    "src": "node_modules/@fontsource-variable/inter/files/inter-greek-wght-normal.woff2"
+  },
+  "node_modules/@fontsource-variable/inter/files/inter-latin-ext-wght-normal.woff2": {
+    "file": "assets/inter-latin-ext-wght-normal-DO1Apj_S.woff2",
+    "src": "node_modules/@fontsource-variable/inter/files/inter-latin-ext-wght-normal.woff2"
+  },
+  "node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2": {
+    "file": "assets/inter-latin-wght-normal-Dx4kXJAl.woff2",
+    "src": "node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2"
+  },
+  "node_modules/@fontsource-variable/inter/files/inter-vietnamese-wght-normal.woff2": {
+    "file": "assets/inter-vietnamese-wght-normal-CBcvBZtf.woff2",
+    "src": "node_modules/@fontsource-variable/inter/files/inter-vietnamese-wght-normal.woff2"
   },
   "node_modules/@fortawesome/fontawesome-free/webfonts/fa-brands-400.woff2": {
     "file": "assets/fa-brands-400-Bs6tcqqs.woff2",
@@ -407,8 +65,52 @@
     "file": "assets/fa-v4compatibility-CErXDOsT.woff2",
     "src": "node_modules/@fortawesome/fontawesome-free/webfonts/fa-v4compatibility.woff2"
   },
+  "node_modules/canvg/lib/index.es.js": {
+    "file": "assets/index.es-DtYG450B.js",
+    "name": "index.es",
+    "src": "node_modules/canvg/lib/index.es.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "_jspdf.es.min-MMuTz6kX.js",
+      "_preload-helper-I4rgV-VL.js"
+    ]
+  },
+  "node_modules/chart.js/auto/auto.js": {
+    "file": "assets/auto-CquwA8NN.js",
+    "name": "auto",
+    "src": "node_modules/chart.js/auto/auto.js",
+    "isDynamicEntry": true
+  },
+  "node_modules/dompurify/dist/purify.es.mjs": {
+    "file": "assets/purify.es-18JuyMri.js",
+    "name": "purify.es",
+    "src": "node_modules/dompurify/dist/purify.es.mjs",
+    "isDynamicEntry": true
+  },
+  "node_modules/flatpickr/dist/esm/index.js": {
+    "file": "assets/index-BPBzpGOV.js",
+    "name": "index",
+    "src": "node_modules/flatpickr/dist/esm/index.js",
+    "isDynamicEntry": true
+  },
+  "node_modules/flatpickr/dist/flatpickr.min.css": {
+    "file": "assets/flatpickr-CksuuEqD.css",
+    "src": "node_modules/flatpickr/dist/flatpickr.min.css"
+  },
+  "node_modules/html2canvas-pro/dist/html2canvas-pro.esm.js": {
+    "file": "assets/html2canvas-pro.esm-BwsXAf2P.js",
+    "name": "html2canvas-pro.esm",
+    "src": "node_modules/html2canvas-pro/dist/html2canvas-pro.esm.js",
+    "isDynamicEntry": true
+  },
+  "node_modules/html2canvas/dist/html2canvas.esm.js": {
+    "file": "assets/html2canvas.esm-DXEQVQnt.js",
+    "name": "html2canvas.esm",
+    "src": "node_modules/html2canvas/dist/html2canvas.esm.js",
+    "isDynamicEntry": true
+  },
   "resources/css/app.css": {
-    "file": "assets/app-W0NcGbwj.css",
+    "file": "assets/app-DeM0cYVh.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -416,8 +118,98 @@
       "app.css"
     ]
   },
+  "resources/css/csp-utilities.css": {
+    "file": "assets/csp-utilities-wpUUaHlY.css",
+    "src": "resources/css/csp-utilities.css",
+    "isEntry": true,
+    "name": "csp-utilities",
+    "names": [
+      "csp-utilities.css"
+    ]
+  },
+  "resources/css/pages/admin/admin-dashboard.css": {
+    "file": "assets/admin-dashboard-CZqLZLON.css",
+    "src": "resources/css/pages/admin/admin-dashboard.css",
+    "isEntry": true,
+    "name": "admin-dashboard",
+    "names": [
+      "admin-dashboard.css"
+    ]
+  },
+  "resources/css/pages/admin/admin-shared.css": {
+    "file": "assets/admin-shared-B2Qdd4z_.css",
+    "src": "resources/css/pages/admin/admin-shared.css",
+    "isEntry": true,
+    "name": "admin-shared",
+    "names": [
+      "admin-shared.css"
+    ]
+  },
+  "resources/css/pages/admin/ai-generated-report.css": {
+    "file": "assets/ai-generated-report-3uBn5LtI.css",
+    "src": "resources/css/pages/admin/ai-generated-report.css",
+    "isEntry": true,
+    "name": "ai-generated-report",
+    "names": [
+      "ai-generated-report.css"
+    ]
+  },
+  "resources/css/pages/admin/dentist-continuity.css": {
+    "file": "assets/dentist-continuity-Ccmai75u.css",
+    "src": "resources/css/pages/admin/dentist-continuity.css",
+    "isEntry": true,
+    "name": "dentist-continuity",
+    "names": [
+      "dentist-continuity.css"
+    ]
+  },
+  "resources/css/pages/admin/document-templates.css": {
+    "file": "assets/document-templates-Djxh7ubv.css",
+    "src": "resources/css/pages/admin/document-templates.css",
+    "isEntry": true,
+    "name": "document-templates",
+    "names": [
+      "document-templates.css"
+    ]
+  },
+  "resources/css/pages/admin/role-permissions.css": {
+    "file": "assets/role-permissions-BuaCieas.css",
+    "src": "resources/css/pages/admin/role-permissions.css",
+    "isEntry": true,
+    "name": "role-permissions",
+    "names": [
+      "role-permissions.css"
+    ]
+  },
+  "resources/css/pages/admin/system-logs.css": {
+    "file": "assets/system-logs-ByaGTmgF.css",
+    "src": "resources/css/pages/admin/system-logs.css",
+    "isEntry": true,
+    "name": "system-logs",
+    "names": [
+      "system-logs.css"
+    ]
+  },
+  "resources/css/pages/admin/system-settings.css": {
+    "file": "assets/system-settings-DZLonIK2.css",
+    "src": "resources/css/pages/admin/system-settings.css",
+    "isEntry": true,
+    "name": "system-settings",
+    "names": [
+      "system-settings.css"
+    ]
+  },
+  "resources/css/pages/admin/user-management.css": {
+    "file": "assets/user-management-lHwMooYg.css",
+    "src": "resources/css/pages/admin/user-management.css",
+    "isEntry": true,
+    "name": "user-management",
+    "names": [
+      "user-management.css"
+    ]
+  },
   "resources/css/pages/auth/backup-login.css": {
-    "file": "assets/backup-login-C5TYrSvl.css",
+    "file": "assets/backup-login-DLjPhzfi.css",
     "src": "resources/css/pages/auth/backup-login.css",
     "isEntry": true,
     "name": "backup-login",
@@ -426,7 +218,7 @@
     ]
   },
   "resources/css/pages/auth/login.css": {
-    "file": "assets/login-lxmtUQ-g.css",
+    "file": "assets/login-C-T7A-YI.css",
     "src": "resources/css/pages/auth/login.css",
     "isEntry": true,
     "name": "login",
@@ -434,117 +226,491 @@
       "login.css"
     ]
   },
+  "resources/css/pages/dentist/add-existing-appointment.css": {
+    "file": "assets/add-existing-appointment-BXyzsWvL.css",
+    "src": "resources/css/pages/dentist/add-existing-appointment.css",
+    "isEntry": true,
+    "name": "add-existing-appointment",
+    "names": [
+      "add-existing-appointment.css"
+    ]
+  },
+  "resources/css/pages/dentist/daily-treatment.css": {
+    "file": "assets/daily-treatment-B6nx8k88.css",
+    "src": "resources/css/pages/dentist/daily-treatment.css",
+    "isEntry": true,
+    "name": "daily-treatment",
+    "names": [
+      "daily-treatment.css"
+    ]
+  },
+  "resources/css/pages/dentist/dental-services.css": {
+    "file": "assets/dental-services-CJb8YqVH.css",
+    "src": "resources/css/pages/dentist/dental-services.css",
+    "isEntry": true,
+    "name": "dental-services",
+    "names": [
+      "dental-services.css"
+    ]
+  },
+  "resources/css/pages/dentist/dentist-dashboard.css": {
+    "file": "assets/dentist-dashboard-Dtdu_kBW.css",
+    "src": "resources/css/pages/dentist/dentist-dashboard.css",
+    "isEntry": true,
+    "name": "dentist-dashboard",
+    "names": [
+      "dentist-dashboard.css"
+    ]
+  },
+  "resources/css/pages/dentist/dentist-shared.css": {
+    "file": "assets/dentist-shared-CthKcCpT.css",
+    "src": "resources/css/pages/dentist/dentist-shared.css",
+    "isEntry": true,
+    "name": "dentist-shared",
+    "names": [
+      "dentist-shared.css"
+    ]
+  },
+  "resources/css/pages/dentist/dentist-walk-in.css": {
+    "file": "assets/dentist-walk-in-CWY2mICf.css",
+    "src": "resources/css/pages/dentist/dentist-walk-in.css",
+    "isEntry": true,
+    "name": "dentist-walk-in",
+    "names": [
+      "dentist-walk-in.css"
+    ]
+  },
+  "resources/css/pages/dentist/odontogram.css": {
+    "file": "assets/odontogram-Bg77x0Kf.css",
+    "src": "resources/css/pages/dentist/odontogram.css",
+    "isEntry": true,
+    "name": "odontogram",
+    "names": [
+      "odontogram.css"
+    ]
+  },
+  "resources/css/pages/error-pages.css": {
+    "file": "assets/error-pages-C3-uLWRd.css",
+    "src": "resources/css/pages/error-pages.css",
+    "isEntry": true,
+    "name": "error-pages",
+    "names": [
+      "error-pages.css"
+    ]
+  },
+  "resources/css/pages/patient/about-us.css": {
+    "file": "assets/about-us-DE6Vb1yg.css",
+    "src": "resources/css/pages/patient/about-us.css",
+    "isEntry": true,
+    "name": "about-us",
+    "names": [
+      "about-us.css"
+    ]
+  },
+  "resources/css/pages/patient/appointment.css": {
+    "file": "assets/appointment-CwvQPE0y.css",
+    "src": "resources/css/pages/patient/appointment.css",
+    "isEntry": true,
+    "name": "appointment",
+    "names": [
+      "appointment.css"
+    ]
+  },
+  "resources/css/pages/patient/book-appointment.css": {
+    "file": "assets/book-appointment-Dkdd1bou.css",
+    "src": "resources/css/pages/patient/book-appointment.css",
+    "isEntry": true,
+    "name": "book-appointment",
+    "names": [
+      "book-appointment.css"
+    ]
+  },
+  "resources/css/pages/patient/dashboard.css": {
+    "file": "assets/dashboard-C1lov9uw.css",
+    "src": "resources/css/pages/patient/dashboard.css",
+    "isEntry": true,
+    "name": "dashboard",
+    "names": [
+      "dashboard.css"
+    ]
+  },
+  "resources/css/pages/patient/patient-profile.css": {
+    "file": "assets/patient-profile-ajN-4u9T.css",
+    "src": "resources/css/pages/patient/patient-profile.css",
+    "isEntry": true,
+    "name": "patient-profile",
+    "names": [
+      "patient-profile.css"
+    ]
+  },
+  "resources/css/pages/patient/patient-shared.css": {
+    "file": "assets/patient-shared-Hdktlmo9.css",
+    "src": "resources/css/pages/patient/patient-shared.css",
+    "isEntry": true,
+    "name": "patient-shared",
+    "names": [
+      "patient-shared.css"
+    ]
+  },
+  "resources/css/pages/patient/records.css": {
+    "file": "assets/records-C8FuTNap.css",
+    "src": "resources/css/pages/patient/records.css",
+    "isEntry": true,
+    "name": "records",
+    "names": [
+      "records.css"
+    ]
+  },
+  "resources/css/pages/shared/academic-period.css": {
+    "file": "assets/academic-period-C5k4dqrN.css",
+    "src": "resources/css/pages/shared/academic-period.css",
+    "isEntry": true,
+    "name": "academic-period",
+    "names": [
+      "academic-period.css"
+    ]
+  },
+  "resources/css/pages/shared/active-sessions.css": {
+    "file": "assets/active-sessions-F8Mbn7ZR.css",
+    "src": "resources/css/pages/shared/active-sessions.css",
+    "isEntry": true,
+    "name": "active-sessions",
+    "names": [
+      "active-sessions.css"
+    ]
+  },
+  "resources/css/pages/shared/add-existing-record.css": {
+    "file": "assets/add-existing-record-BCEY-AsO.css",
+    "src": "resources/css/pages/shared/add-existing-record.css",
+    "isEntry": true,
+    "name": "add-existing-record",
+    "names": [
+      "add-existing-record.css"
+    ]
+  },
+  "resources/css/pages/shared/appointments.css": {
+    "file": "assets/appointments-dD-Jrycz.css",
+    "src": "resources/css/pages/shared/appointments.css",
+    "isEntry": true,
+    "name": "appointments",
+    "names": [
+      "appointments.css"
+    ]
+  },
+  "resources/css/pages/shared/clinic-schedule.css": {
+    "file": "assets/clinic-schedule-DWC578rs.css",
+    "src": "resources/css/pages/shared/clinic-schedule.css",
+    "isEntry": true,
+    "name": "clinic-schedule",
+    "names": [
+      "clinic-schedule.css"
+    ]
+  },
+  "resources/css/pages/shared/dental-records.css": {
+    "file": "assets/dental-records-CMqChDsP.css",
+    "src": "resources/css/pages/shared/dental-records.css",
+    "isEntry": true,
+    "name": "dental-records",
+    "names": [
+      "dental-records.css"
+    ]
+  },
+  "resources/css/pages/shared/document-requests.css": {
+    "file": "assets/document-requests-BOXnUsXF.css",
+    "src": "resources/css/pages/shared/document-requests.css",
+    "isEntry": true,
+    "name": "document-requests",
+    "names": [
+      "document-requests.css"
+    ]
+  },
+  "resources/css/pages/shared/inventory.css": {
+    "file": "assets/inventory-DU4ivRRy.css",
+    "src": "resources/css/pages/shared/inventory.css",
+    "isEntry": true,
+    "name": "inventory",
+    "names": [
+      "inventory.css"
+    ]
+  },
+  "resources/css/pages/shared/patient-list.css": {
+    "file": "assets/patient-list-BOfube6x.css",
+    "src": "resources/css/pages/shared/patient-list.css",
+    "isEntry": true,
+    "name": "patient-list",
+    "names": [
+      "patient-list.css"
+    ]
+  },
+  "resources/css/pages/shared/reports.css": {
+    "file": "assets/reports-BXRLkR1e.css",
+    "src": "resources/css/pages/shared/reports.css",
+    "isEntry": true,
+    "name": "reports",
+    "names": [
+      "reports.css"
+    ]
+  },
+  "resources/css/pages/shared/service-types.css": {
+    "file": "assets/service-types-NS7LoQR1.css",
+    "src": "resources/css/pages/shared/service-types.css",
+    "isEntry": true,
+    "name": "service-types",
+    "names": [
+      "service-types.css"
+    ]
+  },
+  "resources/css/vendor-fonts.css": {
+    "file": "assets/vendor-fonts-MHcUw0Oo.css",
+    "src": "resources/css/vendor-fonts.css",
+    "isEntry": true,
+    "name": "vendor-fonts",
+    "names": [
+      "vendor-fonts.css"
+    ]
+  },
   "resources/js/app.js": {
-    "file": "assets/app-CiizEveF.js",
+    "file": "assets/app-C0MnoOtH.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
-    "css": [
-      "assets/app-CyejRbGa.css"
+    "imports": [
+      "_preload-helper-I4rgV-VL.js"
     ],
-    "assets": [
-      "assets/inter-cyrillic-ext-300-normal-CgCALhwJ.woff2",
-      "assets/inter-cyrillic-ext-300-normal-RId2JxDB.woff",
-      "assets/inter-cyrillic-300-normal-BnqRxXuy.woff2",
-      "assets/inter-cyrillic-300-normal-LR1W_oT8.woff",
-      "assets/inter-greek-ext-300-normal-l2DDyC6M.woff2",
-      "assets/inter-greek-ext-300-normal-DLbbeei1.woff",
-      "assets/inter-greek-300-normal-DmGD3g_f.woff2",
-      "assets/inter-greek-300-normal-BrhSP0vQ.woff",
-      "assets/inter-vietnamese-300-normal-Bdr24Bqb.woff2",
-      "assets/inter-vietnamese-300-normal-DDGmYYdT.woff",
-      "assets/inter-latin-ext-300-normal-CPgO9Ksf.woff2",
-      "assets/inter-latin-ext-300-normal-Dp1L8vcn.woff",
-      "assets/inter-latin-300-normal-BVlfKGgI.woff2",
-      "assets/inter-latin-300-normal-i8F0SvXL.woff",
-      "assets/inter-cyrillic-ext-400-normal-BQZuk6qB.woff2",
-      "assets/inter-cyrillic-ext-400-normal-DQukG94-.woff",
-      "assets/inter-cyrillic-400-normal-obahsSVq.woff2",
-      "assets/inter-cyrillic-400-normal-HOLc17fK.woff",
-      "assets/inter-greek-ext-400-normal-DGGRlc-M.woff2",
-      "assets/inter-greek-ext-400-normal-KugGGMne.woff",
-      "assets/inter-greek-400-normal-B4URO6DV.woff2",
-      "assets/inter-greek-400-normal-q2sYcFCs.woff",
-      "assets/inter-vietnamese-400-normal-DMkecbls.woff2",
-      "assets/inter-vietnamese-400-normal-Bbgyi5SW.woff",
-      "assets/inter-latin-ext-400-normal-C1nco2VV.woff2",
-      "assets/inter-latin-ext-400-normal-77YHD8bZ.woff",
-      "assets/inter-latin-400-normal-C38fXH4l.woff2",
-      "assets/inter-latin-400-normal-CyCys3Eg.woff",
-      "assets/inter-cyrillic-ext-500-normal-B0yAr1jD.woff2",
-      "assets/inter-cyrillic-ext-500-normal-BmqWE9Dz.woff",
-      "assets/inter-cyrillic-500-normal-BasfLYem.woff2",
-      "assets/inter-cyrillic-500-normal-CxZf_p3X.woff",
-      "assets/inter-greek-ext-500-normal-C4iEst2y.woff2",
-      "assets/inter-greek-ext-500-normal-2j5mBUwD.woff",
-      "assets/inter-greek-500-normal-BIZE56-Y.woff2",
-      "assets/inter-greek-500-normal-Xzm54t5V.woff",
-      "assets/inter-vietnamese-500-normal-DOriooB6.woff2",
-      "assets/inter-vietnamese-500-normal-mJboJaSs.woff",
-      "assets/inter-latin-ext-500-normal-CV4jyFjo.woff2",
-      "assets/inter-latin-ext-500-normal-BxGbmqWO.woff",
-      "assets/inter-latin-500-normal-Cerq10X2.woff2",
-      "assets/inter-latin-500-normal-BL9OpVg8.woff",
-      "assets/inter-cyrillic-ext-600-normal-Dfes3d0z.woff2",
-      "assets/inter-cyrillic-ext-600-normal-Bcila6Z-.woff",
-      "assets/inter-cyrillic-600-normal-CWCymEST.woff2",
-      "assets/inter-cyrillic-600-normal-4D_pXhcN.woff",
-      "assets/inter-greek-ext-600-normal-DRtmH8MT.woff2",
-      "assets/inter-greek-ext-600-normal-B8X0CLgF.woff",
-      "assets/inter-greek-600-normal-plRanbMR.woff2",
-      "assets/inter-greek-600-normal-BZpKdvQh.woff",
-      "assets/inter-vietnamese-600-normal-Cc8MFFhd.woff2",
-      "assets/inter-vietnamese-600-normal-BuLX-rYi.woff",
-      "assets/inter-latin-ext-600-normal-D2bJ5OIk.woff2",
-      "assets/inter-latin-ext-600-normal-CIVaiw4L.woff",
-      "assets/inter-latin-600-normal-LgqL8muc.woff2",
-      "assets/inter-latin-600-normal-CiBQ2DWP.woff",
-      "assets/inter-cyrillic-ext-700-normal-BjwYoWNd.woff2",
-      "assets/inter-cyrillic-ext-700-normal-LO58E6JB.woff",
-      "assets/inter-cyrillic-700-normal-CjBOestx.woff2",
-      "assets/inter-cyrillic-700-normal-DrXBdSj3.woff",
-      "assets/inter-greek-ext-700-normal-qfdV9bQt.woff2",
-      "assets/inter-greek-ext-700-normal-BoQ6DsYi.woff",
-      "assets/inter-greek-700-normal-C3JjAnD8.woff2",
-      "assets/inter-greek-700-normal-BUv2fZ6O.woff",
-      "assets/inter-vietnamese-700-normal-DlLaEgI2.woff2",
-      "assets/inter-vietnamese-700-normal-BZaoP0fm.woff",
-      "assets/inter-latin-ext-700-normal-Ca8adRJv.woff2",
-      "assets/inter-latin-ext-700-normal-TidjK2hL.woff",
-      "assets/inter-latin-700-normal-Yt3aPRUw.woff2",
-      "assets/inter-latin-700-normal-BLAVimhd.woff",
-      "assets/inter-cyrillic-ext-800-normal-BZOjs1Xv.woff2",
-      "assets/inter-cyrillic-ext-800-normal-Ca-gJeZY.woff",
-      "assets/inter-cyrillic-800-normal-C7MGvYyJ.woff2",
-      "assets/inter-cyrillic-800-normal-CCHyn08d.woff",
-      "assets/inter-greek-ext-800-normal-B--PVpEC.woff2",
-      "assets/inter-greek-ext-800-normal-DUe57HfS.woff",
-      "assets/inter-greek-800-normal-CLIouy3y.woff2",
-      "assets/inter-greek-800-normal-BU00tryP.woff",
-      "assets/inter-vietnamese-800-normal-Cm7tD1pz.woff2",
-      "assets/inter-vietnamese-800-normal-DDlpr_Ee.woff",
-      "assets/inter-latin-ext-800-normal-DZJjya6U.woff2",
-      "assets/inter-latin-ext-800-normal-BOMpwxm3.woff",
-      "assets/inter-latin-800-normal-BYj_oED-.woff2",
-      "assets/inter-latin-800-normal-D1mf63XC.woff",
-      "assets/inter-cyrillic-ext-900-normal-buRuWz4h.woff2",
-      "assets/inter-cyrillic-ext-900-normal-BUlv-ou0.woff",
-      "assets/inter-cyrillic-900-normal-CjyCg421.woff2",
-      "assets/inter-cyrillic-900-normal-BAVML7y5.woff",
-      "assets/inter-greek-ext-900-normal-voj7phVX.woff2",
-      "assets/inter-greek-ext-900-normal-LVqH4fM3.woff",
-      "assets/inter-greek-900-normal-Clii5heL.woff2",
-      "assets/inter-greek-900-normal-7n5hB3DA.woff",
-      "assets/inter-vietnamese-900-normal-C4P836tE.woff2",
-      "assets/inter-vietnamese-900-normal-DBSPUrC7.woff",
-      "assets/inter-latin-ext-900-normal-ty8Tfvw5.woff2",
-      "assets/inter-latin-ext-900-normal-DG9wZIMw.woff",
-      "assets/inter-latin-900-normal-D4nM5aha.woff2",
-      "assets/inter-latin-900-normal-EUCDUbiG.woff",
-      "assets/fa-brands-400-Bs6tcqqs.woff2",
-      "assets/fa-regular-400-DRN8N0d1.woff2",
-      "assets/fa-solid-900-IAB4Droh.woff2",
-      "assets/fa-v4compatibility-CErXDOsT.woff2"
+    "dynamicImports": [
+      "resources/js/reports/monthly-report.js",
+      "resources/js/records/patient-record-modal.js",
+      "resources/js/odontogram/odontogram-preview.js",
+      "resources/js/odontogram/odontogram-primary-stacked-three.js",
+      "resources/js/ui/voice-logic.js",
+      "resources/js/forms/booking-workflow.js",
+      "resources/js/ui/skeleton.js",
+      "resources/js/records/patient-records-page.js",
+      "_booking-signature-2G5OvK7m.js",
+      "resources/js/reports/report-signatory.js",
+      "resources/js/ui/search-bar.js",
+      "resources/js/ui/show-more.js",
+      "resources/js/ui/view-toggle.js",
+      "resources/js/ui/filter-select.js",
+      "resources/js/ui/filter-drawer.js",
+      "resources/js/ui/filter-controls.js",
+      "resources/js/ui/custom-select.js",
+      "resources/js/ui/date-picker.js",
+      "resources/js/forms/validation.js",
+      "resources/js/ui/delete-confirm.js",
+      "resources/js/ui/profile-avatar.js",
+      "resources/js/ui/header-controls.js",
+      "resources/js/ui/input-clear.js",
+      "resources/js/ui/patient-name.js",
+      "resources/js/ui/preview-zoom.js",
+      "resources/js/ui/page-size.js",
+      "resources/js/ui/pagination-bar.js",
+      "node_modules/chart.js/auto/auto.js",
+      "resources/js/forms/validation.js",
+      "resources/js/ui/search-bar.js",
+      "resources/js/ui/custom-select.js",
+      "resources/js/ui/input-clear.js",
+      "resources/js/ui/patient-name.js",
+      "resources/js/ui/preview-zoom.js",
+      "resources/js/ui/profile-avatar.js"
     ]
+  },
+  "resources/js/forms/booking-workflow.js": {
+    "file": "assets/booking-workflow-wYn_WgZJ.js",
+    "name": "booking-workflow",
+    "src": "resources/js/forms/booking-workflow.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/forms/validation.js": {
+    "file": "assets/validation-86oAKFfR.js",
+    "name": "validation",
+    "src": "resources/js/forms/validation.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/odontogram/odontogram-preview.js": {
+    "file": "assets/odontogram-preview-CV46aJfD.js",
+    "name": "odontogram-preview",
+    "src": "resources/js/odontogram/odontogram-preview.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "_preload-helper-I4rgV-VL.js"
+    ],
+    "dynamicImports": [
+      "resources/js/odontogram/odontogram-primary-stacked-three.js"
+    ]
+  },
+  "resources/js/odontogram/odontogram-primary-stacked-three.js": {
+    "file": "assets/odontogram-primary-stacked-three-DiyRdv8v.js",
+    "name": "odontogram-primary-stacked-three",
+    "src": "resources/js/odontogram/odontogram-primary-stacked-three.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/records/patient-record-modal.js": {
+    "file": "assets/patient-record-modal-BXW4gl_Y.js",
+    "name": "patient-record-modal",
+    "src": "resources/js/records/patient-record-modal.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/odontogram/odontogram-preview.js",
+      "_preload-helper-I4rgV-VL.js"
+    ]
+  },
+  "resources/js/records/patient-records-page.js": {
+    "file": "assets/patient-records-page-DdECs7Rp.js",
+    "name": "patient-records-page",
+    "src": "resources/js/records/patient-records-page.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/reports/monthly-report.js": {
+    "file": "assets/monthly-report-vUCyzyd4.js",
+    "name": "monthly-report",
+    "src": "resources/js/reports/monthly-report.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/forms/validation.js"
+    ]
+  },
+  "resources/js/reports/pdf-tools.js": {
+    "file": "assets/pdf-tools-B4hmG6Cz.js",
+    "name": "pdf-tools",
+    "src": "resources/js/reports/pdf-tools.js",
+    "isEntry": true,
+    "imports": [
+      "_preload-helper-I4rgV-VL.js"
+    ],
+    "dynamicImports": [
+      "node_modules/html2canvas-pro/dist/html2canvas-pro.esm.js",
+      "_jspdf.es.min-MMuTz6kX.js"
+    ]
+  },
+  "resources/js/reports/report-signatory.js": {
+    "file": "assets/report-signatory-alhzmKM7.js",
+    "name": "report-signatory",
+    "src": "resources/js/reports/report-signatory.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/forms/validation.js",
+      "_booking-signature-2G5OvK7m.js"
+    ]
+  },
+  "resources/js/security.js": {
+    "file": "assets/security-RDuG0h5V.js",
+    "name": "security",
+    "src": "resources/js/security.js",
+    "isEntry": true
+  },
+  "resources/js/ui/custom-select.js": {
+    "file": "assets/custom-select-CBKE4Jci.js",
+    "name": "custom-select",
+    "src": "resources/js/ui/custom-select.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/ui/date-picker.js": {
+    "file": "assets/date-picker-Djv5hD8l.js",
+    "name": "date-picker",
+    "src": "resources/js/ui/date-picker.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "_preload-helper-I4rgV-VL.js"
+    ],
+    "dynamicImports": [
+      "node_modules/flatpickr/dist/esm/index.js"
+    ]
+  },
+  "resources/js/ui/delete-confirm.js": {
+    "file": "assets/delete-confirm-CQxol0BO.js",
+    "name": "delete-confirm",
+    "src": "resources/js/ui/delete-confirm.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/ui/filter-controls.js": {
+    "file": "assets/filter-controls-DieekARP.js",
+    "name": "filter-controls",
+    "src": "resources/js/ui/filter-controls.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/ui/filter-drawer.js": {
+    "file": "assets/filter-drawer-CpW6UnP2.js",
+    "name": "filter-drawer",
+    "src": "resources/js/ui/filter-drawer.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/ui/filter-select.js": {
+    "file": "assets/filter-select-B1En0WSx.js",
+    "name": "filter-select",
+    "src": "resources/js/ui/filter-select.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/ui/header-controls.js": {
+    "file": "assets/header-controls-Bme7KdHx.js",
+    "name": "header-controls",
+    "src": "resources/js/ui/header-controls.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/ui/input-clear.js": {
+    "file": "assets/input-clear-0m-0bnka.js",
+    "name": "input-clear",
+    "src": "resources/js/ui/input-clear.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/ui/page-size.js": {
+    "file": "assets/page-size-C-Qcylfc.js",
+    "name": "page-size",
+    "src": "resources/js/ui/page-size.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/ui/pagination-bar.js": {
+    "file": "assets/pagination-bar-C5Jg6Xml.js",
+    "name": "pagination-bar",
+    "src": "resources/js/ui/pagination-bar.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/ui/patient-name.js": {
+    "file": "assets/patient-name-DyNQc3Kn.js",
+    "name": "patient-name",
+    "src": "resources/js/ui/patient-name.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/ui/preview-zoom.js": {
+    "file": "assets/preview-zoom-CiepjS-N.js",
+    "name": "preview-zoom",
+    "src": "resources/js/ui/preview-zoom.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/ui/profile-avatar.js": {
+    "file": "assets/profile-avatar-CBUA0U_F.js",
+    "name": "profile-avatar",
+    "src": "resources/js/ui/profile-avatar.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/ui/search-bar.js": {
+    "file": "assets/search-bar-ZhcLSv9g.js",
+    "name": "search-bar",
+    "src": "resources/js/ui/search-bar.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/ui/show-more.js": {
+    "file": "assets/show-more-C0kzTGHG.js",
+    "name": "show-more",
+    "src": "resources/js/ui/show-more.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/ui/skeleton.js": {
+    "file": "assets/skeleton-DEioxVft.js",
+    "name": "skeleton",
+    "src": "resources/js/ui/skeleton.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/ui/view-toggle.js": {
+    "file": "assets/view-toggle-C09ZVinl.js",
+    "name": "view-toggle",
+    "src": "resources/js/ui/view-toggle.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/ui/voice-logic.js": {
+    "file": "assets/voice-logic-ByNWBGiZ.js",
+    "name": "voice-logic",
+    "src": "resources/js/ui/voice-logic.js",
+    "isDynamicEntry": true
   }
 }

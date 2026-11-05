@@ -2,102 +2,88 @@
 
 namespace App\Http\Controllers\Dentist;
 
-use App\Http\Controllers\Controller;
-use App\Models\Inventory;
+use App\Http\Controllers\Shared\InventoryController as SharedInventoryController;
+use App\Models\AppointmentProcedure;
 use Illuminate\Http\Request;
-use App\Helpers\AuditLogger;
 
-class InventoryController extends Controller
+class InventoryController extends SharedInventoryController
 {
-    public function index()
+    public function procedureNotes(Request $request)
     {
-        AuditLogger::log(
-            'view',
-            'inventory',
-            'Dentist viewed inventory page'
-        );
+        abort_unless($request->user()?->hasAnyRole(['dentist', 'dentist_role'])
+            && !$request->session()->has('impersonated_role'), 403);
+        $notes = AppointmentProcedure::query()
+            ->whereNotNull('inventory_notes')->whereRaw("TRIM(inventory_notes) <> ''")
+            ->whereHas('appointment', function ($query) use ($request) {
+                $query->where('dentist_id', $request->user()->id)->where('status', 'completed');
+            })
+            ->with(['appointment.patient', 'appointment.dentist', 'appointment.serviceType'])
+            ->leftJoin('appointment_procedure_timings as note_timing', 'note_timing.appointment_procedure_id', '=', 'appointment_procedures.id')
+            ->leftJoin('appointments as note_visit', 'note_visit.id', '=', 'appointment_procedures.appointment_id')
+            ->select('appointment_procedures.*')
+            ->orderByRaw('COALESCE(note_timing.completed_at, note_visit.appointment_date) DESC')
+            ->orderByDesc('appointment_procedures.id')
+            ->get();
 
-        return view('shared.inventory', [
-            'notifications' => collect([]),
+        return response()->json([
+            'data' => $notes->map(function ($procedure) {
+                $appointment = $procedure->appointment;
 
-            'layoutRole' => 'dentist',
-            'pageShellClass' => 'dentist-page-shell',
-            'isDentistView' => true,
-
-            'inventoryRouteNames' => [
-                'data' => 'dentist.dentist.inventory.data',
-                'store' => 'dentist.dentist.inventory.store',
-                'update' => 'dentist.dentist.inventory.update',
-                'destroy' => 'dentist.dentist.inventory.destroy',
-            ],
-
-            'inventoryWatcherKey' => 'dentist-inventory',
-        ]);
+                return [
+                    'procedure_id' => $procedure->id,
+                    'appointment_id' => $appointment->id,
+                    'patient_id' => $appointment->patient?->id,
+                    'patient_name' => $appointment->patient?->name ?? 'Patient unavailable',
+                    'procedure_name' => $appointment->service_type_name ?? 'Dental procedure',
+                    'procedure_date' => $procedure->procedure_completed_at?->format('M d, Y h:i A')
+                        ?? \Carbon\Carbon::parse($appointment->appointment_date)->format('M d, Y'),
+                    'visit_date' => \Carbon\Carbon::parse($appointment->appointment_date)->format('M d, Y'),
+                    'dentist_name' => $appointment->dentist_name,
+                    'inventory_notes' => $procedure->inventory_notes,
+                ];
+            }),
+            'total' => $notes->count(),
+        ])->header('Cache-Control', 'no-store');
     }
 
-    public function fetch()
+    protected function actorLabel(): string
     {
-        return Inventory::orderBy('date_received', 'desc')->get();
+        return 'Dentist';
     }
 
-    public function store(Request $request)
+
+    protected function layoutRole(): string
     {
-        $data = $request->validate([
-            'category' => 'required|in:Medicine,Supplies',
-            'date_received' => 'required|date',
-            'stock_no' => 'required|unique:inventory_items,stock_no',
-            'name' => 'required|string|max:255',
-            'unit' => 'required|string|max:50',
-            'qty' => 'required|integer|min:0',
-            'used' => 'required|integer|min:0',
-        ]);
-
-        $data['unit'] = ucwords(strtolower(trim($data['unit'])));
-
-        Inventory::create($data);
-
-        AuditLogger::log(
-            'create_inventory',
-            'inventory',
-            'Dentist added inventory item: ' . $request->name
-        );
-
-        return response()->json(['success' => true]);
+        return 'dentist';
     }
 
-    public function update(Request $request, Inventory $inventory)
+
+    protected function isDentistView(): bool
     {
-        $data = $request->validate([
-            'category' => 'required|in:Medicine,Supplies',
-            'date_received' => 'required|date',
-            'stock_no' => 'required|unique:inventory_items,stock_no,' . $inventory->id,
-            'name' => 'required|string|max:255',
-            'unit' => 'required|string|max:50',
-            'qty' => 'required|integer|min:0',
-            'used' => 'required|integer|min:0',
-        ]);
-
-        $data['unit'] = ucwords(strtolower(trim($data['unit'])));
-
-        $inventory->update($data);
-
-        AuditLogger::log(
-            'update_inventory',
-            'inventory',
-            'Dentist updated inventory item ID ' . $inventory->id
-        );
-
-        return response()->json(['success' => true]);
+        return true;
     }
 
-    public function destroy(Inventory $inventory)
+
+    protected function inventoryRouteNames(): array
     {
-        $inventory->delete();
-        AuditLogger::log(
-            'delete_inventory',
-            'inventory',
-            'Dentist deleted inventory item ID ' . $inventory->id
-        );
-        return response()->json(['success' => true]);
+        return [
+            'data' =>
+            'dentist.dentist.inventory.data',
+
+            'store' =>
+            'dentist.dentist.inventory.store',
+
+            'update' =>
+            'dentist.dentist.inventory.update',
+
+            'destroy' =>
+            'dentist.dentist.inventory.destroy',
+        ];
+    }
+
+
+    protected function inventoryWatcherKey(): string
+    {
+        return 'dentist-inventory';
     }
 }

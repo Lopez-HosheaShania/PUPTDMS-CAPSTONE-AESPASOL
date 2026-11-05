@@ -27,6 +27,10 @@ class ServiceTypeSeeder extends Seeder
                 'name' => 'Dental Surgery',
                 'description' => 'Extraction • Implants',
             ],
+            [
+                'name' => 'Fluoride Treatment',
+                'description' => 'Fluoride application for cavity prevention',
+            ],
         ];
 
         foreach ($defaults as $service) {

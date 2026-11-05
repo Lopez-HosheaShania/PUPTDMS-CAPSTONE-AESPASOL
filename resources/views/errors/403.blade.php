@@ -12,9 +12,6 @@
 
 @section('notice_text', 'Return to a page you can access. If you believe this is a mistake, contact the system administrator.')
 
-@section('primary_label', 'Return Home')
-@section('primary_url', url('/'))
-
 @section('notice_icon')
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
 

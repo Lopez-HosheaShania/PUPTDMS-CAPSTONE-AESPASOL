@@ -7,11 +7,14 @@ use App\Models\AuditLog;
 use App\Models\User;
 use App\Support\BrowserDetection;
 use Illuminate\Http\Request;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator as LengthAwarePaginatorContract;
 use Illuminate\Database\Query\Builder;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 class ConcurrentSessionService
@@ -212,6 +215,132 @@ class ConcurrentSessionService
             ->get();
     }
 
+    public function getAdminSessionLiveSignature(): string
+    {
+        if (!$this->isEnabled()) {
+            return hash(
+                'sha256',
+                'session-management-disabled'
+            );
+        }
+
+        $query = DB::table(
+            $this->sessionTable() .
+                ' as sessions'
+        )
+            ->leftJoin(
+                'users',
+                'users.id',
+                '=',
+                'sessions.user_id'
+            )
+            ->leftJoin(
+                'roles',
+                'roles.id',
+                '=',
+                'users.role_id'
+            )
+            ->select([
+                'sessions.id',
+                'sessions.user_id',
+                'sessions.ip_address',
+                'sessions.user_agent',
+                'users.status as user_status',
+                'roles.slug as role_slug',
+            ])
+            ->whereNotNull(
+                'sessions.user_id'
+            )
+            ->where(
+                'sessions.last_activity',
+                '>=',
+                $this->activeCutoffTimestamp()
+            );
+
+        if (
+            $this->supportsSessionBrowserNameColumn()
+        ) {
+            $query->addSelect(
+                'sessions.browser_name'
+            );
+        }
+
+        if (
+            $this->supportsSessionDeviceColumns()
+        ) {
+            $query->addSelect([
+                'sessions.device_type',
+                'sessions.device_name',
+                'sessions.os_name',
+            ]);
+        }
+
+        $snapshot = $query
+            ->orderBy('sessions.id')
+            ->get()
+            ->map(function (object $session) {
+                return [
+                    'id' =>
+                    (string) $session->id,
+
+                    'user_id' =>
+                    (int) $session->user_id,
+
+                    'status' =>
+                    (string) (
+                        $session->user_status ??
+                        ''
+                    ),
+
+                    'role' =>
+                    (string) (
+                        $session->role_slug ??
+                        ''
+                    ),
+
+                    'ip' =>
+                    (string) (
+                        $session->ip_address ??
+                        ''
+                    ),
+
+                    'device_type' =>
+                    (string) (
+                        $session->device_type ??
+                        ''
+                    ),
+
+                    'device_name' =>
+                    (string) (
+                        $session->device_name ??
+                        ''
+                    ),
+
+                    'os' =>
+                    (string) (
+                        $session->os_name ??
+                        ''
+                    ),
+
+                    'browser' =>
+                    (string) (
+                        $session->browser_name ??
+                        ''
+                    ),
+                ];
+            })
+            ->values()
+            ->all();
+
+        return hash(
+            'sha256',
+            json_encode(
+                $snapshot,
+                JSON_UNESCAPED_SLASHES
+            )
+        );
+    }
+
     public function sessionsForDisplay(User $user, string $currentSessionId): Collection
     {
         return $this->activeSessionsForUser($user)
@@ -224,8 +353,10 @@ class ConcurrentSessionService
                     'device_type' => $session->device_type
                         ?? BrowserDetection::detectDeviceType($session->user_agent),
 
-                    'device_label' => $session->device_name
-                        ?? BrowserDetection::detectDeviceName($session->user_agent),
+                    'device_label' => BrowserDetection::deviceNameForDisplay(
+                        $session->device_name ?? null,
+                        $session->user_agent
+                    ),
 
                     'os_label' => $session->os_name
                         ?? BrowserDetection::detectOperatingSystem($session->user_agent),
@@ -255,7 +386,7 @@ class ConcurrentSessionService
         ])));
 
         return AuditLog::query()
-            ->where(function ($query) use ($user, $identifiers, $roleSlug) {
+            ->whereHas('actorSnapshot', function ($query) use ($user, $identifiers, $roleSlug) {
                 $query->where(function ($strictQuery) use ($user, $roleSlug) {
                     $strictQuery->where('actor_id', $user->id);
 
@@ -305,6 +436,15 @@ class ConcurrentSessionService
             });
     }
 
+    public function recordLogoutActivity(User $user, string $reason = 'manual', string $module = 'authentication'): void
+    {
+        AuditLogger::log(
+            'logout',
+            $module,
+            $this->logoutDescription($user, $reason)
+        );
+    }
+
     public function revokeSessionByReference(User $user, string $reference, ?string $currentSessionId = null): bool
     {
         if (!$this->isEnabled()) {
@@ -341,7 +481,7 @@ class ConcurrentSessionService
         int $perPage = 15,
         array $filters = [],
         ?string $currentSessionId = null
-    ): LengthAwarePaginator {
+    ): LengthAwarePaginatorContract {
         $perPage = in_array($perPage, [10, 15, 20, 50, 100], true) ? $perPage : 15;
         $currentSessionId ??= session()->getId();
 
@@ -374,11 +514,37 @@ class ConcurrentSessionService
             ]);
         }
 
-        $role = trim((string) ($filters['role'] ?? ''));
+        $sort = $this->normalizeSessionSort($filters['sort'] ?? 'recent');
+        $roles = $this->normalizeAdminSessionRoles(
+            $filters['roles'] ??
+                $filters['role'] ??
+                'all'
+        );
+        $device = $this->normalizeSessionDeviceType($filters['device'] ?? 'all');
+        $scope = $this->normalizeSessionScope($filters['scope'] ?? 'all');
         $search = trim((string) ($filters['search'] ?? ''));
 
-        if ($role !== '' && $role !== 'all') {
-            $query->where('roles.slug', $role);
+        if (!in_array('all', $roles, true)) {
+            $databaseRoles = $roles;
+
+            if (in_array('admin', $roles, true)) {
+                $databaseRoles[] = 'super_admin';
+            }
+
+            $query->whereIn(
+                'roles.slug',
+                array_values(
+                    array_unique(
+                        $databaseRoles
+                    )
+                )
+            );
+        }
+
+        if ($scope === 'current') {
+            $query->where('sessions.id', $currentSessionId);
+        } elseif ($scope === 'others') {
+            $query->where('sessions.id', '!=', $currentSessionId);
         }
 
         if ($search !== '') {
@@ -390,14 +556,15 @@ class ConcurrentSessionService
             });
         }
 
-        $paginator = $query
-            ->orderByDesc('sessions.last_activity')
-            ->paginate($perPage)
-            ->withQueryString();
-
-        $items = collect($paginator->items())
+        $items = $query
+            ->get()
             ->map(function (object $session) use ($currentSessionId) {
                 $role = (string) ($session->role_slug ?: 'unknown');
+                $deviceType = $this->normalizeSessionDeviceType(
+                    $session->device_type ?? null,
+                    $session->user_agent
+                );
+                $lastActivityAt = now()->setTimestamp((int) $session->last_activity);
 
                 return (object) [
                     'reference' => $this->makePublicReference((string) $session->id),
@@ -409,11 +576,12 @@ class ConcurrentSessionService
                     'role_label' => $this->formatRoleLabel($role),
                     'ip_address' => $session->ip_address ?: 'Unknown',
                     'user_agent' => $session->user_agent ?: 'Unknown device',
-                    'device_type' => $session->device_type
-                        ?? BrowserDetection::detectDeviceType($session->user_agent),
+                    'device_type' => $deviceType,
 
-                    'device_label' => $session->device_name
-                        ?? BrowserDetection::detectDeviceName($session->user_agent),
+                    'device_label' => BrowserDetection::deviceNameForDisplay(
+                        $session->device_name ?? null,
+                        $session->user_agent
+                    ),
 
                     'os_label' => $session->os_name
                         ?? BrowserDetection::detectOperatingSystem($session->user_agent),
@@ -422,32 +590,181 @@ class ConcurrentSessionService
                         $session->browser_name ?? null,
                         $session->user_agent
                     ),
-                    'last_activity_at' => now()->setTimestamp((int) $session->last_activity),
-                    'last_activity_label' => now()->setTimestamp((int) $session->last_activity)->diffForHumans(),
+                    'last_activity_at' => $lastActivityAt,
+                    'last_activity_label' => $lastActivityAt->diffForHumans(),
                     'is_current' => hash_equals((string) $session->id, $currentSessionId),
                 ];
-            })
-            ->all();
+            });
 
-        $paginator->setCollection(collect($items));
+        if ($device !== 'all') {
+            $items = $items
+                ->filter(fn(object $session) => $session->device_type === $device)
+                ->values();
+        }
+
+        $items = $sort === 'oldest'
+            ? $items->sortBy(fn(object $session) => $session->last_activity_at->getTimestamp())->values()
+            : $items->sortByDesc(fn(object $session) => $session->last_activity_at->getTimestamp())->values();
+
+        $currentPage = max(1, (int) Paginator::resolveCurrentPage());
+        $total = $items->count();
+        $results = $items
+            ->slice(($currentPage - 1) * $perPage, $perPage)
+            ->values();
+
+        $paginator = new LengthAwarePaginator(
+            $results,
+            $total,
+            $perPage,
+            $currentPage,
+            [
+                'path' => Paginator::resolveCurrentPath(),
+                'query' => request()->query(),
+            ]
+        );
 
         return $paginator;
     }
 
-    public function getAdminSessionStats(): array
-    {
-        $baseQuery = DB::table($this->sessionTable() . ' as sessions')
-            ->leftJoin('users', 'users.id', '=', 'sessions.user_id')
-            ->leftJoin('roles', 'roles.id', '=', 'users.role_id')
+    public function getAdminSessionStats(
+        ?string $currentSessionId = null
+    ): array {
+        $currentSessionId ??= session()->getId();
+
+        $baseQuery = DB::table(
+            $this->sessionTable() . ' as sessions'
+        )
+            ->leftJoin(
+                'users',
+                'users.id',
+                '=',
+                'sessions.user_id'
+            )
+            ->leftJoin(
+                'roles',
+                'roles.id',
+                '=',
+                'users.role_id'
+            )
             ->whereNotNull('sessions.user_id')
-            ->where('sessions.last_activity', '>=', $this->activeCutoffTimestamp());
+            ->where(
+                'sessions.last_activity',
+                '>=',
+                $this->activeCutoffTimestamp()
+            );
+
+        $deviceQuery = clone $baseQuery;
+
+        $deviceQuery->select([
+            'sessions.id',
+            'sessions.user_id',
+            'sessions.ip_address',
+            'sessions.user_agent',
+        ]);
+
+        if ($this->supportsSessionDeviceColumns()) {
+            $deviceQuery->addSelect([
+                'sessions.device_type',
+                'sessions.device_name',
+                'sessions.os_name',
+            ]);
+        }
+
+        $activeDevices = $deviceQuery
+            ->get()
+            ->map(function (object $session) {
+                $userAgent =
+                    (string) (
+                        $session->user_agent ?? ''
+                    );
+
+                $deviceName =
+                    $session->device_name ??
+                    BrowserDetection::deviceNameForDisplay(
+                        null,
+                        $userAgent
+                    );
+
+                $osName =
+                    $session->os_name ??
+                    BrowserDetection::detectOperatingSystem(
+                        $userAgent
+                    );
+
+                return implode('|', [
+                    (string) $session->user_id,
+                    (string) (
+                        $session->ip_address ??
+                        'unknown'
+                    ),
+                    strtolower(
+                        trim(
+                            (string) $deviceName
+                        )
+                    ),
+                    strtolower(
+                        trim(
+                            (string) $osName
+                        )
+                    ),
+                ]);
+            })
+            ->filter()
+            ->unique()
+            ->count();
+
+        $totalSessions =
+            (clone $baseQuery)
+            ->count();
+
+        $otherSessions =
+            $currentSessionId
+            ? (clone $baseQuery)
+            ->where(
+                'sessions.id',
+                '!=',
+                $currentSessionId
+            )
+            ->count()
+            : $totalSessions;
 
         return [
-            'total_sessions' => (clone $baseQuery)->count(),
-            'active_users' => (clone $baseQuery)->distinct('sessions.user_id')->count('sessions.user_id'),
-            'admin_sessions' => (clone $baseQuery)->whereIn('roles.slug', ['admin', 'super_admin'])->count(),
-            'dentist_sessions' => (clone $baseQuery)->where('roles.slug', 'dentist')->count(),
-            'patient_sessions' => (clone $baseQuery)->where('roles.slug', 'patient')->count(),
+            'total_sessions' => $totalSessions,
+
+            'active_users' => (clone $baseQuery)
+                ->distinct(
+                    'sessions.user_id'
+                )
+                ->count(
+                    'sessions.user_id'
+                ),
+
+            'other_sessions' => $otherSessions,
+            'active_devices' => $activeDevices,
+
+            'admin_sessions' => (clone $baseQuery)
+                ->whereIn(
+                    'roles.slug',
+                    [
+                        'admin',
+                        'super_admin',
+                    ]
+                )
+                ->count(),
+
+            'dentist_sessions' => (clone $baseQuery)
+                ->where(
+                    'roles.slug',
+                    'dentist'
+                )
+                ->count(),
+
+            'patient_sessions' => (clone $baseQuery)
+                ->where(
+                    'roles.slug',
+                    'patient'
+                )
+                ->count(),
         ];
     }
 
@@ -467,49 +784,173 @@ class ConcurrentSessionService
             return false;
         }
 
-        $deleted = DB::table($this->sessionTable())
-            ->where('id', $session->id)
+        $sessionId =
+            (string) $session->id;
+
+        $this->markSessionRevokedByAdmin(
+            $sessionId
+        );
+
+        $deleted = DB::table(
+            $this->sessionTable()
+        )
+            ->where(
+                'id',
+                $sessionId
+            )
             ->delete();
 
-        if ($deleted > 0) {
-            AuditLogger::log(
-                'admin_session_revoked',
-                'authentication',
-                sprintf('Admin #%d revoked an active session for user #%d.', $actor->id, (int) $session->user_id)
+        if ($deleted <= 0) {
+            $this->forgetAdminRevokedSessionMarker(
+                $sessionId
             );
+
+            return false;
         }
 
-        return $deleted > 0;
+        AuditLogger::log(
+            'admin_session_revoked',
+            'authentication',
+            sprintf(
+                'Admin #%d revoked an active session for user #%d.',
+                $actor->id,
+                (int) $session->user_id
+            )
+        );
+
+        return true;
     }
 
-    public function revokeAllSessionsForUserAsAdmin(User $actor, User $targetUser, ?string $exceptSessionId = null): int
-    {
+    public function revokeAllSessionsForUserAsAdmin(
+        User $actor,
+        User $targetUser,
+        ?string $exceptSessionId = null
+    ): int {
         if (!$this->isEnabled()) {
             return 0;
         }
 
-        $query = DB::table($this->sessionTable())->where('user_id', $targetUser->id);
+        $query = DB::table(
+            $this->sessionTable()
+        )
+            ->where(
+                'user_id',
+                $targetUser->id
+            );
 
         if ($exceptSessionId) {
-            $query->where('id', '!=', $exceptSessionId);
-        }
-
-        $deleted = $query->delete();
-
-        if ($deleted > 0) {
-            AuditLogger::log(
-                'admin_user_sessions_revoked',
-                'authentication',
-                sprintf(
-                    'Admin #%d revoked %d active session(s) for user #%d.',
-                    $actor->id,
-                    $deleted,
-                    $targetUser->id
-                )
+            $query->where(
+                'id',
+                '!=',
+                $exceptSessionId
             );
         }
 
+        $sessionIds = (clone $query)
+            ->pluck('id')
+            ->map(
+                fn($sessionId) =>
+                (string) $sessionId
+            )
+            ->filter()
+            ->values();
+
+        if ($sessionIds->isEmpty()) {
+            return 0;
+        }
+
+        $sessionIds->each(
+            function (
+                string $sessionId
+            ): void {
+                $this->markSessionRevokedByAdmin(
+                    $sessionId
+                );
+            }
+        );
+
+        $deleted = $query->delete();
+
+        if ($deleted <= 0) {
+            $sessionIds->each(
+                function (
+                    string $sessionId
+                ): void {
+                    $this->forgetAdminRevokedSessionMarker(
+                        $sessionId
+                    );
+                }
+            );
+
+            return 0;
+        }
+
+        AuditLogger::log(
+            'admin_user_sessions_revoked',
+            'authentication',
+            sprintf(
+                'Admin #%d revoked %d active session(s) for user #%d.',
+                $actor->id,
+                $deleted,
+                $targetUser->id
+            )
+        );
+
         return $deleted;
+    }
+
+    public function wasSessionRevokedByAdmin(
+        string $sessionId
+    ): bool {
+        if ($sessionId === '') {
+            return false;
+        }
+
+        return Cache::has(
+            $this->adminRevokedSessionCacheKey(
+                $sessionId
+            )
+        );
+    }
+
+    private function markSessionRevokedByAdmin(
+        string $sessionId
+    ): void {
+        if ($sessionId === '') {
+            return;
+        }
+
+        Cache::put(
+            $this->adminRevokedSessionCacheKey(
+                $sessionId
+            ),
+            true,
+            now()->addMinutes(15)
+        );
+    }
+
+    private function adminRevokedSessionCacheKey(
+        string $sessionId
+    ): string {
+        return 'admin-revoked-session:' .
+            hash(
+                'sha256',
+                $sessionId
+            );
+    }
+
+    private function forgetAdminRevokedSessionMarker(
+        string $sessionId
+    ): void {
+        if ($sessionId === '') {
+            return;
+        }
+
+        Cache::forget(
+            $this->adminRevokedSessionCacheKey(
+                $sessionId
+            )
+        );
     }
 
     protected function activeSessionsQuery(int $userId)
@@ -529,7 +970,7 @@ class ConcurrentSessionService
     protected function activeCutoffTimestamp(): int
     {
         $sessionLifetimeSeconds = max(60, (int) config('session.lifetime', 120) * 60);
-        $idleTimeoutSeconds = (int) env('SESSION_IDLE_TIMEOUT_SECONDS', 0);
+        $idleTimeoutSeconds = (int) config('session.idle_timeout_seconds', 0);
 
         if ($idleTimeoutSeconds > 0) {
             $sessionLifetimeSeconds = min($sessionLifetimeSeconds, $idleTimeoutSeconds);
@@ -632,6 +1073,85 @@ class ConcurrentSessionService
         return $supportsColumns;
     }
 
+    protected function normalizeAdminSessionRoles(
+        mixed $roles
+    ): array {
+        $values = is_array($roles)
+            ? $roles
+            : explode(
+                ',',
+                (string) $roles
+            );
+
+        $values = collect($values)
+            ->map(
+                fn($role) =>
+                strtolower(
+                    trim(
+                        (string) $role
+                    )
+                )
+            )
+            ->filter(
+                fn($role) =>
+                in_array(
+                    $role,
+                    [
+                        'all',
+                        'admin',
+                        'dentist',
+                        'patient',
+                    ],
+                    true
+                )
+            )
+            ->unique()
+            ->values()
+            ->all();
+
+        if (
+            empty($values) ||
+            in_array('all', $values, true)
+        ) {
+            return ['all'];
+        }
+
+        return $values;
+    }
+
+    protected function normalizeSessionSort(mixed $sort): string
+    {
+        return strtolower(trim((string) $sort)) === 'oldest'
+            ? 'oldest'
+            : 'recent';
+    }
+
+    protected function normalizeSessionScope(mixed $scope): string
+    {
+        $normalized = strtolower(trim((string) $scope));
+
+        return in_array($normalized, ['current', 'others'], true)
+            ? $normalized
+            : 'all';
+    }
+
+    protected function normalizeSessionDeviceType(mixed $deviceType, ?string $userAgent = null): string
+    {
+        $normalized = strtolower(trim((string) $deviceType));
+
+        return match (true) {
+            in_array($normalized, ['phone', 'mobile', 'smartphone'], true) => 'mobile',
+            in_array($normalized, ['tablet', 'ipad'], true) => 'tablet',
+            in_array($normalized, ['desktop', 'laptop', 'computer', 'pc'], true) => 'desktop',
+            $normalized === 'all' => 'all',
+            $normalized !== '' => $normalized,
+            Str::contains((string) $userAgent, ['iPad', 'Tablet'], true) => 'tablet',
+            Str::contains((string) $userAgent, ['iPhone', 'Android', 'Mobile'], true) => 'mobile',
+            Str::contains((string) $userAgent, ['Windows', 'Macintosh', 'Linux', 'CrOS'], true) => 'desktop',
+            default => 'unknown',
+        };
+    }
+
     protected function formatRoleLabel(string $role): string
     {
         return match ($role) {
@@ -660,6 +1180,24 @@ class ConcurrentSessionService
             'logout' => 'neutral',
             'session_limit_enforced', 'sessions_revoked', 'session_revoked' => 'warning',
             default => 'neutral',
+        };
+    }
+
+    protected function logoutDescription(User $user, string $reason): string
+    {
+        if ($reason === 'idle') {
+            return 'User was signed out due to inactivity.';
+        }
+
+        $roleSlug = (string) optional($user->role)->slug;
+
+        return match ($roleSlug) {
+            'patient' => 'Patient logged out',
+            'admin', 'super_admin' => 'Admin logged out',
+            default => sprintf(
+                'Clinical user (%s) logged out',
+                $roleSlug !== '' ? $roleSlug : 'unknown'
+            ),
         };
     }
 

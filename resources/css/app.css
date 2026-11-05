@@ -1,4 +1,10 @@
+/* app.css */
+
 @import 'tailwindcss';
+
+@import '@fontsource-variable/inter/wght.css';
+@import '@fortawesome/fontawesome-free/css/all.min.css';
+
 @import './skeleton.css';
 
 /* Core */
@@ -8,6 +14,7 @@
 @import './core/utilities.css';
 
 /* Components */
+@import './components/accordion.css';
 @import './components/search.css';
 @import './components/filters.css';
 @import './components/modals.css';
@@ -17,7 +24,7 @@
 @import './components/flatpickr.css';
 @import './components/calendar.css';
 @import './components/floating-actions.css';
-@import './components/accessibility.css';
+@import './components/floating-save-bar.css';
 @import './components/view-toggle.css';
 @import './components/voice-input.css';
 @import './components/card.css';
@@ -28,56 +35,11 @@
 @import './components/sidebar.css';
 @import './components/footer.css';
 @import './components/impersonation-banner.css';
-@import './pages/error-pages.css';
-@import './pages/auth/login.css';
 @import './components/odontogram-preview.css';
+@import './components/patient-record-modal.css';
 @import './components/booking-workflow.css';
 @import './components/filter-select.css';
-
-/* Shared page styles */
-@import './pages/dentist/dentist-shared.css';
-@import './pages/patient/patient-shared.css';
-@import './pages/admin/admin-shared.css';
-
-@import './pages/shared/patient-list.css';
-@import "./pages/shared/document-requests.css";
-@import './pages/shared/appointments.css';
-@import './pages/shared/clinic-schedule.css';
-@import "./pages/shared/inventory.css";
-@import './pages/shared/reports.css';
-@import './pages/shared/active-sessions.css';
-
-/* Dentist pages */
-@import './pages/dentist/dentist-dashboard.css';
-@import './pages/dentist/dental-services.css';
-@import './pages/dentist/daily-treatment.css';
-@import './pages/dentist/odontogram.css';
-@import './pages/dentist/dentist-walk-in.css';
-@import './pages/dentist/add-existing-record.css';
-@import './pages/dentist/add-existing-appointment.css';
-
-/* Patient pages */
-@import './pages/patient/dashboard.css';
-@import './pages/patient/book-appointment.css';
-@import './pages/patient/appointment.css';
-@import './pages/patient/patient-profile.css';
-@import './pages/patient/records.css';
-@import './pages/patient/about-us.css';
-
-/* Admin pages */
-@import './pages/admin/admin-dashboard.css';
-@import './pages/admin/dental-records.css';
-@import './pages/admin/document-templates.css';
-@import './pages/admin/academic-period.css';
-@import './pages/admin/cms-access.css';
-@import './pages/admin/faculty-integration.css';
-@import './pages/admin/role-permissions.css';
-@import './pages/admin/service-types.css';
-@import './pages/admin/system-logs.css';
-@import './pages/admin/system-settings.css';
-@import './pages/admin/user-management.css';
-@import './pages/admin/ai-generated-report.css';
-@import './pages/admin/session-management.css';
+@import './components/accessibility.css';
 
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 @plugin "daisyui";

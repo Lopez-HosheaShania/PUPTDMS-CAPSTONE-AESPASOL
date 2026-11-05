@@ -16,7 +16,11 @@ use App\Helpers\AuditLogger;
 
 class UserManagementController extends Controller
 {
-    private const PASSWORD_LENGTH = 12;
+    private const USER_MANAGEMENT_PERMISSIONS = [
+        'view_account_details',
+        'disable_users',
+        'update_user_role',
+    ];
 
     public function __construct(
         private readonly ConcurrentSessionService $concurrentSessionService
@@ -24,8 +28,15 @@ class UserManagementController extends Controller
 
     public function index(Request $request)
     {
-        $roles = Role::withCount('users')->orderBy('name')->get();
+        $this->authorizeAnyUserManagementAccess();
+
+        $roles = Role::withCount('users')
+            ->orderBy('name')
+            ->get()
+            ->filter(fn(Role $role) => $this->canManageRoleAccounts($role))
+            ->values();
         $roleCounts = $roles->mapWithKeys(fn($role) => [$role->slug => $role->users_count]);
+        $visibleRoleIds = $roles->pluck('id')->all();
 
         $search = trim((string) $request->get('search', ''));
         $roleFilter = trim((string) $request->get('role', ''));
@@ -40,10 +51,34 @@ class UserManagementController extends Controller
 
         $query = User::with(['role', 'patient']);
 
+        if ($visibleRoleIds === []) {
+            $query->whereRaw('1 = 0');
+        } else {
+            $query->whereIn('role_id', $visibleRoleIds);
+        }
+
         if ($search !== '') {
             $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%");
+                $q->where(
+                    'name',
+                    'like',
+                    "%{$search}%"
+                )
+                    ->orWhere(
+                        'email',
+                        'like',
+                        "%{$search}%"
+                    )
+                    ->orWhereHas(
+                        'patient',
+                        function ($patientQuery) use ($search) {
+                            $patientQuery->where(
+                                'name',
+                                'like',
+                                "%{$search}%"
+                            );
+                        }
+                    );
             });
         }
 
@@ -62,21 +97,29 @@ class UserManagementController extends Controller
 
         $notifications = collect([]);
 
-        $allUsersCount = User::count();
-        $adminCount = User::whereHas('role', function ($q) {
+        $countQuery = User::query();
+
+        if ($visibleRoleIds === []) {
+            $countQuery->whereRaw('1 = 0');
+        } else {
+            $countQuery->whereIn('role_id', $visibleRoleIds);
+        }
+
+        $allUsersCount = (clone $countQuery)->count();
+        $adminCount = (clone $countQuery)->whereHas('role', function ($q) {
             $q->where('slug', 'super_admin')->orWhere('name', 'super_admin');
         })->count();
 
-        $dentistCount = User::whereHas('role', function ($q) {
+        $dentistCount = (clone $countQuery)->whereHas('role', function ($q) {
             $q->where('slug', 'dentist')->orWhere('name', 'dentist');
         })->count();
 
-        $patientCount = User::whereHas('role', function ($q) {
+        $patientCount = (clone $countQuery)->whereHas('role', function ($q) {
             $q->where('slug', 'patient')->orWhere('name', 'patient');
         })->count();
 
-        $activeCount = User::where('status', 'active')->count();
-        $inactiveCount = User::where('status', 'inactive')->count();
+        $activeCount = (clone $countQuery)->where('status', 'active')->count();
+        $inactiveCount = (clone $countQuery)->where('status', 'inactive')->count();
 
         // AuditLogger::log(
         //     'view',
@@ -124,82 +167,32 @@ class UserManagementController extends Controller
             'search',
             'roleFilter',
             'statusFilter'
-        ));
+        ) + [
+            'layoutRole' => request()->routeIs('dentist.user_management*') ? 'dentist' : 'admin',
+            'routeNames' => [
+                'index' => $this->routeName('index'),
+                'update' => $this->routeName('update'),
+                'toggle_status' => $this->routeName('toggle_status'),
+            ],
+        ]);
     }
 
-    public function store(Request $request)
-    {
-        $request->merge([
-            'phone' => $this->normalizePhoneNumber($request->input('phone')),
-        ]);
-
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email|unique:patients,email',
-            'role_id' => 'nullable|exists:roles,id',
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'status' => 'required|in:active,inactive',
-            'phone' => ['nullable', 'regex:/^09\d{9}$/'],
-            'birthdate' => 'nullable|date',
-            'gender' => 'nullable|in:Male,Female',
-        ], [
-            'phone.regex' => 'Phone number must start with 09 and contain exactly 11 digits.',
-        ]);
-
-        $roleId = $this->resolveUserRoleId(
-            $request->input('role_id')
-        );
-
-        $request->merge([
-            'role_id' => $roleId,
-        ]);
-
-        $user = DB::transaction(function () use ($request) {
-            $role = Role::findOrFail($request->role_id);
-
-            $user = User::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'phone' => $request->phone,
-                'birthdate' => $request->birthdate,
-                'gender' => $request->gender,
-                'password' => Hash::make((string) $request->password),
-                'role_id' => $request->role_id,
-                'status' => $request->status,
-            ]);
-
-            if ($role && $role->slug === 'patient') {
-                Patient::create([
-                    'user_id' => $user->id,
-                    'name' => $request->name,
-                    'email' => $request->email,
-                    'phone' => $request->phone ?? '',
-                    'birthdate' => $request->birthdate ?? now()->toDateString(),
-                    'gender' => $request->gender ?? 'Male',
-                    'password' => $user->password,
-                ]);
-            }
-
-            return $user;
-        });
-
-        AuditLogger::log(
-            'create',
-            'user',
-            "Created user #{$user->id} ({$user->email})"
-        );
-
-        return redirect()->route('admin.user_management')
-            ->with('success', 'User created successfully.');
-    }
     public function update(Request $request, User $user)
     {
+        $this->authorizeUserManagementAccess('update_user_role');
+        $this->authorizeManagedUserAccount($user);
+
         $request->merge([
             'phone' => $this->normalizePhoneNumber($request->input('phone')),
         ]);
 
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                'regex:/^[A-Za-zÑñ\s.\'-]+$/u',
+            ],
             'email' => [
                 'required',
                 'email',
@@ -211,10 +204,16 @@ class UserManagementController extends Controller
             'role_id' => 'nullable|exists:roles,id',
             'status' => 'required|in:active,inactive',
             'phone' => ['nullable', 'regex:/^09\d{9}$/'],
-            'birthdate' => 'nullable|date',
+            'birthdate' => [
+                'nullable',
+                'date',
+                'before_or_equal:today',
+            ],
             'gender' => 'nullable|in:Male,Female',
         ], [
             'phone.regex' => 'Phone number must start with 09 and contain exactly 11 digits.',
+            'name.regex' => 'Full name may only contain letters, spaces, apostrophes, periods, and hyphens.',
+            'birthdate.before_or_equal' => 'Birthdate cannot be in the future.',
         ]);
 
         $originalRole = $user->role;
@@ -223,6 +222,7 @@ class UserManagementController extends Controller
         );
 
         $newRole = Role::findOrFail($newRoleId);
+        $this->authorizeRoleAccountAccess($newRole);
         $roleChanged = (string) ($user->role_id ?? '') !== (string) ($newRoleId ?? '');
 
         if ($roleChanged) {
@@ -306,6 +306,8 @@ class UserManagementController extends Controller
 
     private function authorizeRoleChange(Request $request, User $user): void
     {
+        $this->authorizeUserManagementAccess('update_user_role');
+
         $actor = Auth::user();
 
         if (!$actor) {
@@ -339,39 +341,11 @@ class UserManagementController extends Controller
         }
     }
 
-    public function resetPassword(Request $request, User $user)
-    {
-        $request->validate([
-            'password' => 'required|min:8|confirmed',
-        ]);
-
-        DB::transaction(function () use ($request, $user) {
-            $hashedPassword = Hash::make($request->password);
-            $user->update(['password' => $hashedPassword]);
-
-            $role = $user->role;
-            if ($role && $role->slug === 'patient') {
-                Patient::where('user_id', $user->id)->update(['password' => $hashedPassword]);
-            }
-        });
-
-        $this->concurrentSessionService->revokeAllSessions($user, null, 'password_reset');
-
-        AuditLogger::log('reset_password', 'user', "Reset password for user #{$user->id}");
-
-        if ($request->ajax() || $request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Password reset successfully.',
-            ]);
-        }
-
-        return redirect()->route('admin.user_management')
-            ->with('success', 'Password reset successfully.');
-    }
-
     public function toggleStatus(User $user)
     {
+        $this->authorizeUserManagementAccess('disable_users');
+        $this->authorizeManagedUserAccount($user);
+
         $user->status = $user->status === 'active' ? 'inactive' : 'active';
         $user->save();
 
@@ -396,9 +370,19 @@ class UserManagementController extends Controller
 
     public function updatePatient(Request $request, Patient $patient)
     {
+        $this->authorizeUserManagementAccess('view_account_details');
+
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                'regex:/^[A-Za-zÑñ\s.\'-]+$/u',
+            ],
             'email' => 'required|email|unique:patients,email,' . $patient->id,
+        ], [
+            'name.regex' =>
+            'Full name may only contain letters, spaces, apostrophes, periods, and hyphens.',
         ]);
 
         $patient->update([
@@ -406,51 +390,14 @@ class UserManagementController extends Controller
             'email' => $request->email,
         ]);
 
-        return redirect()->route('admin.user_management')
+        return redirect()->route($this->routeName('index'))
             ->with('success', 'Patient updated successfully.');
-    }
-
-    public function resetPatientPassword(Request $request, Patient $patient)
-    {
-        $request->validate([
-            'password' => 'required|min:8|confirmed',
-        ]);
-
-        $hashedPassword = Hash::make($request->password);
-
-        $patient->update([
-            'password' => $hashedPassword,
-        ]);
-
-        // If the patient is linked to a user, also update the user's password (consistency)
-        if ($patient->user) {
-            $patient->user->update([
-                'password' => $hashedPassword,
-            ]);
-
-            $user = $patient->user;
-            $this->concurrentSessionService->revokeAllSessions($user, null, 'password_reset');
-
-            AuditLogger::log(
-                'reset_password',
-                'user',
-                "Reset password for user #{$user->id} via patient record"
-            );
-        } else {
-            // Log anyway — even if no linked user (rare case)
-            AuditLogger::log(
-                'reset_password',
-                'patient',
-                "Reset password for standalone patient #{$patient->id}",
-            );
-        }
-
-        return redirect()->route('admin.user_management')
-            ->with('success', 'Patient password reset successfully.');
     }
 
     public function destroy(User $user)
     {
+        $this->authorizeManagedUserAccount($user);
+
         $email = $user->email;
 
         $this->concurrentSessionService->revokeAllSessions($user, null, 'account_deleted');
@@ -466,8 +413,79 @@ class UserManagementController extends Controller
             "Deleted user #{$user->id} ({$email})",
         );
 
-        return redirect()->route('admin.user_management')
+        return redirect()->route($this->routeName('index'))
             ->with('success', 'User deleted successfully.');
+    }
+
+    private function authorizeAnyUserManagementAccess(): void
+    {
+        $user = Auth::user();
+
+        abort_unless($user, 403);
+
+        foreach (self::USER_MANAGEMENT_PERMISSIONS as $permission) {
+            if ($user->hasPermission($permission)) {
+                return;
+            }
+        }
+
+        abort(403, 'Unauthorized.');
+    }
+
+    private function authorizeUserManagementAccess(string $permission): void
+    {
+        $user = Auth::user();
+
+        abort_unless($user, 403);
+        abort_unless($user->hasPermission($permission), 403, 'Unauthorized.');
+    }
+
+    private function authorizeManagedUserAccount(User $user): void
+    {
+        $role = $user->role;
+
+        abort_unless($role, 403, 'Unauthorized.');
+
+        $this->authorizeRoleAccountAccess($role);
+    }
+
+    private function authorizeRoleAccountAccess(Role $role): void
+    {
+        abort_unless($this->canManageRoleAccounts($role), 403, 'Unauthorized.');
+    }
+
+    private function canManageRoleAccounts(Role $role): bool
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return false;
+        }
+
+        $roleKey = strtolower((string) ($role->slug ?: $role->name));
+
+        return match ($roleKey) {
+            'patient' => $user->hasAnyPermission(['view_account_details', 'disable_users', 'update_user_role']),
+            'dentist' => $user->hasAnyPermission(['view_account_details', 'disable_users', 'update_user_role']),
+            default => $user->hasAnyPermission(['update_user_role']),
+        };
+    }
+
+    private function routeName(string $action): string
+    {
+        if (request()->routeIs('dentist.user_management*')) {
+            return match ($action) {
+                'index' => 'dentist.user_management',
+                'update' => 'dentist.user_management.update',
+                'toggle_status' => 'dentist.user_management.toggle_status',
+            };
+        }
+
+        return match ($action) {
+            'index' => 'admin.user_management',
+            'update' => 'admin.user_management.update',
+            'toggle_status' => 'admin.user_management.toggle_status',
+        };
     }
 
     private function formatUserForResponse(User $user): array
@@ -476,6 +494,9 @@ class UserManagementController extends Controller
 
         $patient = $user->patient;
         $role = $user->role;
+        $displayName =
+            $patient?->name
+            ?? $user->name;
         $displayRole = $role?->display_name ?? $role?->name ?? 'No Role';
         $phone = $patient?->phone ?: $user->phone;
         $birthdate = $patient?->birthdate ?: $user->birthdate;
@@ -483,7 +504,7 @@ class UserManagementController extends Controller
 
         return [
             'id' => $user->id,
-            'name' => $user->name,
+            'name' => $displayName,
             'email' => $user->email,
             'status' => $user->status,
             'role_id' => $user->role_id,
@@ -493,7 +514,7 @@ class UserManagementController extends Controller
             'created_at_time' => optional($user->created_at)?->format('h:i A'),
             'details' => [
                 'id' => $user->id,
-                'name' => $user->name,
+                'name' => $displayName,
                 'email' => $user->email,
                 'role' => $displayRole,
                 'status' => ucfirst((string) $user->status),
@@ -530,31 +551,6 @@ class UserManagementController extends Controller
         );
 
         return (int) $patientRoleId;
-    }
-
-    private function generateRandomPassword(): string
-    {
-        $lower = 'abcdefghijkmnopqrstuvwxyz';
-        $upper = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
-        $numbers = '23456789';
-        $symbols = '@#$%*!?';
-
-        $password = [
-            $lower[random_int(0, strlen($lower) - 1)],
-            $upper[random_int(0, strlen($upper) - 1)],
-            $numbers[random_int(0, strlen($numbers) - 1)],
-            $symbols[random_int(0, strlen($symbols) - 1)],
-        ];
-
-        $all = $lower . $upper . $numbers . $symbols;
-
-        while (count($password) < self::PASSWORD_LENGTH) {
-            $password[] = $all[random_int(0, strlen($all) - 1)];
-        }
-
-        shuffle($password);
-
-        return implode('', $password);
     }
 
     private function normalizePhoneNumber(mixed $value): ?string

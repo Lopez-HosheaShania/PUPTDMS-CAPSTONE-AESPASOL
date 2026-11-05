@@ -39,6 +39,7 @@ class FollowUpAppointmentReminderNotification extends Notification
             'event' => $this->reminderType === 'today'
                 ? 'appointment.follow_up.today_reminder'
                 : 'appointment.follow_up.reminder',
+            'recipient_role' => optional($notifiable->role)->slug,
         ];
     }
 
@@ -56,6 +57,7 @@ class FollowUpAppointmentReminderNotification extends Notification
                 : 'appointment.follow_up.reminder',
             'created_at_label' => 'Just now',
             'state' => 'unread',
+            'recipient_role' => optional($notifiable->role)->slug,
         ]);
     }
 

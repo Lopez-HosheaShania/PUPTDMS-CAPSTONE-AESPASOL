@@ -26,7 +26,7 @@
     <div class="booking-confirmation-field" data-global-field>
         <label for="{{ $checkboxId }}" class="global-checkbox-row booking-confirmation-check">
 
-            <input id="{{ $checkboxId }}" type="checkbox" class="global-checkbox-input"
+            <input id="{{ $checkboxId }}" name="final_confirmation" value="1" type="checkbox" class="global-checkbox-input"
                 data-field-label="Final confirmation" data-required-message="Please confirm this before continuing."
                 required>
 

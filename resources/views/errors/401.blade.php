@@ -11,8 +11,8 @@
 
 @section('notice_text', 'Return to the sign-in page, then try opening this section again.')
 
-@section('primary_label', 'Return Home')
-@section('primary_url', url('/'))
+@section('primary_label', 'Sign In')
+@section('primary_url', route('login'))
 
 @section('notice_icon')
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">

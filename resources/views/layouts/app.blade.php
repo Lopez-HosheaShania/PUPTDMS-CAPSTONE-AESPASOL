@@ -11,9 +11,14 @@
     $isDentist = $layoutRole === 'dentist';
     $isPatient = $layoutRole === 'patient';
 
+    $rolePreviewActive =
+        (bool) session('role_preview_active') && in_array(session('preview_role'), ['patient', 'dentist'], true);
+
     $hideSidebar = View::hasSection('hide-sidebar');
     $hideMobileNav = View::hasSection('hide-mobile-nav');
     $hidePatientModals = View::hasSection('hide-patient-modals');
+    $hideFloatingActions = View::hasSection('hide-floating-actions');
+    $hideFooter = View::hasSection('hide-footer');
 
     $showMobileMenu = ($isAdmin || $isDentist) && !$hideSidebar;
     $showSettings = $isAdmin;
@@ -25,6 +30,7 @@
 <html lang="en" data-theme="{{ session('theme', 'light') }}">
 
 <head>
+    @include('partials.security-bootstrap')
     <meta charset="UTF-8">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -33,7 +39,7 @@
         <meta name="auth-user-id" content="{{ auth()->id() }}">
     @endif
 
-    <script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         (function() {
             const savedTheme =
                 localStorage.getItem('theme');
@@ -75,49 +81,35 @@
                 patient: 'patientSidebarCollapsed'
             };
 
-            document.documentElement.classList.add('sidebar-preload');
+            const sidebarStorageKey =
+                sidebarKeys[role] ??
+                'sidebarCollapsed';
 
-            try {
-                if (localStorage.getItem(sidebarKeys[role]) === '1') {
-                    document.documentElement.classList.add(
-                        'sidebar-collapsed-init'
-                    );
-                }
-            } catch (error) {}
-        })();
-    </script>
+            const savedSidebarCollapsed =
+                localStorage.getItem(
+                    sidebarStorageKey
+                ) === '1';
 
-    <style>
-        html.accessibility-preload .header,
-        html.accessibility-preload #sidebar,
-        html.accessibility-preload #mainContent,
-        html.accessibility-preload #siteFooter {
-            visibility: hidden !important;
-        }
-    </style>
+            const sidebarCanRender =
+                role === 'patient' ?
+                window.matchMedia(
+                    '(min-width: 1200px)'
+                ).matches :
+                window.matchMedia(
+                    '(min-width: 768px)'
+                ).matches;
 
-    <script>
-        (function() {
-            const root = document.documentElement;
+            document.documentElement
+                .classList
+                .add('sidebar-preload');
 
-            root.classList.add('accessibility-preload');
-
-            const releaseAccessibilityPreload = () => {
-                requestAnimationFrame(() => {
-                    requestAnimationFrame(() => {
-                        root.classList.remove(
-                            'accessibility-preload'
-                        );
-                    });
-                });
-            };
-
-            window.releaseAccessibilityPreload =
-                releaseAccessibilityPreload;
-            setTimeout(
-                releaseAccessibilityPreload,
-                1500
-            );
+            document.documentElement
+                .classList
+                .toggle(
+                    'sidebar-collapsed-init',
+                    savedSidebarCollapsed &&
+                    sidebarCanRender
+                );
         })();
     </script>
 
@@ -131,7 +123,52 @@
 
     <link rel="icon" type="image/png" href="{{ asset('images/PUPT-DMS-Logo.png') }}">
 
+    <style nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
+        @keyframes page-enter {
+            from {
+                opacity: .92;
+                transform: translateY(4px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .page-enter {
+            animation: page-enter 180ms ease-out both;
+        }
+
+
+        @if ($isPatient)
+            @media (max-width: 640px) {
+                html body.role-patient .asw-menu-btn {
+                    opacity: 0 !important;
+                    visibility: hidden !important;
+                    pointer-events: none !important;
+                    transform: scale(0.01) !important;
+                    transition: none !important;
+                }
+            }
+        @endif
+
+        @media (prefers-reduced-motion: reduce) {
+            .page-enter {
+                animation: none;
+            }
+        }
+    </style>
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    @if ($isAdmin)
+        @vite('resources/css/pages/admin/admin-shared.css')
+    @elseif ($isDentist)
+        @vite('resources/css/pages/dentist/dentist-shared.css')
+    @elseif ($isPatient)
+        @vite('resources/css/pages/patient/patient-shared.css')
+    @endif
 
     @yield('styles')
     @stack('styles')
@@ -140,9 +177,11 @@
 <body
     class="
         role-{{ $layoutRole }}
+        {{ $rolePreviewActive ? 'role-preview-active' : '' }}
         {{ $hideSidebar ? 'layout-no-sidebar' : '' }}
         {{ $hideMobileNav ? 'layout-no-mobile-nav' : '' }}
-        @yield('body-class', 'bg-[#F4F4F4]')">
+        {{ $hideFloatingActions ? 'layout-no-floating-actions' : '' }}
+        @yield('body-class')">
 
     @include('partials.header', [
         'role' => $layoutRole,
@@ -162,97 +201,105 @@
         @include('partials.patient.mobile-nav')
     @endif
 
-    @if ($isPatient && !$hidePatientModals)
+    @if ($isPatient && !$hidePatientModals && !$rolePreviewActive)
         @include('components.patient-document-modals')
         @include('components.patient-record-modal')
     @endif
 
     @if ($isPatient)
         @include('partials.impersonation-banner')
+
+        @unless ($rolePreviewActive)
+            @include('components.booking.personal-information-verification')
+
+            @include('components.booking.maintenance-modal')
+        @endunless
     @endif
 
-    @if ($isDentist)
+    @if ($isDentist || ($isAdmin && View::hasSection('usesAppointmentCalendar')))
         @include('partials.impersonation-banner')
-        @include('components.reschedule-modal')
-        @include('components.cancel-modal')
-        @include('components.patient-record-modal')
+
+        @unless ($rolePreviewActive)
+            @include('components.reschedule-modal')
+
+            @include('components.cancel-modal')
+
+            @include('components.patient-record-modal')
+        @endunless
     @endif
 
-    @if ($isAdmin)
+    @if ($isAdmin && !View::hasSection('usesAppointmentCalendar'))
         @include('components.patient-record-modal')
     @endif
 
     @yield('content')
 
-    @include('partials.footer')
+    @if (!$hideFooter)
+        @include('partials.footer')
+    @endif
 
     @include('components.active-appointment-modal')
-    
+
     @include('components.discard-changes')
 
     @include('partials.global-toast')
 
-    <div id="logoutConfirmModal" class="ui-modal logout-confirm-modal modal-theme-warning" role="dialog"
-        aria-modal="true" aria-labelledby="logoutConfirmTitle" aria-describedby="logoutConfirmDescription"
-        aria-hidden="true">
-        <div class="ui-modal-card modal-sm logout-confirm-card">
+    @include('components.global-loading')
+
+    <div id="logoutConfirmModal" class="ui-modal" role="dialog" aria-modal="true" aria-labelledby="logoutConfirmTitle"
+        aria-describedby="logoutConfirmDescription" aria-hidden="true">
+
+        <div class="ui-modal-card modal-sm">
+
             <div class="modal-hd">
                 <div class="modal-heading">
-                    <div class="modal-icon logout-confirm-icon">
+
+                    <div class="modal-icon">
                         <i class="fa-solid fa-right-from-bracket"></i>
                     </div>
 
                     <div class="modal-copy">
                         <h2 id="logoutConfirmTitle" class="modal-title">
-                            Confirm Logout
+                            Are you sure you want to log out?
                         </h2>
-
-                        <p class="modal-subtitle">
-                            You are about to end your current session.
-                        </p>
                     </div>
-                </div>
 
-                <button type="button" class="modal-x" data-logout-modal-close aria-label="Close logout confirmation">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
+                </div>
             </div>
 
             <div class="modal-bd">
-                <div class="logout-confirm-message">
-                    <div class="logout-confirm-message-icon">
-                        <i class="fa-solid fa-shield-halved"></i>
-                    </div>
+                <div>
 
                     <div>
-                        <p id="logoutConfirmDescription">
-                            Are you sure you want to log out?
+                        <p id="logoutConfirmDescription" class="confirmed-modal-message">
+                            You will need to sign in again to continue.
                         </p>
-
-                        <span>
-                            You will need to sign in again to access your account.
-                        </span>
                     </div>
+
                 </div>
             </div>
 
-            <div class="modal-ft logout-confirm-actions">
-                <button type="button" class="btn-close-modal" data-logout-modal-close>
-                    Stay Signed In
-                </button>
+            <div class="modal-ft">
+                <div class="modal-actions">
 
-                <button type="button" id="confirmLogoutBtn" class="modal-btn-confirm danger">
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                    <span>Log Out</span>
-                </button>
+                    <button type="button" class="ui-btn ui-btn-secondary" data-modal-close="logoutConfirmModal">
+                        Stay Logged In
+                    </button>
+
+                    <button type="button" id="confirmLogoutBtn" class="ui-btn ui-btn-primary" data-modal-initial-focus>
+                        <span>Log Out</span>
+
+                    </button>
+
+                </div>
             </div>
+
         </div>
     </div>
 
     @include('partials.terms-modal')
-    @include('partials.inactivity-logout')
 
-    @if ($isDentist && View::hasSection('usesAppointmentCalendar'))
+    @if (!$rolePreviewActive && ($isDentist || $isAdmin) && View::hasSection('usesAppointmentCalendar'))
         @include('components.appointment-calendar-script', [
             'mode' => 'booking',
             'calendarContainerId' => 'calGridWrapReschedule',
@@ -272,6 +319,7 @@
             'datePillId' => 'datePill',
             'dateErrorId' => 'dateError',
             'timeErrorId' => 'timeError',
+            'clearSlotButtonId' => 'clearSlotSelectionBtn',
             'calendarWrapSelector' => '#rescheduleModal .cal-wrap',
             'slotsWrapSelector' => '#rescheduleModal .slots-wrap',
             'slotEndpoint' => route('dentist.appointment.slots'),
@@ -294,7 +342,7 @@
     @endif
 
     @if ($isPatient && !$hideMobileNav && !$hidePatientModals)
-        <script>
+        <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
             function openQuickAction(type) {
                 if (type === 'record') {
                     document
@@ -314,49 +362,114 @@
     <div id="globalActionTooltip" class="global-action-tooltip" role="tooltip" aria-hidden="true">
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/sienna-accessibility@latest/dist/sienna-accessibility.umd.js"
-        data-position="bottom-right" data-offset="{{ $accessibilityOffset }}" defer></script>
+    @if (!$hideFloatingActions)
+        <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}"
+            src="{{ asset('vendor/sienna/sienna-accessibility.umd.js') }}" data-position="bottom-right"
+            data-offset="{{ $accessibilityOffset }}" defer></script>
 
-    <script>
-        document.addEventListener(
-            'DOMContentLoaded',
-            function() {
-                const release = () => {
-                    window.releaseAccessibilityPreload?.();
-                };
+        @include('partials.chatbot')
+    @endif
 
-                if (document.querySelector('.asw-widget')) {
-                    release();
-                    return;
+    @if ($rolePreviewActive)
+        <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
+            document.addEventListener(
+                'DOMContentLoaded',
+                () => {
+                    const previewRoots = [
+                        document.getElementById(
+                            'mainContent'
+                        ),
+
+                        document.getElementById(
+                            'sidebar'
+                        ),
+
+                        document.getElementById(
+                            'mobileDrawer'
+                        ),
+
+                        document.getElementById(
+                            'mobileBottomNav'
+                        ),
+                    ].filter(Boolean);
+
+                    const allowedSelector = [
+                        '[data-sidebar-toggle]',
+                        '[data-sidebar-group-toggle]',
+                        '[data-drawer-toggle]',
+                        '[data-drawer-close]',
+                        '[data-drawer-group-toggle]',
+                        '[data-theme-choice]',
+                        '[data-preview-allow]',
+                    ].join(',');
+
+                    const showPreviewNotice =
+                        () => {
+                            if (
+                                typeof window
+                                .showToast ===
+                                'function'
+                            ) {
+                                window.showToast(
+                                    'Preview Mode',
+                                    'This action is unavailable while previewing a role.',
+                                    'info'
+                                );
+                            }
+                        };
+
+                    previewRoots.forEach(
+                        root => {
+                            root.addEventListener(
+                                'click',
+                                event => {
+                                    const action =
+                                        event.target
+                                        .closest(
+                                            'a, button, [data-ui-click], [role="button"]'
+                                        );
+
+                                    if (!action) {
+                                        return;
+                                    }
+
+                                    if (
+                                        action.matches(
+                                            allowedSelector
+                                        ) ||
+                                        action.closest(
+                                            allowedSelector
+                                        )
+                                    ) {
+                                        return;
+                                    }
+
+                                    event.preventDefault();
+
+                                    event.stopImmediatePropagation();
+
+                                    showPreviewNotice();
+                                },
+                                true
+                            );
+
+                            root.addEventListener(
+                                'submit',
+                                event => {
+                                    event.preventDefault();
+
+                                    event.stopImmediatePropagation();
+
+                                    showPreviewNotice();
+                                },
+                                true
+                            );
+                        }
+                    );
                 }
-
-                const observer = new MutationObserver(() => {
-                    if (
-                        !document.querySelector(
-                            '.asw-widget'
-                        )
-                    ) {
-                        return;
-                    }
-
-                    observer.disconnect();
-                    release();
-                });
-
-                observer.observe(document.body, {
-                    childList: true,
-                    subtree: true
-                });
-
-                setTimeout(() => {
-                    observer.disconnect();
-                    release();
-                }, 1500);
-            }
-        );
-    </script>
-
-    @include('partials.chatbot')
+            );
+        </script>
+    @endif
 
     @stack('scripts')
     @yield('scripts')

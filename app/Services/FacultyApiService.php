@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Log;
 use App\Models\AcademicPeriod;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
+use App\Models\AcademicYear;
+use App\Models\AcademicTerm;
 
 class FacultyApiService
 {
@@ -76,7 +78,7 @@ class FacultyApiService
                 }
 
                 return collect($this->extractFacultyList($json))
-                    ->map(fn ($faculty) => is_array($faculty) ? $this->normalizeFaculty($faculty) : null)
+                    ->map(fn($faculty) => is_array($faculty) ? $this->normalizeFaculty($faculty) : null)
                     ->filter()
                     ->values()
                     ->all();
@@ -436,18 +438,51 @@ class FacultyApiService
                 'is_active' => false,
             ]);
 
-            return AcademicPeriod::updateOrCreate(
-                [
-                    'academic_year' => $data['academic_year'],
-                    'semester' => $data['semester'],
-                ],
-                [
-                    'start_date' => $data['start_date'],
-                    'end_date' => $data['end_date'],
-                    'description' => 'Synced from FLSS active academic year endpoint.',
-                    'is_active' => true,
-                ]
-            );
+            $academicYear = AcademicYear::firstOrCreate([
+                'name' => trim($data['academic_year']),
+            ]);
+
+            $termCode = match (strtolower(trim($data['semester']))) {
+                '1st semester',
+                'first semester' => 'first_semester',
+
+                '2nd semester',
+                'second semester' => 'second_semester',
+
+                'summer' => 'summer',
+
+                default => null,
+            };
+
+            if ($termCode === null) {
+                throw new \Exception(
+                    "Unsupported semester from FLSS: {$data['semester']}"
+                );
+            }
+
+            $academicTerm = AcademicTerm::where('code', $termCode)->first();
+
+            if ($academicTerm === null) {
+                throw new \Exception(
+                    "Academic term configuration not found: {$termCode}"
+                );
+            }
+
+            $academicPeriod = AcademicPeriod::firstOrNew([
+                'academic_year_id' => $academicYear->id,
+                'academic_term_id' => $academicTerm->id,
+            ]);
+
+            $academicPeriod->fill([
+                'start_date' => $data['start_date'],
+                'end_date' => $data['end_date'],
+                'description' => 'Synced from FLSS active academic year endpoint.',
+                'is_active' => true,
+            ]);
+
+            $academicPeriod->save();
+
+            return $academicPeriod;
         });
     }
 }

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class AiServiceLog extends Model
 {
-    public $timestamps = false;
+    public const UPDATED_AT = null;
 
     protected $fillable = [
         'feature',
@@ -14,12 +14,9 @@ class AiServiceLog extends Model
         'status',
         'mode',
         'message',
-        'context',
-        'happened_at',
     ];
 
     protected $casts = [
-        'context' => 'array',
-        'happened_at' => 'datetime',
+        'created_at' => 'datetime',
     ];
 }

@@ -13,12 +13,10 @@
 
     <div class="booking-page-topbar">
 
-        <a href="{{ $backUrl }}" class="ui-btn ui-btn-primary ui-btn-sm" data-discard-navigation
+        <x-button :href="$backUrl" variant="primary" size="sm" icon="fa-solid fa-arrow-left" data-discard-navigation
             data-discard-form-target="{{ $formTarget }}">
-            <i class="fa-solid fa-arrow-left"></i>
-
             {{ $backLabel }}
-        </a>
+        </x-button>
 
         <span class="booking-step-counter">
             Step
@@ -56,6 +54,12 @@
         <p class="booking-page-subtitle">
             {{ $subtitle }}
         </p>
+
+        @if (trim((string) $slot) !== '')
+            <div class="mt-3">
+                {{ $slot }}
+            </div>
+        @endif
 
     </div>
 

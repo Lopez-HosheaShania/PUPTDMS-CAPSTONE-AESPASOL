@@ -4,10 +4,14 @@
 
 @section('title', 'About Us')
 
+@section('styles')
+    @vite('resources/css/pages/patient/about-us.css')
+@endsection
+
 @section('content')
 
 <main id="mainContent"
-    class="about-us-page patient-page-shell page-enter pt-[90px] px-3 md:px-6 py-6 min-h-screen flex-1">
+    class="about-us-page app-page-shell page-enter pt-[90px] px-3 md:px-6 py-6 min-h-screen flex-1">
     <div class="w-full">
 
         <div class="mb-4">
@@ -92,7 +96,7 @@
                 <div class="dentist-mini mt-6">
                     <div class="dentist-img">
                         <img src="{{ asset('images/Nelson-Angeles.jpg') }}" alt="Dr. Nelson P. Angeles"
-                            onerror="this.src='https://ui-avatars.com/api/?name=Nelson+Angeles&background=660000&color=FFFFFF&size=150'">
+                            data-ui-error="action-7bd4b7e7707f">
                     </div>
                     <div class="dentist-details">
                         <h4>Dr. Nelson Angeles</h4>
@@ -126,7 +130,7 @@
                 <div class="dev-item">
                     <div class="dev-img">
                         <img src="{{ asset('images/' . $dev['img']) }}" alt="{{ $dev['name'] }}"
-                            onerror="this.src='https://ui-avatars.com/api/?name={{ urlencode($dev['name']) }}&background=8B0000&color=FFFFFF&size=100'">
+                            data-ui-error="action-8551a98bacd1" data-ui-error-arg-0="https://ui-avatars.com/api/?name={{ urlencode($dev['name']) }}&amp;background=8B0000&amp;color=FFFFFF&amp;size=100">
                     </div>
                     <div class="dev-info">
                         <h5>{{ $dev['name'] }}</h5>

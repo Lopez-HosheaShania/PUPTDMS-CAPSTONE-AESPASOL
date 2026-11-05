@@ -31,10 +31,10 @@ class SendFollowUpAppointmentReminders extends Command
     private function sendTwoDayReminders(string $targetDate): int
     {
         $appointments = Appointment::with('patient.user')
-            ->where('is_follow_up', true)
+            ->followUps()
             ->whereIn('status', ['upcoming', 'rescheduled'])
             ->whereDate('appointment_date', $targetDate)
-            ->whereNull('follow_up_reminder_sent_at')
+            ->whereDoesntHave('reminderState', fn ($query) => $query->whereNotNull('follow_up_reminder_sent_at'))
             ->get();
 
         $sent = 0;
@@ -64,10 +64,10 @@ class SendFollowUpAppointmentReminders extends Command
     private function sendOneDayReminders(string $targetDate): int
     {
         $appointments = Appointment::with('patient.user')
-            ->where('is_follow_up', true)
+            ->followUps()
             ->whereIn('status', ['upcoming', 'rescheduled'])
             ->whereDate('appointment_date', $targetDate)
-            ->whereNull('follow_up_one_day_reminder_sent_at')
+            ->whereDoesntHave('reminderState', fn ($query) => $query->whereNotNull('follow_up_one_day_reminder_sent_at'))
             ->get();
 
         $sent = 0;

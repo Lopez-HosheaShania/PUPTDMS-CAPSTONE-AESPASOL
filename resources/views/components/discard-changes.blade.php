@@ -13,15 +13,10 @@
                     </p>
                 </div>
             </div>
-
-            <button type="button" class="discard-modal-x" data-discard-keep aria-label="Keep editing">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
         </div>
 
         <div class="discard-modal-body">
             <div class="discard-modal-warning">
-                <i class="fa-solid fa-circle-info"></i>
                 <p id="globalDiscardMessage">
                     Closing this modal will remove the draft you entered. Do you want to discard your changes?
                 </p>
@@ -34,19 +29,17 @@
             </button>
 
             <button type="button" class="discard-modal-btn discard-modal-btn-save" data-discard-save hidden>
-                <i class="fa-solid fa-floppy-disk"></i>
                 Save Draft
             </button>
 
             <button type="button" class="discard-modal-btn discard-modal-btn-discard" data-discard-confirm>
-                <i class="fa-solid fa-trash"></i>
                 Discard
             </button>
         </div>
     </div>
 </div>
 
-<script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     (() => {
         if (window.DiscardChanges) return;
 
@@ -54,6 +47,101 @@
         let pendingDiscardCallback = null;
         let pendingDiscardForm = null;
         let lastFocusedElement = null;
+        const browserHistoryGuardKey = '__discardChangesGuard';
+        let browserHistoryGuardActive = false;
+        let browserNavigationAllowed = false;
+        let pendingBrowserBackForm = null;
+
+        function getDirtyNavigationForm() {
+            return getWatchedForms().find(form => {
+                const modal = form.closest('.ui-modal, .modal-overlay, dialog');
+
+                if (modal && !modal.classList.contains('open') && !modal.open) {
+                    return false;
+                }
+
+                return isFormDirty(form);
+            });
+        }
+
+        function guardBrowserBack(fromUserInteraction = false) {
+            browserNavigationAllowed = false;
+
+            if (!getWatchedForms().length || window.history.length < 2) return;
+            if (window.history.state?.[browserHistoryGuardKey] === 'guard') {
+                browserHistoryGuardActive = true;
+                return;
+            }
+
+            if (fromUserInteraction !== true || pendingBrowserBackForm) return;
+            if (navigator.userActivation && !navigator.userActivation.isActive) return;
+            browserHistoryGuardActive = true;
+
+            window.history.replaceState({
+                ...window.history.state,
+                [browserHistoryGuardKey]: 'base',
+            }, '', window.location.href);
+
+            window.history.pushState({
+                ...window.history.state,
+                [browserHistoryGuardKey]: 'guard',
+            }, '', window.location.href);
+        }
+
+        window.addEventListener('popstate', () => {
+            if (!browserHistoryGuardActive) return;
+
+            if (browserNavigationAllowed) {
+                if (window.history.state?.[browserHistoryGuardKey] === 'base') {
+                    window.history.back();
+                }
+                return;
+            }
+
+            if (window.history.state?.[browserHistoryGuardKey] === 'guard' && pendingBrowserBackForm) {
+                const form = pendingBrowserBackForm;
+                pendingBrowserBackForm = null;
+
+                if (!getDiscardModal()?.classList.contains('open')) {
+                    openDiscardModal(form, () => {
+                        browserNavigationAllowed = true;
+                        window.history.back();
+                    });
+                }
+
+                return;
+            }
+
+            if (window.history.state?.[browserHistoryGuardKey] !== 'base') return;
+
+            const form = getDirtyNavigationForm();
+
+            if (!form) {
+                browserNavigationAllowed = true;
+                window.history.back();
+                return;
+            }
+
+            pendingBrowserBackForm = form;
+            window.history.forward();
+        });
+
+        window.addEventListener('pageshow', guardBrowserBack);
+
+        ['pointerdown', 'pointerup', 'keydown', 'click'].forEach(type => {
+            document.addEventListener(type, event => {
+                if (event.isTrusted) guardBrowserBack(true);
+            }, true);
+        });
+
+        window.addEventListener('hashchange', () => {
+            if (!browserHistoryGuardActive || browserNavigationAllowed) return;
+
+            window.history.replaceState({
+                ...window.history.state,
+                [browserHistoryGuardKey]: 'guard',
+            }, '', window.location.href);
+        });
 
         function getDiscardModal() {
             return document.getElementById('globalDiscardModal');
@@ -308,6 +396,8 @@
                 'false'
             );
 
+            window.syncModalBackground?.();
+
             document.body.classList.add(
                 'modal-lock',
                 'discard-lock'
@@ -331,6 +421,7 @@
 
             discardModal.classList.remove('open');
             discardModal.setAttribute('aria-hidden', 'true');
+            window.syncModalBackground?.();
             pendingDiscardCallback = null;
             pendingDiscardForm = null;
             document.body.classList.remove('discard-lock');
@@ -493,6 +584,7 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             captureAll(document);
+            guardBrowserBack();
 
             document.addEventListener('submit', event => {
                 const form = event.target.closest?.('form[data-discard-form]');

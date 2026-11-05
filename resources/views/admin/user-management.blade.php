@@ -1,8 +1,12 @@
 @extends('layouts.app')
 
-@section('layout-role', 'admin')
+@section('layout-role', $layoutRole ?? 'admin')
 
 @section('title', 'User Management')
+
+@section('styles')
+@vite('resources/css/pages/admin/user-management.css')
+@endsection
 
 @section('content')
 
@@ -10,27 +14,21 @@
 $totalUsers = $totalUsers ?? ($allUsersCount ?? ($users->total() ?? 0));
 $activeCount = $activeCount ?? 0;
 $inactiveCount = $inactiveCount ?? 0;
+$authUser = auth()->user();
+$canViewAccounts = $authUser?->hasPermission('view_account_details') ?? false;
+$canDisableUsers = $authUser?->hasPermission('disable_users') ?? false;
+$canUpdateUserRole = $authUser?->hasPermission('update_user_role') ?? false;
+$patientRole = $roles->first(
+fn($role) => strtolower($role->slug) === 'patient' || strtolower($role->name) === 'patient',
+);
 @endphp
 
-<main id="mainContent" class="admin-page-shell user-management-page page-enter mode-list">
+<main id="mainContent" class="app-page-shell user-management-page page-enter mode-list">
     <div class="w-full">
-        <div class="page-banner">
-            <div class="page-banner-inner">
-                <div>
-                    <h1 class="page-title">User Management</h1>
-                </div>
-
-                <div class="flex items-center gap-3 flex-wrap w-full sm:w-auto">
-                    <button type="button" onclick="openModal('addModal', this)" class="ui-btn ui-btn-primary">
-                        <i class="fa-solid fa-user-plus"></i>
-                        <span>Add New User</span>
-                    </button>
-                </div>
-            </div>
-        </div>
+        <x-page-banner title="User Management" />
 
         @if (session('success'))
-        <script>
+        <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
             document.addEventListener('DOMContentLoaded', function () {
                 showSuccessToast("{{ session('success') }}");
             });
@@ -38,7 +36,7 @@ $inactiveCount = $inactiveCount ?? 0;
         @endif
 
         @if (session('error'))
-        <script>
+        <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
             document.addEventListener('DOMContentLoaded', function () {
                 showErrorToast("{{ session('error') }}");
             });
@@ -48,289 +46,242 @@ $inactiveCount = $inactiveCount ?? 0;
         <div class="admin-page-body">
 
             <div id="statCards" class="stat-grid admin-dashboard-stat-grid user-management-stat-grid mb-6">
-                <div class="stat-card s-all">
-                    <div class="stat-card-info">
-                        <span class="stat-label">Total Users</span>
-                        <span class="stat-num" id="countTotalUsers">{{ $totalUsers }}</span>
-                        <span class="stat-footer">
-                            <i class="fa-solid fa-users"></i>
-                            All registered system accounts
-                        </span>
-                    </div>
+                <x-stat-card label="Total Users" :value="$totalUsers" tone="all" icon="fa-solid fa-users"
+                    footer="All registered system accounts" footer-icon="fa-solid fa-users" value-class="stat-num"
+                    :value-attributes="[
+                            'id' => 'countTotalUsers',
+                        ]" />
 
-                    <div class="stat-icon-wrapper">
-                        <i class="fa-solid fa-users"></i>
-                    </div>
-                </div>
+                <x-stat-card label="Active" :value="$activeCount" tone="approved" icon="fa-solid fa-circle-check"
+                    footer="Accounts currently enabled" footer-icon="fa-solid fa-circle-check" value-class="stat-num"
+                    :value-attributes="[
+                            'id' => 'countActiveUsers',
+                        ]" />
 
-                <div class="stat-card s-approved">
-                    <div class="stat-card-info">
-                        <span class="stat-label">Active</span>
-                        <span class="stat-num" id="countActiveUsers">{{ $activeCount }}</span>
-                        <span class="stat-footer">
-                            <i class="fa-solid fa-circle-check"></i>
-                            Accounts currently enabled
-                        </span>
-                    </div>
-
-                    <div class="stat-icon-wrapper">
-                        <i class="fa-solid fa-circle-check"></i>
-                    </div>
-                </div>
-
-                <div class="stat-card s-rejected">
-                    <div class="stat-card-info">
-                        <span class="stat-label">Inactive</span>
-                        <span class="stat-num" id="countInactiveUsers">{{ $inactiveCount }}</span>
-                        <span class="stat-footer">
-                            <i class="fa-solid fa-user-slash"></i>
-                            Accounts currently disabled
-                        </span>
-                    </div>
-
-                    <div class="stat-icon-wrapper">
-                        <i class="fa-solid fa-user-slash"></i>
-                    </div>
-                </div>
+                <x-stat-card label="Inactive" :value="$inactiveCount" tone="rejected" icon="fa-solid fa-user-slash"
+                    footer="Accounts currently disabled" footer-icon="fa-solid fa-user-slash" value-class="stat-num"
+                    :value-attributes="[
+                            'id' => 'countInactiveUsers',
+                        ]" />
             </div>
 
-            <div class="um-users-card card bg-white rounded-xl shadow border border-gray-100 overflow-visible">
-                <div class="um-users-toolbar px-4 sm:px-5 py-4 border-b bg-gray-50">
-                    <div class="um-users-heading">
+            <div class="table-card">
+                <div class="table-toolbar">
+                    <div class="table-toolbar-title">
                         <div class="card-header-icon">
                             <i class="fa-solid fa-users-gear"></i>
                         </div>
 
-                        <h2 class="font-bold text-gray-800 text-sm">All System Users</h2>
+                        <h2 class="card-title">All System Users</h2>
 
-                        <span id="countBadgeUsers"
-                            class="text-[10px] font-bold bg-[#8B0000] text-white px-2 py-0.5 rounded-full">
+                        <span id="countBadgeUsers" class="table-tag table-tag-neutral">
                             {{ $totalUsers }}
                         </span>
                     </div>
 
-                    <form method="GET" action="{{ route('admin.user_management') }}" id="umFilterForm"
-                        class="um-users-filter-form">
-                        <div class="um-search-row voice-search-row">
-
+                    <form method="GET" action="{{ route($routeNames['index'] ?? 'admin.user_management') }}"
+                        id="umFilterForm" class="table-toolbar-search">
+                        <div class="voice-search-row">
                             <x-search-bar id="umSearch" name="search" placeholder="Search name or email…"
                                 :value="$search ?? ''" callback="handleUserManagementSearch" :debounce="350"
-                                clear-label="Clear user search" class="um-search-control" />
+                                clear-label="Clear user search" />
 
                             <x-voice-input target="#umSearch" status-id="umSearchVoiceStatus" label="Voice search users"
                                 title="Voice search" />
-
                         </div>
-
-                        <x-view-toggle id="umViewToggle" class="um-view-toggle" storage-key="userManagementView"
-                            list-view="#umListView" grid-view="#umGridView" />
                     </form>
+
+                    <div id="umToolbarActions" class="table-toolbar-actions">
+                        <x-view-toggle id="umViewToggle" storage-key="userManagementView" list-view="#umListView"
+                            grid-view="#umGridView" />
+                    </div>
                 </div>
 
                 <x-pagination-bar id="umPaginationTopBar" info-id="umPaginationInfoTop" pagination-id="umPaginationTop"
                     position="top" :show-entries="true" page-size-id="umPerPageSelect"
                     page-size-callback="handleUserManagementPerPageChange" :page-size-value="$perPage ?? 10"
-                    page-size-label="per page" label="users" />
+                    page-size-label="per page" label="users" :total="$users->total()" :from="$users->firstItem() ?? 0"
+                    :to="$users->lastItem() ?? 0" />
 
-                <div class="um-users-content">
-                    <div class="um-view um-list-view" id="umListView">
-                        <div class="table-scroll um-table-scroll">
-                            <table class="data-table um-table">
-                                <thead>
-                                    <tr>
-                                        <th class="hidden sm:table-cell">
-                                            #
-                                        </th>
-
-                                        <th>
-                                            User
-                                        </th>
-
-                                        <th>
-                                            Role
-                                        </th>
-
-                                        <th class="table-cell-center">
-                                            Status
-                                        </th>
-
-                                        <th class="hidden lg:table-cell">
-                                            Registered
-                                        </th>
-
-                                        <th class="table-cell-center">
-                                            Actions
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody id="umTableBody">
-                                    @forelse($users as $user)
-                                    <tr class="user-table-row border-b border-gray-50 last:border-0"
-                                        data-name="{{ strtolower($user->name) }}"
-                                        data-email="{{ strtolower($user->email) }}"
-                                        data-role="{{ strtolower(optional($user->role)->name ?? '') }}">
-                                        <td class="py-3.5 px-3 sm:px-5 hidden sm:table-cell">
-                                            <span class="text-xs text-gray-400 font-medium">{{ $users->firstItem() +
-                                                $loop->index }}</span>
-                                        </td>
-
-                                        <td class="py-3.5 px-2 sm:px-4">
-                                            <div class="flex items-center gap-2 sm:gap-3">
-                                                <div class="patient-avatar patient-avatar-md">
-                                                    <span>
-                                                        {{ strtoupper(substr($user->name, 0, 1)) }}
-                                                    </span>
-                                                </div>
-                                                <div>
-                                                    <div class="font-semibold text-gray-800 text-sm leading-tight">
-                                                        {{ $user->name }}
-                                                    </div>
-                                                    <div class="text-[11px] text-gray-400 mt-0.5 hidden sm:block">
-                                                        {{ $user->email }}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </td>
-
-                                        <td class="py-3.5 px-4">
-                                            @php $roleSlug = optional($user->role)->slug ?? 'none'; @endphp
-
-                                            <span class="badge-role role-{{ $roleSlug }}">
-                                                {{ optional($user->role)->name ?? 'Patient' }}
-                                            </span>
-                                        </td>
-
-                                        <td class="py-3.5 px-4 text-center">
-                                            <span
-                                                class="status-pill {{ $user->status === 'active' ? 'status-active' : 'status-inactive' }}">
-                                                <span class="status-dot"></span>
-                                                {{ ucfirst($user->status) }}
-                                            </span>
-                                        </td>
-
-                                        <td class="py-3.5 px-4 hidden lg:table-cell">
-                                            <span class="text-xs text-gray-600">{{ $user->created_at->format('M d, Y')
-                                                }}</span>
-                                        </td>
-
-                                        <td class="py-3.5 px-4">
-                                            @php
-                                            $userDetails = [
-                                            'id' => $user->id,
-                                            'name' => $user->name,
-                                            'email' => $user->email,
-                                            'role' =>
-                                            optional($user->role)->display_name ??
-                                            (optional($user->role)->name ?? 'Patient'),
-                                            'status' => ucfirst($user->status),
-                                            'source' => 'Users',
-                                            'created_at' => $user->created_at
-                                            ? $user->created_at->format('M d, Y h:i
-                                            A')
-                                            : 'N/A',
-                                            'updated_at' => $user->updated_at
-                                            ? $user->updated_at->format('M d, Y h:i
-                                            A')
-                                            : 'N/A',
-                                            'phone' =>
-                                            optional($user->patient)->phone ?:
-                                            ($user->phone ?:
-                                            'N/A'),
-                                            'birthdate' =>
-                                            optional(optional($user->patient)->birthdate)
-                                            ?->format('M d,
-                                            Y') ??
-                                            (optional($user->birthdate)?->format('M d, Y') ??
-                                            'N/A'),
-                                            'gender' =>
-                                            optional($user->patient)->gender ?:
-                                            ($user->gender ?:
-                                            'N/A'),
-                                            'phone_raw' =>
-                                            optional($user->patient)->phone ?? ($user->phone ?? ''),
-                                            'birthdate_raw' =>
-                                            optional(optional($user->patient)->birthdate)?->format(
-                                            'Y-m-d',
-                                            ) ??
-                                            (optional($user->birthdate)?->format('Y-m-d') ?? ''),
-                                            'gender_raw' =>
-                                            optional($user->patient)->gender ??
-                                            ($user->gender ?? ''),
-                                            'patient_profile' => $user->patient
-                                            ? 'Linked'
-                                            : 'Not linked',
-                                            'last_login_at' =>
-                                            optional($user->last_login_at)?->format(
-                                            'M d, Y h:i A',
-                                            ) ?? 'Never',
-                                            ];
-                                            @endphp
-                                            <div class="ui-action-group um-action-group">
-                                                <button type="button" data-user-details='@json($userDetails)'
-                                                    onclick="openEditModalFromButton(this, 'users', {{ $user->id }}, @js($user->name), @js($user->email), @js($user->role_id), @js($user->status))"
-                                                    class="ui-action-btn ui-action-edit" data-tooltip="Edit account"
-                                                    aria-label="Edit account">
-                                                    <i class="fa-solid fa-pen text-[11px]"></i>
-                                                </button>
-
-                                                <button type="button" onclick="openToggleConfirm(
-        {{ $user->id }},
-        @js($user->status),
-        @js($user->name)
-    )" class="ui-action-btn {{ $user->status === 'active' ? 'ui-action-warning' : 'ui-action-success' }}"
-                                                    data-tooltip="{{ $user->status === 'active' ? 'Deactivate account' : 'Activate account' }}"
-                                                    data-tooltip-tone="{{ $user->status === 'active' ? 'reschedule' : 'start' }}"
-                                                    aria-label="{{ $user->status === 'active' ? 'Deactivate account' : 'Activate account' }}">
-
-                                                    <i
-                                                        class="fa-solid {{ $user->status === 'active' ? 'fa-toggle-on' : 'fa-toggle-off' }}">
-                                                    </i>
-                                                </button>
-
-                                                <button type="button" onclick="openResetModal(
-        'users',
-        {{ $user->id }},
-        @js($user->name)
-    )" class="ui-action-btn ui-action-reset" data-tooltip="Reset password" aria-label="Reset password">
-
-                                                    <i class="fa-solid fa-key"></i>
-                                                </button>
-
-                                                <button type="button" data-user-details='@json($userDetails)'
-                                                    onclick="openViewModalFromButton(this)"
-                                                    class="ui-action-btn ui-action-view" data-tooltip="View details"
-                                                    aria-label="View details">
-                                                    <i class="fa-solid fa-eye text-[11px]"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    @empty
-                                    <tr id="dbEmptyRow">
-                                        <td colspan="6" class="p-0">
-                                            <div id="umTableEmptyState" class="empty-state-host">
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
+                <div class="table-list-view" id="umListView">
+                    <div class="table-list-header um-list-header">
+                        <div>User</div>
+                        <div>Role</div>
+                        <div>Status</div>
+                        <div class="um-registered-col">Registered</div>
+                        <div class="table-cell-center">Actions</div>
                     </div>
 
-                    <div class="um-view" id="umGridView" hidden>
-                        <div class="um-grid-wrap">
-                            <div class="um-grid" id="umGridBody">
-                                @forelse($users as $user)
-                                @php
-                                $roleSlug = optional($user->role)->slug;
-                                $roleName = optional($user->role)->name ?? 'Patient';
-                                @endphp
+                    <div id="umTableBody">
+                        @forelse($users as $user)
+                        @php
+                        $displayName = $user->patient?->name ?? $user->name;
+                        $roleSlug = optional($user->role)->slug ?? 'none';
+                        $roleName =
+                        optional($user->role)->display_name ??
+                        (optional($user->role)->name ?? 'Patient');
 
-                                <div class="um-grid-card">
-                                    <div class="um-grid-top">
-                                        <div class="um-grid-number">#{{ $users->firstItem() + $loop->index }}
+                        $userDetails = [
+                        'id' => $user->id,
+                        'name' => $displayName,
+                        'email' => $user->email,
+                        'role' => $roleName,
+                        'status' => ucfirst($user->status),
+                        'source' => 'Users',
+                        'created_at' => $user->created_at
+                        ? $user->created_at->format('M d, Y h:i A')
+                        : 'N/A',
+                        'updated_at' => $user->updated_at
+                        ? $user->updated_at->format('M d, Y h:i A')
+                        : 'N/A',
+                        'phone' => optional($user->patient)->phone ?: ($user->phone ?: 'N/A'),
+                        'birthdate' =>
+                        optional(optional($user->patient)->birthdate)?->format('M d, Y') ??
+                        (optional($user->birthdate)?->format('M d, Y') ?? 'N/A'),
+                        'gender' => optional($user->patient)->gender ?: ($user->gender ?: 'N/A'),
+                        'phone_raw' => optional($user->patient)->phone ?? ($user->phone ?? ''),
+                        'birthdate_raw' =>
+                        optional(optional($user->patient)->birthdate)?->format('Y-m-d') ??
+                        (optional($user->birthdate)?->format('Y-m-d') ?? ''),
+                        'gender_raw' => optional($user->patient)->gender ?? ($user->gender ?? ''),
+                        'patient_profile' => $user->patient ? 'Linked' : 'Not linked',
+                        'last_login_at' =>
+                        optional($user->last_login_at)?->format('M d, Y h:i A') ?? 'Never',
+                        ];
+                        @endphp
+
+                        <div class="table-list-row user-table-row" data-name="{{ strtolower($displayName) }}"
+                            data-email="{{ strtolower($user->email) }}" data-role="{{ strtolower($roleName) }}">
+                            <div class="um-list-layout">
+                                <div class="table-primary um-user-cell">
+                                    <div class="patient-avatar patient-avatar-md" data-patient-avatar
+                                        data-patient-name="{{ $displayName }}"></div>
+
+                                    <div class="um-user-copy">
+                                        <strong class="um-user-name">{{ $displayName }}</strong>
+                                        <span class="um-user-email">{{ $user->email }}</span>
+                                    </div>
+                                </div>
+
+                                <div class="um-role-cell">
+                                    <span class="badge-role role-{{ $roleSlug }}">
+                                        {{ $roleName }}
+                                    </span>
+                                </div>
+
+                                <div class="um-status-cell">
+                                    <span
+                                        class="status-pill {{ $user->status === 'active' ? 'status-active' : 'status-inactive' }}">
+                                        <span class="status-dot"></span>
+                                        {{ ucfirst($user->status) }}
+                                    </span>
+                                </div>
+
+                                <div class="um-registered-cell">
+                                    <span class="table-date">
+                                        <i class="fa-regular fa-calendar"></i>
+                                        {{ $user->created_at->format('M d, Y') }}
+                                    </span>
+                                </div>
+
+                                <div class="um-actions-cell table-action-cell">
+                                    <div class="ui-action-group">
+                                        @if ($canUpdateUserRole)
+                                        <x-action-button type="button" variant="edit" icon="fa-solid fa-pen"
+                                            label="Edit account" tooltip="Edit account" data-tooltip-tone="edit"
+                                            data-user-details='@json($userDetails)' data-ui-click="action-0c508fb9e874"
+                                            data-ui-click-arg-0="{{ json_encode($user->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                            data-ui-click-arg-1="{{ json_encode($displayName, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                            data-ui-click-arg-2="{{ json_encode($user->email, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                            data-ui-click-arg-3="{{ json_encode($user->role_id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                            data-ui-click-arg-4="{{ json_encode($user->status, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" />
+                                        @endif
+
+                                        @if ($canDisableUsers)
+                                        <x-action-button type="button"
+                                            :variant="$user->status === 'active' ? 'warning' : 'success'" :icon="$user->status === 'active'
+                ? 'fa-solid fa-toggle-on'
+                : 'fa-solid fa-toggle-off'" :label="$user->status === 'active'
+                ? 'Deactivate account'
+                : 'Activate account'" :tooltip="$user->status === 'active'
+                ? 'Deactivate account'
+                : 'Activate account'" :data-tooltip-tone="$user->status === 'active'
+                ? 'reschedule'
+                : 'start'" data-ui-click="action-43aabb4c9c5a"
+                                            data-ui-click-arg-0="{{ json_encode($user->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                            data-ui-click-arg-1="{{ json_encode($user->status, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                            data-ui-click-arg-2="{{ json_encode($displayName, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" />
+                                        @endif
+
+                                        @if ($canViewAccounts)
+                                        <x-action-button type="button" variant="view" icon="fa-solid fa-eye"
+                                            label="View details" tooltip="View details" data-tooltip-tone="view"
+                                            data-user-details='@json($userDetails)'
+                                            data-ui-click="action-ff8f8b5ad104" />
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @empty
+                        <div id="umTableEmptyState" class="empty-state-host"></div>
+                        @endforelse
+                    </div>
+                </div>
+
+                <div class="table-grid-view" id="umGridView" hidden>
+                    <div class="table-record-grid" id="umGridBody">
+                        @forelse($users as $user)
+                        @php
+                        $roleSlug = optional($user->role)->slug ?? 'none';
+                        $roleName =
+                        optional($user->role)->display_name ??
+                        (optional($user->role)->name ?? 'Patient');
+                        $displayName = $user->patient?->name ?? $user->name;
+
+                        $userDetails = [
+                        'id' => $user->id,
+                        'name' => $displayName,
+                        'email' => $user->email,
+                        'role' => $roleName,
+                        'status' => ucfirst($user->status),
+                        'source' => 'Users',
+                        'created_at' => $user->created_at
+                        ? $user->created_at->format('M d, Y h:i A')
+                        : 'N/A',
+                        'updated_at' => $user->updated_at
+                        ? $user->updated_at->format('M d, Y h:i A')
+                        : 'N/A',
+                        'phone' => optional($user->patient)->phone ?: ($user->phone ?: 'N/A'),
+                        'birthdate' =>
+                        optional(optional($user->patient)->birthdate)?->format('M d, Y') ??
+                        (optional($user->birthdate)?->format('M d, Y') ?? 'N/A'),
+                        'gender' => optional($user->patient)->gender ?: ($user->gender ?: 'N/A'),
+                        'phone_raw' => optional($user->patient)->phone ?? ($user->phone ?? ''),
+                        'birthdate_raw' =>
+                        optional(optional($user->patient)->birthdate)?->format('Y-m-d') ??
+                        (optional($user->birthdate)?->format('Y-m-d') ?? ''),
+                        'gender_raw' => optional($user->patient)->gender ?? ($user->gender ?? ''),
+                        'patient_profile' => $user->patient ? 'Linked' : 'Not linked',
+                        'last_login_at' =>
+                        optional($user->last_login_at)?->format('M d, Y h:i A') ?? 'Never',
+                        ];
+                        @endphp
+
+                        <div class="table-record-card">
+                            <div class="table-record-card-layout">
+                                <div class="table-record-content">
+                                    <div class="table-record-header">
+                                        <div class="table-primary">
+                                            <div class="patient-avatar patient-avatar-sm" data-patient-avatar
+                                                data-patient-name="{{ $displayName }}"></div>
+
+                                            <div class="um-user-copy">
+                                                <strong class="table-record-title">{{ $displayName }}</strong>
+                                                <span class="ui-muted-text">{{ $user->email }}</span>
+                                            </div>
                                         </div>
+
                                         <span
                                             class="status-pill {{ $user->status === 'active' ? 'status-active' : 'status-inactive' }}">
                                             <span class="status-dot"></span>
@@ -338,497 +289,83 @@ $inactiveCount = $inactiveCount ?? 0;
                                         </span>
                                     </div>
 
-                                    <div class="flex items-center gap-3">
-                                        <div class="patient-avatar patient-avatar-sm">
-                                            <span>
-                                                {{ strtoupper(substr($user->name, 0, 1)) }}
-                                            </span>
-                                        </div>
-                                        <div class="min-w-0">
-                                            <div class="font-semibold text-gray-800 text-sm leading-tight">
-                                                {{ $user->name }}
-                                            </div>
-                                            <div class="text-[11px] text-gray-400 mt-0.5">
-                                                {{ $user->email }}
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="um-grid-meta">
-                                        <div class="um-grid-field">
-                                            <div class="um-grid-label">
-                                                Role
-                                            </div>
-
-                                            <div class="um-grid-value">
-                                                <span class="badge-role role-{{ $roleSlug ?? 'none' }}">
+                                    <div class="table-record-meta">
+                                        <div class="table-record-row">
+                                            <span class="table-record-label">Role</span>
+                                            <span class="table-record-value">
+                                                <span class="badge-role role-{{ $roleSlug }}">
                                                     {{ $roleName }}
                                                 </span>
-                                            </div>
+                                            </span>
                                         </div>
 
-                                        <div class="um-grid-field">
-                                            <div class="um-grid-label">
-                                                Registered
-                                            </div>
-
-                                            <div class="um-registered-date">
-                                                <span class="um-registered-icon">
-                                                    <i class="fa-solid fa-calendar-day"></i>
-                                                </span>
-
-                                                <span class="um-registered-text">
+                                        <div class="table-record-row">
+                                            <span class="table-record-label">Registered</span>
+                                            <span class="table-record-value">
+                                                <span class="table-date">
+                                                    <i class="fa-regular fa-calendar"></i>
                                                     {{ $user->created_at->format('M d, Y') }}
                                                 </span>
-                                            </div>
+                                            </span>
                                         </div>
                                     </div>
+                                </div>
 
+                                <div class="table-record-actions">
                                     <div class="ui-action-group">
-                                        @php
-                                        $userDetails = [
-                                        'id' => $user->id,
-                                        'name' => $user->name,
-                                        'email' => $user->email,
-                                        'role' =>
-                                        optional($user->role)->display_name ??
-                                        (optional($user->role)->name ?? 'Patient'),
-                                        'status' => ucfirst($user->status),
-                                        'source' => 'Users',
-                                        'created_at' => $user->created_at
-                                        ? $user->created_at->format('M d, Y h:i A')
-                                        : 'N/A',
-                                        'updated_at' => $user->updated_at
-                                        ? $user->updated_at->format('M d, Y h:i A')
-                                        : 'N/A',
-                                        'phone' =>
-                                        optional($user->patient)->phone ?: ($user->phone ?: 'N/A'),
-                                        'birthdate' =>
-                                        optional(optional($user->patient)->birthdate)?->format(
-                                        'M d, Y',
-                                        ) ??
-                                        (optional($user->birthdate)?->format('M d, Y') ?? 'N/A'),
-                                        'gender' =>
-                                        optional($user->patient)->gender ?:
-                                        ($user->gender ?:
-                                        'N/A'),
-                                        'phone_raw' =>
-                                        optional($user->patient)->phone ?? ($user->phone ?? ''),
-                                        'birthdate_raw' =>
-                                        optional(optional($user->patient)->birthdate)?->format(
-                                        'Y-m-d',
-                                        ) ??
-                                        (optional($user->birthdate)?->format('Y-m-d') ?? ''),
-                                        'gender_raw' =>
-                                        optional($user->patient)->gender ?? ($user->gender ?? ''),
-                                        'patient_profile' => $user->patient ? 'Linked' : 'Not linked',
-                                        'last_login_at' =>
-                                        optional($user->last_login_at)?->format('M d, Y h:i A') ??
-                                        'Never',
-                                        ];
-                                        @endphp
-                                        <button type="button" data-user-details='@json($userDetails)'
-                                            onclick="openEditModalFromButton(this, 'users', {{ $user->id }}, @js($user->name), @js($user->email), @js($user->role_id), @js($user->status))"
-                                            class="ui-action-btn ui-action-edit" data-tooltip="Edit account"
-                                            aria-label="Edit account">
-                                            <i class="fa-solid fa-pen text-[11px]"></i>
-                                        </button>
+                                        @if ($canUpdateUserRole)
+                                        <x-action-button type="button" variant="edit" icon="fa-solid fa-pen"
+                                            label="Edit account" tooltip="Edit account" data-tooltip-tone="edit"
+                                            data-user-details='@json($userDetails)' data-ui-click="action-0c508fb9e874"
+                                            data-ui-click-arg-0="{{ json_encode($user->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                            data-ui-click-arg-1="{{ json_encode($displayName, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                            data-ui-click-arg-2="{{ json_encode($user->email, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                            data-ui-click-arg-3="{{ json_encode($user->role_id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                            data-ui-click-arg-4="{{ json_encode($user->status, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" />
+                                        @endif
 
-                                        <button type="button" onclick="openToggleConfirm(
-        {{ $user->id }},
-        @js($user->status),
-        @js($user->name)
-    )" class="ui-action-btn {{ $user->status === 'active' ? 'ui-action-warning' : 'ui-action-success' }}"
-                                            data-tooltip="{{ $user->status === 'active' ? 'Deactivate account' : 'Activate account' }}"
-                                            aria-label="{{ $user->status === 'active' ? 'Deactivate account' : 'Activate account' }}">
+                                        @if ($canDisableUsers)
+                                        <x-action-button type="button"
+                                            :variant="$user->status === 'active' ? 'warning' : 'success'" :icon="$user->status === 'active'
+                ? 'fa-solid fa-toggle-on'
+                : 'fa-solid fa-toggle-off'" :label="$user->status === 'active'
+                ? 'Deactivate account'
+                : 'Activate account'" :tooltip="$user->status === 'active'
+                ? 'Deactivate account'
+                : 'Activate account'" :data-tooltip-tone="$user->status === 'active'
+                ? 'reschedule'
+                : 'start'" data-ui-click="action-43aabb4c9c5a"
+                                            data-ui-click-arg-0="{{ json_encode($user->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                            data-ui-click-arg-1="{{ json_encode($user->status, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                            data-ui-click-arg-2="{{ json_encode($displayName, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" />
+                                        @endif
 
-                                            <i
-                                                class="fa-solid {{ $user->status === 'active' ? 'fa-toggle-on' : 'fa-toggle-off' }}">
-                                            </i>
-                                        </button>
-
-                                        <button type="button" onclick="openResetModal(
-                                        'users',
-                                        {{ $user->id }},
-                                        @js($user->name)
-                                        )" class="ui-action-btn ui-action-reset" data-tooltip="Reset password"
-                                            aria-label="Reset password">
-
-                                            <i class="fa-solid fa-key"></i>
-                                        </button>
-
-                                        <button type="button" data-user-details='@json($userDetails)'
-                                            onclick="openViewModalFromButton(this)" class="ui-action-btn ui-action-view"
-                                            data-tooltip="View details" aria-label="View details">
-                                            <i class="fa-solid fa-eye text-[11px]"></i>
-                                        </button>
+                                        @if ($canViewAccounts)
+                                        <x-action-button type="button" variant="view" icon="fa-solid fa-eye"
+                                            label="View details" tooltip="View details" data-tooltip-tone="view"
+                                            data-user-details='@json($userDetails)'
+                                            data-ui-click="action-ff8f8b5ad104" />
+                                        @endif
                                     </div>
                                 </div>
-                                @empty
-                                <div id="umGridEmptyState" class="empty-state-host"></div>
-                                @endforelse
                             </div>
                         </div>
+                        @empty
+                        <div id="umGridEmptyState" class="empty-state-host table-grid-empty"></div>
+                        @endforelse
                     </div>
                 </div>
 
                 <x-pagination-bar id="umPaginationBottomBar" info-id="umPaginationInfoBottom"
-                    pagination-id="umPaginationBottom" position="bottom" :show-entries="false" label="users" />
+                    pagination-id="umPaginationBottom" position="bottom" :show-entries="false" label="users"
+                    :total="$users->total()" :from="$users->firstItem() ?? 0" :to="$users->lastItem() ?? 0" />
             </div>
         </div>
     </div>
 </main>
 
-<div id="addModal" class="ui-modal modal-theme-primary" aria-hidden="true">
-
-    <div class="ui-modal-card modal-xl modal-split-card">
-        <div class="modal-hd">
-            <div class="modal-heading">
-                <div class="modal-icon">
-                    <i class="fa-solid fa-user-plus"></i>
-                </div>
-
-                <div class="modal-copy">
-                    <h3 class="modal-title">Add New User</h3>
-                    <p class="modal-subtitle">
-                        Create a system account and assign access permissions.
-                    </p>
-                </div>
-            </div>
-
-            <button type="button" data-discard-close="addModal" class="modal-x" aria-label="Close add user modal">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-
-        <form method="POST" action="{{ route('admin.user_management.store') }}" id="addUserForm" class="modal-card-form"
-            data-global-validation data-global-selects data-discard-form data-discard-title="Discard new user?"
-            data-discard-subtitle="You have unsaved account details."
-            data-discard-message="Closing this modal will remove the user information you entered. Do you want to discard your changes?"
-            novalidate>
-            @csrf
-
-            <div class="modal-bd modal-scroll-body">
-                @if ($errors->any())
-                <div class="modal-error-banner show">
-                    <i class="fa-solid fa-circle-exclamation"></i>
-
-                    <div>
-                        @foreach ($errors->all() as $error)
-                        <p>{{ $error }}</p>
-                        @endforeach
-                    </div>
-                </div>
-                @endif
-
-                <div class="modal-form-grid-2">
-
-                    {{-- LEFT COLUMN --}}
-                    <div class="modal-form-section">
-                        <div class="modal-section-heading">
-                            <div class="modal-section-icon">
-                                <i class="fa-solid fa-id-card"></i>
-                            </div>
-
-                            <div>
-                                <h4>Account Details</h4>
-                                <p>
-                                    Basic identity and access information.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="global-form-group" data-global-field>
-                            <label class="global-form-label" for="addNameInput">
-                                Full Name
-                                <span class="required-mark">*</span>
-                            </label>
-
-                            <div class="modal-inline-control">
-                                <div class="modal-inline-main">
-                                    <input type="text" id="addNameInput" name="name" value="{{ old('name') }}"
-                                        class="form-input-custom" placeholder="e.g. Juan dela Cruz" autocomplete="name"
-                                        data-field-label="Full Name"
-                                        data-required-message="Please enter the user's full name." required>
-                                </div>
-
-                                <x-voice-input target="#addNameInput" status-id="addNameVoiceStatus"
-                                    label="Voice input for full name" title="Voice input" />
-                            </div>
-                        </div>
-
-                        <div class="global-form-group" data-global-field>
-                            <label class="global-form-label" for="addEmailInput">
-                                Email Address
-                                <span class="required-mark">*</span>
-                            </label>
-
-                            <div class="global-control-wrap">
-                                <i class="fa-solid fa-envelope global-control-icon"></i>
-
-                                <input type="email" id="addEmailInput" name="email" value="{{ old('email') }}"
-                                    class="form-input-custom global-control-with-icon" placeholder="user@pup.edu.ph"
-                                    autocomplete="email" data-field-label="Email Address"
-                                    data-required-message="Please enter an email address."
-                                    data-type-message="Please enter a valid email address." required>
-                            </div>
-                        </div>
-
-                        <div class="global-form-group" data-global-field>
-                            <label class="global-form-label" for="addRoleSelect">
-                                Role
-                                <span class="required-mark">*</span>
-                            </label>
-
-                            <select id="addRoleSelect" name="role_id" class="js-custom-select"
-                                data-placeholder="Select role" data-field-label="Role" required>
-
-                                @php
-                                $patientRole = $roles->first(
-                                fn($role) => strtolower($role->slug) === 'patient' ||
-                                strtolower($role->name) === 'patient',
-                                );
-                                @endphp
-
-                                @if ($patientRole)
-                                <option value="{{ $patientRole->id }}" {{ old('role_id', $patientRole->id) ==
-                                    $patientRole->id ? 'selected' : '' }}>
-                                    {{ $patientRole->display_name }}
-                                </option>
-                                @endif
-
-                                @foreach ($roles as $role)
-                                @continue($patientRole && (int) $role->id === (int) $patientRole->id)
-
-                                <option value="{{ $role->id }}" {{ old('role_id')==$role->id ? 'selected' : '' }}>
-                                    {{ $role->display_name }}
-                                </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="global-form-group">
-                            <label class="global-form-label">
-                                Account Type
-                            </label>
-
-                            <div class="global-readonly-field">
-                                <i class="fa-solid fa-user-shield"></i>
-                                <span>System-managed user account</span>
-                            </div>
-                        </div>
-
-                        <div class="global-form-group" data-global-field>
-                            <label class="global-form-label" for="addPhoneInput">
-                                Phone Number
-                            </label>
-
-                            <div class="global-control-wrap">
-                                <i class="fa-solid fa-phone global-control-icon"></i>
-
-                                <input type="tel" id="addPhoneInput" name="phone" value="{{ old('phone') }}"
-                                    class="form-input-custom global-control-with-icon" placeholder="09XX XXX XXXX"
-                                    inputmode="numeric" autocomplete="tel" maxlength="13"
-                                    data-field-label="Phone Number">
-                            </div>
-
-                            <p id="addPhoneInputFeedback" class="modal-helper-text">
-                                Format: 09XX XXX XXXX
-                            </p>
-                        </div>
-
-                        <div class="global-form-group" data-global-field>
-                            <label class="global-form-label" for="addBirthdateInput">
-                                Birthdate
-                            </label>
-
-                            <div class="global-control-wrap">
-                                <i class="fa-regular fa-calendar global-control-icon"></i>
-
-                                <input type="text" id="addBirthdateInput" name="birthdate"
-                                    value="{{ old('birthdate') }}"
-                                    class="form-input-custom global-control-with-icon js-flatpickr-date-max-today"
-                                    placeholder="Select birthdate" autocomplete="off" data-field-label="Birthdate"
-                                    data-validation-rule="notFutureDate">
-                            </div>
-                        </div>
-
-                        <div class="global-form-group" data-global-field>
-                            <label class="global-form-label" for="addGenderInput">
-                                Gender
-                            </label>
-
-                            <select id="addGenderInput" name="gender" class="js-custom-select"
-                                data-placeholder="Select gender" data-field-label="Gender">
-
-                                <option value="" disabled selected>
-                                    Select gender
-                                </option>
-
-                                <option value="Male" {{ old('gender')==='Male' ? 'selected' : '' }}>
-                                    Male
-                                </option>
-
-                                <option value="Female" {{ old('gender')==='Female' ? 'selected' : '' }}>
-                                    Female
-                                </option>
-                            </select>
-                        </div>
-                    </div>
-
-                    {{-- RIGHT COLUMN --}}
-                    <div class="modal-form-section">
-                        <div class="modal-section-heading">
-                            <div class="modal-section-icon">
-                                <i class="fa-solid fa-lock"></i>
-                            </div>
-
-                            <div>
-                                <h4>Security Setup</h4>
-                                <p>
-                                    A secure temporary password will be generated.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="global-form-group" data-global-field>
-                            <label class="global-form-label" for="addPassword">
-                                Generated Password
-                            </label>
-
-                            <div class="global-control-wrap">
-                                <i class="fa-solid fa-lock global-control-icon"></i>
-
-                                <input type="password" name="password" id="addPassword" minlength="8"
-                                    class="form-input-custom global-control-with-icon global-control-with-action"
-                                    placeholder="Auto-generated password" readonly>
-
-                                <button type="button" class="global-input-action"
-                                    onclick="togglePassVis('addPassword', 'addEye')"
-                                    aria-label="Show or hide generated password">
-
-                                    <i class="fa-regular fa-eye" id="addEye"></i>
-                                </button>
-                            </div>
-
-                            <div class="modal-inline-actions">
-                                <button type="button" onclick="refreshGeneratedPassword()"
-                                    class="ui-btn ui-btn-secondary ui-btn-sm">
-
-                                    <i class="fa-solid fa-rotate"></i>
-                                    <span>Generate New</span>
-                                </button>
-
-                                <button type="button" onclick="copyFieldValue('addPassword')"
-                                    class="ui-btn ui-btn-secondary ui-btn-sm">
-
-                                    <i class="fa-regular fa-copy"></i>
-                                    <span>Copy</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="global-form-group" data-global-field>
-                            <label class="global-form-label" for="addPasswordConf">
-                                Confirm Password
-                            </label>
-
-                            <div class="global-control-wrap">
-                                <i class="fa-solid fa-lock global-control-icon"></i>
-
-                                <input type="password" name="password_confirmation" id="addPasswordConf"
-                                    class="form-input-custom global-control-with-icon global-control-with-action"
-                                    placeholder="Repeat password" readonly>
-
-                                <button type="button" class="global-input-action"
-                                    onclick="togglePassVis('addPasswordConf', 'addEye2')"
-                                    aria-label="Show or hide confirmed password">
-
-                                    <i class="fa-regular fa-eye" id="addEye2"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="global-confirm-alert modal-theme-warning">
-                            <i class="fa-solid fa-circle-info"></i>
-                            <p>
-                                Temporary password
-                                <span>
-                                    The generated password shown here is the exact password
-                                    that will be saved for the account.
-                                </span>
-                            </p>
-                        </div>
-
-                        <div class="global-form-group" data-global-field>
-                            <label class="global-form-label">
-                                Status
-                                <span class="required-mark">*</span>
-                            </label>
-
-                            <div class="global-choice-group" role="radiogroup" aria-label="Account status">
-
-                                <label class="global-choice-card">
-                                    <input type="radio" name="status" id="addStatusActive" value="active"
-                                        class="global-choice-input" data-field-label="Status"
-                                        data-required-message="Please select an account status." {{
-                                        old('status', 'active' )==='active' ? 'checked' : '' }} required>
-
-                                    <span class="global-choice-indicator">
-                                        <i class="fa-solid fa-check"></i>
-                                    </span>
-
-                                    <span class="global-choice-copy">
-                                        <strong class="global-choice-title">
-                                            Active
-                                        </strong>
-
-                                        <small class="global-choice-description">
-                                            User can access the system immediately
-                                        </small>
-                                    </span>
-                                </label>
-
-                                <label class="global-choice-card">
-                                    <input type="radio" name="status" id="addStatusInactive" value="inactive"
-                                        class="global-choice-input" {{ old('status')==='inactive' ? 'checked' : '' }}>
-
-                                    <span class="global-choice-indicator">
-                                        <i class="fa-solid fa-ban"></i>
-                                    </span>
-
-                                    <span class="global-choice-copy">
-                                        <strong class="global-choice-title">
-                                            Inactive
-                                        </strong>
-
-                                        <small class="global-choice-description">
-                                            User login will be disabled
-                                        </small>
-                                    </span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="modal-ft">
-                <button type="button" data-discard-close="addModal" class="ui-btn ui-btn-secondary">
-                    Cancel
-                </button>
-
-                <button type="submit" class="ui-btn ui-btn-primary">
-                    <i class="fa-solid fa-floppy-disk"></i>
-                    <span>Save User</span>
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-
 <div class="ui-modal modal-theme-edit" id="editModal" aria-hidden="true">
-    <div class="ui-modal-card modal-md modal-split-card">
+    <div class="ui-modal-card modal-lg modal-split-card">
         <div class="modal-hd">
             <div class="modal-heading">
                 <div class="modal-icon">
@@ -867,8 +404,11 @@ $inactiveCount = $inactiveCount ?? 0;
                         <div class="modal-inline-control">
                             <div class="modal-inline-main">
                                 <input type="text" name="name" id="editName" class="form-input-custom"
-                                    placeholder="Full name" autocomplete="name" data-field-label="Full Name"
-                                    data-required-message="Please enter the user's full name." required>
+                                    placeholder="Full name" autocomplete="name" maxlength="255"
+                                    data-field-label="Full Name" data-validation-rule="personName"
+                                    data-required-message="Please enter the user's full name."
+                                    data-pattern-message="Only letters, spaces, apostrophe, period, and hyphen are allowed."
+                                    required>
                             </div>
 
                             <x-voice-input target="#editName" status-id="editNameVoiceStatus"
@@ -886,9 +426,8 @@ $inactiveCount = $inactiveCount ?? 0;
                         <div class="global-control-wrap">
                             <i class="fa-solid fa-envelope global-control-icon"></i>
 
-                            <input type="email" name="email" id="editEmail"
-                                class="form-input-custom global-control-with-icon" placeholder="user@pup.edu.ph"
-                                autocomplete="email" data-field-label="Email Address"
+                            <input type="email" name="email" id="editEmail" class="form-input-custom global-form-icon"
+                                placeholder="user@pup.edu.ph" autocomplete="email" data-field-label="Email Address"
                                 data-required-message="Please enter an email address."
                                 data-type-message="Please enter a valid email address." required>
                         </div>
@@ -899,8 +438,7 @@ $inactiveCount = $inactiveCount ?? 0;
                             Role
                         </label>
 
-                        <select name="role_id" id="editRole" class="js-custom-select" data-placeholder="Patient"
-                            data-field-label="Role">
+                        <x-select id="editRole" name="role_id" data-placeholder="Patient" data-field-label="Role">
                             @if ($patientRole)
                             <option value="{{ $patientRole->id }}">
                                 {{ $patientRole->display_name }}
@@ -914,44 +452,41 @@ $inactiveCount = $inactiveCount ?? 0;
                                 {{ $role->display_name }}
                             </option>
                             @endforeach
-                        </select>
-                    </div>
+                        </x-select>
 
-                    <div id="editRoleConfirmPanel" class="global-confirm-panel hidden">
+                        <div id="editRoleConfirmPanel" class="global-confirm-panel hidden">
+                            <div class="global-confirm-alert">
+                                <i class="fa-solid fa-shield-halved"></i>
 
-                        <div class="global-confirm-alert">
-                            <i class="fa-solid fa-shield-halved"></i>
-                            <p>
-                                Confirm Role Change
-                                <span>
-                                    Enter your current admin password before changing this user's role.
-                                </span>
-                            </p>
-                        </div>
+                                <p>
+                                    Confirm Role Change
+                                    <span>
+                                        Enter your current admin password before changing this user's role.
+                                    </span>
+                                </p>
+                            </div>
 
-                        <div class="global-form-group" data-global-field>
-                            <label class="global-form-label" for="editAdminCurrentPassword">
-                                Current Admin Password
-                                <span class="required-mark">*</span>
-                            </label>
+                            <div class="global-form-group" data-global-field>
+                                <label class="global-form-label" for="editAdminCurrentPassword">
+                                    Current Admin Password
+                                    <span class="required-mark">*</span>
+                                </label>
 
-                            <div class="global-control-wrap">
-                                <i class="fa-solid fa-lock global-control-icon"></i>
+                                <div class="global-control-wrap">
+                                    <i class="fa-solid fa-lock global-control-icon"></i>
 
-                                <input type="password" name="admin_current_password" id="editAdminCurrentPassword"
-                                    class="form-input-custom global-control-with-icon global-control-with-action"
-                                    placeholder="Enter current admin password" autocomplete="current-password"
-                                    data-field-label="Current Admin Password"
-                                    data-required-message="Enter your current admin password.">
+                                    <input type="password" name="admin_current_password" id="editAdminCurrentPassword"
+                                        class="form-input-custom global-form-icon global-control-with-action"
+                                        placeholder="Enter current admin password" autocomplete="current-password"
+                                        data-field-label="Current Admin Password"
+                                        data-required-message="Enter your current admin password.">
 
-                                <button type="button" class="global-input-action" onclick="togglePassVis(
-                    'editAdminCurrentPassword',
-                    'editAdminPasswordEye'
-                )" aria-label="Show or hide current admin password">
-
-                                    <i class="fa-regular fa-eye" id="editAdminPasswordEye">
-                                    </i>
-                                </button>
+                                    <button type="button" class="global-input-action"
+                                        data-ui-click="action-3f17fa1e4fa6"
+                                        aria-label="Show or hide current admin password">
+                                        <i class="fa-regular fa-eye" id="editAdminPasswordEye"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -978,9 +513,8 @@ $inactiveCount = $inactiveCount ?? 0;
                             <div class="global-control-wrap">
                                 <i class="fa-solid fa-phone global-control-icon"></i>
 
-                                <input type="tel" name="phone" id="editPhone"
-                                    class="form-input-custom global-control-with-icon" placeholder="09XX XXX XXXX"
-                                    inputmode="numeric" autocomplete="tel" maxlength="13"
+                                <input type="tel" name="phone" id="editPhone" class="form-input-custom global-form-icon"
+                                    placeholder="09XX XXX XXXX" inputmode="numeric" autocomplete="tel" maxlength="13"
                                     data-field-label="Phone Number"
                                     data-pattern-message="Enter a valid 11-digit Philippine mobile number.">
                             </div>
@@ -996,14 +530,10 @@ $inactiveCount = $inactiveCount ?? 0;
                                 Birthdate
                             </label>
 
-                            <div class="global-control-wrap">
-                                <i class="fa-regular fa-calendar global-control-icon"></i>
-
-                                <input type="text" id="editBirthdate" name="birthdate"
-                                    class="form-input-custom global-control-with-icon js-flatpickr-date-max-today"
-                                    placeholder="Select birthdate" autocomplete="off" data-field-label="Birthdate"
-                                    data-validation-rule="notFutureDate">
-                            </div>
+                            <input type="text" id="editBirthdate" name="birthdate"
+                                class="form-input-custom js-flatpickr-date-max-today" placeholder="Select birthdate"
+                                autocomplete="off" data-field-label="Birthdate" data-validation-rule="notFutureDate"
+                                data-flatpickr-min-year="1900" readonly>
                         </div>
 
                         <div class="global-form-group" data-global-field>
@@ -1011,13 +541,15 @@ $inactiveCount = $inactiveCount ?? 0;
                                 Gender
                             </label>
 
-                            <select name="gender" id="editGender" class="js-custom-select"
-                                data-placeholder="Select gender" data-field-label="Gender">
+                            <x-select id="editGender" name="gender" data-placeholder="Select gender"
+                                data-field-label="Gender">
+                                <option value="" disabled>
+                                    Select gender
+                                </option>
 
-                                <option value="" disabled>Select gender</option>
                                 <option value="Male">Male</option>
                                 <option value="Female">Female</option>
-                            </select>
+                            </x-select>
                         </div>
                     </div>
                 </div>
@@ -1064,278 +596,135 @@ $inactiveCount = $inactiveCount ?? 0;
                 </div>
             </div>
             <div class="modal-ft modal-sticky-footer">
-                <button type="button" data-discard-close="editModal" class="ui-btn ui-btn-secondary">
+                <x-button type="button" variant="secondary" data-discard-close="editModal">
                     Cancel
-                </button>
+                </x-button>
 
-                <button type="submit" class="ui-btn ui-btn-edit">
-                    <i class="fa-solid fa-floppy-disk"></i>
-                    <span>Update User</span>
-                </button>
+                <x-button type="submit" variant="edit" icon="fa-solid fa-floppy-disk">
+                    Update User
+                </x-button>
             </div>
         </form>
     </div>
 </div>
 
-<div id="resetModal" class="ui-modal modal-theme-reset" aria-hidden="true">
+<x-modal id="viewModal" title="Account Details" subtitle="Review selected account information"
+    icon="fa-solid fa-id-card-clip" size="xl">
+    <div class="modal-profile-card">
+        <div class="modal-profile-main">
+            <div id="viewInitial" class="patient-avatar patient-avatar-lg" data-patient-avatar
+                data-patient-name="Patient"></div>
 
-    <div class="ui-modal-card modal-sm">
-        <div class="modal-hd">
-            <div class="modal-heading">
-                <div class="modal-icon">
-                    <i class="fa-solid fa-key"></i>
-                </div>
-
-                <div class="modal-copy">
-                    <h3 class="modal-title">
-                        Reset Password
-                    </h3>
-
-                    <p class="modal-subtitle" id="resetModalSubtitle">
-                        Set a new password
-                    </p>
-                </div>
-            </div>
-
-            <button type="button" data-discard-close="resetModal" class="modal-x"
-                aria-label="Close reset password modal">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-
-        <form method="POST" id="resetForm" class="modal-card-form" data-global-validation data-discard-form
-            data-discard-title="Discard password reset?" data-discard-subtitle="A new password has not been saved."
-            data-discard-message="Closing this modal will remove the password you entered. Do you want to discard it?"
-            novalidate>
-            @csrf
-            <div class="modal-bd modal-scroll-body">
-                <div class="modal-form-grid">
-
-                    <div class="global-form-group" data-global-field>
-                        <label class="global-form-label" for="resetPassword">
-                            New Password
-                            <span class="required-mark">*</span>
-                        </label>
-
-                        <div class="global-control-wrap">
-                            <i class="fa-solid fa-lock global-control-icon"></i>
-
-                            <input type="password" name="password" id="resetPassword"
-                                class="form-input-custom global-control-with-icon global-control-with-action"
-                                placeholder="Enter new password" autocomplete="new-password" minlength="8"
-                                data-field-label="New Password" data-required-message="Please enter a new password."
-                                data-validation-rule="strongPassword" required>
-
-                            <button type="button" class="global-input-action"
-                                onclick="togglePassVis('resetPassword', 'resetEye')"
-                                aria-label="Show or hide new password">
-                                <i class="fa-regular fa-eye" id="resetEye"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="global-form-group" data-global-field>
-                        <label class="global-form-label" for="resetPasswordConf">
-                            Confirm Password
-                            <span class="required-mark">*</span>
-                        </label>
-
-                        <div class="global-control-wrap">
-                            <i class="fa-solid fa-lock global-control-icon"></i>
-
-                            <input type="password" name="password_confirmation" id="resetPasswordConf"
-                                class="form-input-custom global-control-with-icon global-control-with-action"
-                                placeholder="Repeat new password" autocomplete="new-password"
-                                data-field-label="Confirm Password"
-                                data-required-message="Please confirm the new password." required>
-
-                            <button type="button" class="global-input-action"
-                                onclick="togglePassVis('resetPasswordConf', 'resetEye2')"
-                                aria-label="Show or hide confirmed password">
-                                <i class="fa-regular fa-eye" id="resetEye2"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-ft modal-sticky-footer">
-                <button type="button" data-discard-close="resetModal" class="ui-btn ui-btn-secondary">
-                    Cancel
-                </button>
-
-                <button type="submit" class="ui-btn ui-btn-reset-password">
-                    <i class="fa-solid fa-key"></i>
-                    <span>Reset Password</span>
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<div id="viewModal" class="ui-modal" aria-hidden="true">
-
-    <div class="ui-modal-card modal-md">
-        <div class="modal-hd">
-            <div class="modal-heading">
-                <div class="modal-icon">
-                    <i class="fa-solid fa-id-card-clip"></i>
-                </div>
-
-                <div class="modal-copy">
-                    <h3 class="modal-title">Account Details</h3>
-                    <p class="modal-subtitle">
-                        Review selected account information
-                    </p>
-                </div>
-            </div>
-
-            <button type="button" onclick="closeModal('viewModal')" class="modal-x"
-                aria-label="Close account details modal">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-
-        <div class="modal-bd">
-            <div class="um-view-profile-card">
-                <div class="um-view-avatar" id="viewInitial">?</div>
-
-                <div class="um-view-profile-copy">
-                    <div id="viewName" class="um-view-name"></div>
-                    <div id="viewEmail" class="um-view-email"></div>
-                </div>
-            </div>
-
-            <div class="um-view-info-grid">
-                <div class="um-view-info-card">
-                    <div class="um-view-info-icon source">
-                        <i class="fa-solid fa-hashtag"></i>
-                    </div>
-
-                    <div>
-                        <span class="um-view-label">User ID</span>
-                        <strong id="viewId" class="um-view-value"></strong>
-                    </div>
-                </div>
-
-                <div class="um-view-info-card">
-                    <div class="um-view-info-icon role">
-                        <i class="fa-solid fa-user-shield"></i>
-                    </div>
-
-                    <div>
-                        <span class="um-view-label">Role</span>
-                        <strong id="viewRole" class="um-view-value"></strong>
-                    </div>
-                </div>
-
-                <div class="um-view-info-card">
-                    <div class="um-view-info-icon status">
-                        <i class="fa-solid fa-circle-check"></i>
-                    </div>
-
-                    <div>
-                        <span class="um-view-label">Status</span>
-                        <strong id="viewStatus" class="um-view-value um-view-status-pill"></strong>
-                    </div>
-                </div>
-
-                <div class="um-view-info-card">
-                    <div class="um-view-info-icon source">
-                        <i class="fa-solid fa-database"></i>
-                    </div>
-
-                    <div>
-                        <span class="um-view-label">Source</span>
-                        <strong id="viewSource" class="um-view-value"></strong>
-                    </div>
-                </div>
-
-                <div class="um-view-info-card">
-                    <div class="um-view-info-icon date">
-                        <i class="fa-solid fa-calendar-plus"></i>
-                    </div>
-
-                    <div>
-                        <span class="um-view-label">Created At</span>
-                        <strong id="viewCreatedAt" class="um-view-value"></strong>
-                    </div>
-                </div>
-
-                <div class="um-view-info-card">
-                    <div class="um-view-info-icon source">
-                        <i class="fa-solid fa-phone"></i>
-                    </div>
-
-                    <div>
-                        <span class="um-view-label">Phone</span>
-                        <strong id="viewPhone" class="um-view-value"></strong>
-                    </div>
-                </div>
-
-                <div class="um-view-info-card">
-                    <div class="um-view-info-icon date">
-                        <i class="fa-solid fa-cake-candles"></i>
-                    </div>
-
-                    <div>
-                        <span class="um-view-label">Birthdate</span>
-                        <strong id="viewBirthdate" class="um-view-value"></strong>
-                    </div>
-                </div>
-
-                <div class="um-view-info-card">
-                    <div class="um-view-info-icon status">
-                        <i class="fa-solid fa-venus-mars"></i>
-                    </div>
-
-                    <div>
-                        <span class="um-view-label">Gender</span>
-                        <strong id="viewGender" class="um-view-value"></strong>
-                    </div>
-                </div>
-
-                <div class="um-view-info-card">
-                    <div class="um-view-info-icon role">
-                        <i class="fa-solid fa-notes-medical"></i>
-                    </div>
-
-                    <div>
-                        <span class="um-view-label">Patient Profile</span>
-                        <strong id="viewPatientProfile" class="um-view-value"></strong>
-                    </div>
-                </div>
-
-                <div class="um-view-info-card">
-                    <div class="um-view-info-icon source">
-                        <i class="fa-solid fa-clock-rotate-left"></i>
-                    </div>
-
-                    <div>
-                        <span class="um-view-label">Last Login</span>
-                        <strong id="viewLastLoginAt" class="um-view-value"></strong>
-                    </div>
-                </div>
-
-                <div class="um-view-info-card">
-                    <div class="um-view-info-icon date">
-                        <i class="fa-solid fa-pen-to-square"></i>
-                    </div>
-
-                    <div>
-                        <span class="um-view-label">Updated At</span>
-                        <strong id="viewUpdatedAt" class="um-view-value"></strong>
-                    </div>
-                </div>
+            <div class="modal-profile-main-copy">
+                <span class="modal-profile-eyebrow">Selected Account</span>
+                <strong id="viewName" class="modal-profile-name"></strong>
+                <span id="viewEmail" class="ui-muted-text"></span>
             </div>
         </div>
 
-        <div class="modal-ft">
-            <button type="button" onclick="closeModal('viewModal')" class="ui-btn ui-btn-secondary">
-                Close
-            </button>
+        <div class="modal-profile-details">
+            <div class="modal-profile-detail">
+                <span class="modal-profile-detail-icon">
+                    <i class="fa-solid fa-user-shield"></i>
+                </span>
+                <div>
+                    <span class="modal-profile-label">Role</span>
+                    <strong id="viewRole" class="modal-profile-value"></strong>
+                </div>
+            </div>
+
+            <div class="modal-profile-detail">
+                <span class="modal-profile-detail-icon">
+                    <i class="fa-solid fa-circle-check"></i>
+                </span>
+                <div>
+                    <span class="modal-profile-label">Status</span>
+                    <strong id="viewStatus" class="status-pill status-inactive"></strong>
+                </div>
+            </div>
         </div>
     </div>
-</div>
+
+    <div class="modal-profile-details">
+        <div class="modal-profile-detail">
+            <span class="modal-profile-detail-icon"><i class="fa-solid fa-hashtag"></i></span>
+            <div>
+                <span class="modal-profile-label">User ID</span>
+                <strong id="viewId" class="modal-profile-value"></strong>
+            </div>
+        </div>
+
+        <div class="modal-profile-detail">
+            <span class="modal-profile-detail-icon"><i class="fa-solid fa-database"></i></span>
+            <div>
+                <span class="modal-profile-label">Source</span>
+                <strong id="viewSource" class="modal-profile-value"></strong>
+            </div>
+        </div>
+
+        <div class="modal-profile-detail">
+            <span class="modal-profile-detail-icon"><i class="fa-solid fa-calendar-plus"></i></span>
+            <div>
+                <span class="modal-profile-label">Created At</span>
+                <strong id="viewCreatedAt" class="modal-profile-value"></strong>
+            </div>
+        </div>
+
+        <div class="modal-profile-detail">
+            <span class="modal-profile-detail-icon"><i class="fa-solid fa-phone"></i></span>
+            <div>
+                <span class="modal-profile-label">Phone</span>
+                <strong id="viewPhone" class="modal-profile-value"></strong>
+            </div>
+        </div>
+
+        <div class="modal-profile-detail">
+            <span class="modal-profile-detail-icon"><i class="fa-solid fa-cake-candles"></i></span>
+            <div>
+                <span class="modal-profile-label">Birthdate</span>
+                <strong id="viewBirthdate" class="modal-profile-value"></strong>
+            </div>
+        </div>
+
+        <div class="modal-profile-detail">
+            <span class="modal-profile-detail-icon"><i class="fa-solid fa-venus-mars"></i></span>
+            <div>
+                <span class="modal-profile-label">Gender</span>
+                <strong id="viewGender" class="modal-profile-value"></strong>
+            </div>
+        </div>
+
+        <div class="modal-profile-detail">
+            <span class="modal-profile-detail-icon"><i class="fa-solid fa-notes-medical"></i></span>
+            <div>
+                <span class="modal-profile-label">Patient Profile</span>
+                <strong id="viewPatientProfile" class="modal-profile-value"></strong>
+            </div>
+        </div>
+
+        <div class="modal-profile-detail">
+            <span class="modal-profile-detail-icon"><i class="fa-solid fa-clock-rotate-left"></i></span>
+            <div>
+                <span class="modal-profile-label">Last Login</span>
+                <strong id="viewLastLoginAt" class="modal-profile-value"></strong>
+            </div>
+        </div>
+
+        <div class="modal-profile-detail">
+            <span class="modal-profile-detail-icon"><i class="fa-solid fa-pen-to-square"></i></span>
+            <div>
+                <span class="modal-profile-label">Updated At</span>
+                <strong id="viewUpdatedAt" class="modal-profile-value"></strong>
+            </div>
+        </div>
+    </div>
+
+    <x-slot:footer>
+        <x-button type="button" variant="secondary" data-ui-click="action-21e03f3cb038">
+            Close
+        </x-button>
+    </x-slot:footer>
+</x-modal>
 
 <div id="toggleConfirmModal" class="ui-modal modal-theme-warning" aria-hidden="true">
 
@@ -1356,36 +745,45 @@ $inactiveCount = $inactiveCount ?? 0;
                     </p>
                 </div>
             </div>
-
-            <button type="button" onclick="closeModal('toggleConfirmModal')" class="modal-x"
-                aria-label="Close confirm action modal">
-
-                <i class="fa-solid fa-xmark"></i>
-            </button>
         </div>
 
         <div class="modal-bd">
-            <div id="toggleModalBody" class="global-confirm-alert">
-                <i id="toggleModalBodyIcon" class="fa-solid fa-triangle-exclamation"></i>
-                <p>
-                    <span id="toggleModalUserName" class="global-confirm-value">
-                    </span>
-                    <span id="toggleModalMessage"></span>
-                </p>
+
+            <div id="toggleModalBody" class="modal-option-panel">
+
+                <div class="modal-form-section">
+
+                    <div class="modal-section-heading">
+
+                        <div>
+
+                            <h4 id="toggleModalUserName">
+                                Selected User
+                            </h4>
+
+                            <p id="toggleModalMessage">
+                                Please confirm this account status change.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
             </div>
+
         </div>
 
         <div class="modal-ft">
-            <button type="button" onclick="closeModal('toggleConfirmModal')" class="ui-btn ui-btn-secondary">
-
+            <x-button type="button" variant="secondary" data-ui-click="action-5630b39be24d">
                 Cancel
-            </button>
+            </x-button>
 
             <form id="toggleConfirmForm" method="POST">
                 @csrf
 
-                <button type="submit" id="toggleConfirmBtn" class="ui-btn ui-btn-warning">
-                </button>
+                <x-button id="toggleConfirmBtn" type="submit" variant="warning" />
             </form>
         </div>
     </div>
@@ -1393,7 +791,11 @@ $inactiveCount = $inactiveCount ?? 0;
 @endsection
 
 @section('scripts')
-<script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
+    const umCanViewAccounts = @json($canViewAccounts);
+    const umCanDisableUsers = @json($canDisableUsers);
+    const umCanUpdateUserRole = @json($canUpdateUserRole);
+
     var umState = {
         search: @js($search ?? ''),
         role: @js($roleFilter ?? ''),
@@ -1403,6 +805,7 @@ $inactiveCount = $inactiveCount ?? 0;
         };
 
     var umController = null;
+
 
     window.closeAllModals = function () {
         document
@@ -1415,10 +818,6 @@ $inactiveCount = $inactiveCount ?? 0;
                 }
             });
     };
-
-    @if ($errors -> any() && old('_method') !== 'PUT')
-        document.addEventListener('DOMContentLoaded', () => openModal('addModal'));
-    @endif
 
     function openToggleConfirm(
         userId,
@@ -1448,11 +847,6 @@ $inactiveCount = $inactiveCount ?? 0;
                 'toggleModalSubtitle'
             );
 
-        const bodyIcon =
-            document.getElementById(
-                'toggleModalBodyIcon'
-            );
-
         const name =
             document.getElementById(
                 'toggleModalUserName'
@@ -1478,7 +872,6 @@ $inactiveCount = $inactiveCount ?? 0;
             !icon ||
             !title ||
             !subtitle ||
-            !bodyIcon ||
             !name ||
             !message ||
             !button ||
@@ -1518,9 +911,6 @@ $inactiveCount = $inactiveCount ?? 0;
             icon.innerHTML =
                 '<i class="fa-solid fa-user-slash"></i>';
 
-            bodyIcon.className =
-                'fa-solid fa-triangle-exclamation';
-
             title.textContent =
                 'Deactivate User';
 
@@ -1528,13 +918,13 @@ $inactiveCount = $inactiveCount ?? 0;
                 'This will restrict their access';
 
             message.textContent =
-                'will be deactivated. They will no longer be able to log in until reactivated.';
+                'This account will be deactivated and will no longer be able to access the system until reactivated.';
 
             button.className =
                 'ui-btn ui-btn-warning';
 
             button.innerHTML =
-                '<i class="fa-solid fa-user-slash"></i><span>Deactivate</span>';
+                '<span>Deactivate</span>';
         } else {
             modal.classList.add(
                 'modal-theme-success',
@@ -1544,9 +934,6 @@ $inactiveCount = $inactiveCount ?? 0;
             icon.innerHTML =
                 '<i class="fa-solid fa-user-check"></i>';
 
-            bodyIcon.className =
-                'fa-solid fa-circle-check';
-
             title.textContent =
                 'Activate User';
 
@@ -1554,13 +941,13 @@ $inactiveCount = $inactiveCount ?? 0;
                 'This will restore their access';
 
             message.textContent =
-                'will be activated. They will regain access to the system.';
+                'This account will be activated and will regain access to the system.';
 
             button.className =
                 'ui-btn ui-btn-success';
 
             button.innerHTML =
-                '<i class="fa-solid fa-user-check"></i><span>Activate</span>';
+                '<span>Activate</span>';
         }
 
         button.dataset.originalHtml =
@@ -1570,22 +957,80 @@ $inactiveCount = $inactiveCount ?? 0;
     }
 
     function syncEditRoleConfirmation() {
-        const form = document.getElementById('editForm');
-        const roleInput = document.getElementById('editRole');
-        const originalRoleInput = document.getElementById('editOriginalRole');
-        const panel = document.getElementById('editRoleConfirmPanel');
-        const password = document.getElementById('editAdminCurrentPassword');
+        const form =
+            document.getElementById(
+                'editForm'
+            );
 
-        if (!form || !roleInput || !originalRoleInput || !panel || !password) return;
+        const roleInput =
+            document.getElementById(
+                'editRole'
+            );
 
-        const roleChanged = String(roleInput.value || '') !== String(originalRoleInput.value || '');
-        const shouldConfirm = form.dataset.source !== 'patients' && roleChanged;
+        const originalRoleInput =
+            document.getElementById(
+                'editOriginalRole'
+            );
 
-        panel.classList.toggle('hidden', !shouldConfirm);
-        password.required = shouldConfirm;
+        const panel =
+            document.getElementById(
+                'editRoleConfirmPanel'
+            );
+
+        const password =
+            document.getElementById(
+                'editAdminCurrentPassword'
+            );
+
+        if (
+            !form ||
+            !roleInput ||
+            !originalRoleInput ||
+            !panel ||
+            !password
+        ) {
+            return;
+        }
+
+        const roleChanged =
+            String(roleInput.value || '') !==
+            String(originalRoleInput.value || '');
+
+        const shouldConfirm =
+            form.dataset.source !== 'patients' &&
+            roleChanged;
+
+        const wasHidden =
+            panel.classList.contains('hidden');
+
+        if (shouldConfirm) {
+            panel.classList.remove('hidden');
+
+            if (wasHidden) {
+                panel.classList.remove(
+                    'slide-down-fade-in'
+                );
+
+                void panel.offsetWidth;
+
+                panel.classList.add(
+                    'slide-down-fade-in'
+                );
+            }
+        } else {
+            panel.classList.add('hidden');
+
+            panel.classList.remove(
+                'slide-down-fade-in'
+            );
+        }
+
+        password.required =
+            shouldConfirm;
 
         if (!shouldConfirm) {
             password.value = '';
+
             password.setCustomValidity('');
         }
     }
@@ -1694,104 +1139,6 @@ $inactiveCount = $inactiveCount ?? 0;
         openModal('editModal');
     }
 
-    function openResetModal(source, id, name) {
-        const resetForm =
-            document.getElementById('resetForm');
-
-        const resetPassword =
-            document.getElementById('resetPassword');
-
-        const resetPasswordConf =
-            document.getElementById('resetPasswordConf');
-
-        const resetSubtitle =
-            document.getElementById('resetModalSubtitle');
-
-        if (
-            !resetForm ||
-            !resetPassword ||
-            !resetPasswordConf
-        ) {
-            return;
-        }
-
-        resetForm.action =
-            source === 'patients' ?
-                `/admin/user-management/patient/${id}/reset-password` :
-                `/admin/user-management/${id}/reset-password`;
-
-        if (resetSubtitle) {
-            resetSubtitle.textContent =
-                `Resetting password for: ${name}`;
-        }
-
-        resetForm.reset();
-
-        window.showFormInputValidationMessage?.(
-            resetPassword,
-            ''
-        );
-
-        window.showFormInputValidationMessage?.(
-            resetPasswordConf,
-            ''
-        );
-
-        openModal('resetModal');
-    }
-
-    function buildGeneratedPassword(length = 12) {
-        const lower = 'abcdefghijkmnopqrstuvwxyz';
-        const upper = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
-        const numbers = '23456789';
-        const symbols = '@#$%*!?';
-        const all = lower + upper + numbers + symbols;
-
-        const pick = (chars) => chars.charAt(Math.floor(Math.random() * chars.length));
-        const chars = [
-            pick(lower),
-            pick(upper),
-            pick(numbers),
-            pick(symbols),
-        ];
-
-        while (chars.length < length) {
-            chars.push(pick(all));
-        }
-
-        for (let i = chars.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [chars[i], chars[j]] = [chars[j], chars[i]];
-        }
-
-        return chars.join('');
-    }
-
-    function refreshGeneratedPassword() {
-        const password = buildGeneratedPassword();
-        const passwordInput = document.getElementById('addPassword');
-        const confirmInput = document.getElementById('addPasswordConf');
-
-        if (passwordInput) passwordInput.value = password;
-        if (confirmInput) confirmInput.value = password;
-    }
-
-    async function copyFieldValue(inputId) {
-        const input = document.getElementById(inputId);
-        if (!input || !input.value) return;
-
-        try {
-            await navigator.clipboard.writeText(input.value);
-            showSuccessToast('Password copied to clipboard.');
-        } catch (error) {
-            input.removeAttribute('readonly');
-            input.select();
-            document.execCommand('copy');
-            input.setAttribute('readonly', 'readonly');
-            showSuccessToast('Password copied to clipboard.');
-        }
-    }
-
     let userPhoneFeedbackTimer = null;
 
     function formatUserPhoneDisplay(rawDigits) {
@@ -1857,10 +1204,18 @@ $inactiveCount = $inactiveCount ?? 0;
     }
 
     function openEditModalFromButton(button, source, id, name, email, roleId, status) {
+        if (!umCanUpdateUserRole) {
+            return;
+        }
+
         openEditModal(source, id, name, email, roleId, status, parseUserDetailsFromButton(button));
     }
 
     function openViewModalFromButton(button) {
+        if (!umCanViewAccounts) {
+            return;
+        }
+
         openViewModal(parseUserDetailsFromButton(button));
     }
 
@@ -1905,20 +1260,33 @@ $inactiveCount = $inactiveCount ?? 0;
         if (viewLastLoginAt) viewLastLoginAt.textContent = payload.last_login_at || 'Never';
 
         if (viewInitial) {
-            viewInitial.textContent = String(payload.name || '?').trim().charAt(0).toUpperCase() || '?';
+            viewInitial.dataset.patientName =
+                payload.name ||
+                'Patient';
+
+            viewInitial.dataset.patientUrl =
+                payload.avatar_url ||
+                '';
+
+            window.PatientUI?.renderAvatar?.(
+                viewInitial
+            );
         }
 
         if (viewStatus) {
             const normalizedStatus = String(payload.status || '').toLowerCase();
 
             viewStatus.textContent = payload.status || 'Unknown';
-            viewStatus.classList.remove('is-active', 'is-inactive');
+            viewStatus.classList.remove(
+                'status-active',
+                'status-inactive'
+            );
 
-            if (normalizedStatus === 'active') {
-                viewStatus.classList.add('is-active');
-            } else {
-                viewStatus.classList.add('is-inactive');
-            }
+            viewStatus.classList.add(
+                normalizedStatus === 'active' ?
+                    'status-active' :
+                    'status-inactive'
+            );
         }
 
         openModal('viewModal');
@@ -1942,27 +1310,15 @@ $inactiveCount = $inactiveCount ?? 0;
     window.openToggleConfirm = openToggleConfirm;
     window.openEditModal = openEditModal;
     window.openEditModalFromButton = openEditModalFromButton;
-    window.openResetModal = openResetModal;
     window.openViewModal = openViewModal;
     window.openViewModalFromButton = openViewModalFromButton;
     window.togglePassVis = togglePassVis;
-    window.refreshGeneratedPassword = refreshGeneratedPassword;
-    window.copyFieldValue = copyFieldValue;
 
     document.addEventListener('DOMContentLoaded', () => {
         if (typeof applyTheme === 'function') applyTheme(localStorage.getItem('theme') || 'light');
 
-        refreshGeneratedPassword();
-        bindUserPhoneValidation('addPhoneInput');
         bindUserPhoneValidation('editPhone');
 
-        document.querySelectorAll('.flash-alert').forEach(el => {
-            setTimeout(() => {
-                el.style.transition = 'opacity .4s';
-                el.style.opacity = '0';
-                setTimeout(() => el.remove(), 400);
-            }, 4000);
-        });
     });
 
     function umFetch(silent) {
@@ -1979,7 +1335,7 @@ $inactiveCount = $inactiveCount ?? 0;
 
         history.replaceState(null, '', window.location.pathname + '?' + params.toString());
 
-        fetch('{{ route('admin.user_management') }}?' + params.toString(), {
+        fetch('{{ route($routeNames['index'] ?? 'admin.user_management') }}?' + params.toString(), {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
                 'Accept': 'application/json'
@@ -2011,7 +1367,7 @@ $inactiveCount = $inactiveCount ?? 0;
             .replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
+
             .replace(/'/g, '&#039;');
     }
 
@@ -2029,6 +1385,11 @@ $inactiveCount = $inactiveCount ?? 0;
             ''
         ).trim().toLowerCase();
 
+        const derivedSlug = rawName
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '');
+
         const invalidValues = [
             '',
             '-',
@@ -2045,15 +1406,13 @@ $inactiveCount = $inactiveCount ?? 0;
 
         return {
             label: hasNoRole ? 'Patient' : rawName,
-            slug: hasNoRole ? 'none' : rawSlug || 'none'
+            slug: hasNoRole ? 'none' : rawSlug || derivedSlug || 'none'
         };
     }
 
     function umRenderRows(users) {
         function jsAttr(value) {
-            return JSON
-                .stringify(value ?? '')
-                .replace(/"/g, '&quot;');
+            return JSON.stringify(value ?? '');
         }
 
         function buildDetails(user, roleLabel, statusLabel, createdFull) {
@@ -2101,80 +1460,60 @@ $inactiveCount = $inactiveCount ?? 0;
                     'reschedule' :
                     'start';
 
-            return `
-            <div class="ui-action-group um-action-group">
+            const editButton = umCanUpdateUserRole ? `
                 <button
                     type="button"
                     data-user-details="${detailsPayload}"
-                    onclick="openEditModalFromButton(
-                        this,
-                        'users',
-                        ${Number(user.id)},
-                        ${jsAttr(user.name)},
-                        ${jsAttr(user.email)},
-                        ${jsAttr(user.role_id)},
-                        ${jsAttr(user.status)}
-                    )"
+                    data-ui-click="action-300bbde9a403" data-ui-click-arg-0="${window.uiAttribute(Number(user.id))}" data-ui-click-arg-1="${window.uiAttribute(jsAttr(user.name))}" data-ui-click-arg-2="${window.uiAttribute(jsAttr(user.email))}" data-ui-click-arg-3="${window.uiAttribute(jsAttr(user.role_id))}" data-ui-click-arg-4="${window.uiAttribute(jsAttr(user.status))}"
                     class="ui-action-btn ui-action-edit"
                     data-tooltip="Edit account"
                     data-tooltip-tone="edit"
                     aria-label="Edit account">
-
                     <i class="fa-solid fa-pen"></i>
                 </button>
+            ` : '';
 
+            const toggleButton = umCanDisableUsers ? `
                 <button
                     type="button"
-                    onclick="openToggleConfirm(
-                        ${Number(user.id)},
-                        ${jsAttr(user.status)},
-                        ${jsAttr(user.name)}
-                    )"
+                    data-ui-click="action-1818b87d7b42" data-ui-click-arg-0="${window.uiAttribute(Number(user.id))}" data-ui-click-arg-1="${window.uiAttribute(jsAttr(user.status))}" data-ui-click-arg-2="${window.uiAttribute(jsAttr(user.name))}"
                     class="ui-action-btn ${toggleClass}"
                     data-tooltip="${toggleTooltip}"
                     data-tooltip-tone="${toggleTone}"
                     aria-label="${toggleTooltip}">
-
                     <i class="fa-solid ${toggleIcon}"></i>
                 </button>
+            ` : '';
 
-                <button
-                    type="button"
-                    onclick="openResetModal(
-                        'users',
-                        ${Number(user.id)},
-                        ${jsAttr(user.name)}
-                    )"
-                    class="ui-action-btn ui-action-reset"
-                    data-tooltip="Reset password"
-                    data-tooltip-tone="reset"
-                    aria-label="Reset password">
-
-                    <i class="fa-solid fa-key"></i>
-                </button>
-
+            const viewButton = umCanViewAccounts ? `
                 <button
                     type="button"
                     data-user-details="${detailsPayload}"
-                    onclick="openViewModalFromButton(this)"
+                    data-ui-click="action-ff8f8b5ad104"
                     class="ui-action-btn ui-action-view"
                     data-tooltip="View details"
                     data-tooltip-tone="view"
                     aria-label="View details">
-
                     <i class="fa-solid fa-eye"></i>
                 </button>
-            </div>
-        `;
+            ` : '';
+
+            return `
+                    <div class="ui-action-group">
+                        ${editButton}
+                        ${toggleButton}
+                        ${viewButton}
+                    </div>
+                `;
         }
 
-        const tbody =
+        const listBody =
             document.getElementById('umTableBody');
 
         const gridBody =
             document.getElementById('umGridBody');
 
-        if (!tbody || !gridBody) {
+        if (!listBody || !gridBody) {
             return;
         }
 
@@ -2187,31 +1526,22 @@ $inactiveCount = $inactiveCount ?? 0;
                     umState.search || ''
                 ).trim();
 
-            tbody.innerHTML = `
-        <tr>
-            <td
-                colspan="6"
-                class="p-0">
-
-                <div
-                    id="umTableEmptyState"
-                    class="empty-state-host">
-                </div>
-
-            </td>
-        </tr>
-    `;
+            listBody.innerHTML = `
+                    <div
+                        id="umTableEmptyState"
+                        class="empty-state-host">
+                    </div>
+                `;
 
             gridBody.innerHTML = `
-        <div
-            id="umGridEmptyState"
-            class="empty-state-host">
-        </div>
-    `;
+                    <div
+                        id="umGridEmptyState"
+                        class="empty-state-host table-grid-empty">
+                    </div>
+                `;
 
             const renderEmptyState =
                 host => {
-
                     if (!host) {
                         return;
                     }
@@ -2254,17 +1584,10 @@ $inactiveCount = $inactiveCount ?? 0;
             return;
         }
 
-        const startNumber =
-            ((Number(umState.page || 1) - 1) *
-                Number(umState.perPage || 10)) + 1;
-
-        let tableHtml = '';
+        let listHtml = '';
         let gridHtml = '';
 
-        users.forEach(function (user, index) {
-            const rowNumber =
-                startNumber + index;
-
+        users.forEach(function (user) {
             const normalizedRole =
                 normalizeUmRole(user);
 
@@ -2292,12 +1615,6 @@ $inactiveCount = $inactiveCount ?? 0;
                     normalizedStatus.charAt(0).toUpperCase() +
                     normalizedStatus.slice(1) :
                     'Unknown';
-
-            const initial =
-                String(user.name || 'U')
-                    .trim()
-                    .charAt(0)
-                    .toUpperCase() || 'U';
 
             const registeredDay =
                 user.created_at_day || '—';
@@ -2344,132 +1661,132 @@ $inactiveCount = $inactiveCount ?? 0;
                     detailsPayload
                 );
 
-            tableHtml += `
-            <tr
-                class="user-table-row border-b border-gray-50 last:border-0"
-                data-name="${safeName.toLowerCase()}"
-                data-email="${safeEmail.toLowerCase()}"
-                data-role="${safeRoleLabel.toLowerCase()}">
+            const avatarMd =
+                window.PatientUI?.buildAvatarHtml?.({
+                    name: user.name || 'Patient',
+                    size: 'md',
+                    escapeHtml
+                }) || '';
 
-                <td class="py-3.5 px-3 sm:px-5 hidden sm:table-cell">
-                    <span class="text-xs text-gray-400 font-medium">
-                        ${rowNumber}
-                    </span>
-                </td>
+            const avatarSm =
+                window.PatientUI?.buildAvatarHtml?.({
+                    name: user.name || 'Patient',
+                    size: 'sm',
+                    escapeHtml
+                }) || '';
 
-                <td class="py-3.5 px-2 sm:px-4">
-                    <div class="flex items-center gap-2 sm:gap-3">
-                        <div class="patient-avatar patient-avatar-md">
-                            <span>
-                                ${initial}
-                            </span>
-                        </div>
+            listHtml += `
+                    <div
+                        class="table-list-row user-table-row"
+                        data-name="${safeName.toLowerCase()}"
+                        data-email="${safeEmail.toLowerCase()}"
+                        data-role="${safeRoleLabel.toLowerCase()}">
 
-                        <div class="min-w-0">
-                            <div class="font-semibold text-gray-800 text-sm leading-tight">
-                                ${safeName}
+                        <div class="um-list-layout">
+                            <div class="table-primary um-user-cell">
+                                ${avatarMd}
+
+                                <div class="um-user-copy">
+                                    <strong class="um-user-name">
+                                        ${safeName}
+                                    </strong>
+
+                                    <span class="um-user-email">
+                                        ${safeEmail}
+                                    </span>
+                                </div>
                             </div>
 
-                            <div class="text-[11px] text-gray-400 mt-0.5 hidden sm:block">
-                                ${safeEmail}
+                            <div class="um-role-cell">
+                                <span class="badge-role role-${safeRoleSlug}">
+                                    ${safeRoleLabel}
+                                </span>
+                            </div>
+
+                            <div class="um-status-cell">
+                                <span class="status-pill ${statusClass}">
+                                    <span class="status-dot"></span>
+                                    ${statusLabel}
+                                </span>
+                            </div>
+
+                            <div class="um-registered-cell">
+                                <span class="table-date">
+                                    <i class="fa-regular fa-calendar"></i>
+                                    ${safeRegisteredDay}
+                                </span>
+                            </div>
+
+                            <div class="um-actions-cell table-action-cell">
+                                ${actionButtons}
                             </div>
                         </div>
                     </div>
-                </td>
-
-                <td class="py-3.5 px-4">
-                    <span class="badge-role role-${safeRoleSlug}">
-                        ${safeRoleLabel}
-                    </span>
-                </td>
-
-                <td class="py-3.5 px-4 text-center">
-                    <span class="status-pill ${statusClass}">
-                        <span class="status-dot"></span>
-                        ${statusLabel}
-                    </span>
-                </td>
-
-                <td class="py-3.5 px-4 hidden lg:table-cell">
-                    <span class="text-xs text-gray-600">
-                        ${safeRegisteredDay}
-                    </span>
-                </td>
-
-                <td class="py-3.5 px-4">
-                    ${actionButtons}
-                </td>
-            </tr>
-        `;
+                `;
 
             gridHtml += `
-            <div class="um-grid-card">
-                <div class="um-grid-top">
-                    <div class="um-grid-number">
-                        #${rowNumber}
+                    <div class="table-record-card">
+                        <div class="table-record-card-layout">
+                            <div class="table-record-content">
+                                <div class="table-record-header">
+                                    <div class="table-primary">
+                                        ${avatarSm}
+
+                                        <div class="um-user-copy">
+                                            <strong class="table-record-title">
+                                                ${safeName}
+                                            </strong>
+
+                                            <span class="ui-muted-text">
+                                                ${safeEmail}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <span class="status-pill ${statusClass}">
+                                        <span class="status-dot"></span>
+                                        ${statusLabel}
+                                    </span>
+                                </div>
+
+                                <div class="table-record-meta">
+                                    <div class="table-record-row">
+                                        <span class="table-record-label">
+                                            Role
+                                        </span>
+
+                                        <span class="table-record-value">
+                                            <span class="badge-role role-${safeRoleSlug}">
+                                                ${safeRoleLabel}
+                                            </span>
+                                        </span>
+                                    </div>
+
+                                    <div class="table-record-row">
+                                        <span class="table-record-label">
+                                            Registered
+                                        </span>
+
+                                        <span class="table-record-value">
+                                            <span class="table-date">
+                                                <i class="fa-regular fa-calendar"></i>
+                                                ${safeRegisteredDay}
+                                            </span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="table-record-actions">
+                                ${actionButtons}
+                            </div>
+                        </div>
                     </div>
-
-                    <span class="status-pill ${statusClass}">
-                        <span class="status-dot"></span>
-                        ${statusLabel}
-                    </span>
-                </div>
-
-                <div class="flex items-center gap-3">
-                    <div class="patient-avatar patient-avatar-sm">
-                        <span>
-                            ${initial}
-                        </span>
-                    </div>
-
-                    <div class="min-w-0">
-                        <div class="font-semibold text-gray-800 text-sm leading-tight">
-                            ${safeName}
-                        </div>
-
-                        <div class="text-[11px] text-gray-400 mt-0.5">
-                            ${safeEmail}
-                        </div>
-                    </div>
-                </div>
-
-                <div class="um-grid-meta">
-                    <div class="um-grid-field">
-                        <div class="um-grid-label">
-                            Role
-                        </div>
-
-                        <div class="um-grid-value">
-                            <span class="badge-role role-${safeRoleSlug}">
-                                ${safeRoleLabel}
-                            </span>
-                        </div>
-                    </div>
-
-                    <div class="um-grid-field">
-                        <div class="um-grid-label">
-                            Registered
-                        </div>
-
-                        <div class="um-registered-date">
-                            <span class="um-registered-icon">
-                                <i class="fa-solid fa-calendar-day"></i>
-                            </span>
-
-                            <span class="um-registered-text">
-                                ${safeRegisteredDay}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                ${actionButtons}
-            </div>
-        `;
+                `;
         });
 
-        tbody.innerHTML =
-            tableHtml;
+        listBody.innerHTML =
+            listHtml;
 
         gridBody.innerHTML =
             gridHtml;
@@ -2668,14 +1985,11 @@ $inactiveCount = $inactiveCount ?? 0;
                     window.EmptyState
                         ?.renderSearch({
                             host,
-                            input:
-                                document.getElementById(
-                                    'umSearch'
-                                ),
-                            query:
-                                initialSearchValue,
-                            message:
-                                'Try a different name or email.',
+                            input: document.getElementById(
+                                'umSearch'
+                            ),
+                            query: initialSearchValue,
+                            message: 'Try a different name or email.',
                         });
 
                     return;
@@ -2686,8 +2000,7 @@ $inactiveCount = $inactiveCount ?? 0;
                         host,
                         icon: 'fa-users',
                         title: 'No users found',
-                        message:
-                            'Users matching the selected filters will appear here.',
+                        message: 'Users matching the selected filters will appear here.',
                     });
             };
 
@@ -2715,14 +2028,43 @@ $inactiveCount = $inactiveCount ?? 0;
 
         if (typeof applyTheme === 'function') applyTheme(localStorage.getItem('theme') || 'light');
 
-        umRenderPagebar({
-            total: {{ $users-> total() }},
+        const initialPagination = {
+            total: {{ $users-> total()
+    }},
+
         from: {{ $users-> firstItem() ?? 0 }},
+
         to: {{ $users-> lastItem() ?? 0 }},
+
         current_page: {{ $users-> currentPage() }},
+
         last_page: {{ $users-> lastPage() }},
+
         per_page: {{ $users-> perPage() }},
+            };
+
+    if (
+        typeof window.loadPaginationBarModule ===
+        'function'
+    ) {
+        window
+            .loadPaginationBarModule()
+            .then(() => {
+                umRenderPagebar(
+                    initialPagination
+                );
+            })
+            .catch(error => {
+                console.error(
+                    'Unable to initialize user pagination.',
+                    error
+                );
             });
+    } else {
+        umRenderPagebar(
+            initialPagination
+        );
+    }
 
     window.initGlobalPageSizeSelects?.();
 
@@ -2899,100 +2241,6 @@ $inactiveCount = $inactiveCount ?? 0;
         });
     }
 
-    var addUserForm =
-        document.getElementById('addUserForm');
-
-    if (addUserForm) {
-        addUserForm.addEventListener(
-            'submit',
-            function (event) {
-                const validation =
-                    window.validateGlobalForm?.(this);
-
-                if (
-                    validation &&
-                    !validation.valid
-                ) {
-                    event.preventDefault();
-                    return;
-                }
-
-                const addPhoneInput =
-                    document.getElementById(
-                        'addPhoneInput'
-                    );
-
-                if (addPhoneInput) {
-                    addPhoneInput.value =
-                        getNormalizedUserPhoneValue(
-                            addPhoneInput
-                        );
-                }
-            }
-        );
-    }
-
-    var resetForm = document.getElementById('resetForm');
-    if (resetForm) {
-        resetForm.addEventListener('submit', function (e) {
-            e.preventDefault();
-
-            const validation = window.validateGlobalForm?.(this);
-
-            if (validation && !validation.valid) {
-                return;
-            }
-
-            var form = this;
-            var url = form.action;
-            var submitBtn = form.querySelector('button[type="submit"]');
-            var originalHtml = submitBtn.innerHTML;
-
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Resetting…';
-
-            var formData = new FormData(form);
-
-            fetch(url, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json',
-                },
-                body: formData
-            })
-                .then(function (res) {
-                    return res.json().then(function (data) {
-                        return {
-                            ok: res.ok,
-                            status: res.status,
-                            data: data
-                        };
-                    });
-                })
-                .then(function (result) {
-                    if (result.status === 422 && result.data.errors) {
-                        var msgs = Object.values(result.data.errors).flat().join(' ');
-                        showErrorToast(msgs);
-                    } else if (result.ok && result.data.success) {
-                        closeAllModals();
-                        showSuccessToast(result.data.message || 'Password reset successfully.');
-                        document.getElementById('resetPassword').value = '';
-                        document.getElementById('resetPasswordConf').value = '';
-                    } else {
-                        showErrorToast(result.data.message || 'Something went wrong.');
-                    }
-                })
-                .catch(function () {
-                    showErrorToast('Something went wrong. Please try again.');
-                })
-                .finally(function () {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = originalHtml;
-                });
-        });
-    }
         });
 </script>
 @endsection

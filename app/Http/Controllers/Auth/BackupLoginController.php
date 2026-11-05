@@ -6,6 +6,7 @@ use App\Helpers\AuditLogger;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\ConcurrentSessionService;
+use App\Services\IdpHealthService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -19,16 +20,27 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 class BackupLoginController extends Controller
 {
     public function __construct(
-        private readonly ConcurrentSessionService $concurrentSessionService
+        private readonly ConcurrentSessionService $concurrentSessionService,
+        private readonly IdpHealthService $idpHealthService
     ) {}
 
     public function show()
     {
-        return view('auth.backup-login');
+        if ($this->idpHealthService->isAvailable()) {
+            return redirect()->route('login')
+                ->with('error', 'Local admin login is only available while the primary SSO service is unavailable.');
+        }
+
+        return view('auth.backup-login', $this->idpHealthService->loginViewData());
     }
 
     public function store(Request $request): RedirectResponse|Response
     {
+        if ($this->idpHealthService->isAvailable()) {
+            return redirect()->route('login')
+                ->with('error', 'Local admin login is only available while the primary SSO service is unavailable.');
+        }
+
         $this->concurrentSessionService->rememberBrowserHint($request);
 
         $credentials = $request->validate([
@@ -253,7 +265,7 @@ class BackupLoginController extends Controller
         static $supportsColumns;
 
         if ($supportsColumns === null) {
-            $supportsColumns = Schema::hasColumns('users', [
+            $supportsColumns = Schema::hasColumns('user_auth_security', [
                 'failed_login_attempts',
                 'last_failed_login_at',
                 'locked_until',

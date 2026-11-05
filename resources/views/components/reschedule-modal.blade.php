@@ -1,5 +1,5 @@
 <div id="rescheduleModal" class="ui-modal modal-theme-warning" aria-hidden="true" role="dialog" aria-modal="true"
-    aria-labelledby="rescheduleModalTitle" onclick="handleRescheduleBackdropClick(event)">
+    aria-labelledby="rescheduleModalTitle" data-ui-click="action-2c27020b29c8">
     <div class="ui-modal-card modal-xl modal-split-card">
 
         <div class="modal-hd">
@@ -24,7 +24,8 @@
 
             </div>
 
-            <button type="button" onclick="closeRescheduleModal()" class="modal-x" aria-label="Close reschedule modal">
+            <button type="button" class="modal-x" data-discard-close="rescheduleModal"
+                aria-label="Close reschedule modal">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
@@ -105,59 +106,50 @@
 
                 <div class="modal-form-grid-2 mb-2 sm:mb-3">
 
-                    <div class="cal-wrap modal-calendar-panel calendar-shell-no-card" data-global-field>
+                    <div class="cal-wrap modal-calendar-panel calendar-shell-no-card" data-global-field
+                        data-global-linked-input="#new_appointment_date" data-global-error-key="reschedule-date">
                         <div id="calGridWrapReschedule"></div>
                     </div>
 
-                    <div class="slots-wrap modal-option-panel time-panel" data-global-field>
+                    <div class="slots-wrap time-panel appointment-time-panel" data-global-field
+                        data-global-linked-input="#new_appointment_time" data-global-error-key="reschedule-time">
 
-                        <div class="modal-section-heading">
-                            <span class="modal-section-icon">
+                        <div class="appointment-time-heading">
+                            <span class="appointment-time-heading-icon">
                                 <i class="fa-regular fa-clock"></i>
                             </span>
 
                             <div>
-                                <h4>Time Slot</h4>
+                                <h4>Pick a Time Slot</h4>
+
+                                <p>
+                                    Choose a new appointment time for the selected date.
+                                </p>
                             </div>
                         </div>
 
-                        <div id="dateBanner"
-                            class="
-        hidden
-        rounded-xl
-        px-3
-        py-2
-        text-sm
-        font-semibold
-        text-white
-        mb-3
-        shadow-md
-        date-banner-gradient
-    ">
+                        <div id="dateBanner" class="hidden appointment-slot-date-banner">
                         </div>
 
-                        <div id="slotPlaceholder"
-                            class="slot-placeholder-empty flex flex-col items-center justify-center gap-3 py-8 text-center text-[#9e9690]">
+                        <div id="slotPlaceholder" class="appointment-slot-placeholder">
 
-                            <div
-                                class="empty-icon w-12 h-12 rounded-full bg-[#f9e8e8] flex items-center justify-center text-[#8B0000] text-lg">
+                            <div class="empty-icon">
                                 <i class="fa-regular fa-calendar"></i>
                             </div>
 
-                            <div>
-                                <p class="empty-title text-sm font-semibold text-[#5c5550]">
-                                    Choose a date
-                                </p>
+                            <p class="empty-title">
+                                Choose a date
+                            </p>
 
-                                <p class="empty-subtitle text-xs mt-1">
-                                    Select an available day to see time slots.
-                                </p>
-                            </div>
+                            <p class="empty-subtitle">
+                                Select an available day to see time slots.
+                            </p>
+
                         </div>
 
                         <div id="slotContainer" class="hidden">
 
-                            <div id="slotGrid" class="slot-grid-ui grid grid-cols-2 gap-4">
+                            <div id="slotGrid" class="appointment-slot-grid">
                             </div>
 
                             <button type="button" id="clearSlotSelectionBtn"
@@ -170,35 +162,19 @@
             mb-2
             w-full
         "
-                                onclick="clearRescheduleSlotSelection()">
-                                <i class="fa-solid fa-xmark"></i>
+                                data-ui-click="action-bfa80e93ba29">
                                 Clear selection
                             </button>
 
-                            <div id="selectedSlotDisplay"
-                                class="
-            hidden
-            rounded-2xl
-            px-4
-            py-3
-            text-sm
-            font-semibold
-            text-[#8B0000]
-            bg-[linear-gradient(135deg,#fff5f5,#fffafa)]
-            border
-            border-[#e8caca]
-            shadow-sm
-        ">
-                                <i
-                                    class="
-                fa-solid
-                fa-circle-check
-                mr-1.5
-            "></i>
+                            <div id="selectedSlotDisplay" class="hidden appointment-selected-slot">
+
+                                <i class="fa-solid fa-circle-check"></i>
 
                                 Selected:
 
-                                <span id="selectedSlotText" class="font-bold"></span>
+                                <span id="selectedSlotText" class="font-bold">
+                                </span>
+
                             </div>
 
                         </div>
@@ -223,23 +199,26 @@
 
                 </div>
 
-                <div class="w-full">
-                    <textarea id="reschedule_reason" name="reschedule_reason" rows="3"
-                        placeholder="e.g. Patient requested a later date…" class="form-input w-full min-h-[112px] resize-none"></textarea>
+                <div class="global-form-group" data-global-field>
+
+                    <textarea id="reschedule_reason" name="reschedule_reason" rows="3" maxlength="1000"
+                        placeholder="e.g. Patient requested a later date…" class="form-input-custom global-form-textarea"
+                        data-field-label="Reason for Rescheduling"></textarea>
+
+                    <div id="rescheduleReasonError" class="global-field-error" data-error-for="reschedule_reason"
+                        aria-hidden="true">
+                    </div>
+
                 </div>
             </div>
 
             <div class="modal-ft modal-sticky-footer">
 
-                <button type="button" id="cancelBtn" class="ui-btn ui-btn-secondary">
-
-                    <i class="fa-solid fa-xmark"></i>
+                <button type="button" class="ui-btn ui-btn-secondary" data-discard-close="rescheduleModal">
                     <span>Cancel</span>
                 </button>
 
                 <button type="submit" id="confirmRescheduleBtn" class="ui-btn ui-btn-warning">
-
-                    <i class="fa-solid fa-check"></i>
                     <span>Confirm Reschedule</span>
                 </button>
             </div>
@@ -247,7 +226,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     function openRescheduleModalFromDay(id, name, datetime, serviceType, updateUrl) {
         openRescheduleModal({
             id,
@@ -259,6 +238,21 @@
     }
 
     let selectedRescheduleId = null;
+
+    function getRescheduleCalendar() {
+        const container =
+            document.getElementById(
+                'calGridWrapReschedule'
+            );
+
+        if (!container) {
+            return null;
+        }
+
+        return window.__appointmentCalendars?.[
+            container.id
+        ] || null;
+    }
 
     function clearRescheduleSlotSelection() {
         const timeInput = document.getElementById('new_appointment_time');
@@ -274,7 +268,7 @@
         const clearBtn = document.getElementById('clearSlotSelectionBtn');
         const slotGrid = document.getElementById('slotGrid');
 
-        if (typeof selectedTime !== 'undefined') selectedTime = null;
+        getRescheduleCalendar()?.setSelectedTime?.(null);
 
         if (timeInput) {
             timeInput.value = '';
@@ -299,18 +293,7 @@
         slotGrid
             ?.querySelectorAll('.slot-chip')
             .forEach(chip => {
-                chip.classList.remove(
-                    'selected',
-                    'bg-[#8B0000]',
-                    'text-white',
-                    'border-[#8B0000]'
-                );
-
-                chip.classList.add(
-                    'border-[#e8e2dd]',
-                    'bg-[#fafaf8]',
-                    'text-[#1a1410]'
-                );
+                chip.classList.remove('selected');
 
                 chip.setAttribute(
                     'aria-pressed',
@@ -321,6 +304,21 @@
     }
 
     function resetRescheduleSlotUi() {
+        const dateInput =
+            document.getElementById(
+                'new_appointment_date'
+            );
+
+        const timeInput =
+            document.getElementById(
+                'new_appointment_time'
+            );
+
+        const dateBanner =
+            document.getElementById(
+                'dateBanner'
+            );
+
         const slotPlaceholder =
             document.getElementById(
                 'slotPlaceholder'
@@ -351,37 +349,83 @@
                 'clearSlotSelectionBtn'
             );
 
-        slotPlaceholder?.classList.remove(
-            'hidden'
-        );
+        const calendar =
+            getRescheduleCalendar();
 
-        slotContainer?.classList.add(
-            'hidden'
-        );
+        calendar
+            ?.setSelectedDate?.(null);
+
+        calendar
+            ?.setSelectedTime?.(null);
+
+        if (dateInput) {
+            dateInput.value = '';
+        }
+
+        if (timeInput) {
+            timeInput.value = '';
+        }
+
+        if (dateBanner) {
+            dateBanner.replaceChildren();
+            dateBanner.classList.add(
+                'hidden'
+            );
+            dateBanner.style.removeProperty(
+                'display'
+            );
+        }
 
         if (slotGrid) {
-            slotGrid.innerHTML = '';
+            slotGrid.replaceChildren();
             slotGrid.style.removeProperty(
                 'display'
             );
         }
 
+        slotContainer?.classList.add(
+            'hidden'
+        );
+
+        slotContainer?.style.removeProperty(
+            'display'
+        );
+
+        slotPlaceholder?.classList.remove(
+            'hidden'
+        );
+
+        slotPlaceholder?.style.removeProperty(
+            'display'
+        );
+
         selectedSlotDisplay?.classList.add(
             'hidden'
         );
+
+        selectedSlotDisplay
+            ?.style.removeProperty(
+                'display'
+            );
 
         if (selectedSlotText) {
             selectedSlotText.textContent = '';
         }
 
-        clearBtn?.classList.add(
-            'hidden'
-        );
+        if (clearBtn) {
+            clearBtn.classList.add(
+                'hidden'
+            );
 
-        clearBtn?.setAttribute(
-            'aria-hidden',
-            'true'
-        );
+            clearBtn.setAttribute(
+                'aria-hidden',
+                'true'
+            );
+
+            clearBtn.style.removeProperty(
+                'display'
+            );
+        }
     }
 
     function openRescheduleModal(payload = {}) {
@@ -419,23 +463,6 @@
         if (timeInput) timeInput.value = '';
         if (reasonInput) reasonInput.value = '';
 
-        if (typeof selectedDate !== 'undefined') selectedDate = null;
-        if (typeof selectedTime !== 'undefined') selectedTime = null;
-
-        window.clearGlobalGroupError?.(
-            document.querySelector(
-                '#rescheduleModal .cal-wrap'
-            ),
-            'reschedule-date'
-        );
-
-        window.clearGlobalGroupError?.(
-            document.querySelector(
-                '#rescheduleModal .slots-wrap'
-            ),
-            'reschedule-time'
-        );
-
         const calendarGroup =
             document.querySelector(
                 '#rescheduleModal .cal-wrap'
@@ -461,54 +488,53 @@
         const submitBtn = document.getElementById('confirmRescheduleBtn');
         if (submitBtn) {
             submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="fa-solid fa-check"></i> Confirm Reschedule';
+            submitBtn.innerHTML = 'Confirm Reschedule';
         }
 
-        modal.classList.remove('closing');
-        modal.classList.add('open');
-        modal.setAttribute('aria-hidden', 'false');
+        window.openModal?.(
+            'rescheduleModal'
+        );
 
-        document.documentElement.classList.add('modal-lock');
-        document.body.classList.add('modal-lock');
+        const calendar = getRescheduleCalendar();
 
-        if (typeof renderCalendarLoading === 'function') {
-            renderCalendarLoading();
-        }
+        calendar
+            ?.renderLoading?.();
 
-        if (typeof renderCalendar === 'function') {
-            setTimeout(() => {
-                renderCalendar();
-            }, 0);
-        }
+        setTimeout(() => {
+            calendar
+                ?.render?.();
+        }, 0);
 
         if (dateInput) dateInput.value = '';
         if (timeInput) timeInput.value = '';
-
-        requestAnimationFrame(() => {
-            window.DiscardChanges?.captureModal(modal);
-        });
     }
 
     function forceCloseRescheduleModal() {
-        const modal = document.getElementById('rescheduleModal');
+        const modal =
+            document.getElementById(
+                'rescheduleModal'
+            );
 
-        if (!modal || !modal.classList.contains('open')) {
+        if (
+            !modal ||
+            !modal.classList.contains(
+                'open'
+            )
+        ) {
             return;
         }
 
-        modal.classList.remove('open');
-        modal.classList.add('closing');
-        modal.setAttribute('aria-hidden', 'true');
+        resetRescheduleSlotUi();
 
-        window.setTimeout(() => {
-            modal.classList.remove('closing');
+        document
+            .getElementById(
+                'rescheduleForm'
+            )
+            ?.reset();
 
-            document.documentElement.classList.remove('modal-lock');
-
-            if (!document.querySelector('.ui-modal.open')) {
-                document.body.classList.remove('modal-lock');
-            }
-        }, 170);
+        window.closeModal?.(
+            'rescheduleModal'
+        );
 
         selectedRescheduleId = null;
     }
@@ -541,14 +567,30 @@
         }
     }
 
-    document.getElementById("cancelBtn")?.addEventListener("click", () => {
-        closeRescheduleModal();
-    });
-
     document.getElementById("rescheduleForm")?.addEventListener("submit", async e => {
         e.preventDefault();
 
         let valid = true;
+
+        const dateInput =
+            document.getElementById(
+                'new_appointment_date'
+            );
+
+        const timeInput =
+            document.getElementById(
+                'new_appointment_time'
+            );
+
+        const selectedDateValue =
+            String(
+                dateInput?.value || ''
+            ).trim();
+
+        const selectedTimeValue =
+            String(
+                timeInput?.value || ''
+            ).trim();
 
         const calendarGroup =
             document.querySelector(
@@ -560,7 +602,7 @@
                 '#rescheduleModal .slots-wrap'
             );
 
-        if (!selectedDate) {
+        if (!selectedDateValue) {
             window.showGlobalGroupError?.(
                 calendarGroup,
                 'reschedule-date',
@@ -575,7 +617,7 @@
             );
         }
 
-        if (!selectedTime) {
+        if (!selectedTimeValue) {
             window.showGlobalGroupError?.(
                 timeSlotGroup,
                 'reschedule-time',
@@ -648,7 +690,7 @@
 
                 if (submitBtn) {
                     submitBtn.disabled = false;
-                    submitBtn.innerHTML = '<i class="fa-solid fa-check"></i> Confirm Reschedule';
+                    submitBtn.innerHTML = 'Confirm Reschedule';
                 }
                 alert(data?.message ?? "Something went wrong. Please try again.");
             }
@@ -657,7 +699,7 @@
 
             if (submitBtn) {
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="fa-solid fa-check"></i> Confirm Reschedule';
+                submitBtn.innerHTML = 'Confirm Reschedule';
             }
             alert("Network error. Please try again.");
         }

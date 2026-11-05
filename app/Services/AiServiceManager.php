@@ -58,8 +58,6 @@ class AiServiceManager
             'status' => $status,
             'mode' => $this->mode(),
             'message' => $message,
-            'context' => $context,
-            'happened_at' => now(),
         ]);
     }
 }

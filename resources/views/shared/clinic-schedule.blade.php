@@ -4,284 +4,702 @@
 
 @section('title', $pageTitle ?? 'Clinic Schedule')
 
+@section('styles')
+    @vite('resources/css/pages/shared/clinic-schedule.css')
+@endsection
+
 @section('content')
-@php
-$layoutRole = $layoutRole ?? 'admin';
+    @php
+        $layoutRole = $layoutRole ?? 'admin';
 
-$isDentistView = $isDentistView ?? false;
+        $isDentistView = $isDentistView ?? false;
 
-$pageShellClass = $pageShellClass ?? ($isDentistView ? 'dentist-page-shell' : 'admin-page-shell');
+        $reservedErrors = $reservedErrors ?? $errors->getBag('reservedPeriod');
 
-$pageTitle = $pageTitle ?? 'Clinic Schedule';
+        $canCreateReservedPeriods = auth()->user()?->hasPermission('create_clinic_schedule') ?? false;
+        $canUpdateReservedPeriods = auth()->user()?->hasPermission('update_clinic_schedule') ?? false;
+        $canDeleteReservedPeriods = auth()->user()?->hasPermission('delete_clinic_schedule') ?? false;
+        $canManageReservedPeriods = $canUpdateReservedPeriods || $canDeleteReservedPeriods;
 
-$clinicScheduleRouteNames = $clinicScheduleRouteNames ?? [
-'store' => 'admin.clinic_schedule.store',
-'update' => 'admin.clinic_schedule.update',
-'destroy' => 'admin.clinic_schedule.destroy',
-'block' => 'admin.clinic_schedule.block',
-'unblock' => 'admin.clinic_schedule.unblock',
-];
+        $pageShellClass = $pageShellClass ?? ($isDentistView ? 'app-page-shell' : 'app-page-shell');
 
-$openRules = $schedules->where('status', '!=', 'closed');
-$openDays = $openRules->sum(fn($s) => count($s->days ?? []));
-$maxSlots = $openRules->max('max_slots') ?? 0;
-$blockedThisMonth = $blockedDates->filter(fn($b) => \Carbon\Carbon::parse($b->date)->isCurrentMonth())->count();
-$holidaysThisMonth = collect($philippineHolidays)
-->filter(fn($name, $date) => \Carbon\Carbon::parse($date)->isCurrentMonth())
-->count();
+        $pageTitle = $pageTitle ?? 'Clinic Schedule';
 
-$scheduleByDay = [];
-foreach ($schedules as $s) {
-foreach ($s->days ?? [] as $d) {
-$scheduleByDay[$d] = $s;
-}
-}
+        $clinicScheduleRouteNames = $clinicScheduleRouteNames ?? [
+            'store' => 'admin.clinic_schedule.store',
+            'update' => 'admin.clinic_schedule.update',
+            'destroy' => 'admin.clinic_schedule.destroy',
+            'block' => 'admin.clinic_schedule.block',
+            'unblock' => 'admin.clinic_schedule.unblock',
+        ];
 
-$dayNames = [
-'Monday' => 'Mon',
-'Tuesday' => 'Tue',
-'Wednesday' => 'Wed',
-'Thursday' => 'Thu',
-'Friday' => 'Fri',
-'Saturday' => 'Sat',
-'Sunday' => 'Sun',
-];
+        $activeSchedules = $schedules->where('is_active', true);
+        $openRules = $activeSchedules->where('status', '!=', 'closed');
+        $openDays = $openRules->sum(fn($s) => count($s->days ?? []));
+        $maxSlots = $openRules->max('max_slots') ?? 0;
+        $blockedDatesCount = $blockedDates->count();
 
-$breakSchedule = $openRules->first(fn($s) => $s->break_time && $s->break_time !== 'none');
-@endphp
+        $today = \Carbon\Carbon::now('Asia/Manila')->startOfDay();
 
-<main id="mainContent" class="{{ $pageShellClass }}
-        clinic-schedule-page
-        {{ $isDentistView ? 'dentist-clinic-schedule-page' : 'admin-clinic-schedule-page' }}
-        page-enter
-        mode-list">
+        $allUpcomingHolidays = collect($philippineHolidays)
+            ->filter(fn($holiday, $date) => \Carbon\Carbon::parse($date, 'Asia/Manila')->startOfDay()->gte($today))
+            ->sortKeys();
 
-    <div class="w-full">
+        $upcomingHolidaysCount = $allUpcomingHolidays->count();
 
-        @if ($errors->any())
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                const hasRuleErrors =
-                    @json(
-                        $errors -> has('days') ||
-                        $errors -> has('status') ||
-                        $errors -> has('open_time') ||
-                        $errors -> has('close_time') ||
-                        $errors -> has('max_slots') ||
-                        $errors -> has('notes'));
+        $scheduleByDay = [];
+        foreach ($activeSchedules as $s) {
+            foreach ($s->days ?? [] as $d) {
+                $scheduleByDay[$d] = $s;
+            }
+        }
 
-                const hasBlockErrors =
-                    @json($errors -> has('date') || $errors -> has('reason') || $errors -> has('note'));
+        $dayNames = [
+            'Monday' => 'Mon',
+            'Tuesday' => 'Tue',
+            'Wednesday' => 'Wed',
+            'Thursday' => 'Thu',
+            'Friday' => 'Fri',
+            'Saturday' => 'Sat',
+            'Sunday' => 'Sun',
+        ];
 
-                if (hasRuleErrors) {
-                    openRuleModal();
-                }
+        $breakSchedule = $openRules->first(fn($s) => $s->break_time && $s->break_time !== 'none');
 
-                if (hasBlockErrors) {
-                    openBlockModal();
-                }
+        $serviceBadgeClass = function ($service) {
+            $service = strtolower(trim((string) $service));
 
-                @if ($errors -> has('days'))
-                    setFieldError('ruleDaysError', @json($errors -> first('days')), null, 'ruleDaysGroup');
-                @endif
-                @if ($errors -> has('status'))
-                    setFieldError('ruleStatusError', @json($errors -> first('status')), 'ruleStatus');
-                @endif
-                @if ($errors -> has('open_time'))
-                    setFieldError('ruleOpenTimeError', @json($errors -> first('open_time')), 'ruleOpenTime');
-                @endif
-                @if ($errors -> has('close_time'))
-                    setFieldError('ruleCloseTimeError', @json($errors -> first('close_time')), 'ruleCloseTime');
-                @endif
-                @if ($errors -> has('max_slots'))
-                    setFieldError('ruleMaxSlotsError', @json($errors -> first('max_slots')), 'ruleMaxSlots');
-                @endif
-                @if ($errors -> has('notes'))
-                    setFieldError('ruleNotesError', @json($errors -> first('notes')), 'ruleNotes');
-                @endif
+            if (str_contains($service, 'surgery')) {
+                return 'service-badge-surgery';
+            }
 
-                @if ($errors -> has('date'))
-                    setFieldError('blockDateError', @json($errors -> first('date')), 'blockDate');
-                @endif
-                @if ($errors -> has('reason'))
-                    setFieldError('blockReasonError', @json($errors -> first('reason')), 'blockReason');
-                @endif
-                @if ($errors -> has('note'))
-                    setFieldError('blockNoteError', @json($errors -> first('note')), 'blockNote');
-                @endif
-            });
-        </script>
-        @endif
+            if (str_contains($service, 'check')) {
+                return 'service-badge-checkup';
+            }
 
-        @if ($isDentistView)
-        <section class="dentist-hero cs-dentist-hero mb-5">
-            <div class="dentist-hero-content">
-                <div class="dentist-hero-icon">
-                    <i class="fa-solid fa-calendar-week"></i>
-                </div>
+            if (str_contains($service, 'whiten')) {
+                return 'service-badge-whitening';
+            }
 
-                <div class="min-w-0">
-                    <div class="dentist-hero-eyebrow">
-                        <i class="fa-solid fa-tooth"></i>
-                        Clinic Availability
-                    </div>
+            if (str_contains($service, 'extrac')) {
+                return 'service-badge-extraction';
+            }
 
-                    <h1 class="dentist-hero-title">
-                        Clinic Schedule
-                    </h1>
-                </div>
-            </div>
+            return 'service-badge-default';
+        };
 
-            <div class="dentist-hero-actions cs-hero-actions">
-                <button type="button" onclick="openRuleModal()" class="ui-btn ui-btn-primary">
+    @endphp
 
-                    <i class="fa-solid fa-plus"></i>
-                    <span>Add Schedule Rule</span>
-                </button>
+    <main id="mainContent" class="{{ $pageShellClass }} clinic-schedule-page page-enter mode-list">
 
-                <button type="button" onclick="openBlockModal()" class="ui-btn ui-btn-danger">
+        <div class="w-full">
 
-                    <i class="fa-solid fa-ban"></i>
-                    <span>Block Date</span>
-                </button>
-            </div>
-        </section>
-        @else
-        <div class="page-banner">
-            <div class="page-banner-inner">
-                <div>
-                    <h1 class="page-title">
-                        Clinic Schedule
-                    </h1>
-                </div>
+            @if ($errors->any())
+                <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const hasRuleErrors =
+                            @json(
+                                $errors->has('days') ||
+                                    $errors->has('is_active') ||
+                                    $errors->has('status') ||
+                                    $errors->has('open_time') ||
+                                    $errors->has('close_time') ||
+                                    $errors->has('max_slots') ||
+                                    $errors->has('slot_duration_minutes') ||
+                                    $errors->has('notes'));
 
-                <div class="flex items-center gap-3 flex-wrap page-actions">
-                    <button type="button" onclick="openRuleModal()" class="ui-btn ui-btn-primary">
+                        const hasBlockErrors =
+                            @json($errors->has('date') || $errors->has('reason') || $errors->has('note'));
 
-                        <i class="fa-solid fa-plus"></i>
-                        <span>Add Schedule Rule</span>
-                    </button>
+                        if (hasRuleErrors) {
+                            openRuleModal();
+                        }
 
-                    <button type="button" onclick="openBlockModal()" class="ui-btn ui-btn-danger">
+                        if (hasBlockErrors) {
+                            openBlockModal();
+                        }
 
-                        <i class="fa-solid fa-ban"></i>
-                        <span>Block Date</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-        @endif
+                        @if ($errors->has('days'))
+                            setFieldError('ruleDaysError', @json($errors->first('days')), null, 'ruleDaysGroup');
+                        @endif
+                        @if ($errors->has('is_active'))
+                            const activeScheduleError =
+                                @json($errors->first('is_active'));
 
-        <div class="admin-page-body">
+                            setFieldError(
+                                'ruleStateError',
+                                activeScheduleError,
+                                'ruleActivationState'
+                            );
 
-            <div id="statCards" class="stat-grid cs-stat-grid">
-                @php
-                $statCards = [
-                [
-                'icon' => 'fa-calendar-days',
-                'class' => 's-crimson',
-                'val' => $openDays,
-                'label' => 'Open Days/Week',
-                'sub' => 'Active schedule days',
-                ],
-                [
-                'icon' => 'fa-clock',
-                'class' => 's-blue',
-                'val' => $maxSlots,
-                'label' => 'Daily Slot Cap',
-                'sub' => 'Max patients/day',
-                ],
-                [
-                'icon' => 'fa-ban',
-                'class' => 's-green',
-                'val' => $blockedThisMonth,
-                'label' => 'Blocked Dates',
-                'sub' => 'This month',
-                ],
-                [
-                'icon' => 'fa-umbrella-beach',
-                'class' => 's-amber',
-                'val' => $holidaysThisMonth,
-                'label' => 'Holidays',
-                'sub' => 'This month',
-                ],
-                ];
-                @endphp
+                            window.setTimeout(() => {
+                                window.showToast?.({
+                                    type: 'warning',
+                                    title: 'Schedule cannot be activated',
+                                    message: activeScheduleError,
+                                    duration: 5000
+                                });
+                            }, 100);
+                        @endif
+                        @if ($errors->has('status'))
+                            setFieldError('ruleStatusError', @json($errors->first('status')), 'ruleStatus');
+                        @endif
+                        @if ($errors->has('open_time'))
+                            setFieldError('ruleOpenTimeError', @json($errors->first('open_time')), 'ruleOpenTime');
+                        @endif
+                        @if ($errors->has('close_time'))
+                            setFieldError('ruleCloseTimeError', @json($errors->first('close_time')), 'ruleCloseTime');
+                        @endif
+                        @if ($errors->has('max_slots'))
+                            setFieldError('ruleMaxSlotsError', @json($errors->first('max_slots')), 'ruleMaxSlots');
+                        @endif
+                        @if ($errors->has('slot_duration_minutes'))
+                            setFieldError('ruleSlotDurationError', @json($errors->first('slot_duration_minutes')), 'ruleSlotDuration');
+                        @endif
+                        @if ($errors->has('notes'))
+                            setFieldError('ruleNotesError', @json($errors->first('notes')), 'ruleNotes');
+                        @endif
 
-                @foreach ($statCards as $card)
-                <div class="stat-card {{ $card['class'] }}">
-                    <div class="stat-card-info">
-                        <div class="stat-label">{{ $card['label'] }}</div>
-                        <div class="stat-num">{{ $card['val'] }}</div>
-                        <div class="stat-footer">{{ $card['sub'] }}</div>
-                    </div>
+                        @if ($errors->has('date'))
+                            setFieldError('blockDateError', @json($errors->first('date')), 'blockDate');
+                        @endif
+                        @if ($errors->has('reason'))
+                            setFieldError('blockReasonError', @json($errors->first('reason')), 'blockReason');
+                        @endif
+                        @if ($errors->has('note'))
+                            setFieldError('blockNoteError', @json($errors->first('note')), 'blockNote');
+                        @endif
+                    });
+                </script>
+            @endif
 
-                    <div class="stat-icon-wrapper">
-                        <i class="fa-solid {{ $card['icon'] }}"></i>
-                    </div>
-                </div>
-                @endforeach
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-
-                <div class="lg:col-span-2 space-y-6">
-
-                    <div class="bg-white rounded-xl shadow border border-gray-100 overflow-hidden">
-
-                        <div
-                            class="px-4 py-4 border-b bg-gray-50 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                            <div class="flex items-start gap-2">
-                                <i class="fa-solid fa-calendar-week text-[#8B0000] mt-0.5"></i>
-                                <h2 class="font-bold text-gray-800 text-sm leading-5">Weekly Appointment View</h2>
-                            </div>
-                            <div class="flex items-center justify-between gap-2 sm:justify-end">
-
-                                <button type="button" id="prevWeek" class="ui-icon-btn neutral"
-                                    data-tooltip="Previous week" data-tooltip-tone="neutral" aria-label="Previous week">
-                                    <i class="fa-solid fa-chevron-left"></i>
-                                </button>
-                                <span id="weekRangeLabel"
-                                    class="text-xs font-semibold text-gray-600 px-1 min-w-[140px] text-center"></span>
-                                <button type="button" id="nextWeek" class="ui-icon-btn neutral" data-tooltip="Next week"
-                                    data-tooltip-tone="neutral" aria-label="Next week">
-                                    <i class="fa-solid fa-chevron-right"></i>
-                                </button>
-                                <button type="button" id="todayBtn" class="ui-btn ui-btn-secondary ui-btn-sm">
-                                    <i class="fa-solid fa-calendar-day"></i>
-                                    <span>Today</span>
-                                </button>
-                            </div>
+            @if ($isDentistView)
+                <section class="dentist-hero mb-5">
+                    <div class="dentist-hero-content">
+                        <div class="dentist-hero-icon">
+                            <i class="fa-solid fa-calendar-week"></i>
                         </div>
 
-                        <div class="p-4 overflow-x-auto">
-                            <div id="weekGrid" class="week-grid" style="min-width:480px;"></div>
-                            <div class="flex flex-wrap gap-3 mt-3 justify-end">
-                                <div class="flex items-center gap-1.5 text-xs text-gray-500"><span
-                                        class="w-3 h-3 rounded bg-blue-200 border-l-2 border-blue-500 inline-block"></span>Check-up
-                                </div>
-                                <div class="flex items-center gap-1.5 text-xs text-gray-500"><span
-                                        class="w-3 h-3 rounded bg-green-200 border-l-2 border-green-500 inline-block"></span>Cleaning
-                                </div>
-                                <div class="flex items-center gap-1.5 text-xs text-gray-500"><span
-                                        class="w-3 h-3 rounded bg-yellow-100 border-l-2 border-yellow-400 inline-block"></span>Surgery
-                                </div>
-                                <div class="flex items-center gap-1.5 text-xs text-gray-500"><span
-                                        class="w-3 h-3 rounded bg-purple-100 border-l-2 border-purple-400 inline-block"></span>Prosthesis
-                                </div>
+                        <div class="min-w-0">
+                            <div class="dentist-hero-eyebrow">
+                                <i class="fa-solid fa-tooth"></i>
+                                Clinic Availability
                             </div>
+
+                            <h1 class="dentist-hero-title">
+                                Clinic Schedule
+                            </h1>
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-xl shadow border border-gray-100 overflow-hidden">
-                        <div class="px-5 py-4 flex items-center justify-between cs-rules-card-header">
-                            <div class="weekly-toolbar flex items-center gap-2">
-                                <i class="fa-solid fa-list-check text-[#8B0000]"></i>
-                                <h2 class="font-bold text-gray-800 text-sm">Schedule Rules</h2>
+                    <div class="dentist-hero-actions">
+                        <x-button type="button" variant="primary" icon="fa-solid fa-plus"
+                            data-ui-click="action-3658b7ca536b">
+                            Add Schedule Rule
+                        </x-button>
+
+                        <x-button type="button" variant="secondary" icon="fa-solid fa-calendar-xmark"
+                            data-ui-click="action-35e136a0c602">
+                            Block Date
+                        </x-button>
+                    </div>
+                </section>
+            @else
+                <x-page-banner title="Clinic Schedule" actions-class="flex items-center gap-3 flex-wrap page-actions">
+                    <x-slot:actions>
+                        <x-button type="button" variant="primary" icon="fa-solid fa-plus"
+                            data-ui-click="action-3658b7ca536b">
+                            Add Schedule Rule
+                        </x-button>
+
+                        <x-button type="button" variant="secondary" icon="fa-solid fa-calendar-xmark"
+                            data-ui-click="action-35e136a0c602">
+                            Block Date
+                        </x-button>
+                    </x-slot:actions>
+                </x-page-banner>
+            @endif
+
+            <div class="admin-page-body">
+
+                <div id="statCards" class="stat-grid">
+                    @php
+                        $statCards = [
+                            [
+                                'icon' => 'fa-calendar-days',
+                                'class' => 's-crimson',
+                                'val' => $openDays,
+                                'label' => 'Open Days/Week',
+                            ],
+                            [
+                                'icon' => 'fa-clock',
+                                'class' => 's-blue',
+                                'val' => $maxSlots,
+                                'label' => 'Daily Slot Cap',
+                            ],
+                            [
+                                'icon' => 'fa-ban',
+                                'class' => 's-green',
+                                'val' => $blockedDatesCount,
+                                'label' => 'Blocked Dates',
+                            ],
+                            [
+                                'icon' => 'fa-umbrella-beach',
+                                'class' => 's-amber',
+                                'val' => $upcomingHolidaysCount,
+                                'label' => 'Upcoming Holidays',
+                            ],
+                        ];
+                    @endphp
+
+                    @foreach ($statCards as $card)
+                        <x-stat-card :label="$card['label']" :value="$card['val']" :tone="$card['class']" :icon="'fa-solid ' . $card['icon']"
+                            value-class="stat-num" />
+                    @endforeach
+                </div>
+
+                <div class="grid grid-cols-1 gap-6 mb-6">
+
+                    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                        <section id="clinicHoursCard" class="card">
+                            <div class="card-header card-header-inline">
+                                <div class="card-header-left">
+                                    <span class="card-header-icon" aria-hidden="true">
+                                        <i class="fa-solid fa-clock"></i>
+                                    </span>
+
+                                    <h2 class="card-title">Clinic Hours</h2>
+                                </div>
+
+                                <div class="card-header-right">
+                                    <x-button type="button" variant="primary" size="sm" icon="fa-solid fa-plus"
+                                        data-ui-click="action-3658b7ca536b">
+                                        Add
+                                    </x-button>
+                                </div>
                             </div>
 
-                            <div class="cs-rules-header-actions">
-                                <span class="cs-rules-count">{{ $schedules->count() }} rules</span>
+                            <div class="table-list-view">
+                                @foreach ($dayNames as $fullName => $abbr)
+                                    @php $s = $scheduleByDay[$abbr] ?? null; @endphp
+
+                                    <div class="table-list-row">
+                                        <div class="flex items-center justify-between gap-3 px-4 py-3">
+                                            <span class="table-record-title">{{ $fullName }}</span>
+
+                                            @if ($s && $s->status !== 'closed')
+                                                <span class="table-record-value">{{ $s->hours_range }}</span>
+                                            @else
+                                                <span class="status-pill status-inactive">Closed</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endforeach
+
+                                @if ($breakSchedule)
+                                    <div class="table-list-row">
+                                        <div class="flex items-center justify-between gap-3 px-4 py-3">
+                                            <span class="table-date">
+                                                <i class="fa-solid fa-mug-hot"></i>
+                                                Lunch
+                                            </span>
+
+                                            @php [$bs,$be]=explode('-',$breakSchedule->break_time); @endphp
+                                            <span class="table-record-value">
+                                                {{ date('g:i A', strtotime(trim($bs) . ':00')) }} –
+                                                {{ date('g:i A', strtotime(trim($be) . ':00')) }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+                        </section>
+
+                        <section id="blockedDatesCard" class="card">
+                            <div class="card-header card-header-inline">
+                                <div class="card-header-left">
+                                    <span class="card-header-icon" aria-hidden="true">
+                                        <i class="fa-solid fa-ban"></i>
+                                    </span>
+
+                                    <h2 class="card-title">Blocked Dates</h2>
+                                </div>
+
+                                <div class="card-header-right">
+                                    <x-button type="button" variant="primary" size="sm" icon="fa-solid fa-plus"
+                                        data-ui-click="action-35e136a0c602">
+                                        Add
+                                    </x-button>
+                                </div>
+                            </div>
+
+                            @if ($blockedDates->count())
+                                <div id="blockedDatesListView" class="table-list-view">
+                                    @foreach ($blockedDates as $blocked)
+                                        @php
+                                            $bd = \Carbon\Carbon::parse($blocked->date);
+
+                                            $blockedDisplayName = $bd->format('D, M j, Y') . ' — ' . $blocked->reason;
+                                        @endphp
+
+                                        <div class="table-list-row">
+
+                                            <div class="flex items-start gap-3 px-4 py-3">
+
+                                                <div class="min-w-0 flex-1">
+
+                                                    <div class="table-record-title">
+                                                        {{ $bd->format('D, M j, Y') }}
+                                                    </div>
+
+                                                    <span class="global-info-subvalue">
+                                                        {{ $blocked->reason }}
+                                                    </span>
+
+                                                    @if ($blocked->note)
+                                                        <span class="global-info-subvalue mt-1">
+                                                            {{ $blocked->note }}
+                                                        </span>
+                                                    @endif
+
+                                                </div>
+
+                                                <span class="status-pill status-pending">
+                                                    Blocked
+                                                </span>
+
+                                                <x-action-button type="button" variant="delete" icon="fa-solid fa-trash"
+                                                    label="Remove blocked date" tooltip="Remove blocked date"
+                                                    data-ui-click="action-28b22a237020"
+                                                    data-ui-click-arg-0="{{ json_encode(
+                                                        route($clinicScheduleRouteNames['unblock'], $blocked),
+                                                        JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT,
+                                                    ) }}"
+                                                    data-ui-click-arg-1="{{ json_encode($blockedDisplayName, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" />
+
+                                            </div>
+
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @else
+                                <div class="card-body">
+                                    <div class="flex flex-col items-center justify-center gap-2 py-8 text-center">
+                                        <span class="global-info-icon status-completed" aria-hidden="true">
+                                            <i class="fa-solid fa-check"></i>
+                                        </span>
+                                        <span class="ui-muted-text">No blocked dates</span>
+                                    </div>
+                                </div>
+                            @endif
+                        </section>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-6 xl:grid-cols-3">
+                        <section id="weeklyAppointmentCard" class="card xl:col-span-2">
+                            <div class="card-header weekly-appointment-header">
+
+                                <div class="card-header-left">
+                                    <span class="card-header-icon" aria-hidden="true">
+                                        <i class="fa-solid fa-calendar-week"></i>
+                                    </span>
+
+                                    <h2 class="card-title">
+                                        Weekly Appointment View
+                                    </h2>
+                                </div>
+
+                                <div class="card-header-right weekly-appointment-header-actions">
+
+                                    <div class="weekly-week-nav">
+
+                                        <button type="button" id="prevWeek" class="ui-icon-btn neutral"
+                                            data-tooltip="Previous week" data-tooltip-tone="neutral"
+                                            aria-label="Previous week">
+
+                                            <i class="fa-solid fa-chevron-left"></i>
+                                        </button>
+
+                                        <span id="weekRangeLabel" class="ui-muted-text text-center">
+                                        </span>
+
+                                        <button type="button" id="nextWeek" class="ui-icon-btn neutral"
+                                            data-tooltip="Next week" data-tooltip-tone="neutral" aria-label="Next week">
+
+                                            <i class="fa-solid fa-chevron-right"></i>
+                                        </button>
+
+                                    </div>
+
+                                    <x-button id="todayBtn" type="button" variant="secondary" size="sm"
+                                        icon="fa-solid fa-calendar-day">
+                                        Today
+                                    </x-button>
+
+                                </div>
+
+                            </div>
+
+                            <div class="card-body">
+                                <div id="weekGrid" class="week-grid"></div>
+
+                                <div class="global-info-group mt-3 justify-end">
+                                    <span class="service-badge service-badge-checkup">
+                                        Check-up
+                                    </span>
+
+                                    <span class="service-badge service-badge-default">
+                                        Cleaning
+                                    </span>
+
+                                    <span class="service-badge service-badge-surgery">
+                                        Surgery
+                                    </span>
+
+                                    <span class="service-badge service-badge-default">
+                                        Prosthesis
+                                    </span>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section id="holidaysCard" class="card flex flex-col xl:self-start">
+
+                            @php
+                                $MONTHS_SHORT = [
+                                    'Jan',
+                                    'Feb',
+                                    'Mar',
+                                    'Apr',
+                                    'May',
+                                    'Jun',
+                                    'Jul',
+                                    'Aug',
+                                    'Sep',
+                                    'Oct',
+                                    'Nov',
+                                    'Dec',
+                                ];
+
+                                $upcoming = $allUpcomingHolidays->take(5);
+                            @endphp
+
+                            <div class="card-header card-header-inline">
+
+                                <div class="card-header-left">
+                                    <span class="card-header-icon" aria-hidden="true">
+                                        <i class="fa-solid fa-umbrella-beach"></i>
+                                    </span>
+
+                                    <h2 class="card-title">
+                                        Upcoming Holidays
+                                    </h2>
+                                </div>
+
+                                <span class="card-header-badge">
+                                    {{ $upcoming->count() }} upcoming
+                                </span>
+
+                            </div>
+
+                            @if ($upcoming->count())
+
+                                <div class="table-list-view">
+
+                                    @foreach ($upcoming as $hDate => $holiday)
+                                        @php
+                                            $hC = \Carbon\Carbon::parse($hDate);
+
+                                            $diff = (int) $today->diffInDays($hC, false);
+
+                                            $holidayName = is_array($holiday)
+                                                ? $holiday['name'] ?? 'Philippine Holiday'
+                                                : (string) $holiday;
+
+                                            $isBlockedHoliday = is_array($holiday)
+                                                ? $holiday['is_blocked_for_booking'] ?? true
+                                                : true;
+                                        @endphp
+
+                                        <div class="table-list-row {{ $loop->first ? 'status-cancelled' : '' }}">
+
+                                            <div class="flex items-start gap-3 px-4 py-3">
+
+                                                <div class="w-11 shrink-0 text-center">
+
+                                                    <div class="appt-visit-month">
+                                                        {{ $MONTHS_SHORT[$hC->month - 1] }}
+                                                    </div>
+
+                                                    <div class="text-xl font-extrabold leading-none"
+                                                        data-ui-presentation="presentation-23b8d2e99754">
+
+                                                        {{ $hC->day }}
+
+                                                    </div>
+
+                                                </div>
+
+                                                <div class="min-w-0 flex-1">
+
+                                                    <div class="appt-visit-title">
+                                                        {{ $holidayName }}
+                                                    </div>
+
+                                                    <span class="global-info-subvalue">
+                                                        {{ $diff === 0 ? 'Today' : ($diff === 1 ? 'Tomorrow' : "In $diff days") }}
+                                                    </span>
+
+                                                    @if ($loop->first)
+                                                        @if ($isBlockedHoliday)
+                                                            <div class="global-info-subvalue status-cancelled mt-2"
+                                                                data-ui-presentation="presentation-420e169b733d">
+
+                                                                <i class="fa-solid fa-triangle-exclamation"></i>
+
+                                                                Bookings unavailable on this date
+
+                                                            </div>
+                                                        @else
+                                                            <div class="global-info-subvalue status-active mt-2"
+                                                                data-ui-presentation="presentation-420e169b733d">
+
+                                                                <i class="fa-solid fa-circle-check"></i>
+
+                                                                Clinic remains open on this date
+
+                                                            </div>
+                                                        @endif
+                                                    @endif
+
+                                                </div>
+
+                                                <div class="shrink-0 pt-1">
+
+                                                    @if ($isBlockedHoliday)
+                                                        <div class="global-info-group status-pending flex-nowrap"
+                                                            data-ui-presentation="presentation-420e169b733d">
+
+                                                            <i class="fa-solid fa-star text-[9px]"></i>
+
+                                                            <span class="text-[.66rem] font-bold whitespace-nowrap">
+                                                                Non-Working
+                                                            </span>
+
+                                                        </div>
+                                                    @else
+                                                        <div class="global-info-group status-all flex-nowrap"
+                                                            data-ui-presentation="presentation-420e169b733d">
+
+                                                            <i class="fa-solid fa-briefcase text-[9px]"></i>
+
+                                                            <span class="text-[.66rem] font-bold whitespace-nowrap">
+                                                                Working
+                                                            </span>
+
+                                                        </div>
+                                                    @endif
+
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+                                    @endforeach
+
+                                </div>
+
+                                <div class="border-t px-4 py-4" data-ui-presentation="presentation-7c1d0a16a55f">
+
+                                    <div class="table-record-label mb-3">
+                                        Good to Know
+                                    </div>
+
+                                    <div class="space-y-3">
+
+                                        <div class="flex items-start gap-2">
+                                            <span class="global-info-icon status-active"
+                                                data-ui-presentation="presentation-3d6d2187b3e9" aria-hidden="true">
+
+                                                <i class="fa-solid fa-check text-[9px]"></i>
+                                            </span>
+
+                                            <span class="global-info-subvalue">
+                                                Non-working holidays auto-block regular bookings for that date.
+                                            </span>
+                                        </div>
+
+                                        <div class="flex items-start gap-2">
+                                            <span class="global-info-icon status-active"
+                                                data-ui-presentation="presentation-3d6d2187b3e9" aria-hidden="true">
+
+                                                <i class="fa-solid fa-check text-[9px]"></i>
+                                            </span>
+
+                                            <span class="global-info-subvalue">
+                                                Working holidays keep the clinic open on its normal hours.
+                                            </span>
+                                        </div>
+
+                                        <div class="flex items-start gap-2">
+                                            <span class="global-info-icon status-active"
+                                                data-ui-presentation="presentation-3d6d2187b3e9" aria-hidden="true">
+
+                                                <i class="fa-solid fa-check text-[9px]"></i>
+                                            </span>
+
+                                            <span class="global-info-subvalue">
+                                                Reserved periods aren't cancelled automatically — check for conflicts.
+                                            </span>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                                <div class="border-t px-4 py-3" data-ui-presentation="presentation-7c1d0a16a55f">
+
+                                    <x-button type="button" variant="secondary" icon="fa-regular fa-calendar-days"
+                                        class="w-full" data-ui-click="action-62d7209e5e45">
+                                        View Full List
+                                    </x-button>
+
+                                </div>
+                            @else
+                                <div class="card-body">
+
+                                    <div class="flex flex-col items-center justify-center gap-2 py-8 text-center">
+
+                                        <span class="global-info-icon status-default" aria-hidden="true">
+
+                                            <i class="fa-solid fa-calendar"></i>
+
+                                        </span>
+
+                                        <span class="ui-muted-text">
+                                            No upcoming holidays.
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            @endif
+
+                        </section>
+                    </div>
+
+                    <section id="scheduleRulesCard" class="card">
+                        <div class="card-header schedule-rules-header">
+                            <div class="card-header-left">
+                                <span class="card-header-icon" aria-hidden="true">
+                                    <i class="fa-solid fa-list-check"></i>
+                                </span>
+
+                                <h2 class="card-title">Schedule Rules</h2>
+                            </div>
+
+                            <div class="card-header-right schedule-rules-header-actions">
 
                                 <x-view-toggle id="scheduleRulesViewToggle" storage-key="scheduleRulesView"
                                     list-view="#scheduleRulesListView" grid-view="#scheduleRulesGridView" />
@@ -289,454 +707,1029 @@ $breakSchedule = $openRules->first(fn($s) => $s->break_time && $s->break_time !=
                         </div>
 
                         @if ($schedules->count())
-                        <div id="scheduleRulesListView" class="schedule-rules-view">
-                            <div class="overflow-x-auto px-2 pb-2 sm:px-0 sm:pb-0">
-                                <table class="data-table sched-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Day(s)</th>
-                                            <th>Opens</th>
-                                            <th>Closes</th>
-                                            <th>Lunch Break</th>
-                                            <th>Max Slots</th>
-                                            <th>Status</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($schedules as $rule)
-                                        <tr>
-                                            <td data-label="Day(s)" class="font-semibold text-gray-800">
-                                                {{ $rule->days_label }}</td>
-                                            <td data-label="Opens">
-                                                {{ $rule->open_time ? date('g:i A', strtotime($rule->open_time)) : '—'
-                                                }}
-                                            </td>
-                                            <td data-label="Closes">
-                                                {{ $rule->close_time ? date('g:i A', strtotime($rule->close_time)) : '—'
-                                                }}
-                                            </td>
-                                            <td data-label="Lunch Break" class="text-xs text-gray-500">
-                                                @if ($rule->break_time && $rule->break_time !== 'none')
-                                                @php [$bs,$be]=explode('-', $rule->break_time); @endphp
-                                                {{ date('g:i A', strtotime(trim($bs) . ':00')) }} –
-                                                {{ date('g:i A', strtotime(trim($be) . ':00')) }}
-                                                @else
-                                                —
-                                                @endif
-                                            </td>
-                                            <td data-label="Max Slots">
-                                                <div class="flex items-center gap-2">
-                                                    <span class="font-bold text-[#8B0000]">{{ $rule->max_slots }}</span>
-                                                    @if ($rule->status !== 'closed')
-                                                    <div class="cap-bar w-16">
-                                                        <div class="cap-fill"
-                                                            style="width:{{ min(100, ($rule->max_slots / 10) * 100) }}%">
+                            <div id="scheduleRulesListView" class="table-list-view">
+                                <div class="hidden md:block">
+                                    <div class="table-scroll">
+                                        <table class="data-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Day(s)</th>
+                                                    <th>Opens</th>
+                                                    <th>Closes</th>
+                                                    <th>Lunch Break</th>
+                                                    <th>Max Slots</th>
+                                                    <th>Duration</th>
+                                                    <th>Status</th>
+                                                    <th>Rule State</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach ($schedules as $rule)
+                                                    @php
+                                                        $ruleStatusClass = match ($rule->status) {
+                                                            'open' => 'status-active',
+                                                            'limited' => 'status-pending',
+                                                            default => 'status-inactive',
+                                                        };
+                                                        $ruleStatusLabel = match ($rule->status) {
+                                                            'open' => 'Open',
+                                                            'limited' => 'Limited',
+                                                            default => 'Closed',
+                                                        };
+                                                        $ruleStateClass = $rule->is_active
+                                                            ? 'status-active'
+                                                            : 'status-pending';
+                                                    @endphp
+                                                    <tr>
+                                                        <td data-label="Day(s)">
+                                                            <strong>{{ $rule->days_label }}</strong>
+                                                        </td>
+                                                        <td data-label="Opens">
+                                                            {{ $rule->open_time ? date('g:i A', strtotime($rule->open_time)) : '—' }}
+                                                        </td>
+                                                        <td data-label="Closes">
+                                                            {{ $rule->close_time ? date('g:i A', strtotime($rule->close_time)) : '—' }}
+                                                        </td>
+                                                        <td data-label="Lunch Break">
+                                                            @if ($rule->break_time && $rule->break_time !== 'none')
+                                                                @php [$bs,$be]=explode('-', $rule->break_time); @endphp
+                                                                {{ date('g:i A', strtotime(trim($bs) . ':00')) }} –
+                                                                {{ date('g:i A', strtotime(trim($be) . ':00')) }}
+                                                            @else
+                                                                —
+                                                            @endif
+                                                        </td>
+                                                        <td data-label="Max Slots">
+                                                            <div class="flex items-center gap-3">
+                                                                <strong>{{ $rule->max_slots }}</strong>
+
+                                                                @if ($rule->status !== 'closed')
+                                                                    <div class="cap-bar" aria-hidden="true">
+                                                                        <div class="cap-fill"
+                                                                            data-ui-style="width:{{ min(100, ($rule->max_slots / 30) * 100) }}%">
+                                                                        </div>
+                                                                    </div>
+                                                                @endif
+                                                            </div>
+                                                        </td>
+                                                        <td data-label="Duration">
+                                                            {{ $rule->status !== 'closed' ? ($rule->slot_duration_minutes ?: 60) . ' min' : '—' }}
+                                                        </td>
+                                                        <td data-label="Status">
+                                                            <span class="status-pill {{ $ruleStatusClass }}">
+                                                                {{ $ruleStatusLabel }}
+                                                            </span>
+                                                        </td>
+                                                        <td data-label="Rule State">
+                                                            <span class="status-pill {{ $ruleStateClass }}">
+                                                                {{ $rule->is_active ? 'Active' : 'Inactive' }}
+                                                            </span>
+                                                        </td>
+                                                        <td data-label="Actions" class="table-action-cell">
+                                                            <div class="ui-action-group">
+                                                                <x-action-button type="button" variant="edit"
+                                                                    icon="fa-solid fa-pen" label="Edit schedule"
+                                                                    tooltip="Edit schedule"
+                                                                    data-ui-click="action-5ae65e27acd4"
+                                                                    data-ui-click-arg-0="{{ json_encode($rule->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                                    data-ui-click-arg-1="{{ json_encode($rule) }}" />
+
+                                                                <x-action-button type="button" variant="delete"
+                                                                    icon="fa-solid fa-trash" label="Delete schedule"
+                                                                    tooltip="Delete schedule"
+                                                                    data-ui-click="action-6d843152ccce"
+                                                                    data-ui-click-arg-0="{{ json_encode(
+                                                                        route($clinicScheduleRouteNames['destroy'], $rule),
+                                                                        JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT,
+                                                                    ) }}"
+                                                                    data-ui-click-arg-1="{{ json_encode($rule->days_label, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" />
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <div id="scheduleRulesMobileList" class="md:hidden">
+                                    @foreach ($schedules as $rule)
+                                        @php
+                                            $ruleStatusClass = match ($rule->status) {
+                                                'open' => 'status-active',
+                                                'limited' => 'status-pending',
+                                                default => 'status-inactive',
+                                            };
+                                            $ruleStatusLabel = match ($rule->status) {
+                                                'open' => 'Open',
+                                                'limited' => 'Limited',
+                                                default => 'Closed',
+                                            };
+                                            $ruleStateClass = $rule->is_active ? 'status-active' : 'status-pending';
+                                        @endphp
+
+                                        <div class="table-list-row">
+                                            <div class="table-record-card-layout">
+
+                                                <div class="table-record-content">
+
+                                                    <div class="table-record-header">
+
+                                                        <div class="table-primary">
+                                                            <strong>{{ $rule->days_label }}</strong>
+                                                        </div>
+
+                                                        <div class="global-info-group">
+                                                            <span class="status-pill {{ $ruleStatusClass }}">
+                                                                {{ $ruleStatusLabel }}
+                                                            </span>
+
+                                                            <span class="status-pill {{ $ruleStateClass }}">
+                                                                {{ $rule->is_active ? 'Active' : 'Inactive' }}
+                                                            </span>
+                                                        </div>
+
+                                                    </div>
+
+                                                    <div class="table-record-meta">
+
+                                                        <div class="table-record-row">
+                                                            <span class="table-record-label">
+                                                                Opens
+                                                            </span>
+
+                                                            <span class="table-record-value">
+                                                                {{ $rule->open_time ? date('g:i A', strtotime($rule->open_time)) : '—' }}
+                                                            </span>
+                                                        </div>
+
+                                                        <div class="table-record-row">
+                                                            <span class="table-record-label">
+                                                                Closes
+                                                            </span>
+
+                                                            <span class="table-record-value">
+                                                                {{ $rule->close_time ? date('g:i A', strtotime($rule->close_time)) : '—' }}
+                                                            </span>
+                                                        </div>
+
+                                                        <div class="table-record-row">
+                                                            <span class="table-record-label">
+                                                                Lunch Break
+                                                            </span>
+
+                                                            <span class="table-record-value">
+                                                                @if ($rule->break_time && $rule->break_time !== 'none')
+                                                                    @php [$bs,$be] = explode('-', $rule->break_time); @endphp
+
+                                                                    {{ date('g:i A', strtotime(trim($bs) . ':00')) }}
+                                                                    –
+                                                                    {{ date('g:i A', strtotime(trim($be) . ':00')) }}
+                                                                @else
+                                                                    —
+                                                                @endif
+                                                            </span>
+                                                        </div>
+
+                                                        <div class="table-record-row">
+                                                            <span class="table-record-label">
+                                                                Max Slots
+                                                            </span>
+
+                                                            <span class="table-record-value">
+                                                                <strong>{{ $rule->max_slots }}</strong>
+
+                                                                @if ($rule->status !== 'closed')
+                                                                    <span class="cap-bar" aria-hidden="true">
+                                                                        <span class="cap-fill"
+                                                                            data-ui-style="display:block;width:{{ min(100, ($rule->max_slots / 30) * 100) }}%">
+                                                                        </span>
+                                                                    </span>
+                                                                @endif
+                                                            </span>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+
+                                                <div class="table-record-actions">
+                                                    <div class="ui-action-group">
+
+                                                        <x-action-button type="button" variant="edit"
+                                                            icon="fa-solid fa-pen" label="Edit schedule"
+                                                            tooltip="Edit schedule" data-ui-click="action-cf79ab3d24c0"
+                                                            data-ui-click-arg-0="{{ json_encode($rule->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                            data-ui-click-arg-1="{{ json_encode($rule) }}" />
+
+                                                        <x-action-button type="button" variant="delete"
+                                                            icon="fa-solid fa-trash" label="Delete schedule"
+                                                            tooltip="Delete schedule" data-ui-click="action-899c015d05d8"
+                                                            data-ui-click-arg-0="{{ json_encode(
+                                                                route($clinicScheduleRouteNames['destroy'], $rule),
+                                                                JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT,
+                                                            ) }}"
+                                                            data-ui-click-arg-1="{{ json_encode($rule->days_label, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" />
+
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+
+                            <div id="scheduleRulesGridView" class="table-grid-view" hidden>
+                                <div class="table-record-grid">
+                                    @foreach ($schedules as $rule)
+                                        @php
+                                            $ruleStatusClass = match ($rule->status) {
+                                                'open' => 'status-active',
+                                                'limited' => 'status-pending',
+                                                default => 'status-inactive',
+                                            };
+                                            $ruleStatusLabel = match ($rule->status) {
+                                                'open' => 'Open',
+                                                'limited' => 'Limited',
+                                                default => 'Closed',
+                                            };
+                                            $ruleStateClass = $rule->is_active ? 'status-active' : 'status-pending';
+                                        @endphp
+
+                                        <article class="table-record-card">
+                                            <div class="table-record-card-layout">
+                                                <div class="table-record-content">
+                                                    <div class="table-record-header">
+                                                        <div class="table-primary">
+                                                            <h3 class="table-record-title">{{ $rule->days_label }}
+                                                            </h3>
+                                                        </div>
+
+                                                        <div class="global-info-group">
+                                                            <span class="status-pill {{ $ruleStatusClass }}">
+                                                                {{ $ruleStatusLabel }}
+                                                            </span>
+                                                            <span class="status-pill {{ $ruleStateClass }}">
+                                                                {{ $rule->is_active ? 'Active' : 'Inactive' }}
+                                                            </span>
+                                                        </div>
+
+                                                        <div class="table-record-row">
+                                                            <span class="table-record-label">
+                                                                Duration
+                                                            </span>
+
+                                                            <span class="table-record-value">
+                                                                {{ $rule->status !== 'closed' ? ($rule->slot_duration_minutes ?: 60) . ' min' : '—' }}
+                                                            </span>
                                                         </div>
                                                     </div>
-                                                    @endif
-                                                </div>
-                                            </td>
-                                            <td data-label="Status">
-                                                @if ($rule->status === 'open')
-                                                <span class="badge-open">Open</span>
-                                                @elseif($rule->status === 'limited')
-                                                <span class="badge-limited">Limited</span>
-                                                @else
-                                                <span class="badge-closed">Closed</span>
-                                                @endif
-                                            </td>
-                                            <td data-label="Actions">
-                                                <div class="ui-action-group">
-                                                    <button type="button" onclick='openRuleModal(
-        "edit",
-        {{ $rule->id }},
-        {{ json_encode($rule) }}
-    )' class="ui-action-btn ui-action-edit" data-tooltip="Edit schedule" aria-label="Edit schedule">
 
-                                                        <i class="fa-solid fa-pen"></i>
-                                                    </button>
+                                                    <div class="table-record-meta">
+                                                        <div class="table-record-row">
+                                                            <span class="table-record-label">Opens</span>
+                                                            <span class="table-record-value">
+                                                                {{ $rule->open_time ? date('g:i A', strtotime($rule->open_time)) : '—' }}
+                                                            </span>
+                                                        </div>
 
-                                                    <button type="button" class="ui-action-btn ui-action-delete"
-                                                        data-tooltip="Delete schedule" aria-label="Delete schedule"
-                                                        onclick='openScheduleDeleteModal(
-        @json(route($clinicScheduleRouteNames['destroy'], $rule)), @json($rule->days_label)
-                                                        )'>
+                                                        <div class="table-record-row">
+                                                            <span class="table-record-label">Closes</span>
+                                                            <span class="table-record-value">
+                                                                {{ $rule->close_time ? date('g:i A', strtotime($rule->close_time)) : '—' }}
+                                                            </span>
+                                                        </div>
 
-                                                        <i class="fa-solid fa-trash"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+                                                        <div class="table-record-row">
+                                                            <span class="table-record-label">Lunch Break</span>
+                                                            <span class="table-record-value">
+                                                                @if ($rule->break_time && $rule->break_time !== 'none')
+                                                                    @php [$bs,$be]=explode('-', $rule->break_time); @endphp
+                                                                    {{ date('g:i A', strtotime(trim($bs) . ':00')) }} –
+                                                                    {{ date('g:i A', strtotime(trim($be) . ':00')) }}
+                                                                @else
+                                                                    —
+                                                                @endif
+                                                            </span>
+                                                        </div>
 
-                        <div id="scheduleRulesGridView" class="schedule-rules-view" hidden>
-                            <div class="schedule-rules-grid">
-                                @foreach ($schedules as $rule)
-                                <div class="schedule-rule-card">
-                                    <div class="schedule-rule-card-top">
-                                        <div>
-                                            <div class="schedule-rule-card-title">{{ $rule->days_label }}
-                                            </div>
-                                            <div class="mt-2">
-                                                @if ($rule->status === 'open')
-                                                <span class="badge-open">Open</span>
-                                                @elseif($rule->status === 'limited')
-                                                <span class="badge-limited">Limited</span>
-                                                @else
-                                                <span class="badge-closed">Closed</span>
-                                                @endif
-                                            </div>
-                                        </div>
-                                    </div>
+                                                        <div class="table-record-row">
+                                                            <span class="table-record-label">
+                                                                Max Slots
+                                                            </span>
 
-                                    <div class="schedule-rule-card-meta">
-                                        <div>
-                                            <div class="schedule-rule-card-label">Opens</div>
-                                            <div class="schedule-rule-card-value">
-                                                {{ $rule->open_time ? date('g:i A', strtotime($rule->open_time)) : '—'
-                                                }}
-                                            </div>
-                                        </div>
+                                                            <span class="table-record-value">
+                                                                <strong>{{ $rule->max_slots }}</strong>
 
-                                        <div>
-                                            <div class="schedule-rule-card-label">Closes</div>
-                                            <div class="schedule-rule-card-value">
-                                                {{ $rule->close_time ? date('g:i A', strtotime($rule->close_time)) : '—'
-                                                }}
-                                            </div>
-                                        </div>
-
-                                        <div>
-                                            <div class="schedule-rule-card-label">Lunch Break</div>
-                                            <div class="schedule-rule-card-value">
-                                                @if ($rule->break_time && $rule->break_time !== 'none')
-                                                @php [$bs,$be]=explode('-', $rule->break_time); @endphp
-                                                {{ date('g:i A', strtotime(trim($bs) . ':00')) }} –
-                                                {{ date('g:i A', strtotime(trim($be) . ':00')) }}
-                                                @else
-                                                —
-                                                @endif
-                                            </div>
-                                        </div>
-
-                                        <div>
-                                            <div class="schedule-rule-card-label">Max Slots</div>
-                                            <div class="schedule-rule-card-value flex items-center gap-2">
-                                                <span class="font-bold text-[#8B0000]">{{ $rule->max_slots }}</span>
-                                                @if ($rule->status !== 'closed')
-                                                <div class="cap-bar w-16">
-                                                    <div class="cap-fill"
-                                                        style="width:{{ min(100, ($rule->max_slots / 10) * 100) }}%">
+                                                                @if ($rule->status !== 'closed')
+                                                                    <span class="cap-bar" aria-hidden="true">
+                                                                        <span class="cap-fill"
+                                                                            data-ui-style="display:block;width:{{ min(100, ($rule->max_slots / 30) * 100) }}%">
+                                                                        </span>
+                                                                    </span>
+                                                                @endif
+                                                            </span>
+                                                        </div>
                                                     </div>
                                                 </div>
+
+                                                <div class="table-record-actions">
+                                                    <div class="ui-action-group">
+                                                        <x-action-button type="button" variant="edit"
+                                                            icon="fa-solid fa-pen" label="Edit schedule"
+                                                            tooltip="Edit schedule" data-ui-click="action-b1e8100ff8f6"
+                                                            data-ui-click-arg-0="{{ json_encode($rule->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                            data-ui-click-arg-1="{{ json_encode($rule) }}" />
+
+                                                        <x-action-button type="button" variant="delete"
+                                                            icon="fa-solid fa-trash" label="Delete schedule"
+                                                            tooltip="Delete schedule" data-ui-click="action-84a17b07f767"
+                                                            data-ui-click-arg-0="{{ json_encode(
+                                                                route($clinicScheduleRouteNames['destroy'], $rule),
+                                                                JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT,
+                                                            ) }}"
+                                                            data-ui-click-arg-1="{{ json_encode($rule->days_label, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </article>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @else
+                            <div id="scheduleRulesEmptyState" class="empty-state-host"></div>
+                        @endif
+                    </section>
+
+                    <section id="reservedPeriodsCard" class="card">
+                        <div class="card-header reserved-periods-header">
+
+                            <div class="card-header-left">
+                                <span class="card-header-icon" aria-hidden="true">
+                                    <i class="fa-solid fa-calendar-check"></i>
+                                </span>
+
+                                <h2 class="card-title">
+                                    Reserved Booking Periods
+                                </h2>
+                            </div>
+
+                            <div class="card-header-right reserved-periods-header-actions">
+
+                                <x-view-toggle id="reservedPeriodsViewToggle" storage-key="reservedPeriodsView"
+                                    list-view="#reservedPeriodsListView" grid-view="#reservedPeriodsGridView" />
+
+                                @if ($canCreateReservedPeriods)
+                                    <x-button type="button" variant="primary" size="sm" icon="fa-solid fa-plus"
+                                        data-ui-click="action-210cc7fbd9be" aria-label="Add reserved booking period">
+                                        <span class="reserved-period-add-label">
+                                            Add Period
+                                        </span>
+                                    </x-button>
+                                @endif
+
+                            </div>
+
+                        </div>
+
+                        @if ($reservedBookingPeriods->count())
+                            <div id="reservedPeriodsListView" class="table-list-view reserved-periods-list-view">
+                                <div class="reserved-periods-desktop-list">
+                                    <div class="table-scroll">
+                                        <table class="data-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Schedule</th>
+                                                    <th>Purpose</th>
+                                                    <th>Target Group</th>
+                                                    <th>Booking</th>
+                                                    <th>Capacity</th>
+                                                    <th>Status</th>
+                                                    @if ($canManageReservedPeriods)
+                                                        <th>Actions</th>
+                                                    @endif
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach ($reservedBookingPeriods as $period)
+                                                    @php
+                                                        $isPastPeriod = \Carbon\Carbon::parse($period->reserved_date)
+                                                            ->startOfDay()
+                                                            ->lt(\Carbon\Carbon::today());
+                                                        $periodPayload = [
+                                                            'id' => $period->id,
+                                                            'title' => $period->title,
+                                                            'is_active' => (bool) $period->is_active,
+                                                            'reserved_date' => optional($period->reserved_date)->format(
+                                                                'Y-m-d',
+                                                            ),
+                                                            'start_time' => $period->start_time,
+                                                            'end_time' => $period->end_time,
+                                                            'target_patient_type' => $period->target_patient_type,
+                                                            'allowed_services' => $period->allowed_services,
+                                                            'program_code' => $period->program_code,
+                                                            'year_level' => $period->year_level,
+                                                            'section' => $period->section,
+                                                            'max_capacity' => $period->max_capacity,
+                                                            'timeslot_duration_minutes' =>
+                                                                $period->timeslot_duration_minutes,
+                                                            'notes' => $period->notes,
+                                                            'booking_mode' => $period->booking_mode,
+                                                            'timeslots' => $period->slots
+                                                                ->map(fn($slot) => ['time' => $slot->slot_time])
+                                                                ->values()
+                                                                ->all(),
+                                                        ];
+                                                        $periodStatusClass = $isPastPeriod
+                                                            ? 'status-inactive'
+                                                            : ($period->is_active
+                                                                ? 'status-active'
+                                                                : 'status-pending');
+                                                        $periodStatusLabel = $isPastPeriod
+                                                            ? 'Past'
+                                                            : ($period->is_active
+                                                                ? 'Active'
+                                                                : 'Inactive');
+                                                    @endphp
+
+                                                    <tr>
+                                                        <td data-label="Schedule">
+                                                            <div class="flex flex-col items-start gap-1">
+
+                                                                <div class="table-primary">
+                                                                    <strong>
+                                                                        {{ \Carbon\Carbon::parse($period->reserved_date)->format('M d, Y') }}
+                                                                    </strong>
+                                                                </div>
+
+                                                                <div class="table-date">
+                                                                    <i class="fa-regular fa-clock" aria-hidden="true"></i>
+
+                                                                    <span>
+                                                                        {{ date('g:i A', strtotime($period->start_time)) }}
+                                                                        –
+                                                                        {{ date('g:i A', strtotime($period->end_time)) }}
+                                                                    </span>
+                                                                </div>
+
+                                                            </div>
+                                                        </td>
+                                                        <td data-label="Purpose" class="table-cell-main">
+                                                            <div class="table-primary">
+                                                                <strong>{{ $period->title }}</strong>
+                                                            </div>
+                                                            <div class="global-info-group mt-1">
+                                                                @if ($period->allowed_services === null)
+                                                                    <span class="service-badge service-badge-default">
+                                                                        All dental services
+                                                                    </span>
+                                                                @else
+                                                                    @foreach ($period->allowed_services as $service)
+                                                                        <span
+                                                                            class="service-badge {{ $serviceBadgeClass($service) }}">
+                                                                            {{ $service }}
+                                                                        </span>
+                                                                    @endforeach
+                                                                @endif
+                                                            </div>
+                                                            @if ($period->notes)
+                                                                <span class="global-info-subvalue">
+                                                                    {{ $period->notes }}
+                                                                </span>
+                                                            @endif
+                                                        </td>
+                                                        <td data-label="Target Group">
+                                                            <span class="status-pill status-all">
+                                                                {{ $period->target_label }}
+                                                            </span>
+                                                        </td>
+                                                        <td data-label="Booking">
+                                                            @if ($period->booking_mode === 'timeslot')
+                                                                <span class="global-info-subvalue">
+                                                                    {{ $period->slots->count() }} selectable
+                                                                    {{ \Illuminate\Support\Str::plural('slot', $period->slots->count()) }}
+                                                                    · {{ $period->timeslot_duration_minutes }} min each
+                                                                </span>
+                                                            @else
+                                                                Date only
+                                                            @endif
+                                                        </td>
+
+                                                        <td data-label="Capacity">
+                                                            <strong>{{ $period->max_capacity }}</strong>
+
+                                                            <span class="global-info-subvalue">
+                                                                {{ \Illuminate\Support\Str::plural('patient', $period->max_capacity) }}
+                                                            </span>
+                                                        </td>
+                                                        <td data-label="Status">
+                                                            <span class="status-pill {{ $periodStatusClass }}">
+                                                                {{ $periodStatusLabel }}
+                                                            </span>
+                                                        </td>
+                                                        @if ($canManageReservedPeriods)
+                                                            <td data-label="Actions" class="table-action-cell">
+                                                                <div class="ui-action-group">
+                                                                    @if ($canUpdateReservedPeriods && !$isPastPeriod)
+                                                                        <x-action-button type="button" variant="edit"
+                                                                            icon="fa-solid fa-pen"
+                                                                            label="Edit reserved period"
+                                                                            tooltip="Edit reserved period"
+                                                                            data-ui-click="action-f2843b92493b"
+                                                                            data-ui-click-arg-0="{{ json_encode($period->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                                            data-ui-click-arg-1="{{ json_encode($periodPayload, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" />
+                                                                    @endif
+
+                                                                    @if ($canDeleteReservedPeriods)
+                                                                        <x-action-button type="button" variant="delete"
+                                                                            icon="fa-solid fa-trash"
+                                                                            label="Remove reserved period"
+                                                                            tooltip="Remove reserved period"
+                                                                            data-ui-click="action-bad117ef6f8f"
+                                                                            data-ui-click-arg-0="{{ json_encode(
+                                                                                route($clinicScheduleRouteNames['reserved_destroy'], $period),
+                                                                                JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT,
+                                                                            ) }}"
+                                                                            data-ui-click-arg-1="{{ json_encode($period->title, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" />
+                                                                    @endif
+                                                                </div>
+                                                            </td>
+                                                        @endif
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <div class="reserved-periods-compact-list">
+                                    @foreach ($reservedBookingPeriods as $period)
+                                        @php
+                                            $isPastPeriod = \Carbon\Carbon::parse($period->reserved_date)
+                                                ->startOfDay()
+                                                ->lt(\Carbon\Carbon::today());
+                                            $periodPayload = [
+                                                'id' => $period->id,
+                                                'title' => $period->title,
+                                                'is_active' => (bool) $period->is_active,
+                                                'reserved_date' => optional($period->reserved_date)->format('Y-m-d'),
+                                                'start_time' => $period->start_time,
+                                                'end_time' => $period->end_time,
+                                                'target_patient_type' => $period->target_patient_type,
+                                                'allowed_services' => $period->allowed_services,
+                                                'program_code' => $period->program_code,
+                                                'year_level' => $period->year_level,
+                                                'section' => $period->section,
+                                                'max_capacity' => $period->max_capacity,
+                                                'timeslot_duration_minutes' => $period->timeslot_duration_minutes,
+                                                'notes' => $period->notes,
+                                                'booking_mode' => $period->booking_mode,
+                                                'timeslots' => $period->slots
+                                                    ->map(fn($slot) => ['time' => $slot->slot_time])
+                                                    ->values()
+                                                    ->all(),
+                                            ];
+                                            $periodStatusClass = $isPastPeriod
+                                                ? 'status-inactive'
+                                                : ($period->is_active
+                                                    ? 'status-active'
+                                                    : 'status-pending');
+                                            $periodStatusLabel = $isPastPeriod
+                                                ? 'Past'
+                                                : ($period->is_active
+                                                    ? 'Active'
+                                                    : 'Inactive');
+                                        @endphp
+
+                                        <div class="table-list-row reserved-periods-list-row">
+                                            <div class="reserved-periods-list-layout">
+                                                <div class="reserved-periods-list-heading">
+                                                    <div class="table-primary">
+                                                        <strong>{{ $period->title }}</strong>
+                                                    </div>
+
+                                                    <div class="global-info-group reserved-periods-service-badges">
+                                                        @if ($period->allowed_services === null)
+                                                            <span class="service-badge service-badge-default">
+                                                                All dental services
+                                                            </span>
+                                                        @else
+                                                            @foreach ($period->allowed_services as $service)
+                                                                <span
+                                                                    class="service-badge {{ $serviceBadgeClass($service) }}">
+                                                                    {{ $service }}
+                                                                </span>
+                                                            @endforeach
+                                                        @endif
+                                                    </div>
+                                                </div>
+
+                                                <div class="reserved-periods-list-status">
+                                                    <span class="status-pill {{ $periodStatusClass }}">
+                                                        {{ $periodStatusLabel }}
+                                                    </span>
+                                                </div>
+
+                                                <div class="reserved-periods-list-details">
+                                                    <div class="reserved-periods-list-detail">
+                                                        <span class="reserved-periods-list-key">Schedule</span>
+                                                        <span class="reserved-periods-list-value">
+                                                            {{ \Carbon\Carbon::parse($period->reserved_date)->format('M d, Y') }}
+                                                            <span class="reserved-periods-list-subvalue">
+                                                                {{ date('g:i A', strtotime($period->start_time)) }}–{{ date('g:i A', strtotime($period->end_time)) }}
+                                                            </span>
+                                                        </span>
+                                                    </div>
+
+                                                    <div class="reserved-periods-list-detail">
+                                                        <span class="reserved-periods-list-key">Target</span>
+                                                        <span class="reserved-periods-list-value">
+                                                            {{ $period->target_label }}
+                                                        </span>
+                                                    </div>
+
+                                                    <div class="reserved-periods-list-detail">
+                                                        <span class="reserved-periods-list-key">Booking</span>
+
+                                                        <span class="reserved-periods-list-value">
+                                                            @if ($period->booking_mode === 'timeslot')
+                                                                {{ $period->slots->count() }} selectable
+                                                                {{ \Illuminate\Support\Str::plural('slot', $period->slots->count()) }}
+                                                                · {{ $period->timeslot_duration_minutes }} min each
+                                                            @else
+                                                                Date only
+                                                            @endif
+                                                        </span>
+                                                    </div>
+
+                                                    <div class="reserved-periods-list-detail">
+                                                        <span class="reserved-periods-list-key">Capacity</span>
+
+                                                        <span class="reserved-periods-list-value">
+                                                            <strong>{{ $period->max_capacity }}</strong>
+                                                            {{ \Illuminate\Support\Str::plural('patient', $period->max_capacity) }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                @if ($period->notes)
+                                                    <div class="reserved-periods-list-note">
+                                                        {{ $period->notes }}
+                                                    </div>
+                                                @endif
+
+                                                @if ($canManageReservedPeriods)
+                                                    <div class="reserved-periods-list-actions table-action-cell">
+                                                        <div class="ui-action-group">
+                                                            @if ($canUpdateReservedPeriods && !$isPastPeriod)
+                                                                <x-action-button type="button" variant="edit"
+                                                                    icon="fa-solid fa-pen" label="Edit reserved period"
+                                                                    tooltip="Edit reserved period"
+                                                                    data-ui-click="action-f2843b92493b"
+                                                                    data-ui-click-arg-0="{{ json_encode($period->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                                    data-ui-click-arg-1="{{ json_encode($periodPayload, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" />
+                                                            @endif
+
+                                                            @if ($canDeleteReservedPeriods)
+                                                                <x-action-button type="button" variant="delete"
+                                                                    icon="fa-solid fa-trash"
+                                                                    label="Remove reserved period"
+                                                                    tooltip="Remove reserved period"
+                                                                    data-ui-click="action-d584b12ca4ac"
+                                                                    data-ui-click-arg-0="{{ json_encode(
+                                                                        route($clinicScheduleRouteNames['reserved_destroy'], $period),
+                                                                        JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT,
+                                                                    ) }}"
+                                                                    data-ui-click-arg-1="{{ json_encode($period->title, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" />
+                                                            @endif
+                                                        </div>
+                                                    </div>
                                                 @endif
                                             </div>
                                         </div>
-                                    </div>
-
-                                    <div class="schedule-rule-card-actions ui-action-group">
-                                        <button type="button" onclick='openRuleModal(
-        "edit",
-        {{ $rule->id }},
-        {{ json_encode($rule) }}
-    )' class="ui-action-btn ui-action-edit" data-tooltip="Edit schedule" aria-label="Edit schedule">
-
-                                            <i class="fa-solid fa-pen"></i>
-                                        </button>
-
-                                        <button type="button" class="ui-action-btn ui-action-delete"
-                                            data-tooltip="Delete schedule" aria-label="Delete schedule" onclick='openScheduleDeleteModal(
-        @json(route($clinicScheduleRouteNames['destroy'], $rule)), @json($rule->days_label)
-                                            )'>
-
-                                            <i class="fa-solid fa-trash"></i>
-                                        </button>
-                                    </div>
+                                    @endforeach
                                 </div>
-                                @endforeach
                             </div>
-                        </div>
+
+                            <div id="reservedPeriodsGridView" class="table-grid-view" hidden>
+                                <div class="table-record-grid">
+                                    @foreach ($reservedBookingPeriods as $period)
+                                        @php
+                                            $isPastPeriod = \Carbon\Carbon::parse($period->reserved_date)
+                                                ->startOfDay()
+                                                ->lt(\Carbon\Carbon::today());
+                                            $periodPayload = [
+                                                'id' => $period->id,
+                                                'title' => $period->title,
+                                                'is_active' => (bool) $period->is_active,
+                                                'reserved_date' => optional($period->reserved_date)->format('Y-m-d'),
+                                                'start_time' => $period->start_time,
+                                                'end_time' => $period->end_time,
+                                                'target_patient_type' => $period->target_patient_type,
+                                                'allowed_services' => $period->allowed_services,
+                                                'program_code' => $period->program_code,
+                                                'year_level' => $period->year_level,
+                                                'section' => $period->section,
+                                                'max_capacity' => $period->max_capacity,
+                                                'timeslot_duration_minutes' => $period->timeslot_duration_minutes,
+                                                'notes' => $period->notes,
+                                                'booking_mode' => $period->booking_mode,
+                                                'timeslots' => $period->slots
+                                                    ->map(fn($slot) => ['time' => $slot->slot_time])
+                                                    ->values()
+                                                    ->all(),
+                                            ];
+                                            $periodStatusClass = $isPastPeriod
+                                                ? 'status-inactive'
+                                                : ($period->is_active
+                                                    ? 'status-active'
+                                                    : 'status-pending');
+                                            $periodStatusLabel = $isPastPeriod
+                                                ? 'Past'
+                                                : ($period->is_active
+                                                    ? 'Active'
+                                                    : 'Inactive');
+                                        @endphp
+
+                                        <article class="table-record-card">
+                                            <div class="table-record-card-layout">
+                                                <div class="table-record-content">
+                                                    <div class="table-record-header">
+                                                        <div class="table-primary">
+                                                            <h3 class="table-record-title">{{ $period->title }}</h3>
+                                                        </div>
+
+                                                        <span class="status-pill {{ $periodStatusClass }}">
+                                                            {{ $periodStatusLabel }}
+                                                        </span>
+                                                    </div>
+
+                                                    <div class="global-info-group">
+                                                        @if ($period->allowed_services === null)
+                                                            <span class="service-badge service-badge-default">
+                                                                All dental services
+                                                            </span>
+                                                        @else
+                                                            @foreach ($period->allowed_services as $service)
+                                                                <span
+                                                                    class="service-badge {{ $serviceBadgeClass($service) }}">
+                                                                    {{ $service }}
+                                                                </span>
+                                                            @endforeach
+                                                        @endif
+                                                    </div>
+
+                                                    <div class="table-record-meta reserved-period-grid-details">
+                                                        <div class="table-record-row">
+                                                            <span class="table-record-label">Schedule</span>
+                                                            <span class="table-record-value">
+                                                                {{ \Carbon\Carbon::parse($period->reserved_date)->format('M d, Y') }},
+                                                                {{ date('g:i A', strtotime($period->start_time)) }}–{{ date('g:i A', strtotime($period->end_time)) }}
+                                                            </span>
+                                                        </div>
+
+                                                        <div class="table-record-row">
+                                                            <span class="table-record-label">Target</span>
+                                                            <span class="table-record-value">
+                                                                {{ $period->target_label }}
+                                                            </span>
+                                                        </div>
+
+                                                        <div class="table-record-row">
+                                                            <span class="table-record-label">Booking</span>
+
+                                                            <span class="table-record-value">
+                                                                @if ($period->booking_mode === 'timeslot')
+                                                                    {{ $period->slots->count() }} selectable
+                                                                    {{ \Illuminate\Support\Str::plural('slot', $period->slots->count()) }}
+                                                                    · {{ $period->timeslot_duration_minutes }} min each
+                                                                @else
+                                                                    Date only
+                                                                @endif
+                                                            </span>
+                                                        </div>
+
+                                                        <div class="table-record-row">
+                                                            <span class="table-record-label">Capacity</span>
+
+                                                            <span class="table-record-value">
+                                                                {{ $period->max_capacity }}
+                                                                {{ \Illuminate\Support\Str::plural('patient', $period->max_capacity) }}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+
+                                                    @if ($period->notes)
+                                                        <span class="global-info-subvalue">{{ $period->notes }}</span>
+                                                    @endif
+                                                </div>
+
+                                                @if ($canManageReservedPeriods)
+                                                    <div class="table-record-actions">
+                                                        <div class="ui-action-group">
+                                                            @if ($canUpdateReservedPeriods && !$isPastPeriod)
+                                                                <x-action-button type="button" variant="edit"
+                                                                    icon="fa-solid fa-pen" label="Edit reserved period"
+                                                                    tooltip="Edit reserved period"
+                                                                    data-ui-click="action-f2843b92493b"
+                                                                    data-ui-click-arg-0="{{ json_encode($period->id, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}"
+                                                                    data-ui-click-arg-1="{{ json_encode($periodPayload, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" />
+                                                            @endif
+
+                                                            @if ($canDeleteReservedPeriods)
+                                                                <x-action-button type="button" variant="delete"
+                                                                    icon="fa-solid fa-trash"
+                                                                    label="Remove reserved period"
+                                                                    tooltip="Remove reserved period"
+                                                                    data-ui-click="action-a10af097fbc8"
+                                                                    data-ui-click-arg-0="{{ json_encode(
+                                                                        route($clinicScheduleRouteNames['reserved_destroy'], $period),
+                                                                        JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT,
+                                                                    ) }}"
+                                                                    data-ui-click-arg-1="{{ json_encode($period->title, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) }}" />
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </article>
+                                    @endforeach
+                                </div>
+                            </div>
                         @else
-                        <div class="text-center py-10">
-                            <i class="fa-solid fa-calendar-xmark text-3xl text-gray-300 mb-2 block"></i>
-                            <p class="text-gray-400 text-sm">
-                                No rules yet.
-                                <button onclick="openRuleModal()"
-                                    class="text-[#8B0000] font-semibold hover:underline">Add
-                                    one.</button>
-                            </p>
-                        </div>
+                            <div class="card-body">
+                                <div id="reservedPeriodsEmptyState" class="empty-state-host"></div>
+                            </div>
                         @endif
-                    </div>
+                    </section>
                 </div>
+            </div>
+        </div>
+    </main>
 
-                <div class="space-y-6">
+    <x-modal id="holidayListModal" title="Upcoming Holidays" title-id="holidayListModalTitle"
+        subtitle="Working and non-working holidays" icon="fa-solid fa-umbrella-beach" size="md"
+        body-class="modal-scroll-body" close-label="Close holiday list" :card-attributes="[
+            'data-ui-click' => 'action-22499e15f3ee',
+        ]" :close-attributes="[
+            'data-ui-click' => 'action-a96098d272f6',
+        ]">
+        <div class="table-list-view">
+            @foreach ($allUpcomingHolidays as $hDate => $holiday)
+                @php
+                    $hC = \Carbon\Carbon::parse($hDate);
 
-                    <div class="bg-white rounded-xl shadow border border-gray-100 overflow-hidden">
-                        <div class="px-5 py-4 border-b bg-gray-50 flex items-center justify-between">
-                            <div class="flex items-center gap-2"><i class="fa-solid fa-clock text-[#8B0000]"></i>
-                                <h2 class="font-bold text-gray-800 text-sm">Clinic Hours</h2>
-                            </div>
-                            <button type="button" onclick="openRuleModal()" class="ui-btn ui-btn-edit ui-btn-sm">
-                                <i class="fa-solid fa-pen"></i>
-                                <span>Edit</span>
-                            </button>
-                        </div>
-                        <div class="p-4 space-y-0.5">
-                            @foreach ($dayNames as $fullName => $abbr)
-                            @php $s = $scheduleByDay[$abbr] ?? null; @endphp
-                            <div
-                                class="flex justify-between items-center py-1.5 {{ !$loop->last ? 'border-b border-gray-50' : '' }}">
-                                <span class="text-xs font-semibold text-gray-600">{{ $fullName }}</span>
-                                @if ($s && $s->status !== 'closed')
-                                <span class="text-xs font-bold text-[#8B0000]">{{ $s->hours_range }}</span>
-                                @else
-                                <span class="text-xs font-medium text-gray-400">Closed</span>
-                                @endif
-                            </div>
-                            @endforeach
-                            @if ($breakSchedule)
-                            <div class="pt-2 mt-1 border-t border-gray-100">
-                                <div class="flex justify-between items-center">
-                                    <span class="text-xs text-gray-400 italic flex items-center gap-1"><i
-                                            class="fa-solid fa-mug-hot text-yellow-400"></i> Lunch</span>
-                                    @php [$bs,$be]=explode('-',$breakSchedule->break_time); @endphp
-                                    <span class="text-xs font-medium text-gray-500">{{ date('g:i A', strtotime(trim($bs)
-                                        . ':00')) }}
-                                        – {{ date('g:i A', strtotime(trim($be) . ':00')) }}</span>
-                                </div>
-                            </div>
-                            @endif
-                        </div>
-                    </div>
+                    $diff = (int) $today->diffInDays($hC, false);
 
-                    <div class="bg-white rounded-xl shadow border border-gray-100 overflow-hidden">
-                        <div class="px-5 py-4 border-b bg-gray-50 flex items-center justify-between gap-3 flex-wrap">
-                            <div class="flex items-center gap-2">
-                                <i class="fa-solid fa-ban text-[#8B0000]"></i>
-                                <h2 class="font-bold text-gray-800 text-sm">Blocked Dates</h2>
+                    $holidayName = is_array($holiday) ? $holiday['name'] ?? 'Philippine Holiday' : (string) $holiday;
+
+                    $isBlockedHoliday = is_array($holiday) ? $holiday['is_blocked_for_booking'] ?? true : true;
+                @endphp
+
+                <div class="table-list-row">
+                    <div class="flex items-center gap-3 px-4 py-3">
+                        <div class="w-11 shrink-0 text-center">
+                            <div class="appt-visit-month">
+                                {{ $MONTHS_SHORT[$hC->month - 1] }}
                             </div>
 
-                            <div class="flex items-center gap-2">
-                                <button type="button" onclick="openBlockModal()"
-                                    class="ui-btn ui-btn-primary ui-btn-sm">
-                                    <i class="fa-solid fa-plus"></i>
-                                    <span>Add</span>
-                                </button>
+                            <div class="text-xl font-extrabold leading-none"
+                                data-ui-presentation="presentation-23b8d2e99754">
+                                {{ $hC->day }}
                             </div>
                         </div>
 
-                        <div class="p-4">
-                            @if ($blockedDates->count())
-                            <div id="blockedDatesListView" class="blocked-dates-view">
-                                @foreach ($blockedDates as $blocked)
-                                @php
-                                $bd = \Carbon\Carbon::parse($blocked->date);
-                                $badgeCls = match ($blocked->reason) {
-                                'Holiday' => 'badge-holiday',
-                                'Dentist Unavailable' => 'badge-limited',
-                                default => 'badge-closed',
-                                };
-                                @endphp
-
-                                <div
-                                    class="blocked-list-item flex items-start gap-3 py-2.5 {{ !$loop->last ? 'border-b border-gray-50' : '' }}">
-                                    <div
-                                        class="blocked-date-pill w-9 h-9 rounded-lg bg-red-50 border border-red-100 flex items-center justify-center flex-shrink-0 text-[#8B0000] text-xs font-bold">
-                                        {{ $bd->day }}
-                                    </div>
-
-                                    <div class="flex-1 min-w-0">
-                                        <p class="blocked-title text-xs font-bold text-gray-800 truncate">
-                                            {{ $bd->format('D, M j, Y') }}
-                                        </p>
-                                        <span class="{{ $badgeCls }} mt-0.5 inline-block">{{ $blocked->reason }}</span>
-                                        @if ($blocked->note)
-                                        <p class="blocked-note text-[10px] text-gray-400 mt-0.5 italic truncate">
-                                            {{ $blocked->note }}
-                                        </p>
-                                        @endif
-                                    </div>
-
-                                    <form action="{{ route($clinicScheduleRouteNames['unblock'], $blocked) }}"
-                                        method="POST">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="ui-action-btn ui-action-delete"
-                                            data-tooltip="Remove blocked date" aria-label="Remove blocked date">
-
-                                            <i class="fa-solid fa-xmark"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                                @endforeach
+                        <div class="min-w-0 flex-1">
+                            <div class="appt-visit-title">
+                                {{ $holidayName }}
                             </div>
+
+                            <span class="global-info-subvalue">
+                                {{ $diff === 0 ? 'Today' : ($diff === 1 ? 'Tomorrow' : "In $diff days") }}
+                            </span>
+                        </div>
+
+                        <div class="shrink-0">
+                            @if ($isBlockedHoliday)
+                                <span class="cal-pill cal-pill-yellow">
+                                    <i class="fa-solid fa-star text-[10px]"></i>
+                                    Non-Working
+                                </span>
                             @else
-                            <div class="flex flex-col items-center justify-center py-10 text-center">
-                                <i class="fa-solid fa-check-circle text-4xl text-green-400 mb-3"></i>
-                                <p class="text-sm text-gray-400">No blocked dates</p>
-                            </div>
+                                <span class="cal-pill cal-pill-working-holiday">
+                                    <i class="fa-solid fa-briefcase text-[10px]"></i>
+                                    Working Holiday
+                                </span>
                             @endif
                         </div>
                     </div>
+                </div>
+            @endforeach
+        </div>
 
-                    <div class="bg-white rounded-xl shadow border border-gray-100 overflow-hidden">
-                        <div class="px-5 py-4 border-b bg-gray-50">
-                            <div class="flex items-center gap-2"><i
-                                    class="fa-solid fa-umbrella-beach text-[#8B0000]"></i>
-                                <h2 class="font-bold text-gray-800 text-sm">Upcoming Holidays</h2>
-                            </div>
-                        </div>
-                        <div class="p-4">
-                            @php
-                            $today = now()->startOfDay();
-                            $MONTHS_SHORT = [
-                            'Jan',
-                            'Feb',
-                            'Mar',
-                            'Apr',
-                            'May',
-                            'Jun',
-                            'Jul',
-                            'Aug',
-                            'Sep',
-                            'Oct',
-                            'Nov',
-                            'Dec',
-                            ];
-                            $upcoming = collect($philippineHolidays)
-                            ->filter(fn($n, $d) => \Carbon\Carbon::parse($d)->gte($today))
-                            ->take(5);
-                            @endphp
-                            @forelse($upcoming as $hDate => $hName)
-                            @php
-                            $hC = \Carbon\Carbon::parse($hDate);
-                            $diff = (int) $today->diffInDays($hC, false);
-                            @endphp
-                            <div
-                                class="holiday-item flex items-center gap-3 py-2 border-b border-gray-50 last:border-b-0">
-                                <div class="w-10 text-center flex-shrink-0">
-                                    <div class="month text-[10px] font-bold uppercase text-[#8B0000]">
-                                        {{ $MONTHS_SHORT[$hC->month - 1] }}</div>
-                                    <div class="day text-xl font-extrabold text-gray-800 leading-tight">
-                                        {{ $hC->day }}</div>
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="holiday-title text-xs font-semibold text-gray-800 truncate">
-                                        {{ $hName }}</p>
-                                    <p class="holiday-meta text-[10px] text-gray-400">
-                                        {{ $diff === 0 ? 'Today' : ($diff === 1 ? 'Tomorrow' : "In $diff days") }}
-                                    </p>
-                                </div>
-                                <span class="holiday-badge badge-holiday flex-shrink-0">Holiday</span>
-                            </div>
-                            @empty
-                            <p class="text-xs text-gray-400 text-center py-4">No upcoming holidays.</p>
-                            @endforelse
-                        </div>
+        <x-slot:footer>
+            <x-button type="button" variant="secondary" data-ui-click="action-a96098d272f6">
+                Close
+            </x-button>
+        </x-slot:footer>
+    </x-modal>
+
+    <x-modal id="appointmentDetailModal" title="Appointment Details" subtitle="Selected booked slot information"
+        icon="fa-solid fa-calendar-check" size="md" body-class="modal-scroll-body"
+        close-label="Close appointment details" :card-attributes="[
+            'data-ui-click' => 'action-22499e15f3ee',
+        ]" :close-attributes="[
+            'data-ui-click' => 'action-755e543aec03',
+        ]">
+        <div class="modal-form-grid">
+            <div>
+                <label class="form-label">
+                    Patient Name
+                </label>
+
+                <div id="detailPatientName" class="global-readonly-field">
+                    —
+                </div>
+            </div>
+
+            <div>
+                <label class="form-label">
+                    Service Type
+                </label>
+
+                <div id="detailServiceType" class="global-readonly-field">
+                    —
+                </div>
+            </div>
+
+            <div>
+                <label class="form-label">
+                    Schedule
+                </label>
+
+                <div id="detailSchedule" class="global-readonly-field">
+                    —
+                </div>
+            </div>
+        </div>
+
+        <x-slot:footer>
+            <x-button type="button" variant="primary" data-ui-click="action-755e543aec03">
+                Close
+            </x-button>
+        </x-slot:footer>
+    </x-modal>
+
+    <div id="ruleModalBackdrop" class="ui-modal modal-theme-primary">
+        <div class="ui-modal-card modal-xl" data-ui-click="action-22499e15f3ee">
+
+            <div class="modal-hd">
+                <div class="modal-heading">
+                    <div class="modal-icon">
+                        <i class="fa-solid fa-calendar-plus" id="ruleModalIcon"></i>
                     </div>
 
-                </div>
-            </div>
-        </div>
-    </div>
-</main>
+                    <div class="modal-copy">
+                        <h3 class="modal-title" id="ruleModalTitle">
+                            Add Schedule Rule
+                        </h3>
 
-<div id="appointmentDetailModal" class="ui-modal cs-modal">
-    <div class="ui-modal-card cs-modal-card cs-detail-modal-card" onclick="event.stopPropagation()">
-        <div class="modal-hdr">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h3 class="text-lg font-bold">Appointment Details</h3>
-                    <p class="text-sm text-white/70 mt-0.5">Selected booked slot information</p>
+                        <p class="modal-subtitle" id="ruleModalSubtitle">
+                            Choose clinic days, set operating hours,
+                            and control booking capacity.
+                        </p>
+                    </div>
                 </div>
-                <button onclick="closeAppointmentDetailModal()"
-                    class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white hover:bg-white/30">
-                    <i class="fa-solid fa-xmark text-sm"></i>
+
+                <button type="button" class="modal-x" data-discard-close="ruleModalBackdrop"
+                    aria-label="Close rule modal">
+                    <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
-        </div>
 
-        <div class="modal-body">
-            <div class="space-y-4">
-                <div>
-                    <label class="form-label">Patient Name</label>
-                    <div id="detailPatientName" class="form-ctrl bg-gray-50">—</div>
-                </div>
-
-                <div>
-                    <label class="form-label">Service Type</label>
-                    <div id="detailServiceType" class="form-ctrl bg-gray-50">—</div>
-                </div>
-
-                <div>
-                    <label class="form-label">Schedule</label>
-                    <div id="detailSchedule" class="form-ctrl bg-gray-50">—</div>
-                </div>
-            </div>
-
-            <div class="flex justify-end gap-3 pt-4 mt-4 border-t border-gray-100">
-                <button type="button" onclick="closeAppointmentDetailModal()" class="ui-btn ui-btn-primary">
-                    Close
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div id="ruleModalBackdrop" class="ui-modal cs-modal cs-rule-modal modal-theme-primary">
-    <div class="ui-modal-card cs-modal-card cs-rule-modal-card" onclick="event.stopPropagation()">
-
-        <div class="modal-hd">
-            <div class="modal-heading">
-                <div class="modal-icon">
-                    <i class="fa-solid fa-calendar-plus" id="ruleModalIcon"></i>
-                </div>
-
-                <div class="modal-copy">
-                    <h3 class="modal-title" id="ruleModalTitle">
-                        Add Schedule Rule
-                    </h3>
-
-                    <p class="modal-subtitle" id="ruleModalSubtitle">
-                        Choose clinic days, set operating hours,
-                        and control booking capacity.
-                    </p>
-                </div>
-            </div>
-
-            <button type="button" class="modal-x" data-discard-close="ruleModalBackdrop" aria-label="Close rule modal">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-
-        <div class="modal-bd modal-form-body">
             <form id="ruleForm" method="POST" action="{{ route($clinicScheduleRouteNames['store']) }}"
-                data-global-validation data-discard-form data-form-validation-rule="clinicScheduleRule" novalidate>
+                class="modal-card-form" data-global-validation data-discard-form
+                data-form-validation-rule="clinicScheduleRule" novalidate>
                 @csrf
                 <div id="ruleMethodField"></div>
-                <div class="rule-modal-layout">
+                <div class="modal-bd modal-scroll-body modal-form-grid-2">
                     <div class="flex flex-col gap-4">
 
-                        <div class="modal-section m-0">
-                            <div class="modal-section-head">
+                        <div class="info-card modal-form-section m-0">
+                            <div class="modal-section-heading">
                                 <div class="modal-section-icon">
                                     <i class="fa-solid fa-calendar-days"></i>
                                 </div>
 
                                 <div>
-                                    <div class="modal-section-title">
+                                    <h4>
                                         Applicable Days
-                                    </div>
+                                    </h4>
 
-                                    <div class="modal-section-sub">
+                                    <p>
                                         Select one or more days for this rule.
-                                    </div>
+                                    </p>
                                 </div>
                             </div>
 
@@ -748,842 +1741,2273 @@ $breakSchedule = $openRules->first(fn($s) => $s->break_time && $s->break_time !=
 
                                 <div id="ruleDaysGroup" class="day-toggle-group mt-1" tabindex="-1">
                                     @foreach ([
-                                    'Mon' => 'M',
-                                    'Tue' => 'T',
-                                    'Wed' => 'W',
-                                    'Thu' => 'Th',
-                                    'Fri' => 'F',
-                                    'Sat' => 'S',
-                                    'Sun' => 'Su',
-                                    ] as $abbr => $lbl)
-                                    <button type="button" class="day-toggle" data-day="{{ $abbr }}" data-discard-track
-                                        data-discard-key="schedule-day-{{ $abbr }}" data-discard-value="false"
-                                        onclick="toggleDay(this)" aria-pressed="false">
+            'Mon' => 'M',
+            'Tue' => 'T',
+            'Wed' => 'W',
+            'Thu' => 'Th',
+            'Fri' => 'F',
+            'Sat' => 'S',
+            'Sun' => 'Su',
+        ] as $abbr => $lbl)
+                                        <button type="button" class="day-toggle" data-day="{{ $abbr }}"
+                                            data-discard-track data-discard-key="schedule-day-{{ $abbr }}"
+                                            data-discard-value="false" data-ui-click="action-9ac08cc75f07"
+                                            aria-pressed="false">
 
-                                        <span class="day-toggle-label">
-                                            {{ $lbl }}
-                                        </span>
+                                            <span class="day-toggle-label">
+                                                {{ $lbl }}
+                                            </span>
 
-                                        <span class="day-toggle-check" aria-hidden="true">
-                                            <i class="fa-solid fa-check"></i>
-                                        </span>
-                                    </button>
+                                            <span class="day-toggle-check" aria-hidden="true">
+                                                <i class="fa-solid fa-check"></i>
+                                            </span>
+                                        </button>
                                     @endforeach
                                 </div>
 
-                                <div class="form-help">
+                                <div class="field-help">
                                     You can apply one schedule to multiple weekdays.
+                                </div>
+                                <div id="ruleDaysError" class="global-field-error" data-error-for="ruleDaysGroup"
+                                    aria-hidden="true">
                                 </div>
                             </div>
                         </div>
 
-                        <div class="modal-section rule-notes-section m-0 flex-1 flex flex-col" data-global-field>
+                        <div class="info-card modal-form-section m-0 flex-1" data-global-field>
 
-                            <div class="modal-section-head">
+                            <div class="modal-section-heading">
                                 <div class="modal-section-icon">
                                     <i class="fa-solid fa-note-sticky"></i>
                                 </div>
 
                                 <div>
-                                    <div class="modal-section-title">
+                                    <h4>
                                         Additional Notes
-                                    </div>
+                                    </h4>
 
-                                    <div class="modal-section-sub">
+                                    <p>
                                         Optional reminder or exception.
-                                    </div>
+                                    </p>
                                 </div>
                             </div>
 
                             <div class="global-label-row">
                                 <label class="form-label" for="ruleNotes">
-                                    Notes (optional)
+                                    Notes
+                                    <span class="field-optional">(Optional)</span>
                                 </label>
-
-                                <span id="ruleNotesCount" class="char-counter">
-                                    0 / 150 characters
-                                </span>
                             </div>
 
-                            <div class="voice-search-row rule-notes-field mb-2" data-voice-field>
+                            <div class="global-voice-row is-textarea rule-notes-field mb-2" data-voice-field>
 
-                                <div class="global-control-wrap global-form-textarea-wrap rule-notes-textarea-wrap"
-                                    data-clearable-field>
+                                <div class="global-voice-control" data-clearable-field>
 
-                                    <textarea id="ruleNotes" name="notes"
-                                        class="form-ctrl resize-none rule-notes-textarea no-voice" maxlength="150"
-                                        data-char-limit="150" data-char-counter="#ruleNotesCount"
-                                        placeholder="e.g. Reduced operations due to holiday program."
-                                        data-clearable-input></textarea>
+                                    <div class="global-form-textarea-wrap rule-notes-textarea-wrap">
 
-                                    <button type="button" id="ruleNotesClearBtn"
-                                        class="search-clear field-clear-btn field-clear-btn--textarea" data-field-clear
-                                        aria-label="Clear notes" title="Clear notes">
+                                        <textarea id="ruleNotes" name="notes" class="form-input-custom global-form-textarea rule-notes-textarea"
+                                            maxlength="150" data-char-limit="150" data-char-counter="#ruleNotesCount"
+                                            placeholder="e.g. Reduced operations due to holiday program." data-clearable-input></textarea>
 
-                                        <i class="fa-solid fa-xmark"></i>
-                                    </button>
+                                        <button type="button" id="ruleNotesClearBtn"
+                                            class="search-clear field-clear-btn field-clear-btn--textarea" data-field-clear
+                                            aria-label="Clear notes" title="Clear notes">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
+
+                                        <span id="ruleNotesCount" class="char-counter">
+                                            0 / 150 characters
+                                        </span>
+
+                                    </div>
                                 </div>
 
                                 <x-voice-input target="#ruleNotes" status-id="ruleNotesVoiceStatus"
                                     label="Voice input for schedule notes" title="Voice input" />
+
+                            </div>
+
+                            <div id="ruleNotesError" class="global-field-error" data-error-for="ruleNotes"
+                                aria-hidden="true">
                             </div>
                         </div>
                     </div>
 
                     <div class="flex flex-col h-full">
-                        <div class="modal-section m-0 flex-1">
-                            <div class="modal-section-head">
+                        <div class="info-card modal-form-section m-0 flex-1">
+                            <div class="modal-section-heading">
                                 <div class="modal-section-icon">
                                     <i class="fa-solid fa-hospital-user"></i>
                                 </div>
 
                                 <div>
-                                    <div class="modal-section-title">
+                                    <h4>
                                         Clinic Availability
-                                    </div>
+                                    </h4>
 
-                                    <div class="modal-section-sub">
+                                    <p>
                                         Define whether the clinic is open, closed, or limited.
-                                    </div>
+                                    </p>
                                 </div>
                             </div>
 
-                            <div class="mb-5" data-global-field>
-                                <label class="form-label" for="ruleStatus">
-                                    Clinic Status
-                                </label>
+                            <div class="modal-form-grid">
+                                <div data-global-field>
+                                    <label class="form-label" for="ruleActivationState">
+                                        Schedule State
+                                    </label>
 
-                                <select id="ruleStatus" class="form-ctrl form-sel js-custom-select"
-                                    data-placeholder="Select clinic status" onchange="toggleStatusFields(this.value)">
-                                    <option value="open">Open</option>
-                                    <option value="closed">Closed</option>
-                                    <option value="limited">Limited Hours</option>
-                                </select>
-                            </div>
+                                    <x-select id="ruleActivationState" data-placeholder="Select schedule state">
+                                        <option value="0" selected>
+                                            Inactive
+                                        </option>
 
-                            <div id="ruleTimeFields" class="rule-availability-grid">
+                                        <option value="1">
+                                            Active
+                                        </option>
+                                    </x-select>
 
-                                <div class="space-y-5">
-                                    <div class="rule-time-select-grid">
+                                    <div class="field-help">
+                                        New schedule rules start as Inactive. Active rules cannot share the same
+                                        weekday with another active rule.
+                                    </div>
+
+                                    <div id="ruleStateError" class="global-field-error"
+                                        data-error-for="ruleActivationState" aria-hidden="true">
+                                    </div>
+                                </div>
+
+                                <div data-global-field>
+                                    <label class="form-label" for="ruleStatus">
+                                        Clinic Status
+                                    </label>
+
+                                    <x-select id="ruleStatus" data-placeholder="Select clinic status"
+                                        data-ui-change="action-958c6da8d111">
+                                        <option value="open">
+                                            Open
+                                        </option>
+
+                                        <option value="closed">
+                                            Closed
+                                        </option>
+
+                                        <option value="limited">
+                                            Limited Hours
+                                        </option>
+                                    </x-select>
+
+                                    <div id="ruleStatusError" class="global-field-error" data-error-for="ruleStatus"
+                                        aria-hidden="true">
+                                    </div>
+                                </div>
+
+                                <div id="ruleTimeFields" class="modal-form-grid">
+
+                                    <div class="modal-form-grid-2">
 
                                         <div data-global-field>
                                             <label class="form-label" for="ruleOpenTime">
                                                 Opening Time
                                             </label>
 
-                                            <select id="ruleOpenTime" class="form-ctrl form-sel js-custom-select"
-                                                data-placeholder="Select opening time">
+                                            <x-select id="ruleOpenTime" data-placeholder="Select opening time">
                                                 <option value="07:00">7:00 AM</option>
                                                 <option value="08:00">8:00 AM</option>
                                                 <option value="09:00" selected>9:00 AM</option>
                                                 <option value="10:00">10:00 AM</option>
-                                            </select>
+                                            </x-select>
+
+                                            <div id="ruleOpenTimeError" class="global-field-error"
+                                                data-error-for="ruleOpenTime" aria-hidden="true">
+                                            </div>
                                         </div>
 
-                                        <div class="rule-closing-time-field" data-global-field>
+
+                                        <div data-global-field>
                                             <label class="form-label" for="ruleCloseTime">
                                                 Closing Time
                                             </label>
 
-                                            <select id="ruleCloseTime" class="form-ctrl form-sel js-custom-select"
-                                                data-placeholder="Select closing time">
+                                            <x-select id="ruleCloseTime" data-placeholder="Select closing time">
                                                 <option value="15:00">3:00 PM</option>
                                                 <option value="16:00">4:00 PM</option>
                                                 <option value="17:00" selected>5:00 PM</option>
                                                 <option value="18:00">6:00 PM</option>
-                                            </select>
+                                            </x-select>
+
+                                            <div id="ruleCloseTimeError" class="global-field-error"
+                                                data-error-for="ruleCloseTime" aria-hidden="true">
+                                            </div>
                                         </div>
+
                                     </div>
+
 
                                     <div data-global-field>
                                         <label class="form-label" for="ruleMaxSlots">
                                             Max Appointments / Day
                                         </label>
 
-                                        <div class="global-number-stepper mt-1" data-global-number-stepper>
+                                        <x-number-stepper id="ruleMaxSlots" value="5" min="1" max="30"
+                                            step="1" wrapper-class="mt-1"
+                                            decrease-label="Decrease maximum appointments"
+                                            increase-label="Increase maximum appointments" autocomplete="off"
+                                            data-field-label="Max Appointments" data-validation-rule="wholeNumber" />
 
-                                            <button type="button" class="global-number-stepper-btn"
-                                                data-number-step="-1" aria-label="Decrease maximum appointments">
-
-                                                <i class="fa-solid fa-minus"></i>
-                                            </button>
-
-                                            <input type="number" id="ruleMaxSlots" class="global-number-stepper-input"
-                                                value="5" min="1" max="30" step="1" inputmode="numeric"
-                                                autocomplete="off" data-number-stepper-input
-                                                data-field-label="Max Appointments" data-validation-rule="wholeNumber">
-
-                                            <button type="button" class="global-number-stepper-btn" data-number-step="1"
-                                                aria-label="Increase maximum appointments">
-
-                                                <i class="fa-solid fa-plus"></i>
-                                            </button>
+                                        <div id="ruleMaxSlotsError" class="global-field-error"
+                                            data-error-for="ruleMaxSlots" aria-hidden="true">
                                         </div>
 
-                                        <div class="form-help">
-                                            Set how many appointments may be accepted.
+                                        <div class="field-help">
+                                            Set how many appointments may be accepted per day, from 1 to 30.
                                         </div>
                                     </div>
-                                </div>
 
-                                <div data-global-field>
-                                    <label class="form-label">
-                                        Lunch Break
-                                    </label>
+                                    <div data-global-field>
+                                        <label class="form-label" for="ruleSlotDuration">
+                                            Slot Duration (minutes)
+                                        </label>
 
-                                    <div id="ruleBreakGroup" class="break-chip-group break-chip-stack">
+                                        <x-number-stepper id="ruleSlotDuration" value="60" min="5"
+                                            max="240" step="5" wrapper-class="mt-1"
+                                            decrease-label="Decrease slot duration"
+                                            increase-label="Increase slot duration" autocomplete="off"
+                                            data-field-label="Slot Duration" data-validation-rule="wholeNumber" />
 
-                                        <button type="button" class="break-chip selected" data-val="12:00-13:00"
-                                            data-discard-track data-discard-key="schedule-break-12-13"
-                                            data-discard-value="true" onclick="selectBreak(this)">
-                                            12:00 – 1:00 PM
-                                        </button>
+                                        <div id="ruleSlotDurationError" class="global-field-error"
+                                            data-error-for="ruleSlotDuration" aria-hidden="true">
+                                        </div>
 
-                                        <button type="button" class="break-chip" data-val="13:00-14:00"
-                                            data-discard-track data-discard-key="schedule-break-13-14"
-                                            data-discard-value="false" onclick="selectBreak(this)">
-                                            1:00 – 2:00 PM
-                                        </button>
-
-                                        <button type="button" class="break-chip" data-val="none" data-discard-track
-                                            data-discard-key="schedule-break-none" data-discard-value="false"
-                                            onclick="selectBreak(this)">
-                                            <i class="fa-solid fa-ban text-[10px]"></i>
-                                            No Break
-                                        </button>
+                                        <div class="field-help">
+                                            Choose how long each regular appointment slot lasts, in 5-minute increments.
+                                        </div>
                                     </div>
+
+                                    <div data-global-field>
+                                        <label class="form-label">
+                                            Lunch Break
+                                        </label>
+
+                                        <div id="ruleBreakGroup" class="break-chip-group">
+
+                                            <button type="button" class="break-chip selected" data-val="12:00-13:00"
+                                                data-discard-track data-discard-key="schedule-break-12-13"
+                                                data-discard-value="true" data-ui-click="action-f9d97e5305b3">
+                                                12:00 – 1:00 PM
+                                            </button>
+
+                                            <button type="button" class="break-chip" data-val="13:00-14:00"
+                                                data-discard-track data-discard-key="schedule-break-13-14"
+                                                data-discard-value="false" data-ui-click="action-f9d97e5305b3">
+                                                1:00 – 2:00 PM
+                                            </button>
+
+                                            <button type="button" class="break-chip" data-val="none" data-discard-track
+                                                data-discard-key="schedule-break-none" data-discard-value="false"
+                                                data-ui-click="action-f9d97e5305b3">
+
+                                                <i class="fa-solid fa-ban text-[10px]"></i>
+                                                No Break
+                                            </button>
+
+                                        </div>
+                                    </div>
+
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="modal-ft rule-modal-footer">
-                    <button type="button" class="ui-btn ui-btn-secondary" data-discard-close="ruleModalBackdrop">
+                <div class="modal-ft modal-sticky-footer">
+                    <x-button type="button" variant="secondary" data-discard-close="ruleModalBackdrop">
                         Cancel
-                    </button>
+                    </x-button>
 
-                    <button type="button" onclick="submitRule()" id="ruleSubmitBtn" class="ui-btn ui-btn-primary">
-                        <i class="fa-solid fa-floppy-disk"></i>
-                        <span id="ruleSubmitText">Save Rule</span>
-                    </button>
+                    <x-button id="ruleSubmitBtn" type="button" variant="primary" icon="fa-solid fa-floppy-disk"
+                        data-ui-click="action-2f4c982ff581">
+                        <span id="ruleSubmitText">
+                            Save Rule
+                        </span>
+                    </x-button>
                 </div>
             </form>
         </div>
     </div>
-</div>
 
-<div id="blockModalBackdrop" class="ui-modal modal-theme-danger cs-modal cs-block-modal" aria-hidden="true">
+    <div id="blockModalBackdrop" class="ui-modal modal-theme-danger" aria-hidden="true">
 
-    <form id="blockDateForm" action="{{ route($clinicScheduleRouteNames['block']) }}" method="POST"
-        class="ui-modal-card modal-lg modal-card-form cs-modal-card cs-block-modal-card" role="dialog" aria-modal="true"
-        aria-labelledby="blockDateModalTitle" data-global-validation data-discard-form
-        data-discard-title="Discard blocked date?" data-discard-subtitle="You have unsaved blocked-date details."
-        data-discard-message="Closing this modal will remove the blocked-date details you entered." novalidate>
+        <form id="blockDateForm" action="{{ route($clinicScheduleRouteNames['block']) }}" method="POST"
+            class="ui-modal-card modal-md modal-card-form" role="dialog" aria-modal="true"
+            aria-labelledby="blockDateModalTitle" data-global-validation data-discard-form
+            data-discard-title="Discard blocked date?" data-discard-subtitle="You have unsaved blocked-date details."
+            data-discard-message="Closing this modal will remove the blocked-date details you entered."
+            data-ui-click="action-22499e15f3ee" novalidate>
+            @csrf
 
-        @csrf
+            <div class="modal-hd">
+                <div class="modal-heading">
+                    <div class="modal-icon">
+                        <i class="fa-solid fa-calendar-xmark"></i>
+                    </div>
 
-        <div class="modal-hd">
+                    <div class="modal-copy">
+                        <h3 class="modal-title" id="blockDateModalTitle">
+                            Block Date
+                        </h3>
+
+                        <p class="modal-subtitle">
+                            Prevent appointments from being booked on a specific date.
+                        </p>
+                    </div>
+                </div>
+
+                <button type="button" class="modal-x" data-discard-close="blockModalBackdrop"
+                    aria-label="Close block date modal">
+
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="modal-bd modal-scroll-body">
+                <div class="info-card modal-form-section">
+                    <div class="modal-section-heading">
+                        <div class="modal-section-icon">
+                            <i class="fa-solid fa-calendar-xmark"></i>
+                        </div>
+
+                        <div>
+                            <h4>
+                                Date Details
+                            </h4>
+
+                            <p>
+                                Choose the blocked date and specify the reason.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="mb-4" data-global-field>
+
+                        <label class="form-label" for="blockDate">
+
+                            Date
+                            <span class="required-mark">*</span>
+                        </label>
+
+                        <div class="fp-date-input-wrap">
+                            <input type="text" id="blockDate" name="date"
+                                class="form-input-custom fp-date-input js-flatpickr-date-min-today"
+                                data-flatpickr-append-to-body min="{{ date('Y-m-d') }}" data-field-label="Date"
+                                data-required-message="Please select a date." data-validation-rule="clinicFutureOrToday"
+                                placeholder="Select blocked date" required readonly>
+                            <i class="fa-solid fa-calendar-days fp-date-icon"></i>
+                        </div>
+                        <div id="blockDateError" class="global-field-error" data-error-for="blockDate"
+                            aria-hidden="true">
+                        </div>
+                    </div>
+
+                    <div class="mb-4" data-global-field>
+
+                        <label class="form-label" for="blockReason">
+                            Reason
+                            <span class="required-mark">*</span>
+                        </label>
+
+                        <x-select id="blockReason" name="reason" required data-placeholder="Select reason"
+                            data-field-label="Reason">
+                            <option value="Holiday">
+                                Holiday
+                            </option>
+
+                            <option value="Dentist Unavailable">
+                                Dentist Unavailable
+                            </option>
+
+                            <option value="Clinic Maintenance">
+                                Clinic Maintenance
+                            </option>
+
+                            <option value="Special Event">
+                                Special Event
+                            </option>
+
+                            <option value="Other">
+                                Other
+                            </option>
+                        </x-select>
+
+                        <div id="blockReasonError" class="global-field-error" data-error-for="blockReason"
+                            aria-hidden="true">
+                        </div>
+                    </div>
+
+                    <div data-global-field>
+
+                        <div class="global-label-row">
+                            <label class="form-label" for="blockNote">
+                                Notes
+                                <span class="field-optional">(Optional)</span>
+                            </label>
+
+                            <span id="blockNoteCount" class="char-counter">
+                                0 / 150 characters
+                            </span>
+                        </div>
+
+                        <div class="global-voice-row">
+                            <div class="global-voice-control">
+
+                                <input type="text" id="blockNote" name="note" class="form-input-custom"
+                                    maxlength="150" data-char-limit="150" data-char-counter="#blockNoteCount"
+                                    placeholder="e.g. National holiday, maintenance, outreach event...">
+
+                            </div>
+
+                            <x-voice-input target="#blockNote" status-id="blockNoteVoiceStatus"
+                                label="Voice input for blocked date note" title="Voice input" />
+                        </div>
+
+                        <div id="blockNoteError" class="global-field-error" data-error-for="blockNote"
+                            aria-hidden="true">
+                        </div>
+
+                        <div class="field-help">
+                            Add extra context for admins viewing blocked dates later.
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-ft modal-sticky-footer">
+                <x-button type="button" variant="secondary" data-discard-close="blockModalBackdrop">
+                    Cancel
+                </x-button>
+
+                <x-button type="submit" variant="primary">
+                    Block Date
+                </x-button>
+            </div>
+        </form>
+    </div>
+
+    <x-modal id="reservedPeriodModalBackdrop" title="Create Reserved Booking Period" title-id="reservedPeriodModalTitle"
+        size="xl" class="modal-theme-primary" body-class="modal-scroll-body" form-id="reservedPeriodForm"
+        form-class="modal-card-form" :card-attributes="[
+            'data-ui-click' => 'action-22499e15f3ee',
+        ]" :form-attributes="[
+            'method' => 'POST',
+            'action' => route($clinicScheduleRouteNames['reserved_store']),
+            'data-global-validation' => '',
+            'data-form-validation-rule' => 'reservedBookingPeriod',
+        
+            'data-discard-form' => '',
+            'data-discard-title' => 'Discard reserved period changes?',
+            'data-discard-subtitle' => 'You have unsaved reserved booking period details.',
+            'data-discard-message' =>
+                'Closing this modal will remove the reserved period details you entered. Do you want to discard your changes?',
+        
+            'novalidate' => '',
+        ]">
+
+        <x-slot:header>
             <div class="modal-heading">
                 <div class="modal-icon">
-                    <i class="fa-solid fa-calendar-xmark"></i>
+                    <i id="reservedPeriodModalIcon" class="fa-solid fa-calendar-check">
+                    </i>
                 </div>
 
                 <div class="modal-copy">
-                    <h3 class="modal-title" id="blockDateModalTitle">
-                        Block Date
+                    <h3 id="reservedPeriodModalTitle" class="modal-title">
+                        Create Reserved Booking Period
                     </h3>
 
-                    <p class="modal-subtitle">
-                        Prevent appointments from being booked on a specific date.
+                    <p id="reservedPeriodModalSubtitle" class="modal-subtitle">
+                        Reserve part of a clinic day for a selected patient group.
                     </p>
                 </div>
             </div>
 
-            <button type="button" class="modal-x" data-discard-close="blockModalBackdrop"
-                aria-label="Close block date modal">
-
-                <i class="fa-solid fa-xmark"></i>
+            <button type="button" class="modal-x" data-discard-close="reservedPeriodModalBackdrop"
+                aria-label="Close reserved period modal">
+                <i class="fa-solid fa-xmark" aria-hidden="true">
+                </i>
             </button>
-        </div>
+        </x-slot:header>
 
-        <div class="modal-bd">
-            <div class="modal-section">
-                <div class="modal-section-head">
+        @csrf
+        <div id="reservedPeriodMethodField"></div>
+        <input id="reservedPeriodId" type="hidden" name="reserved_period_id">
+        <input type="hidden" name="allowed_services_present" value="1">
+
+        <div class="modal-form-grid-2">
+            <div class="info-card modal-form-section">
+                <div class="modal-section-heading">
                     <div class="modal-section-icon">
-                        <i class="fa-solid fa-calendar-xmark"></i>
+                        <i class="fa-solid fa-calendar-day"></i>
                     </div>
-
                     <div>
-                        <div class="modal-section-title">
-                            Date Details
-                        </div>
-
-                        <div class="modal-section-sub">
-                            Choose the blocked date and specify the reason.
-                        </div>
+                        <h4>Period Details</h4>
+                        <p>Set the purpose, date, and reserved hours.</p>
                     </div>
                 </div>
 
-                <div class="mb-4" data-global-field>
+                <div class="space-y-4">
+                    <div data-global-field>
+                        <label for="reservedTitle" class="form-label">Purpose <span class="text-red-500">*</span></label>
+                        <div class="global-voice-row" data-voice-field>
+                            <div class="global-voice-control">
+                                <input id="reservedTitle" name="title" type="text" maxlength="120" required
+                                    class="form-input-custom @error('title', 'reservedPeriod') is-invalid @enderror"
+                                    data-field-label="Purpose" placeholder="e.g. Mandatory Oral Check-up">
+                            </div>
 
-                    <label class="form-label" for="blockDate">
-
-                        Date
-                        <span class="required-mark">*</span>
-                    </label>
-
-                    <div class="fp-date-input-wrap">
-                        <input type="text" id="blockDate" name="date"
-                            class="form-ctrl fp-date-input js-flatpickr-date-min-today" min="{{ date('Y-m-d') }}"
-                            data-field-label="Date" data-required-message="Please select a date."
-                            data-validation-rule="clinicFutureOrToday" placeholder="Select blocked date" required
-                            readonly>
-
-                        <i class="fa-solid fa-calendar-days fp-date-icon"></i>
+                            <x-voice-input target="#reservedTitle" status-id="reservedTitleVoiceStatus"
+                                label="Voice input for reserved period purpose" title="Voice input" />
+                        </div>
+                        <div class="global-field-error @error('title', 'reservedPeriod') show @enderror"
+                            data-error-for="reservedTitle"
+                            aria-hidden="{{ $reservedErrors->has('title') ? 'false' : 'true' }}">
+                            @error('title', 'reservedPeriod')
+                                {{ $message }}
+                            @enderror
+                        </div>
                     </div>
-                </div>
 
-                <div class="mb-4" data-global-field>
-
-                    <label class="form-label" for="blockReason">
-
-                        Reason
-                        <span class="required-mark">*</span>
-                    </label>
-
-                    <select id="blockReason" name="reason" class="form-ctrl form-sel js-custom-select"
-                        data-placeholder="Select reason" data-field-label="Reason" required>
-
-                        <option value="Holiday">Holiday</option>
-                        <option value="Dentist Unavailable">
-                            Dentist Unavailable
-                        </option>
-                        <option value="Clinic Maintenance">
-                            Clinic Maintenance
-                        </option>
-                        <option value="Special Event">
-                            Special Event
-                        </option>
-                        <option value="Other">Other</option>
-                    </select>
-                </div>
-
-                <div data-global-field>
-                    <div class="global-label-row">
-                        <label class="form-label" for="blockNote">
-                            Note (optional)
+                    <div data-global-field>
+                        <label for="reservedDate" class="form-label">
+                            Date
+                            <span class="text-red-500">*</span>
                         </label>
 
-                        <span id="blockNoteCount" class="char-counter">
-                            0 / 150 characters
-                        </span>
-                    </div>
-
-                    <div class="global-voice-row">
-                        <div class="global-voice-control">
-                            <input type="text" id="blockNote" name="note" class="form-ctrl" maxlength="150"
-                                data-char-limit="150" data-char-counter="#blockNoteCount"
-                                placeholder="e.g. National holiday, maintenance, outreach event...">
+                        <div class="fp-date-input-wrap" data-flatpickr-trigger>
+                            <input id="reservedDate" name="reserved_date" type="text" required readonly
+                                data-field-label="Date"
+                                class="form-input-custom fp-date-input js-flatpickr-date-min-today @error('reserved_date', 'reservedPeriod') is-invalid @enderror"
+                                data-flatpickr-append-to-body
+                                data-flatpickr-disabled-date-tooltip="This date already has an active reserved booking period"
+                                data-flatpickr-disabled-dates='[]' placeholder="Select date">
                         </div>
 
-                        <x-voice-input target="#blockNote" status-id="blockNoteVoiceStatus"
-                            label="Voice input for blocked date note" title="Voice input" />
+                        <div class="global-field-error @error('reserved_date', 'reservedPeriod') show @enderror"
+                            data-error-for="reservedDate"
+                            aria-hidden="{{ $reservedErrors->has('reserved_date') ? 'false' : 'true' }}">
+                            @error('reserved_date', 'reservedPeriod')
+                                {{ $message }}
+                            @enderror
+                        </div>
                     </div>
 
-                    <div class="form-help">
-                        Add extra context for admins viewing blocked dates later.
+                    <div class="modal-form-grid-2">
+                        <div data-global-field>
+                            <label for="reservedStartTime" class="form-label">Start Time <span
+                                    class="required-mark">*</span></label>
+
+                            <div class="global-control-wrap reserved-time-control" data-flatpickr-trigger>
+                                <i class="fa-regular fa-clock global-control-icon" aria-hidden="true">
+                                </i>
+
+                                <input id="reservedStartTime" name="start_time" type="text" required readonly
+                                    data-field-label="Start Time" data-flatpickr-append-to-body
+                                    class="form-input-custom global-form-icon js-flatpickr-time @error('start_time', 'reservedPeriod') is-invalid @enderror"
+                                    placeholder="Select start time">
+                            </div>
+
+                            <div class="global-field-error @error('start_time', 'reservedPeriod') show @enderror"
+                                data-error-for="reservedStartTime"
+                                aria-hidden="{{ $reservedErrors->has('start_time') ? 'false' : 'true' }}">
+                                @error('start_time', 'reservedPeriod')
+                                    {{ $message }}
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div data-global-field>
+                            <label for="reservedEndTime" class="form-label">End Time <span
+                                    class="required-mark">*</span></label>
+
+                            <div class="global-control-wrap reserved-time-control" data-flatpickr-trigger>
+                                <i class="fa-regular fa-clock global-control-icon" aria-hidden="true">
+                                </i>
+
+                                <input id="reservedEndTime" name="end_time" type="text" required readonly
+                                    data-field-label="End Time" data-flatpickr-append-to-body
+                                    class="form-input-custom global-form-icon js-flatpickr-time @error('end_time', 'reservedPeriod') is-invalid @enderror"
+                                    placeholder="Select end time">
+                            </div>
+
+                            <div class="global-field-error @error('end_time', 'reservedPeriod') show @enderror"
+                                data-error-for="reservedEndTime"
+                                aria-hidden="{{ $reservedErrors->has('end_time') ? 'false' : 'true' }}">
+                                @error('end_time', 'reservedPeriod')
+                                    {{ $message }}
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    <div data-global-field>
+                        <span class="form-label">Patient chooses <span class="text-red-500">*</span></span>
+                        <div id="reservedBookingModeGroup" class="reserved-booking-mode-grid">
+                            <label class="reserved-booking-mode-card">
+                                <input type="radio" name="booking_mode" value="timeslot" required
+                                    data-ui-change="action-75f748f7e0aa">
+                                <span class="reserved-booking-mode-icon"><i class="fa-regular fa-clock"></i></span>
+                                <span>
+                                    <strong>Date & timeslot</strong>
+                                    <small>Patient selects an available time.</small>
+                                </span>
+                            </label>
+                            <label class="reserved-booking-mode-card">
+                                <input type="radio" name="booking_mode" value="date_only" required
+                                    data-ui-change="action-75f748f7e0aa">
+                                <span class="reserved-booking-mode-icon"><i class="fa-solid fa-list-ol"></i></span>
+                                <span>
+                                    <strong>Date only</strong>
+                                    <small>Queue-based within the period.</small>
+                                </span>
+                            </label>
+                        </div>
+                        <div class="global-field-error @error('booking_mode', 'reservedPeriod') show @enderror"
+                            data-error-for="reserved-booking-mode"
+                            aria-hidden="{{ $reservedErrors->has('booking_mode') ? 'false' : 'true' }}">
+                            @error('booking_mode', 'reservedPeriod')
+                                {{ $message }}
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div data-global-field>
+                        <label for="reservedActivationState" class="form-label">Period State <span
+                                class="text-red-500">*</span></label>
+                        <x-select id="reservedActivationState" name="is_active" required
+                            class="{{ $reservedErrors->has('is_active') ? 'is-invalid' : '' }}"
+                            data-placeholder="Select period state" data-field-label="Period State"
+                            data-ui-change="action-e5dcc598a9fd">
+                            <option value="0" selected>
+                                Inactive
+                            </option>
+
+                            <option value="1">
+                                Active
+                            </option>
+                        </x-select>
+                        <p class="field-help">
+                            Inactive saves the setup only. Active reserves the selected date and time and sends
+                            booking notifications to eligible users.
+                        </p>
+                        <div class="global-field-error @error('is_active', 'reservedPeriod') show @enderror"
+                            data-error-for="reservedActivationState"
+                            aria-hidden="{{ $reservedErrors->has('is_active') ? 'false' : 'true' }}">
+                            @error('is_active', 'reservedPeriod')
+                                {{ $message }}
+                            @enderror
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-card modal-form-section">
+                <div class="modal-section-heading">
+                    <div class="modal-section-icon">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                    <div>
+                        <h4>Target & Capacity</h4>
+                        <p>Choose who may book and limit the available places.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div data-global-field>
+                        <label for="reservedPatientType" class="form-label">Patient Type <span
+                                class="text-red-500">*</span></label>
+                        <x-select id="reservedPatientType" name="target_patient_type" required
+                            data-field-label="Patient Type" data-placeholder="Select patient type"
+                            data-ui-change="action-6aebdfee76f3">
+                            <option value="student">
+                                Student
+                            </option>
+
+                            <option value="faculty">
+                                Faculty
+                            </option>
+
+                            <option value="administrative">
+                                Administrative
+                            </option>
+
+                            <option value="guest">
+                                Guest
+                            </option>
+                        </x-select>
+                        @error('target_patient_type', 'reservedPeriod')
+                            <p class="global-field-error show">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div id="reservedStudentFields" class="info-card modal-form-grid">
+                        <div data-global-field>
+                            <label for="reservedProgramCode" class="form-label">Program <span
+                                    class="required-mark">*</span></label>
+
+                            <x-select id="reservedProgramCode" name="program_code" data-field-label="Program"
+                                data-placeholder="Select program" data-ui-change="action-14444081b07c">
+                                <option value="">
+                                    Select program
+                                </option>
+
+                                @foreach ($studentTargetOptions->unique('course_code') as $studentOption)
+                                    <option value="{{ $studentOption['course_code'] }}">
+                                        {{ $studentOption['course_code'] }}{{ $studentOption['course_name'] && $studentOption['course_name'] !== $studentOption['course_code'] ? ' — ' . $studentOption['course_name'] : '' }}
+                                    </option>
+                                @endforeach
+                            </x-select>
+                            <p class="field-help">Programs are loaded from the student information system.</p>
+                            @error('program_code', 'reservedPeriod')
+                                <p class="global-field-error show">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="modal-form-grid-2">
+                            <div data-global-field>
+                                <label for="reservedYearLevel" class="form-label">Year Level <span
+                                        class="required-mark">*</span></label>
+
+                                <x-select id="reservedYearLevel" name="year_level"
+                                    data-placeholder="Select year level" data-field-label="Year Level"
+                                    data-ui-change="action-a626fa8e15ce">
+                                    <option value="">
+                                        Select year
+                                    </option>
+
+                                    @foreach ($studentTargetOptions->pluck('year_level')->filter()->unique()->sort() as $year)
+                                        <option value="{{ $year }}">
+                                            Year {{ $year }}
+                                        </option>
+                                    @endforeach
+                                </x-select>
+
+                                @error('year_level', 'reservedPeriod')
+                                    <p class="global-field-error show">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div data-global-field>
+                                <label for="reservedSection" class="form-label">Section <span
+                                        class="required-mark">*</span></label>
+                                <x-select id="reservedSection" name="section" data-field-label="Section"
+                                    data-placeholder="Select section">
+                                    <option value="">
+                                        Select section
+                                    </option>
+
+                                    @foreach ($studentTargetOptions->pluck('section')->filter()->unique() as $sectionOption)
+                                        <option value="{{ $sectionOption }}">
+                                            {{ $sectionOption }}
+                                        </option>
+                                    @endforeach
+                                </x-select>
+                                @error('section', 'reservedPeriod')
+                                    <p class="global-field-error show">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="reservedOverallCapacityField" data-global-field hidden>
+                        <label for="reservedMaxCapacity" class="form-label">Maximum Capacity <span
+                                class="required-mark">*</span></label>
+                        <x-number-stepper id="reservedMaxCapacity" name="max_capacity" value="10" min="1"
+                            :max="\App\Models\ReservedBookingPeriod::MAX_CAPACITY" step="1" required wrapper-class="reserved-capacity-stepper"
+                            decrease-label="Decrease maximum capacity" increase-label="Increase maximum capacity"
+                            data-field-label="Maximum Capacity" />
+                        <p class="field-help">Maximum eligible patients who can book this period, up to
+                            {{ \App\Models\ReservedBookingPeriod::MAX_CAPACITY }}.</p>
+                        @error('max_capacity', 'reservedPeriod')
+                            <p class="global-field-error show">{{ $message }}</p>
+                        @enderror
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="modal-ft">
-            <button type="button" class="ui-btn ui-btn-secondary" data-discard-close="blockModalBackdrop">
+        <div class="info-card modal-form-section mt-5" data-global-field>
+            <div class="modal-section-heading">
+                <div class="modal-section-icon">
+                    <i class="fa-solid fa-tooth"></i>
+                </div>
+                <div>
+                    <h4>
+                        Allowed Dental Services
+                    </h4>
+                    <span class="required-mark">*</span>
+                    <p>
+                        Select every service patients may choose during this reserved period.
+                    </p>
+                </div>
+            </div>
 
-                Cancel
-            </button>
-
-            <button type="submit" class="ui-btn ui-btn-danger">
-
-                <i class="fa-solid fa-ban"></i>
-                <span>Block Date</span>
-            </button>
+            <div id="reservedAllowedServicesGroup" class="global-choice-group">
+                @foreach ($serviceTypes as $serviceType)
+                    <label class="global-choice-card">
+                        <input type="checkbox" name="allowed_services[]" value="{{ $serviceType->name }}"
+                            class="global-choice-input" data-reserved-service>
+                        <span class="global-choice-indicator">
+                            <i class="fa-solid fa-check"></i>
+                        </span>
+                        <span class="global-choice-copy">
+                            <span class="global-choice-title">{{ $serviceType->name }}</span>
+                            <span class="global-choice-description">
+                                {{ $serviceType->description ?: 'Available dental service.' }}
+                            </span>
+                        </span>
+                    </label>
+                @endforeach
+            </div>
+            <p class="field-help">Only these services will appear when an eligible patient books this period.
+            </p>
+            <div class="global-field-error @error('allowed_services', 'reservedPeriod') show @enderror"
+                data-error-for="reserved-allowed-services"
+                aria-hidden="{{ $reservedErrors->has('allowed_services') || $reservedErrors->has('allowed_services.*') ? 'false' : 'true' }}">
+                @if ($reservedErrors->has('allowed_services') || $reservedErrors->has('allowed_services.*'))
+                    {{ $reservedErrors->first('allowed_services') ?: $reservedErrors->first('allowed_services.*') }}
+                @endif
+            </div>
         </div>
-    </form>
-</div>
 
-<x-delete-confirm-modal id="scheduleDeleteModal" form-id="scheduleDeleteForm" name-id="scheduleDeleteName"
-    title="Delete Schedule Rule" helper="This schedule rule will be permanently removed." />
+        <div class="info-card modal-form-section mt-5" data-global-field>
+            <div class="modal-section-heading">
+                <div class="modal-section-icon">
+                    <i class="fa-solid fa-note-sticky"></i>
+                </div>
+
+                <div>
+                    <h4>
+                        Additional Notes
+                    </h4>
+
+                    <p>
+                        Add optional instructions for this reserved booking period.
+                    </p>
+                </div>
+            </div>
+
+            <div class="global-label-row">
+                <label for="reservedNotes" class="form-label">
+                    Notes
+                    <span class="field-optional">(Optional)</span>
+                </label>
+
+                <span id="reservedNotesCount" class="char-counter">
+                    0 / 500 characters
+                </span>
+            </div>
+
+            <div class="global-voice-row" data-voice-field>
+                <div class="global-voice-control">
+                    <div class="global-form-textarea-wrap">
+                        <textarea id="reservedNotes" name="notes" maxlength="500" rows="3"
+                            class="form-input-custom global-form-textarea" data-char-limit="500" data-char-counter="#reservedNotesCount"
+                            data-field-label="Notes" placeholder="Internal instructions for this reserved period.">{{ old('notes') }}</textarea>
+                    </div>
+                </div>
+
+                <x-voice-input target="#reservedNotes" status-id="reservedNotesVoiceStatus"
+                    label="Voice input for reserved period notes" title="Voice input" />
+            </div>
+
+            <div class="global-field-error @error('notes', 'reservedPeriod') show @enderror"
+                data-error-for="reservedNotes" aria-hidden="{{ $reservedErrors->has('notes') ? 'false' : 'true' }}">
+                @error('notes', 'reservedPeriod')
+                    {{ $message }}
+                @enderror
+            </div>
+        </div>
+
+        <div id="reservedTimeslotBuilder" class="info-card modal-form-section mt-5">
+            <div class="modal-section-heading reserved-timeslot-heading">
+                <div class="modal-section-icon">
+                    <i class="fa-solid fa-clock"></i>
+                </div>
+                <div>
+                    <h4>Selectable Timeslots</h4>
+                    <p>Create up to
+                        {{ \App\Models\ReservedBookingPeriod::MAX_CAPACITY }} times patients can choose. Each
+                        timeslot is for one patient.</p>
+                </div>
+                <div class="reserved-timeslot-total">
+                    <span id="reservedTimeslotTotal">0</span>
+                    <small>total patients</small>
+                </div>
+            </div>
+
+            <div class="reserved-timeslot-add-row">
+                <div data-global-field>
+                    <label for="reservedSlotDuration" class="form-label">
+                        Duration (minutes)
+                    </label>
+
+                    <x-number-stepper id="reservedSlotDuration" name="timeslot_duration_minutes" value="30"
+                        min="5" max="240" step="5" required decrease-label="Decrease duration"
+                        increase-label="Increase duration" autocomplete="off" data-field-label="Duration"
+                        data-validation-rule="wholeNumber" data-ui-change="action-443e42f7600e" />
+                </div>
+                <div data-global-field>
+                    <label for="reservedNewSlotTime" class="form-label">
+                        Timeslot
+                    </label>
+
+                    <div class="global-control-wrap reserved-time-control" data-flatpickr-trigger>
+                        <i class="fa-regular fa-clock global-control-icon" aria-hidden="true"></i>
+
+                        <input id="reservedNewSlotTime" type="text" readonly
+                            class="form-input-custom global-form-icon js-flatpickr-time" value="09:00"
+                            placeholder="Select timeslot">
+                    </div>
+                </div>
+                <x-button id="reservedAddTimeslotButton" type="button" variant="primary" icon="fa-solid fa-plus"
+                    data-ui-click="action-9f3a82837bcb">
+                    Add Timeslot
+                </x-button>
+            </div>
+
+            <div class="global-field-error" data-error-for="reservedNewSlotTime" aria-hidden="true">
+            </div>
+
+            <div id="reservedTimeslotList" class="reserved-timeslot-list"></div>
+            <p id="reservedTimeslotEmpty" class="reserved-timeslot-empty">
+                <i class="fa-regular fa-clock"></i>
+                No timeslots yet. Add the first selectable time above.
+            </p>
+            @if ($reservedErrors->has('timeslots') || $reservedErrors->has('timeslots.*.time'))
+                <p class="global-field-error show">
+                    {{ $reservedErrors->first('timeslots') ?: $reservedErrors->first('timeslots.*.time') }}
+                </p>
+            @endif
+        </div>
+
+        <x-slot:footer>
+            <x-button type="button" variant="secondary" data-discard-close="reservedPeriodModalBackdrop">
+                Cancel
+            </x-button>
+
+            <x-button id="reservedPeriodSubmitButton" type="submit" variant="primary"
+                icon="fa-solid fa-floppy-disk">
+                <span id="reservedPeriodSubmitText">
+                    Save Reserved Period
+                </span>
+            </x-button>
+        </x-slot:footer>
+
+    </x-modal>
+
+    <x-delete-confirm-modal id="scheduleDeleteModal" form-id="scheduleDeleteForm" name-id="scheduleDeleteName"
+        title="Delete Schedule Rule" helper="This schedule rule will be permanently removed." />
+
+    <x-delete-confirm-modal id="blockedDateDeleteModal" form-id="blockedDateDeleteForm"
+        name-id="blockedDateDeleteName" title="Remove Blocked Date" subtitle="This action requires confirmation"
+        message="Are you sure you want to remove"
+        helper="Removing this record will allow the date to follow the applicable clinic schedule again." />
+
+    <x-delete-confirm-modal id="reservedPeriodDeleteModal" form-id="reservedPeriodDeleteForm"
+        name-id="reservedPeriodDeleteName" title="Remove Reserved Booking Period"
+        helper="The period remains in database history but will no longer be available for booking." />
 @endsection
 
 @section('scripts')
 
-@php
-$clinicScheduleStoreUrl = route($clinicScheduleRouteNames['store']);
+    @php
+        $clinicScheduleStoreUrl = route($clinicScheduleRouteNames['store']);
 
-$clinicScheduleUpdateUrlTemplate = route($clinicScheduleRouteNames['update'], [
-'clinicSchedule' => '__RULE_ID__',
-]);
-@endphp
+        $clinicScheduleUpdateUrlTemplate = route($clinicScheduleRouteNames['update'], [
+            'clinicSchedule' => '__RULE_ID__',
+        ]);
 
-<script>
-    const clinicScheduleRoutes = {
-        store: @json($clinicScheduleStoreUrl),
-        update: @json($clinicScheduleUpdateUrlTemplate),
-    };
+        $reservedPeriodStoreUrl = route($clinicScheduleRouteNames['reserved_store']);
 
-    const scheduleRules = @json($schedules);
-    const weeklyAppointments = @json($weeklyAppointments ?? []);
+        $reservedPeriodUpdateUrlTemplate = route($clinicScheduleRouteNames['reserved_update'], [
+            'reservedBookingPeriod' => '__PERIOD_ID__',
+        ]);
 
-    function clearFieldError(errorId, inputId = null, groupId = null) {
-        const errorEl = document.getElementById(errorId);
-        if (errorEl) {
-            errorEl.textContent = '';
-            errorEl.classList.remove('show');
-        }
-        if (inputId) document.getElementById(inputId)?.classList.remove('is-invalid');
-        if (groupId) document.getElementById(groupId)?.classList.remove('is-invalid');
-    }
+        $clinicScheduleAjaxState = [
+            'schedules' => $schedules,
+            'weeklyAppointments' => $weeklyAppointments ?? [],
+            'reservedBookingPeriods' => $reservedBookingPeriods,
+        ];
+    @endphp
 
-    function setFieldError(errorId, message, inputId = null, groupId = null) {
-        const errorEl = document.getElementById(errorId);
-        if (errorEl) {
-            errorEl.textContent = message;
-            errorEl.classList.add('show');
-        }
-        if (inputId) document.getElementById(inputId)?.classList.add('is-invalid');
-        if (groupId) document.getElementById(groupId)?.classList.add('is-invalid');
-    }
+    <script type="application/json" id="clinicScheduleAjaxState"
+    nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
+    @json($clinicScheduleAjaxState)
+</script>
 
-    function openAppointmentDetailModal(appt) {
-        const service = appt.service_type === 'Others' ?
-            (appt.other_services || 'Other Service') :
-            (appt.service_type || '—');
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
+        const clinicScheduleRoutes = {
+            store: @json($clinicScheduleStoreUrl),
+            update: @json($clinicScheduleUpdateUrlTemplate),
+        };
 
-        document.getElementById('detailPatientName').textContent = appt.patient_name || 'Unknown Patient';
-        document.getElementById('detailServiceType').textContent = service;
-        document.getElementById('detailSchedule').textContent =
-            `${appt.appointment_date} ${appt.display_time || appt.appointment_time || ''}`;
+        const reservedPeriodRoutes = {
+            store: @json($reservedPeriodStoreUrl),
+            update: @json($reservedPeriodUpdateUrlTemplate),
+        };
+        const reservedPeriodValidationFailed = @json($reservedErrors->any());
+        const reservedPeriodOldInput = @json(old());
+        const reservedPeriodMaxCapacity = @json(\App\Models\ReservedBookingPeriod::MAX_CAPACITY);
+        const reservedStudentTargetOptions = @json($studentTargetOptions->values());
 
-        window.openModal('appointmentDetailModal');
-    }
+        function readClinicScheduleAjaxState(root = document) {
+            const stateElement =
+                root.getElementById('clinicScheduleAjaxState');
 
-    function closeAppointmentDetailModal() {
-        window.closeModal('appointmentDetailModal');
-    }
+            if (!stateElement) {
+                return {};
+            }
 
-    const SHORT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const DAY_ABBRS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    const TIME_ROWS = [{
-        h: 9,
-        l: '9:00 AM'
-    }, {
-        h: 10,
-        l: '10:00 AM'
-    },
-    {
-        h: 11,
-        l: '11:00 AM'
-    }, {
-        h: 12,
-        l: '12:00 PM'
-    },
-    {
-        h: 13,
-        l: '1:00 PM'
-    }, {
-        h: 14,
-        l: '2:00 PM'
-    },
-    {
-        h: 15,
-        l: '3:00 PM'
-    }, {
-        h: 16,
-        l: '4:00 PM'
-    }
-    ];
+            try {
+                return JSON.parse(
+                    stateElement.textContent || '{}'
+                );
+            } catch (error) {
+                console.error(
+                    'Unable to parse clinic schedule state.',
+                    error
+                );
 
-    let weekOffset = 0;
-
-    function weekStart(offset) {
-        const t = new Date();
-        t.setHours(0, 0, 0, 0);
-        const dow = t.getDay();
-        const mon = new Date(t);
-        mon.setDate(t.getDate() - (dow === 0 ? 6 : dow - 1) + offset * 7);
-        return mon;
-    }
-
-    function slotState(dayAbbr, hour) {
-        const rule = scheduleRules.find(r => r.is_active && (r.days || []).includes(dayAbbr));
-        if (!rule || rule.status === 'closed') return 'closed';
-        const oh = rule.open_time ? parseInt(rule.open_time) : 9;
-        const ch = rule.close_time ? parseInt(rule.close_time) : 17;
-        if (hour < oh || hour >= ch) return 'closed';
-        if (rule.break_time && rule.break_time !== 'none') {
-            const [bs, be] = rule.break_time.split('-');
-            if (hour >= parseInt(bs) && hour < parseInt(be)) return 'break';
-        }
-        return 'open';
-    }
-
-    function to24Hour(hour) {
-        return String(hour).padStart(2, '0') + ':00';
-    }
-
-    function normalizeToHourMinute(timeValue) {
-        if (!timeValue) return '';
-        if (/^\d{2}:\d{2}$/.test(timeValue)) return timeValue;
-        if (/^\d{2}:\d{2}:\d{2}$/.test(timeValue)) return timeValue.slice(0, 5);
-        const temp = new Date(`1970-01-01 ${timeValue}`);
-        if (!isNaN(temp.getTime())) {
-            return `${String(temp.getHours()).padStart(2, '0')}:${String(temp.getMinutes()).padStart(2, '0')}`;
-        }
-        return String(timeValue).trim();
-    }
-
-    function getAppointmentsForSlot(isoDate, hour) {
-        const slotTime = to24Hour(hour);
-        return weeklyAppointments.filter(appt =>
-            appt.appointment_date === isoDate &&
-            normalizeToHourMinute(appt.appointment_time) === slotTime
-        );
-    }
-
-    function getServiceColor(serviceType) {
-        const service = (serviceType || '').toLowerCase();
-
-        if (service.includes('oral check')) {
-            return 'background:#dbeafe;border-left:3px solid #3b82f6;color:#1e3a8a;';
+                return {};
+            }
         }
 
-        if (service.includes('cleaning')) {
-            return 'background:#dcfce7;border-left:3px solid #22c55e;color:#166534;';
+        const initialClinicScheduleState = readClinicScheduleAjaxState();
+
+        let scheduleRules =
+            initialClinicScheduleState.schedules ??
+            @json($schedules);
+
+        let weeklyAppointments =
+            initialClinicScheduleState.weeklyAppointments ??
+            @json($weeklyAppointments ?? []);
+
+        let reservedBookingPeriods =
+            initialClinicScheduleState.reservedBookingPeriods ??
+            @json($reservedBookingPeriods);
+
+        const clinicScheduleLiveSelectors = [
+            '#statCards',
+            '#clinicHoursCard',
+            '#blockedDatesCard',
+            '#scheduleRulesCard',
+            '#reservedPeriodsCard',
+        ];
+
+        function clearClinicScheduleAjaxErrors(form) {
+            if (!form) return;
+
+            form
+                .querySelectorAll('.global-field-error')
+                .forEach(error => {
+                    error.textContent = '';
+                    error.classList.remove('show');
+                    error.setAttribute('aria-hidden', 'true');
+                });
+
+            form
+                .querySelectorAll('.is-invalid')
+                .forEach(element => {
+                    element.classList.remove('is-invalid');
+                });
         }
 
-        if (service.includes('surgery')) {
-            return 'background:#fef3c7;border-left:3px solid #f59e0b;color:#92400e;';
-        }
-
-        if (
-            service.includes('restoration') ||
-            service.includes('prosthesis')
+        function showClinicScheduleAjaxErrors(
+            form,
+            errors = {}
         ) {
-            return 'background:#f3e8ff;border-left:3px solid #a855f7;color:#6b21a8;';
+            if (!form || !errors) {
+                return;
+            }
+
+            const fieldMaps = {
+                ruleForm: {
+                    days: {
+                        groupId: 'ruleDaysGroup',
+                        groupKey: 'rule-days',
+                    },
+                    is_active: {
+                        inputId: 'ruleActivationState',
+                    },
+                    status: {
+                        inputId: 'ruleStatus',
+                    },
+                    open_time: {
+                        inputId: 'ruleOpenTime',
+                    },
+                    close_time: {
+                        inputId: 'ruleCloseTime',
+                    },
+                    max_slots: {
+                        inputId: 'ruleMaxSlots',
+                    },
+                    slot_duration_minutes: {
+                        inputId: 'ruleSlotDuration',
+                    },
+                    notes: {
+                        inputId: 'ruleNotes',
+                    },
+                },
+
+                blockDateForm: {
+                    date: {
+                        inputId: 'blockDate',
+                    },
+                    reason: {
+                        inputId: 'blockReason',
+                    },
+                    note: {
+                        inputId: 'blockNote',
+                    },
+                },
+
+                reservedPeriodForm: {
+                    title: {
+                        inputId: 'reservedTitle',
+                    },
+                    reserved_date: {
+                        inputId: 'reservedDate',
+                    },
+                    start_time: {
+                        inputId: 'reservedStartTime',
+                    },
+                    end_time: {
+                        inputId: 'reservedEndTime',
+                    },
+                    booking_mode: {
+                        groupId: 'reservedBookingModeGroup',
+                        groupKey: 'reserved-booking-mode',
+                    },
+                    is_active: {
+                        inputId: 'reservedActivationState',
+                    },
+                    target_patient_type: {
+                        inputId: 'reservedPatientType',
+                    },
+                    program_code: {
+                        inputId: 'reservedProgramCode',
+                    },
+                    year_level: {
+                        inputId: 'reservedYearLevel',
+                    },
+                    section: {
+                        inputId: 'reservedSection',
+                    },
+                    max_capacity: {
+                        inputId: 'reservedMaxCapacity',
+                    },
+                    timeslot_duration_minutes: {
+                        inputId: 'reservedSlotDuration',
+                    },
+                    allowed_services: {
+                        groupId: 'reservedAllowedServicesGroup',
+                        groupKey: 'reserved-allowed-services',
+                    },
+                    timeslots: {
+                        groupId: 'reservedNewSlotTime',
+                        groupKey: 'reserved-timeslots',
+                    },
+                    notes: {
+                        inputId: 'reservedNotes',
+                    },
+                },
+            };
+
+            const formMap =
+                fieldMaps[form.id] || {};
+
+            let firstInvalid = null;
+
+            Object.entries(errors).forEach(
+                ([fieldName, messages]) => {
+                    const rootField =
+                        String(fieldName).split('.')[0];
+
+                    const message =
+                        Array.isArray(messages) ?
+                        messages[0] :
+                        messages;
+
+                    const fieldConfig =
+                        formMap[rootField];
+
+                    if (!fieldConfig) {
+                        return;
+                    }
+
+                    if (fieldConfig.groupId) {
+                        const group =
+                            document.getElementById(
+                                fieldConfig.groupId
+                            );
+
+                        window.showGlobalGroupError?.(
+                            group,
+                            fieldConfig.groupKey,
+                            message
+                        );
+
+                        firstInvalid ||= group;
+
+                        return;
+                    }
+
+                    const input =
+                        document.getElementById(
+                            fieldConfig.inputId
+                        );
+
+                    if (!input) {
+                        return;
+                    }
+
+                    window.showFormInputValidationMessage?.(
+                        input,
+                        message
+                    );
+
+                    input.classList.add('is-invalid');
+
+                    firstInvalid ||= input;
+                }
+            );
+
+            if (firstInvalid) {
+                firstInvalid.scrollIntoView?.({
+                    behavior: 'smooth',
+                    block: 'center',
+                });
+
+                firstInvalid.focus?.({
+                    preventScroll: true,
+                });
+            }
         }
 
-        return 'background:#f3f4f6;border-left:3px solid #6b7280;color:#374151;';
-    }
+        function applyClinicScheduleAjaxState(
+            nextDocument
+        ) {
+            const nextState =
+                readClinicScheduleAjaxState(
+                    nextDocument
+                );
 
-    function buildWeekGrid() {
-        const ws = weekStart(weekOffset);
-        const days = Array.from({
-            length: 7
-        }, (_, i) => {
-            const d = new Date(ws);
-            d.setDate(d.getDate() + i);
-            return d;
-        });
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+            scheduleRules =
+                Array.isArray(nextState.schedules) ?
+                nextState.schedules : [];
 
-        document.getElementById('weekRangeLabel').textContent =
-            `${SHORT_MONTHS[days[0].getMonth()]} ${days[0].getDate()} – ${SHORT_MONTHS[days[6].getMonth()]} ${days[6].getDate()}, ${days[6].getFullYear()}`;
+            weeklyAppointments =
+                Array.isArray(
+                    nextState.weeklyAppointments
+                ) ?
+                nextState.weeklyAppointments : [];
 
-        let html = `<div class="wk-hdr empty"></div>`;
-        days.forEach((d, i) => {
-            const isTod = d.getTime() === today.getTime();
-            const cls = isTod ? 'today-hdr' : i >= 5 ? 'weekend-hdr' : '';
-            html += `<div class="wk-hdr ${cls}">
-                    <div style="font-size:.65rem;opacity:.75">${DAY_ABBRS[d.getDay()]}</div>
-                    <div style="font-size:1rem;font-weight:800;line-height:1.2">${d.getDate()}</div>
-                    ${isTod ? '<div style="font-size:.55rem;background:rgba(255,255,255,.25);border-radius:999px;padding:1px 6px;margin-top:2px">Today</div>' : ''}
-                </div>`;
-        });
+            reservedBookingPeriods =
+                Array.isArray(
+                    nextState.reservedBookingPeriods
+                ) ?
+                nextState.reservedBookingPeriods : [];
 
-        TIME_ROWS.forEach(({
-            h,
-            l
-        }) => {
-            html += `<div class="time-lbl">${l}</div>`;
+            const currentStateElement =
+                document.getElementById(
+                    'clinicScheduleAjaxState'
+                );
+
+            const nextStateElement =
+                nextDocument.getElementById(
+                    'clinicScheduleAjaxState'
+                );
+
+            if (
+                currentStateElement &&
+                nextStateElement
+            ) {
+                currentStateElement.textContent =
+                    nextStateElement.textContent;
+            }
+        }
+
+        function refreshClinicScheduleSectionsFromHtml(
+            html
+        ) {
+            const parser =
+                new DOMParser();
+
+            const nextDocument =
+                parser.parseFromString(
+                    html,
+                    'text/html'
+                );
+
+            applyClinicScheduleAjaxState(
+                nextDocument
+            );
+
+            clinicScheduleLiveSelectors.forEach(
+                selector => {
+                    const currentElement =
+                        document.querySelector(
+                            selector
+                        );
+
+                    const nextElement =
+                        nextDocument.querySelector(
+                            selector
+                        );
+
+                    if (
+                        !currentElement ||
+                        !nextElement
+                    ) {
+                        return;
+                    }
+
+                    currentElement.replaceWith(
+                        nextElement.cloneNode(true)
+                    );
+                }
+            );
+
+            renderClinicScheduleEmptyStates();
+
+            buildWeekGrid();
+
+            syncReservedDateAvailability(
+                document
+                .getElementById(
+                    'reservedPeriodId'
+                )
+                ?.value || null
+            );
+        }
+
+        async function fetchFreshClinicScheduleHtml() {
+            const response =
+                await fetch(
+                    window.location.href, {
+                        method: 'GET',
+
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+
+                            Accept: 'text/html',
+                        },
+
+                        cache: 'no-store',
+                    }
+                );
+
+            if (!response.ok) {
+                throw new Error(
+                    'Unable to refresh clinic schedule.'
+                );
+            }
+
+            return response.text();
+        }
+
+        async function submitClinicScheduleAjax(
+            form, {
+                modalId = null,
+                successMessage = 'Changes saved successfully.',
+                submitButton = null,
+            } = {}
+        ) {
+            if (
+                !form ||
+                form.dataset.ajaxSubmitting ===
+                'true'
+            ) {
+                return;
+            }
+
+            clearClinicScheduleAjaxErrors(
+                form
+            );
+
+            if (
+                form.hasAttribute(
+                    'data-global-validation'
+                )
+            ) {
+                const validation =
+                    window.validateGlobalForm?.(
+                        form
+                    );
+
+                if (
+                    validation &&
+                    !validation.valid
+                ) {
+                    return;
+                }
+            }
+
+            form.dataset.ajaxSubmitting =
+                'true';
+
+            const button =
+                submitButton ||
+                form.querySelector(
+                    '[type="submit"]'
+                );
+
+            if (button) {
+                button.disabled = true;
+                button.setAttribute(
+                    'aria-busy',
+                    'true'
+                );
+            }
+
+            try {
+                const response =
+                    await fetch(
+                        form.action, {
+                            method: (
+                                form.method ||
+                                'POST'
+                            ).toUpperCase(),
+
+                            body: new FormData(
+                                form
+                            ),
+
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+
+                                Accept: 'application/json',
+                            },
+                        }
+                    );
+
+                const contentType =
+                    response.headers.get(
+                        'content-type'
+                    ) || '';
+
+                if (
+                    response.status === 422
+                ) {
+                    const payload =
+                        await response.json();
+
+                    showClinicScheduleAjaxErrors(
+                        form,
+                        payload.errors || {}
+                    );
+
+                    window.showToast?.({
+                        type: 'warning',
+                        title: 'Check the form',
+                        message: payload.message ||
+                            'Please correct the highlighted fields.',
+                        duration: 5000,
+                    });
+
+                    return;
+                }
+
+                if (!response.ok) {
+                    let message =
+                        'Unable to save the changes.';
+
+                    if (
+                        contentType.includes(
+                            'application/json'
+                        )
+                    ) {
+                        const payload =
+                            await response
+                            .json()
+                            .catch(() => null);
+
+                        message =
+                            payload?.message ||
+                            message;
+                    }
+
+                    throw new Error(
+                        message
+                    );
+                }
+
+                let html = '';
+
+                if (
+                    contentType.includes(
+                        'text/html'
+                    )
+                ) {
+                    html =
+                        await response.text();
+                } else {
+                    html =
+                        await fetchFreshClinicScheduleHtml();
+                }
+
+                refreshClinicScheduleSectionsFromHtml(
+                    html
+                );
+
+                window.DiscardChanges
+                    ?.markSubmitting?.(
+                        form
+                    );
+
+                if (modalId) {
+                    window.closeModal?.(
+                        modalId
+                    );
+                }
+
+                window.showToast?.({
+                    type: 'success',
+                    title: 'Saved',
+                    message: successMessage,
+                    duration: 4000,
+                });
+            } catch (error) {
+                console.error(
+                    'Clinic schedule AJAX error:',
+                    error
+                );
+
+                window.showToast?.({
+                    type: 'error',
+                    title: 'Unable to save',
+                    message: error.message ||
+                        'Something went wrong while saving the changes.',
+                    duration: 5000,
+                });
+            } finally {
+                form.dataset.ajaxSubmitting =
+                    'false';
+
+                if (button) {
+                    button.disabled = false;
+                    button.removeAttribute(
+                        'aria-busy'
+                    );
+                }
+            }
+        }
+
+        function reservedPeriodStateIsActive() {
+            const value = document.getElementById('reservedActivationState')?.value ?? '0';
+
+            return String(value) === '1';
+        }
+
+        function syncReservedDateAvailability(ignorePeriodId = null) {
+            const dateInput = document.getElementById('reservedDate');
+
+            if (!dateInput) return;
+
+            const disabledDates = reservedPeriodStateIsActive() ? reservedBookingPeriods
+                .filter(period => {
+                    const isActive = period?.is_active === true ||
+                        period?.is_active === 1 ||
+                        period?.is_active === '1';
+
+                    return isActive && String(period.id) !== String(ignorePeriodId ?? '');
+                })
+                .map(period => String(period.reserved_date || '').slice(0, 10))
+                .filter(Boolean) : [];
+
+            dateInput.dataset.flatpickrDisabledDates = JSON.stringify(disabledDates);
+
+            if (dateInput._flatpickr) {
+                dateInput._flatpickr.set('disable', disabledDates);
+                dateInput._flatpickr.redraw();
+            }
+
+            const selectedDate = String(dateInput.value || '').slice(0, 10);
+
+            if (reservedPeriodStateIsActive() && selectedDate && disabledDates.includes(selectedDate)) {
+                if (dateInput._flatpickr) {
+                    dateInput._flatpickr.clear(false);
+                } else {
+                    dateInput.value = '';
+                }
+
+                window.showFormInputValidationMessage?.(
+                    dateInput,
+                    'This date already has an active reserved booking period. Set that period to Inactive first or choose another date.'
+                );
+            } else {
+                window.showFormInputValidationMessage?.(dateInput, '');
+            }
+        }
+
+        function handleReservedPeriodStateChange() {
+            const periodId = document.getElementById('reservedPeriodId')?.value || null;
+            syncReservedDateAvailability(periodId);
+        }
+
+        function clearFieldError(errorId, inputId = null, groupId = null) {
+            const errorEl = document.getElementById(errorId);
+            if (errorEl) {
+                errorEl.textContent = '';
+                errorEl.classList.remove('show');
+            }
+            if (inputId) document.getElementById(inputId)?.classList.remove('is-invalid');
+            if (groupId) document.getElementById(groupId)?.classList.remove('is-invalid');
+        }
+
+        function setFieldError(errorId, message, inputId = null, groupId = null) {
+            const errorEl = document.getElementById(errorId);
+            if (errorEl) {
+                errorEl.textContent = message;
+                errorEl.classList.add('show');
+            }
+            if (inputId) document.getElementById(inputId)?.classList.add('is-invalid');
+            if (groupId) document.getElementById(groupId)?.classList.add('is-invalid');
+        }
+
+        function openAppointmentDetailModal(appt) {
+            const service = appt.service_type === 'Others' ?
+                (appt.other_services || 'Other Service') :
+                (appt.service_type || '—');
+
+            document.getElementById('detailPatientName').textContent = appt.patient_name || 'Unknown Patient';
+            document.getElementById('detailServiceType').textContent = service;
+            document.getElementById('detailSchedule').textContent =
+                `${appt.appointment_date} ${appt.display_time || appt.appointment_time || ''}`;
+
+            window.openModal('appointmentDetailModal');
+        }
+
+        function closeAppointmentDetailModal() {
+            window.closeModal('appointmentDetailModal');
+        }
+
+        const SHORT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const DAY_ABBRS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const DEFAULT_CALENDAR_OPEN_HOUR = 9;
+        const DEFAULT_CALENDAR_CLOSE_HOUR = 17;
+
+        function formatCalendarHour(hour) {
+            const normalizedHour =
+                ((hour % 24) + 24) % 24;
+
+            const suffix =
+                normalizedHour >= 12 ? 'PM' : 'AM';
+
+            const displayHour =
+                normalizedHour % 12 || 12;
+
+            return `${displayHour}:00 ${suffix}`;
+        }
+
+        function getActiveCalendarSchedule() {
+            return (scheduleRules || []).find(rule => {
+                return (
+                    rule &&
+                    rule.is_active &&
+                    rule.status !== 'closed' &&
+                    rule.open_time &&
+                    rule.close_time
+                );
+            }) || null;
+        }
+
+        function getCalendarTimeRows() {
+            const activeSchedule =
+                getActiveCalendarSchedule();
+
+            let openHour =
+                DEFAULT_CALENDAR_OPEN_HOUR;
+
+            let closeHour =
+                DEFAULT_CALENDAR_CLOSE_HOUR;
+
+            if (activeSchedule) {
+                openHour = parseInt(
+                    String(activeSchedule.open_time).substring(0, 2),
+                    10
+                );
+
+                closeHour = parseInt(
+                    String(activeSchedule.close_time).substring(0, 2),
+                    10
+                );
+            }
+
+            if (
+                !Number.isFinite(openHour) ||
+                !Number.isFinite(closeHour) ||
+                closeHour <= openHour
+            ) {
+                openHour =
+                    DEFAULT_CALENDAR_OPEN_HOUR;
+
+                closeHour =
+                    DEFAULT_CALENDAR_CLOSE_HOUR;
+            }
+
+            return Array.from({
+                    length: closeHour - openHour
+                },
+                (_, index) => {
+                    const hour =
+                        openHour + index;
+
+                    return {
+                        h: hour,
+                        l: formatCalendarHour(hour)
+                    };
+                }
+            );
+        }
+        let weekOffset = 0;
+
+        function weekStart(offset) {
+            const t = new Date();
+            t.setHours(0, 0, 0, 0);
+            const dow = t.getDay();
+            const mon = new Date(t);
+            mon.setDate(t.getDate() - (dow === 0 ? 6 : dow - 1) + offset * 7);
+            return mon;
+        }
+
+        function slotState(dayAbbr, hour) {
+            const rule = scheduleRules.find(r => r.is_active && (r.days || []).includes(dayAbbr));
+            if (!rule || rule.status === 'closed') return 'closed';
+            const oh = rule.open_time ? parseInt(rule.open_time) : 9;
+            const ch = rule.close_time ? parseInt(rule.close_time) : 17;
+            if (hour < oh || hour >= ch) return 'closed';
+            if (rule.break_time && rule.break_time !== 'none') {
+                const [bs, be] = rule.break_time.split('-');
+                if (hour >= parseInt(bs) && hour < parseInt(be)) return 'break';
+            }
+            return 'open';
+        }
+
+        function to24Hour(hour) {
+            return String(hour).padStart(2, '0') + ':00';
+        }
+
+        function normalizeToHourMinute(timeValue) {
+            if (!timeValue) return '';
+            if (/^\d{2}:\d{2}$/.test(timeValue)) return timeValue;
+            if (/^\d{2}:\d{2}:\d{2}$/.test(timeValue)) return timeValue.slice(0, 5);
+            const temp = new Date(`1970-01-01 ${timeValue}`);
+            if (!isNaN(temp.getTime())) {
+                return `${String(temp.getHours()).padStart(2, '0')}:${String(temp.getMinutes()).padStart(2, '0')}`;
+            }
+            return String(timeValue).trim();
+        }
+
+        function getAppointmentsForSlot(isoDate, hour) {
+            const slotTime = to24Hour(hour);
+            return weeklyAppointments.filter(appt =>
+                appt.appointment_date === isoDate &&
+                normalizeToHourMinute(appt.appointment_time) === slotTime
+            );
+        }
+
+        function getReservedPeriodsForSlot(isoDate, hour) {
+            return reservedBookingPeriods.filter(period => {
+                if (!period?.is_active || period.reserved_date !== isoDate) {
+                    return false;
+                }
+
+                const [startHour, startMinute] = normalizeToHourMinute(period.start_time)
+                    .split(':')
+                    .map(Number);
+                const [endHour, endMinute] = normalizeToHourMinute(period.end_time)
+                    .split(':')
+                    .map(Number);
+                const start = startHour * 60 + startMinute;
+                const end = endHour * 60 + endMinute;
+                const rowStart = hour * 60;
+                const rowEnd = rowStart + 60;
+
+                return start < rowEnd && end > rowStart;
+            });
+        }
+
+        function escapeCalendarText(value) {
+            const element = document.createElement('div');
+            element.textContent = String(value ?? '');
+            return element.innerHTML;
+        }
+
+        function getAppointmentStatusMeta(status) {
+            const normalized = String(status || '')
+                .trim()
+                .toLowerCase();
+
+            if (['pending', 'confirmed', 'upcoming'].includes(normalized)) {
+                return {
+                    className: 'status-upcoming',
+                    label: 'Upcoming',
+                };
+            }
+
+            if (['reschedule', 'rescheduled'].includes(normalized)) {
+                return {
+                    className: 'status-rescheduled',
+                    label: 'Rescheduled',
+                };
+            }
+
+            if (normalized === 'completed') {
+                return {
+                    className: 'status-completed',
+                    label: 'Completed',
+                };
+            }
+
+            if (['canceled', 'cancelled'].includes(normalized)) {
+                return {
+                    className: 'status-cancelled',
+                    label: 'Cancelled',
+                };
+            }
+
+            return {
+                className: 'status-upcoming',
+                label: 'Upcoming',
+            };
+        }
+
+        function getServiceBadgeClass(serviceType) {
+            const service = String(serviceType || '').toLowerCase();
+
+            if (service.includes('surgery')) {
+                return 'service-badge-surgery';
+            }
+
+            if (service.includes('check')) {
+                return 'service-badge-checkup';
+            }
+
+            if (service.includes('whiten')) {
+                return 'service-badge-whitening';
+            }
+
+            if (service.includes('extrac')) {
+                return 'service-badge-extraction';
+            }
+
+            return 'service-badge-default';
+        }
+
+        function buildWeekGrid() {
+            const ws = weekStart(weekOffset);
+            const days = Array.from({
+                length: 7
+            }, (_, i) => {
+                const d = new Date(ws);
+                d.setDate(d.getDate() + i);
+                return d;
+            });
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            document.getElementById('weekRangeLabel').textContent =
+                `${SHORT_MONTHS[days[0].getMonth()]} ${days[0].getDate()} – ${SHORT_MONTHS[days[6].getMonth()]} ${days[6].getDate()}, ${days[6].getFullYear()}`;
+
+            let html = `<div class="wk-hdr empty"></div>`;
             days.forEach((d, i) => {
-                const isoDate =
-                    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-                const abbr = d.toLocaleDateString('en-US', {
-                    weekday: 'short'
-                }).replace('.', '');
-                const state = i >= 5 ? 'wk-weekend' :
-                    slotState(abbr, h) === 'break' ? 'wk-break' :
+                const isTod = d.getTime() === today.getTime();
+                const cls = isTod ? 'today-hdr' : i >= 5 ? 'weekend-hdr' : '';
+                html += `<div class="wk-hdr ${cls}">
+                    <div data-ui-presentation="presentation-ffc624773df6">${DAY_ABBRS[d.getDay()]}</div>
+                    <div data-ui-presentation="presentation-53164131daad">${d.getDate()}</div>
+                    ${isTod ? '<div data-ui-presentation="presentation-7c63aa9c4d24">Today</div>' : ''}
+                </div>`;
+            });
+
+            getCalendarTimeRows().forEach(({
+                h,
+                l
+            }) => {
+                html += `<div class="time-lbl">${l}</div>`;
+                days.forEach((d, i) => {
+                    const isoDate =
+                        `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                    const abbr = d.toLocaleDateString('en-US', {
+                        weekday: 'short'
+                    }).replace('.', '');
+                    const slotReservedPeriods = getReservedPeriodsForSlot(isoDate, h);
+                    const state = i >= 5 ? 'wk-weekend' :
+                        slotReservedPeriods.length ? 'wk-reserved' :
+                        slotState(abbr, h) === 'break' ? 'wk-break' :
                         slotState(abbr, h) === 'closed' ? 'wk-closed' : '';
 
-                let inner = '';
-                if (state === 'wk-break') inner = '<span class="slot-label">BREAK</span>';
-                else if (state === 'wk-closed' || state === 'wk-weekend') inner =
-                    '<span class="slot-label">CLOSED</span>';
-                else {
-                    const slotAppointments = getAppointmentsForSlot(isoDate, h);
-                    if (slotAppointments.length > 0) {
-                        inner = slotAppointments.map(appt => {
-                            const service = appt.service_type === 'Others' ? (appt
-                                .other_services || 'Other Service') : appt.service_type;
-                            const serviceStyle = getServiceColor(service);
-                            return `<button type="button" onclick='openAppointmentDetailModal(${JSON.stringify(appt)})'
-                                    style="${serviceStyle}margin:4px;border-radius:8px;padding:6px 7px;font-size:.62rem;line-height:1.25;font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.06);width:calc(100% - 8px);text-align:left;cursor:pointer;transition:transform .15s ease,box-shadow .15s ease;"
-                                    onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 10px rgba(0,0,0,.10)'"
-                                    onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 1px 3px rgba(0,0,0,.06)'"
-                                    title="Click to view details">
-                                    <div style="font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${appt.patient_name}</div>
-                                    <div style="font-size:.58rem;opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${service}</div>
-                                </button>`;
-                        }).join('');
+                    let inner = '';
+                    if (state === 'wk-reserved') {
+                        inner = slotReservedPeriods.map(period => `
+                        <div class="reserved-calendar-block" title="Reserved booking period">
+                            <strong>${escapeCalendarText(period.title)}</strong>
+                            <span>${escapeCalendarText(period.target_label || period.target_patient_type)}</span>
+                        </div>
+                    `).join('');
+                    } else if (state === 'wk-break') inner = '<span class="slot-label">BREAK</span>';
+                    else if (state === 'wk-closed' || state === 'wk-weekend') inner =
+                        '<span class="slot-label">CLOSED</span>';
+                    else {
+                        const slotAppointments = getAppointmentsForSlot(isoDate, h);
+                        if (slotAppointments.length > 0) {
+                            inner = slotAppointments.map(appt => {
+                                const service =
+                                    appt.service_type === 'Others' ?
+                                    (appt.other_services || 'Other Service') :
+                                    (appt.service_type || 'Other Service');
+
+                                const statusMeta =
+                                    getAppointmentStatusMeta(appt.status);
+
+                                const serviceBadgeClass =
+                                    getServiceBadgeClass(service);
+
+                                return `
+        <button
+            type="button"
+            class="week-appointment ${statusMeta.className}"
+            data-ui-click="action-d5fde1a38ad6" data-ui-click-arg-0="${window.uiAttribute(JSON.stringify(appt))}"
+            title="Click to view details"
+        >
+            <div class="week-appointment-top">
+                <strong class="week-appointment-patient">
+                    ${escapeCalendarText(appt.patient_name || 'Unknown Patient')}
+                </strong>
+
+                <span class="week-appointment-status">
+                    ${statusMeta.label}
+                </span>
+            </div>
+
+            <span class="service-badge ${serviceBadgeClass}">
+                ${escapeCalendarText(service)}
+            </span>
+        </button>
+    `;
+                            }).join('');
+                        }
                     }
+                    html += `<div class="cal-slot ${state}">${inner}</div>`;
+                });
+            });
+
+            document.getElementById('weekGrid').innerHTML = html;
+        }
+
+        let weekCarouselAnimating = false;
+
+        const WEEK_CAROUSEL_OUT_MS = 180;
+        const WEEK_CAROUSEL_IN_MS = 280;
+
+        function clearWeekCarouselClasses(element) {
+            if (!element) {
+                return;
+            }
+
+            element.classList.remove(
+                'global-carousel-out-left',
+                'global-carousel-out-right',
+                'global-carousel-in-left',
+                'global-carousel-in-right'
+            );
+        }
+
+        function runWeekCarousel(direction, updateContent) {
+            const weekGrid =
+                document.getElementById('weekGrid');
+
+            if (!weekGrid) {
+                updateContent();
+                return;
+            }
+
+            const reducedMotion =
+                window.matchMedia(
+                    '(prefers-reduced-motion: reduce)'
+                ).matches;
+
+            if (!direction || reducedMotion) {
+                updateContent();
+                return;
+            }
+
+            if (weekCarouselAnimating) {
+                return;
+            }
+
+            weekCarouselAnimating = true;
+
+            const outClass =
+                direction > 0 ?
+                'global-carousel-out-left' :
+                'global-carousel-out-right';
+
+            const inClass =
+                direction > 0 ?
+                'global-carousel-in-right' :
+                'global-carousel-in-left';
+
+            clearWeekCarouselClasses(weekGrid);
+
+            weekGrid.classList.add(outClass);
+
+            window.setTimeout(() => {
+                weekGrid.classList.remove(outClass);
+
+                updateContent();
+
+                requestAnimationFrame(() => {
+                    clearWeekCarouselClasses(weekGrid);
+
+                    weekGrid.classList.add(inClass);
+
+                    window.setTimeout(() => {
+                        weekGrid.classList.remove(inClass);
+
+                        weekCarouselAnimating = false;
+                    }, WEEK_CAROUSEL_IN_MS);
+                });
+            }, WEEK_CAROUSEL_OUT_MS);
+        }
+
+        function changeWeek(direction) {
+            if (weekCarouselAnimating) {
+                return;
+            }
+
+            runWeekCarousel(
+                direction,
+                () => {
+                    weekOffset += direction;
+                    buildWeekGrid();
                 }
-                html += `<div class="cal-slot ${state}">${inner}</div>`;
-            });
-        });
+            );
+        }
 
-        document.getElementById('weekGrid').innerHTML = html;
-    }
+        document
+            .getElementById('prevWeek')
+            ?.addEventListener(
+                'click',
+                () => changeWeek(-1)
+            );
 
-    document.getElementById('prevWeek').addEventListener('click', () => {
-        weekOffset--;
-        buildWeekGrid();
-    });
-    document.getElementById('nextWeek').addEventListener('click', () => {
-        weekOffset++;
-        buildWeekGrid();
-    });
-    document.getElementById('todayBtn').addEventListener('click', () => {
-        weekOffset = 0;
-        buildWeekGrid();
-    });
+        document
+            .getElementById('nextWeek')
+            ?.addEventListener(
+                'click',
+                () => changeWeek(1)
+            );
 
-    function initWeeklyAppointmentView() {
-        const weekGrid =
-            document.getElementById('weekGrid');
+        document
+            .getElementById('todayBtn')
+            ?.addEventListener(
+                'click',
+                () => {
+                    if (
+                        weekCarouselAnimating ||
+                        weekOffset === 0
+                    ) {
+                        return;
+                    }
 
-        if (!weekGrid) return;
+                    const direction =
+                        weekOffset < 0 ? 1 : -1;
 
-        buildWeekGrid();
-    }
+                    runWeekCarousel(
+                        direction,
+                        () => {
+                            weekOffset = 0;
+                            buildWeekGrid();
+                        }
+                    );
+                }
+            );
 
-    initWeeklyAppointmentView();
+        function initWeeklyAppointmentView() {
+            const weekGrid =
+                document.getElementById('weekGrid');
 
-    let selectedBreak = '12:00-13:00';
-    let editingId = null;
+            if (!weekGrid) return;
 
-    function setCustomSelectValue(
-        select,
-        value,
-        options = {}
-    ) {
-        if (!select) return;
+            buildWeekGrid();
+        }
 
-        const {
-            dispatch = false
-        } = options;
+        initWeeklyAppointmentView();
 
-        select.value = value;
+        let selectedBreak = '12:00-13:00';
+        let editingId = null;
 
-        const wrapper =
-            select.closest('.custom-select');
-
-        if (
-            wrapper &&
-            typeof window.syncCustomSelect === 'function'
+        function setCustomSelectValue(
+            select,
+            value,
+            options = {}
         ) {
-            window.syncCustomSelect(wrapper);
+            if (!select) return;
+
+            const {
+                dispatch = false
+            } = options;
+
+            select.value = value;
+
+            const wrapper =
+                select.closest('.custom-select');
+
+            if (
+                wrapper &&
+                typeof window.syncCustomSelect === 'function'
+            ) {
+                window.syncCustomSelect(wrapper);
+            }
+
+            if (dispatch) {
+                select.dispatchEvent(
+                    new Event('change', {
+                        bubbles: true
+                    })
+                );
+            }
         }
 
-        if (dispatch) {
-            select.dispatchEvent(
-                new Event('change', {
-                    bubbles: true
-                })
-            );
-        }
-    }
+        function openRuleModal(mode = 'create', ruleId = null, rule = null) {
+            editingId = null;
 
-    function openRuleModal(mode = 'create', ruleId = null, rule = null) {
-        editingId = null;
+            const submitBtn = document.getElementById('ruleSubmitBtn');
+            const submitText = document.getElementById('ruleSubmitText');
+            const subtitle = document.getElementById('ruleModalSubtitle');
+            const icon = document.getElementById('ruleModalIcon');
 
-        const submitBtn = document.getElementById('ruleSubmitBtn');
-        const submitText = document.getElementById('ruleSubmitText');
-        const subtitle = document.getElementById('ruleModalSubtitle');
-        const icon = document.getElementById('ruleModalIcon');
+            const backdrop = document.getElementById('ruleModalBackdrop');
+            const form = document.getElementById('ruleForm');
+            const methodField = document.getElementById('ruleMethodField');
+            const title = document.getElementById('ruleModalTitle');
+            const activationState = document.getElementById('ruleActivationState');
+            const status = document.getElementById('ruleStatus');
+            const openTime = document.getElementById('ruleOpenTime');
+            const closeTime = document.getElementById('ruleCloseTime');
+            const maxSlots = document.getElementById('ruleMaxSlots');
+            const slotDuration = document.getElementById('ruleSlotDuration');
+            const notes = document.getElementById('ruleNotes');
+            const timeFields = document.getElementById('ruleTimeFields');
+            const defaultBreak = document.querySelector('.break-chip[data-val="12:00-13:00"]');
 
-        const backdrop = document.getElementById('ruleModalBackdrop');
-        const form = document.getElementById('ruleForm');
-        const methodField = document.getElementById('ruleMethodField');
-        const title = document.getElementById('ruleModalTitle');
-        const status = document.getElementById('ruleStatus');
-        const openTime = document.getElementById('ruleOpenTime');
-        const closeTime = document.getElementById('ruleCloseTime');
-        const maxSlots = document.getElementById('ruleMaxSlots');
-        const notes = document.getElementById('ruleNotes');
-        const timeFields = document.getElementById('ruleTimeFields');
-        const defaultBreak = document.querySelector('.break-chip[data-val="12:00-13:00"]');
+            if (
+                !backdrop ||
+                !form ||
+                !methodField ||
+                !title ||
+                !activationState ||
+                !status ||
+                !openTime ||
+                !closeTime ||
+                !maxSlots ||
+                !slotDuration ||
+                !notes ||
+                !timeFields
+            ) {
+                console.error('Rule modal elements not found.');
+                return;
+            }
 
-        if (!backdrop || !form || !methodField || !title || !status || !openTime || !closeTime || !maxSlots || !notes ||
-            !timeFields) {
-            console.error('Rule modal elements not found.');
-            return;
-        }
+            document
+                .querySelectorAll(
+                    '#ruleForm .global-field-error'
+                )
+                .forEach(error => {
+                    error.innerHTML = '';
+                    error.classList.remove('show');
+                });
 
-        document
-            .querySelectorAll(
-                '#ruleForm .global-field-error'
-            )
-            .forEach(error => {
-                error.innerHTML = '';
-                error.classList.remove('show');
-            });
+            document
+                .querySelectorAll(
+                    '#ruleForm .is-invalid'
+                )
+                .forEach(element => {
+                    element.classList.remove('is-invalid');
+                });
 
-        document
-            .querySelectorAll(
-                '#ruleForm .is-invalid'
-            )
-            .forEach(element => {
-                element.classList.remove('is-invalid');
-            });
-
-        backdrop.classList.remove(
-            'modal-theme-primary',
-            'modal-theme-edit'
-        );
-
-        backdrop.classList.add('modal-theme-primary');
-
-        title.textContent = 'Add Schedule Rule';
-
-        if (subtitle) {
-            subtitle.textContent =
-                'Choose clinic days, set operating hours, and control booking capacity.';
-        }
-
-        if (icon) {
-            icon.className = 'fa-solid fa-calendar-plus';
-        }
-
-        if (submitBtn) {
-            submitBtn.className = 'ui-btn ui-btn-primary';
-        }
-
-        if (submitText) {
-            submitText.textContent = 'Save Rule';
-        }
-        form.action = clinicScheduleRoutes.store;
-        methodField.innerHTML = '';
-
-        document.querySelectorAll(
-            '#ruleModalBackdrop .day-toggle'
-        ).forEach(button => {
-            button.classList.remove('active');
-            button.setAttribute(
-                'aria-pressed',
-                'false'
-            );
-            button.dataset.discardValue = 'false';
-        });
-
-        document.querySelectorAll(
-            '#ruleModalBackdrop .break-chip'
-        ).forEach(button => {
-            const selected =
-                button === defaultBreak;
-
-            button.classList.toggle(
-                'selected',
-                selected
+            backdrop.classList.remove(
+                'modal-theme-primary',
+                'modal-theme-edit'
             );
 
-            button.dataset.discardValue =
-                selected ? 'true' : 'false';
-        });
+            backdrop.classList.add('modal-theme-primary');
 
-        selectedBreak = '12:00-13:00';
-        setCustomSelectValue(status, 'open');
-        setCustomSelectValue(openTime, '09:00');
-        setCustomSelectValue(closeTime, '17:00');
-        toggleStatusFields('open');
-        maxSlots.value = '5';
-        notes.value = '';
-
-        window.initCharLimitFields?.(
-            backdrop
-        );
-
-        notes.dispatchEvent(
-            new Event('input', {
-                bubbles: true
-            })
-        );
-
-        timeFields.style.display = '';
-
-        if (mode === 'edit' && rule) {
-            backdrop.classList.remove('modal-theme-primary');
-            backdrop.classList.add('modal-theme-edit');
-
-            title.textContent = 'Edit Schedule Rule';
+            title.textContent = 'Add Schedule Rule';
 
             if (subtitle) {
                 subtitle.textContent =
-                    'Update clinic days, operating hours, and booking capacity.';
+                    'Choose clinic days, set operating hours, and control booking capacity.';
             }
 
             if (icon) {
-                icon.className = 'fa-solid fa-pen-to-square';
+                icon.className = 'fa-solid fa-calendar-plus';
             }
 
             if (submitBtn) {
-                submitBtn.className = 'ui-btn ui-btn-edit';
+                submitBtn.className = 'ui-btn ui-btn-primary';
             }
 
             if (submitText) {
-                submitText.textContent = 'Update Rule';
+                submitText.textContent = 'Save Rule';
             }
+            form.action = clinicScheduleRoutes.store;
+            methodField.innerHTML = '';
 
-            editingId = ruleId;
-            form.action = clinicScheduleRoutes.update.replace('__RULE_ID__', ruleId);
-            methodField.innerHTML = '<input type="hidden" name="_method" value="PUT">';
-
-            (rule.days || []).forEach(day => {
-                const el = document.querySelector(`#ruleModalBackdrop .day-toggle[data-day="${day}"]`);
-                if (el) {
-                    el.classList.add('active');
-                    el.setAttribute(
-                        'aria-pressed',
-                        'true'
-                    );
-                    el.dataset.discardValue = 'true';
-                }
+            document.querySelectorAll(
+                '#ruleModalBackdrop .day-toggle'
+            ).forEach(button => {
+                button.classList.remove('active');
+                button.setAttribute(
+                    'aria-pressed',
+                    'false'
+                );
+                button.dataset.discardValue = 'false';
             });
 
-            const selectedStatus = rule.status || 'open';
+            document.querySelectorAll(
+                '#ruleModalBackdrop .break-chip'
+            ).forEach(button => {
+                const selected =
+                    button === defaultBreak;
 
-            setCustomSelectValue(status, selectedStatus);
-            toggleStatusFields(selectedStatus);
-
-            if (rule.open_time) {
-                setCustomSelectValue(
-                    openTime,
-                    String(rule.open_time).substring(0, 5)
+                button.classList.toggle(
+                    'selected',
+                    selected
                 );
-            }
 
-            if (rule.close_time) {
-                setCustomSelectValue(
-                    closeTime,
-                    String(rule.close_time).substring(0, 5)
-                );
-            }
+                button.dataset.discardValue =
+                    selected ? 'true' : 'false';
+            });
 
-            maxSlots.value = rule.max_slots || 5;
-            notes.value =
-                rule.notes || '';
+            selectedBreak = '12:00-13:00';
+            setCustomSelectValue(activationState, '0');
+            setCustomSelectValue(status,
+                'open');
+            setCustomSelectValue(openTime, '09:00');
+            setCustomSelectValue(closeTime,
+                '17:00');
+            toggleStatusFields('open');
+            maxSlots.value = '5';
+            slotDuration.value = '60';
+            notes.value = '';
+
+            window.initCharLimitFields?.(
+                backdrop
+            );
 
             notes.dispatchEvent(
                 new Event('input', {
@@ -1591,475 +4015,1721 @@ $clinicScheduleUpdateUrlTemplate = route($clinicScheduleRouteNames['update'], [
                 })
             );
 
-            selectedBreak = rule.break_time || 'none';
-            document.querySelectorAll(
-                '#ruleModalBackdrop .break-chip'
-            ).forEach(button => {
-                const selected =
-                    button.dataset.val === selectedBreak;
+            timeFields.classList.remove('hidden');
 
-                button.classList.toggle(
-                    'selected',
-                    selected
+            if (mode === 'edit' && rule) {
+                backdrop.classList.remove('modal-theme-primary');
+                backdrop.classList.add('modal-theme-edit');
+
+                title.textContent = 'Edit Schedule Rule';
+
+                if (subtitle) {
+                    subtitle.textContent =
+                        'Update clinic days, operating hours, and booking capacity.';
+                }
+
+                if (icon) {
+                    icon.className = 'fa-solid fa-pen-to-square';
+                }
+
+                if (submitBtn) {
+                    submitBtn.className = 'ui-btn ui-btn-primary';
+                }
+
+                if (submitText) {
+                    submitText.textContent = 'Update Rule';
+                }
+
+                editingId = ruleId;
+                form.action = clinicScheduleRoutes.update.replace('__RULE_ID__', ruleId);
+                methodField.innerHTML = '<input type="hidden" name="_method" value="PUT">';
+
+                (rule.days || []).forEach(day => {
+                    const el = document.querySelector(`#ruleModalBackdrop .day-toggle[data-day="${day}"]`);
+                    if (el) {
+                        el.classList.add('active');
+                        el.setAttribute(
+                            'aria-pressed',
+                            'true'
+                        );
+                        el.dataset.discardValue = 'true';
+                    }
+                });
+
+                const selectedStatus = rule.status || 'open';
+                const selectedActivationState = rule.is_active ? '1' : '0';
+
+                setCustomSelectValue(activationState, selectedActivationState);
+                setCustomSelectValue(status, selectedStatus);
+                toggleStatusFields(selectedStatus);
+
+                if (rule.open_time) {
+                    setCustomSelectValue(
+                        openTime,
+                        String(rule.open_time).substring(0, 5)
+                    );
+                }
+
+                if (rule.close_time) {
+                    setCustomSelectValue(
+                        closeTime,
+                        String(rule.close_time).substring(0, 5)
+                    );
+                }
+
+                maxSlots.value = rule.max_slots || 5;
+                slotDuration.value = rule.slot_duration_minutes || 60;
+                notes.value =
+                    rule.notes || '';
+
+                notes.dispatchEvent(
+                    new Event('input', {
+                        bubbles: true
+                    })
                 );
 
-                button.dataset.discardValue =
-                    selected ? 'true' : 'false';
-            });
-        }
+                selectedBreak = rule.break_time || 'none';
+                document.querySelectorAll(
+                    '#ruleModalBackdrop .break-chip'
+                ).forEach(button => {
+                    const selected =
+                        button.dataset.val === selectedBreak;
 
-        notes.dispatchEvent(
-            new Event('input', {
-                bubbles: true
-            })
-        );
-        window.openModal('ruleModalBackdrop');
-    }
-
-    function toggleDay(button) {
-        const isActive =
-            button.classList.toggle('active');
-
-        const value =
-            isActive ? 'true' : 'false';
-
-        button.setAttribute(
-            'aria-pressed',
-            value
-        );
-
-        button.dataset.discardValue = value;
-
-        clearFieldError(
-            'ruleDaysError',
-            null,
-            'ruleDaysGroup'
-        );
-    }
-
-    function toggleStatusFields(val) {
-        document.getElementById('ruleTimeFields').style.display = val === 'closed' ? 'none' : '';
-    }
-
-    function selectBreak(selectedButton) {
-        document
-            .querySelectorAll(
-                '#ruleBreakGroup .break-chip'
-            )
-            .forEach(button => {
-                const selected =
-                    button === selectedButton;
-
-                button.classList.toggle(
-                    'selected',
-                    selected
-                );
-
-                button.dataset.discardValue =
-                    selected ? 'true' : 'false';
-            });
-
-        selectedBreak =
-            selectedButton.dataset.val;
-
-        clearFieldError(
-            'ruleBreakError',
-            null,
-            'ruleBreakGroup'
-        );
-    }
-
-    function sortScheduleDays(days) {
-        const order = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-        return [...new Set(days)].sort((a, b) => order.indexOf(a) - order.indexOf(b));
-    }
-
-    function findConflictingScheduleDays(activeDays) {
-        const selected = new Set(activeDays);
-        const conflicts = [];
-
-        (scheduleRules || []).forEach(rule => {
-            if (!rule || !rule.is_active) return;
-            if (editingId !== null && String(rule.id) === String(editingId)) return;
-
-            (rule.days || []).forEach(day => {
-                if (selected.has(day)) conflicts.push(day);
-            });
-        });
-
-        return sortScheduleDays(conflicts);
-    }
-
-    function registerClinicScheduleValidation() {
-        if (
-            typeof window.registerGlobalFormValidationRule !==
-            'function'
-        ) {
-            return false;
-        }
-
-        window.registerGlobalFormValidationRule(
-            'clinicScheduleRule',
-            form => {
-                const daysGroup =
-                    document.getElementById('ruleDaysGroup');
-
-                const activeDays = Array.from(
-                    form.querySelectorAll('.day-toggle.active')
-                ).map(day => day.dataset.day);
-
-                const status =
-                    document.getElementById('ruleStatus')?.value || '';
-
-                const openTimeField =
-                    document.getElementById('ruleOpenTime');
-
-                const closeTimeField =
-                    document.getElementById('ruleCloseTime');
-
-                const maxSlotsField =
-                    document.getElementById('ruleMaxSlots');
-
-                const openTime = openTimeField?.value || '';
-                const closeTime = closeTimeField?.value || '';
-                const maxSlots = Number(maxSlotsField?.value || 0);
-
-                let valid = true;
-                let firstInvalid = null;
-
-                window.clearGlobalGroupError?.(
-                    daysGroup,
-                    'rule-days'
-                );
-
-                window.showFormInputValidationMessage?.(
-                    closeTimeField,
-                    ''
-                );
-
-                window.showFormInputValidationMessage?.(
-                    maxSlotsField,
-                    ''
-                );
-
-                if (!activeDays.length) {
-                    window.showGlobalGroupError?.(
-                        daysGroup,
-                        'rule-days',
-                        'Please select at least one day.'
+                    button.classList.toggle(
+                        'selected',
+                        selected
                     );
 
-                    valid = false;
-                    firstInvalid = daysGroup;
-                }
-
-                const conflicts =
-                    findConflictingScheduleDays(activeDays);
-
-                if (conflicts.length) {
-                    window.showGlobalGroupError?.(
-                        daysGroup,
-                        'rule-days',
-                        `A schedule already exists for ${conflicts.join(', ')}.`
-                    );
-
-                    valid = false;
-                    firstInvalid ||= daysGroup;
-                }
-
-                if (status !== 'closed') {
-                    if (
-                        !openTime ||
-                        !closeTime
-                    ) {
-                        if (!openTime) {
-                            window.showFormInputValidationMessage?.(
-                                openTimeField,
-                                'Please select an opening time.'
-                            );
-
-                            firstInvalid ||= openTimeField;
-                        }
-
-                        if (!closeTime) {
-                            window.showFormInputValidationMessage?.(
-                                closeTimeField,
-                                'Please select a closing time.'
-                            );
-
-                            firstInvalid ||= closeTimeField;
-                        }
-
-                        valid = false;
-                    } else if (openTime >= closeTime) {
-                        window.showFormInputValidationMessage?.(
-                            closeTimeField,
-                            'Closing time must be later than opening time.'
-                        );
-
-                        valid = false;
-                        firstInvalid ||= closeTimeField;
-                    }
-
-                    if (
-                        !Number.isFinite(maxSlots) ||
-                        maxSlots < 1 ||
-                        maxSlots > 30
-                    ) {
-                        window.showFormInputValidationMessage?.(
-                            maxSlotsField,
-                            'Max appointments must be between 1 and 30.'
-                        );
-
-                        valid = false;
-                        firstInvalid ||= maxSlotsField;
-                    }
-                }
-
-                return {
-                    valid,
-                    firstInvalid
-                };
+                    button.dataset.discardValue =
+                        selected ? 'true' : 'false';
+                });
             }
-        );
 
-        return true;
-    }
-
-    window.addEventListener(
-        'global-validation-ready',
-        () => {
-            registerClinicScheduleValidation();
-            registerClinicDateValidation();
-        }
-    );
-
-    document.addEventListener(
-        'DOMContentLoaded',
-        () => {
-            registerClinicScheduleValidation();
-            registerClinicDateValidation();
-        }
-    );
-
-    function submitRule() {
-        const form = document.getElementById('ruleForm');
-
-        if (!form) return;
-
-        const validation =
-            window.validateGlobalForm?.(form);
-
-        if (!validation || !validation.valid) {
-            return;
+            notes.dispatchEvent(
+                new Event('input', {
+                    bubbles: true
+                })
+            );
+            window.openModal('ruleModalBackdrop');
         }
 
-        const activeDays = Array.from(
-            document.querySelectorAll(
-                '#ruleModalBackdrop .day-toggle.active'
-            )
-        ).map(day => day.dataset.day);
+        function toggleDay(button) {
+            const isActive =
+                button.classList.toggle('active');
 
-        const status =
-            document.getElementById('ruleStatus').value;
+            const value =
+                isActive ? 'true' : 'false';
 
-        const openTime =
-            document.getElementById('ruleOpenTime').value;
+            button.setAttribute(
+                'aria-pressed',
+                value
+            );
 
-        const closeTime =
-            document.getElementById('ruleCloseTime').value;
+            button.dataset.discardValue = value;
 
-        const maxSlots =
-            document.getElementById('ruleMaxSlots').value;
-
-        form
-            .querySelectorAll('.injected-hidden')
-            .forEach(element => element.remove());
-
-        const inject = (name, value) => {
-            const input = document.createElement('input');
-
-            input.type = 'hidden';
-            input.name = name;
-            input.value = value;
-            input.className = 'injected-hidden';
-
-            form.appendChild(input);
-        };
-
-        activeDays.forEach(day => {
-            inject('days[]', day);
-        });
-
-        inject('status', status);
-
-        if (status !== 'closed') {
-            inject('open_time', openTime);
-            inject('close_time', closeTime);
-            inject('max_slots', maxSlots);
-            inject(
-                'break_time',
-                selectedBreak || 'none'
+            clearFieldError(
+                'ruleDaysError',
+                null,
+                'ruleDaysGroup'
             );
         }
 
-        inject(
-            'notes',
-            document.getElementById('ruleNotes').value
-        );
-        window.DiscardChanges?.markSubmitting(form);
-        form.requestSubmit();
-    }
+        function toggleStatusFields(val) {
+            const timeFields =
+                document.getElementById('ruleTimeFields');
 
-    function getLocalDateString(date = new Date()) {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
+            if (!timeFields) {
+                return;
+            }
 
-        return `${year}-${month}-${day}`;
-    }
-
-    function openBlockModal() {
-        const backdrop = document.getElementById('blockModalBackdrop');
-        const blockDate = document.getElementById('blockDate');
-
-        if (!backdrop || !blockDate) {
-            console.error('Block modal elements not found.');
-            return;
+            timeFields.classList.toggle(
+                'hidden',
+                val === 'closed'
+            );
         }
 
-        document
-            .querySelectorAll(
-                '#blockDateForm .global-field-error'
-            )
-            .forEach(error => {
-                error.innerHTML = '';
-                error.classList.remove('show');
-            });
+        function selectBreak(selectedButton) {
+            document
+                .querySelectorAll(
+                    '#ruleBreakGroup .break-chip'
+                )
+                .forEach(button => {
+                    const selected =
+                        button === selectedButton;
 
-        document
-            .querySelectorAll(
-                '#blockDateForm .is-invalid'
-            )
-            .forEach(element => {
-                element.classList.remove('is-invalid');
-            });
+                    button.classList.toggle(
+                        'selected',
+                        selected
+                    );
 
-        const today = getLocalDateString();
+                    button.dataset.discardValue =
+                        selected ? 'true' : 'false';
+                });
 
-        blockDate.removeAttribute('max');
-        blockDate.setAttribute('min', today);
-        blockDate.classList.remove('js-flatpickr-date-max-today');
-        blockDate.classList.add('js-flatpickr-date-min-today');
+            selectedBreak =
+                selectedButton.dataset.val;
 
-        if (blockDate._flatpickr) {
-            blockDate._flatpickr.set('maxDate', null);
-            blockDate._flatpickr.set('minDate', today);
-            blockDate._flatpickr.clear();
-        } else {
-            blockDate.value = '';
+            clearFieldError(
+                'ruleBreakError',
+                null,
+                'ruleBreakGroup'
+            );
         }
 
-        setCustomSelectValue(
-            document.getElementById('blockReason'),
-            'Holiday'
-        );
-
-        window.openModal('blockModalBackdrop');
-    }
-
-    function registerClinicDateValidation() {
-        if (
-            typeof window.registerGlobalValidationRule !==
-            'function'
-        ) {
-            return false;
-        }
-
-        window.registerGlobalValidationRule(
-            'clinicFutureOrToday',
-            field => {
-                const value =
-                    String(field.value || '').trim();
-
-                if (!value) {
-                    return 'Please select a date.';
+        function findOtherActiveSchedule(selectedDays = []) {
+            return (scheduleRules || []).find(rule => {
+                if (!rule || !rule.is_active) {
+                    return false;
                 }
 
-                const today = getLocalDateString();
-
-                if (value < today) {
-                    return 'Previous dates are not allowed.';
+                if (
+                    editingId !== null &&
+                    String(rule.id) === String(editingId)
+                ) {
+                    return false;
                 }
 
-                return '';
+                const ruleDays =
+                    Array.isArray(rule.days) ?
+                    rule.days : [];
+
+                return selectedDays.some(day =>
+                    ruleDays.includes(day)
+                );
+            }) || null;
+        }
+
+        function timeToMinutes(value) {
+            const parts = String(value || '').split(':').map(part => Number(part));
+
+            if (parts.length < 2 || parts.some(part => !Number.isFinite(part))) {
+                return null;
+            }
+
+            return (parts[0] * 60) + parts[1];
+        }
+
+        function possibleScheduleSlotCount(openTime, closeTime, breakTime, durationMinutes) {
+            const openMinutes = timeToMinutes(openTime);
+            const closeMinutes = timeToMinutes(closeTime);
+            const duration = Number(durationMinutes);
+
+            if (
+                openMinutes === null ||
+                closeMinutes === null ||
+                !Number.isFinite(duration) ||
+                duration < 5 ||
+                openMinutes >= closeMinutes
+            ) {
+                return 0;
+            }
+
+            let breakStart = null;
+            let breakEnd = null;
+
+            if (breakTime && breakTime !== 'none') {
+                const [rawStart, rawEnd] = String(breakTime).split('-');
+                breakStart = timeToMinutes(rawStart);
+                breakEnd = timeToMinutes(rawEnd);
+            }
+
+            let count = 0;
+
+            for (let start = openMinutes; start + duration <= closeMinutes; start += duration) {
+                const end = start + duration;
+
+                if (
+                    breakStart !== null &&
+                    breakEnd !== null &&
+                    start < breakEnd &&
+                    end > breakStart
+                ) {
+                    continue;
+                }
+
+                count++;
+            }
+
+            return count;
+        }
+
+        function registerClinicScheduleValidation() {
+            if (
+                typeof window.registerGlobalFormValidationRule !==
+                'function'
+            ) {
+                return false;
+            }
+
+            window.registerGlobalFormValidationRule(
+                'clinicScheduleRule',
+                form => {
+                    const daysGroup =
+                        document.getElementById('ruleDaysGroup');
+
+                    const activeDays = Array.from(
+                        form.querySelectorAll('.day-toggle.active')
+                    ).map(day => day.dataset.day);
+
+                    const activationStateField =
+                        document.getElementById('ruleActivationState');
+
+                    const activationState =
+                        activationStateField?.value || '0';
+
+                    const status =
+                        document.getElementById('ruleStatus')?.value || '';
+
+                    const openTimeField =
+                        document.getElementById('ruleOpenTime');
+
+                    const closeTimeField =
+                        document.getElementById('ruleCloseTime');
+
+                    const maxSlotsField =
+                        document.getElementById('ruleMaxSlots');
+
+                    const slotDurationField =
+                        document.getElementById('ruleSlotDuration');
+
+                    const openTime =
+                        openTimeField?.value || '';
+
+                    const closeTime =
+                        closeTimeField?.value || '';
+
+                    const maxSlots =
+                        Number(maxSlotsField?.value || 0);
+
+                    const slotDuration =
+                        Number(slotDurationField?.value || 0);
+
+                    let valid = true;
+                    let firstInvalid = null;
+
+                    window.clearGlobalGroupError?.(
+                        daysGroup,
+                        'rule-days'
+                    );
+
+                    clearFieldError(
+                        'ruleStateError',
+                        'ruleActivationState'
+                    );
+
+                    window.showFormInputValidationMessage?.(
+                        closeTimeField,
+                        ''
+                    );
+
+                    window.showFormInputValidationMessage?.(
+                        maxSlotsField,
+                        ''
+                    );
+
+                    window.showFormInputValidationMessage?.(
+                        slotDurationField,
+                        ''
+                    );
+
+                    if (!activeDays.length) {
+                        window.showGlobalGroupError?.(
+                            daysGroup,
+                            'rule-days',
+                            'Please select at least one day.'
+                        );
+
+                        valid = false;
+                        firstInvalid = daysGroup;
+                    }
+
+                    if (activationState === '1') {
+                        const otherActiveSchedule =
+                            findOtherActiveSchedule(activeDays);
+
+                        if (otherActiveSchedule) {
+                            const message =
+                                'Set the overlapping active schedule to Inactive before activating this schedule.';
+
+                            setFieldError(
+                                'ruleStateError',
+                                message,
+                                'ruleActivationState'
+                            );
+
+                            window.showToast?.({
+                                type: 'warning',
+                                title: 'Schedule cannot be activated',
+                                message: message,
+                                duration: 5000
+                            });
+
+                            valid = false;
+                            firstInvalid ||= activationStateField;
+                        }
+                    }
+
+                    if (status !== 'closed') {
+                        if (
+                            !openTime ||
+                            !closeTime
+                        ) {
+                            if (!openTime) {
+                                window.showFormInputValidationMessage?.(
+                                    openTimeField,
+                                    'Please select an opening time.'
+                                );
+
+                                firstInvalid ||= openTimeField;
+                            }
+
+                            if (!closeTime) {
+                                window.showFormInputValidationMessage?.(
+                                    closeTimeField,
+                                    'Please select a closing time.'
+                                );
+
+                                firstInvalid ||= closeTimeField;
+                            }
+
+                            valid = false;
+                        } else if (openTime >= closeTime) {
+                            window.showFormInputValidationMessage?.(
+                                closeTimeField,
+                                'Closing time must be later than opening time.'
+                            );
+
+                            valid = false;
+                            firstInvalid ||= closeTimeField;
+                        }
+
+                        if (
+                            !Number.isFinite(maxSlots) ||
+                            maxSlots < 1 ||
+                            maxSlots > 30
+                        ) {
+                            window.showFormInputValidationMessage?.(
+                                maxSlotsField,
+                                'Max appointments must be between 1 and 30.'
+                            );
+
+                            valid = false;
+                            firstInvalid ||= maxSlotsField;
+                        }
+
+                        if (
+                            !Number.isFinite(slotDuration) ||
+                            slotDuration < 5 ||
+                            slotDuration > 240 ||
+                            slotDuration % 5 !== 0
+                        ) {
+                            window.showFormInputValidationMessage?.(
+                                slotDurationField,
+                                'Slot duration must be 5 to 240 minutes, using 5-minute increments.'
+                            );
+
+                            valid = false;
+                            firstInvalid ||= slotDurationField;
+                        }
+
+                        const possibleSlots = possibleScheduleSlotCount(
+                            openTime,
+                            closeTime,
+                            selectedBreak || 'none',
+                            slotDuration
+                        );
+
+                        if (
+                            Number.isFinite(maxSlots) &&
+                            maxSlots > possibleSlots
+                        ) {
+                            window.showFormInputValidationMessage?.(
+                                maxSlotsField,
+                                `Max appointments cannot exceed ${possibleSlots} for the selected hours, lunch break, and slot duration.`
+                            );
+
+                            valid = false;
+                            firstInvalid ||= maxSlotsField;
+                        }
+                    }
+
+                    return {
+                        valid,
+                        firstInvalid
+                    };
+                }
+            );
+
+            return true;
+        }
+
+        window.addEventListener(
+            'global-validation-ready',
+            () => {
+                registerClinicScheduleValidation();
+                registerClinicDateValidation();
+                registerReservedBookingPeriodValidation();
             }
         );
 
-        return true;
-    }
+        document.addEventListener(
+            'DOMContentLoaded',
+            () => {
+                registerClinicScheduleValidation();
+                registerClinicDateValidation();
+                registerReservedBookingPeriodValidation();
+            }
+        );
 
-    function openScheduleDeleteModal(
-        actionUrl,
-        scheduleName
-    ) {
-        window.openDeleteConfirmModal?.({
-            modalId:
-                'scheduleDeleteModal',
+        function submitRule() {
+            const form = document.getElementById('ruleForm');
 
-            formId:
-                'scheduleDeleteForm',
+            if (!form) {
+                return;
+            }
 
-            nameId:
-                'scheduleDeleteName',
+            const validation =
+                window.validateGlobalForm?.(form);
 
-            action:
-                actionUrl,
+            if (validation && !validation.valid) {
+                return;
+            }
 
-            itemName:
-                scheduleName,
-        });
-    }
+            const activeDays = Array.from(
+                document.querySelectorAll(
+                    '#ruleModalBackdrop .day-toggle.active'
+                )
+            ).map(day => day.dataset.day);
 
-    document.addEventListener('DOMContentLoaded', function () {
+            const activationState =
+                document.getElementById('ruleActivationState')?.value || '0';
 
-        const ruleNotes = document.getElementById('ruleNotes');
+            const status =
+                document.getElementById('ruleStatus')?.value || 'open';
 
-        ruleNotes?.addEventListener(
-            'input',
-            function () {
-                clearFieldError(
-                    'ruleNotesError',
-                    'ruleNotes'
+            const openTime =
+                document.getElementById('ruleOpenTime')?.value || '';
+
+            const closeTime =
+                document.getElementById('ruleCloseTime')?.value || '';
+
+            const maxSlots =
+                document.getElementById('ruleMaxSlots')?.value || '';
+
+            const slotDuration =
+                document.getElementById('ruleSlotDuration')?.value || '';
+
+            form
+                .querySelectorAll('.injected-hidden')
+                .forEach(element => element.remove());
+
+            const inject = (name, value) => {
+                const input = document.createElement('input');
+
+                input.type = 'hidden';
+                input.name = name;
+                input.value = value;
+                input.className = 'injected-hidden';
+
+                form.appendChild(input);
+            };
+
+            activeDays.forEach(day => {
+                inject('days[]', day);
+            });
+
+            inject('is_active', activationState);
+            inject('status', status);
+
+            if (status !== 'closed') {
+                inject('open_time', openTime);
+                inject('close_time', closeTime);
+                inject('max_slots', maxSlots);
+                inject('slot_duration_minutes', slotDuration);
+                inject(
+                    'break_time',
+                    selectedBreak || 'none'
                 );
             }
-        );
 
-        window.syncInputClearButton?.(ruleNotes);
+            inject(
+                'notes',
+                document.getElementById('ruleNotes')?.value || ''
+            );
 
-        document.getElementById('ruleStatus')?.addEventListener('change', () => clearFieldError(
-            'ruleStatusError', 'ruleStatus'));
-        document.getElementById('ruleOpenTime')?.addEventListener('change', () => clearFieldError(
-            'ruleOpenTimeError', 'ruleOpenTime'));
-        document.getElementById('ruleCloseTime')?.addEventListener('change', () => clearFieldError(
-            'ruleCloseTimeError', 'ruleCloseTime'));
-        document.getElementById('ruleMaxSlots')?.addEventListener('input', function () {
-            this.value = this.value.replace(/\D/g, '').slice(0, 2);
+            form.requestSubmit();
+        }
 
-            if (this.value !== '') {
-                const value = Math.max(1, Math.min(30, parseInt(this.value, 10)));
-                this.value = String(value);
+        function getLocalDateString(date = new Date()) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+
+            return `${year}-${month}-${day}`;
+        }
+
+        async function openBlockModal() {
+            const backdrop = document.getElementById('blockModalBackdrop');
+            const blockDate = document.getElementById('blockDate');
+
+            if (!backdrop || !blockDate) {
+                console.error('Block modal elements not found.');
+                return;
             }
 
-            clearFieldError('ruleMaxSlotsError', 'ruleMaxSlots');
+            document
+                .querySelectorAll('#blockDateForm .global-field-error')
+                .forEach(error => {
+                    error.innerHTML = '';
+                    error.classList.remove('show');
+                });
+
+            document
+                .querySelectorAll('#blockDateForm .is-invalid')
+                .forEach(element => {
+                    element.classList.remove('is-invalid');
+                });
+
+            const today = getLocalDateString();
+
+            blockDate.removeAttribute('max');
+            blockDate.setAttribute('min', today);
+            blockDate.classList.remove('js-flatpickr-date-max-today');
+            blockDate.classList.add('js-flatpickr-date-min-today');
+
+            setCustomSelectValue(
+                document.getElementById('blockReason'),
+                'Holiday'
+            );
+
+            const blockNote =
+                document.getElementById('blockNote');
+
+            if (blockNote) {
+                blockNote.value = '';
+
+                blockNote.dispatchEvent(
+                    new Event('input', {
+                        bubbles: true
+                    })
+                );
+            }
+
+            window.openModal('blockModalBackdrop');
+
+            try {
+                await window.initGlobalDatePickers?.(backdrop);
+            } catch (error) {
+                console.error('Unable to initialize Block Date picker.', error);
+            }
+
+            const picker = blockDate._flatpickr;
+
+            if (picker) {
+                picker.set('maxDate', null);
+                picker.set('minDate', today);
+                picker.clear(false);
+            } else {
+                blockDate.value = '';
+            }
+        }
+
+        function registerClinicDateValidation() {
+            if (
+                typeof window.registerGlobalValidationRule !==
+                'function'
+            ) {
+                return false;
+            }
+
+            window.registerGlobalValidationRule(
+                'clinicFutureOrToday',
+                field => {
+                    const value =
+                        String(field.value || '').trim();
+
+                    if (!value) {
+                        return 'Please select a date.';
+                    }
+
+                    const today = getLocalDateString();
+
+                    if (value < today) {
+                        return 'Previous dates are not allowed.';
+                    }
+
+                    return '';
+                }
+            );
+
+            return true;
+        }
+
+        function openScheduleDeleteModal(actionUrl, scheduleName) {
+            window.openDeleteConfirmModal?.({
+                modalId: 'scheduleDeleteModal',
+
+                formId: 'scheduleDeleteForm',
+
+                nameId: 'scheduleDeleteName',
+
+                action: actionUrl,
+
+                itemName: scheduleName,
+            });
+        }
+
+        function openBlockedDateDeleteModal(actionUrl, blockedDateName) {
+            window.openDeleteConfirmModal?.({
+                modalId: 'blockedDateDeleteModal',
+
+                formId: 'blockedDateDeleteForm',
+
+                nameId: 'blockedDateDeleteName',
+
+                action: actionUrl,
+
+                itemName: blockedDateName,
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+
+            const ruleNotes = document.getElementById('ruleNotes');
+
+            ruleNotes?.addEventListener(
+                'input',
+                function() {
+                    clearFieldError(
+                        'ruleNotesError',
+                        'ruleNotes'
+                    );
+                }
+            );
+
+            window.syncInputClearButton?.(ruleNotes);
+
+            document.getElementById('ruleStatus')?.addEventListener('change', () => clearFieldError(
+                'ruleStatusError', 'ruleStatus'));
+            document.getElementById('ruleOpenTime')?.addEventListener('change', () => clearFieldError(
+                'ruleOpenTimeError', 'ruleOpenTime'));
+            document.getElementById('ruleCloseTime')?.addEventListener('change', () => clearFieldError(
+                'ruleCloseTimeError', 'ruleCloseTime'));
+            document.getElementById('ruleMaxSlots')?.addEventListener('input', function() {
+                this.value = this.value.replace(/\D/g, '').slice(0, 2);
+
+                if (this.value !== '') {
+                    const value = Math.max(1, Math.min(30, parseInt(this.value, 10)));
+                    this.value = String(value);
+                }
+
+                clearFieldError('ruleMaxSlotsError', 'ruleMaxSlots');
+            });
+
+            document.getElementById('ruleSlotDuration')?.addEventListener('input', function() {
+                this.value = this.value.replace(/\D/g, '').slice(0, 3);
+
+                if (this.value !== '') {
+                    const value = Math.max(5, Math.min(240, parseInt(this.value, 10)));
+                    this.value = String(value);
+                }
+
+                clearFieldError('ruleSlotDurationError', 'ruleSlotDuration');
+            });
+
+            document.getElementById('blockDate')?.addEventListener('input', () => clearFieldError(
+                'blockDateError',
+                'blockDate'));
+
+            document
+                .querySelector('#blockModalBackdrop .fp-date-input-wrap')
+                ?.addEventListener('click', async function() {
+                    const input = document.getElementById('blockDate');
+
+                    if (!input) return;
+
+                    if (!input._flatpickr) {
+                        try {
+                            await window.initGlobalDatePickers?.(
+                                document.getElementById('blockModalBackdrop')
+                            );
+                        } catch (error) {
+                            console.error('Unable to initialize Block Date picker.', error);
+                        }
+                    }
+
+                    input._flatpickr?.open();
+                });
+            document.getElementById('blockReason')?.addEventListener('change', () => clearFieldError(
+                'blockReasonError', 'blockReason'));
+            document.getElementById('blockNote')?.addEventListener('input', () => clearFieldError(
+                'blockNoteError',
+                'blockNote'));
         });
 
-        document.getElementById('blockDate')?.addEventListener('input', () => clearFieldError('blockDateError',
-            'blockDate'));
-        document.getElementById('blockReason')?.addEventListener('change', () => clearFieldError(
-            'blockReasonError', 'blockReason'));
-        document.getElementById('blockNote')?.addEventListener('input', () => clearFieldError('blockNoteError',
-            'blockNote'));
-    });
-</script>
+        function replaceReservedTargetSelectOptions(select, options, placeholder, selectedValue = '') {
+            if (!select) return;
+
+            const wrapper = select.closest('.custom-select');
+            if (wrapper) {
+                wrapper.parentNode.insertBefore(select, wrapper);
+                wrapper.remove();
+            }
+
+            delete select.dataset.customSelectReady;
+            select.classList.remove('custom-select-native');
+            select.innerHTML = '';
+            const placeholderOption = new Option(placeholder, '');
+            placeholderOption.disabled = true;
+            placeholderOption.hidden = true;
+            select.appendChild(placeholderOption);
+
+            options.forEach(option => {
+                select.appendChild(new Option(option.label, option.value));
+            });
+
+            const normalizedSelected = String(selectedValue ?? '');
+            select.value = Array.from(select.options).some(option => option.value === normalizedSelected) ?
+                normalizedSelected :
+                '';
+
+            window.initCustomSelects?.(select.parentElement);
+        }
+
+        function updateReservedStudentTargetDropdowns(program = '', year = '', section = '') {
+            const programSelect = document.getElementById('reservedProgramCode');
+            const yearSelect = document.getElementById('reservedYearLevel');
+            const sectionSelect = document.getElementById('reservedSection');
+            const selectedProgram = String(program || '').toUpperCase();
+            const selectedYear = String(year || '');
+            const selectedSection = String(section || '').toUpperCase();
+
+            const uniqueOptions = (items, valueKey, labelBuilder) => {
+                const seen = new Set();
+
+                return items.reduce((options, item) => {
+                    const value = String(item[valueKey] ?? '').trim();
+                    const key = value.toLowerCase();
+                    if (!value || seen.has(key)) return options;
+
+                    seen.add(key);
+                    options.push({
+                        value,
+                        label: labelBuilder(item, value)
+                    });
+                    return options;
+                }, []);
+            };
+
+            const programs = uniqueOptions(
+                reservedStudentTargetOptions,
+                'course_code',
+                (item, value) => item.course_name && item.course_name !== value ?
+                `${value} — ${item.course_name}` :
+                value
+            );
+            const matchingProgram = reservedStudentTargetOptions.filter(
+                item => String(item.course_code || '').toUpperCase() === selectedProgram
+            );
+            const years = uniqueOptions(
+                matchingProgram,
+                'year_level',
+                (_item, value) => `Year ${value}`
+            ).sort((a, b) => Number(a.value) - Number(b.value));
+            const matchingYear = matchingProgram.filter(
+                item => String(item.year_level || '') === selectedYear
+            );
+            const sections = uniqueOptions(
+                matchingYear,
+                'section',
+                (_item, value) => value
+            ).sort((a, b) => a.label.localeCompare(b.label, undefined, {
+                numeric: true
+            }));
+
+            replaceReservedTargetSelectOptions(programSelect, programs, 'Select program', selectedProgram);
+            replaceReservedTargetSelectOptions(yearSelect, years, 'Select year', selectedYear);
+            replaceReservedTargetSelectOptions(sectionSelect, sections, 'Select section', selectedSection);
+
+            yearSelect.disabled = !selectedProgram;
+            sectionSelect.disabled = !selectedProgram || !selectedYear;
+
+            const yearCustomSelect = yearSelect.closest('.custom-select');
+            const sectionCustomSelect = sectionSelect.closest('.custom-select');
+
+            if (yearCustomSelect) {
+                window.syncCustomSelect?.(yearCustomSelect);
+            }
+
+            if (sectionCustomSelect) {
+                window.syncCustomSelect?.(sectionCustomSelect);
+            }
+        }
+
+        function toggleReservedStudentFields(patientType) {
+            const studentFields = document.getElementById('reservedStudentFields');
+            const isStudent = patientType === 'student';
+
+            if (!studentFields) return;
+
+            studentFields.hidden = !isStudent;
+
+            ['reservedProgramCode', 'reservedYearLevel', 'reservedSection'].forEach(id => {
+                const field = document.getElementById(id);
+                if (!field) return;
+
+                const selectedProgram = document.getElementById('reservedProgramCode')?.value || '';
+                const selectedYear = document.getElementById('reservedYearLevel')?.value || '';
+                field.disabled = !isStudent ||
+                    (id === 'reservedYearLevel' && !selectedProgram) ||
+                    (id === 'reservedSection' && (!selectedProgram || !selectedYear));
+                field.required = isStudent;
+
+                if (!isStudent) {
+                    field.value = '';
+                }
+
+                const customSelect = field.closest('.custom-select');
+                if (customSelect) {
+                    customSelect.classList.toggle('is-disabled', !isStudent);
+                    window.syncCustomSelect?.(customSelect);
+                }
+            });
+        }
+
+        let reservedTimeslots = [];
+
+        function setReservedBookingMode(mode) {
+            const normalizedMode = mode === 'date_only' ? 'date_only' : 'timeslot';
+            const timeslotBuilder = document.getElementById('reservedTimeslotBuilder');
+            const capacityField = document.getElementById('reservedOverallCapacityField');
+            const capacityInput = document.getElementById('reservedMaxCapacity');
+            const durationInput = document.getElementById('reservedSlotDuration');
+
+            document.querySelectorAll('input[name="booking_mode"]').forEach(input => {
+                input.checked = input.value === normalizedMode;
+            });
+
+            if (timeslotBuilder) {
+                timeslotBuilder.hidden = normalizedMode !== 'timeslot';
+                timeslotBuilder.querySelectorAll('input[name^="timeslots["]').forEach(input => {
+                    input.disabled = normalizedMode !== 'timeslot';
+                });
+            }
+
+            if (capacityField) capacityField.hidden = normalizedMode === 'timeslot';
+            if (capacityInput) {
+                capacityInput.disabled = normalizedMode === 'timeslot';
+                capacityInput.required = normalizedMode === 'date_only';
+            }
+            if (durationInput) {
+                durationInput.disabled = normalizedMode !== 'timeslot';
+                durationInput.required = normalizedMode === 'timeslot';
+            }
+        }
+
+        function getReservedSlotDuration() {
+            return Math.min(
+                240,
+                Math.max(5, Number(document.getElementById('reservedSlotDuration')?.value) || 30)
+            );
+        }
+
+        function updateReservedSlotDuration() {
+            const durationInput = document.getElementById('reservedSlotDuration');
+            const duration = getReservedSlotDuration();
+
+            if (durationInput) durationInput.value = duration;
+            renderReservedTimeslots();
+        }
+
+        function renderReservedTimeslots() {
+            const list = document.getElementById('reservedTimeslotList');
+            const empty = document.getElementById('reservedTimeslotEmpty');
+            const total = document.getElementById('reservedTimeslotTotal');
+            const addButton = document.getElementById('reservedAddTimeslotButton');
+
+            if (!list || !empty || !total) return;
+
+            list.querySelectorAll('.js-flatpickr-time').forEach(input => {
+                input._flatpickr?.destroy();
+            });
+
+            list.innerHTML = reservedTimeslots.map((slot, index) => `
+            <div class="reserved-timeslot-item">
+                <span class="reserved-timeslot-item-icon"><i class="fa-regular fa-clock"></i></span>
+                <div data-global-field>
+                    <label class="form-label" for="reservedSlotTime${index}">Time</label>
+                    <div class="global-control-wrap reserved-time-control" data-flatpickr-trigger>
+                        <i class="fa-regular fa-clock global-control-icon" aria-hidden="true"></i>
+                        <input id="reservedSlotTime${index}" name="timeslots[${index}][time]" type="text"
+                            required readonly class="form-input-custom global-form-icon js-flatpickr-time"
+                            value="${slot.time}" placeholder="Select time"
+                            data-ui-change="action-5d12ccc88311" data-ui-change-arg-0="${window.uiAttribute(index)}">
+                    </div>
+                </div>
+                <span class="reserved-timeslot-one-patient">
+                    <i class="fa-solid fa-user"></i> 1 patient · ${getReservedSlotDuration()} min
+                </span>
+                <button type="button" class="reserved-remove-timeslot" data-ui-click="action-fcae67819c6f" data-ui-click-arg-0="${window.uiAttribute(index)}"
+                    aria-label="Remove timeslot" title="Remove timeslot">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+            </div>
+        `).join('');
+
+            empty.hidden = reservedTimeslots.length > 0;
+            total.textContent = reservedTimeslots.length;
+
+            if (addButton) {
+                const atCapacity = reservedTimeslots.length >= reservedPeriodMaxCapacity;
+
+                addButton.disabled = atCapacity;
+
+                if (atCapacity) {
+                    addButton.dataset.tooltip = `Maximum of ${reservedPeriodMaxCapacity} timeslots reached`;
+                    addButton.dataset.tooltipTone = 'locked';
+                } else {
+                    addButton.removeAttribute('data-tooltip');
+                    addButton.removeAttribute('data-tooltip-tone');
+                }
+            }
+
+            setReservedBookingMode(
+                document.querySelector('input[name="booking_mode"]:checked')?.value || 'timeslot'
+            );
+        }
+
+        function updateReservedTimeslot(index, field, value) {
+            if (!reservedTimeslots[index]) return;
+
+            reservedTimeslots[index][field] = String(value).slice(0, 5);
+        }
+
+        function removeReservedTimeslot(index) {
+            reservedTimeslots.splice(index, 1);
+            renderReservedTimeslots();
+        }
+
+        function addReservedTimeslot() {
+            const timeInput = document.getElementById('reservedNewSlotTime');
+            const time = timeInput?.value || '';
+
+            timeInput?.setCustomValidity('');
+
+            if (!time) {
+                window.showFormInputValidationMessage?.(
+                    timeInput,
+                    'Choose a time before adding the timeslot.'
+                );
+
+                window.focusGlobalInvalidField?.(
+                    timeInput
+                );
+
+                return;
+            }
+
+            if (
+                reservedTimeslots.some(
+                    slot => slot.time === time
+                )
+            ) {
+                window.showFormInputValidationMessage?.(
+                    timeInput,
+                    'This timeslot has already been added.'
+                );
+
+                return;
+            }
+
+            if (
+                reservedTimeslots.length >=
+                reservedPeriodMaxCapacity
+            ) {
+                window.showFormInputValidationMessage?.(
+                    timeInput,
+                    `A reserved period cannot have more than ${reservedPeriodMaxCapacity} timeslots.`
+                );
+
+                return;
+            }
+
+            window.showFormInputValidationMessage?.(timeInput, '');
+            reservedTimeslots.push({
+                time
+            });
+
+            reservedTimeslots.sort((a, b) => a.time.localeCompare(b.time));
+            renderReservedTimeslots();
+
+            if (timeInput) {
+                const [hours, minutes] = time.split(':').map(Number);
+                const nextMinutes = (hours * 60) + minutes + getReservedSlotDuration();
+                const end = document.getElementById('reservedEndTime')?.value || '';
+                const nextTime =
+                    `${String(Math.floor(nextMinutes / 60)).padStart(2, '0')}:${String(nextMinutes % 60).padStart(2, '0')}`;
+                if (nextMinutes < 24 * 60 && (!end || nextTime < end)) {
+                    if (timeInput._flatpickr) {
+                        timeInput._flatpickr.setDate(nextTime, false, 'H:i');
+                    } else {
+                        timeInput.value = nextTime;
+                    }
+                }
+            }
+        }
+
+        async function openReservedPeriodPicker(input) {
+            if (!input) {
+                return;
+            }
+
+            const modal = document.getElementById(
+                'reservedPeriodModalBackdrop'
+            );
+
+            if (!modal) {
+                return;
+            }
+
+            if (!input._flatpickr) {
+                try {
+                    await window.initGlobalDatePickers?.(
+                        modal
+                    );
+                } catch (error) {
+                    console.error(
+                        'Unable to initialize reserved period picker.',
+                        error
+                    );
+                }
+            }
+
+            input._flatpickr?.open();
+        }
+
+        function bindReservedPeriodPickerTriggers() {
+            const modal = document.getElementById(
+                'reservedPeriodModalBackdrop'
+            );
+
+            if (
+                !modal ||
+                modal.dataset.flatpickrTriggersBound === 'true'
+            ) {
+                return;
+            }
+
+            modal.dataset.flatpickrTriggersBound = 'true';
+
+            modal.addEventListener(
+                'click',
+                async event => {
+                    const trigger =
+                        event.target.closest(
+                            '[data-flatpickr-trigger]'
+                        );
+
+                    if (
+                        !trigger ||
+                        !modal.contains(trigger)
+                    ) {
+                        return;
+                    }
+
+                    const input =
+                        trigger.querySelector(
+                            '.js-flatpickr-date-min-today, .js-flatpickr-time'
+                        );
+
+                    if (!input) {
+                        return;
+                    }
+
+                    await openReservedPeriodPicker(
+                        input
+                    );
+                }
+            );
+        }
+
+        function openReservedPeriodModal(mode = 'create', periodId = null, period = null) {
+            const modal = document.getElementById('reservedPeriodModalBackdrop');
+            const form = document.getElementById('reservedPeriodForm');
+            const methodField = document.getElementById('reservedPeriodMethodField');
+            const idField = document.getElementById('reservedPeriodId');
+            const modalTitle = document.getElementById('reservedPeriodModalTitle');
+            const modalSubtitle = document.getElementById('reservedPeriodModalSubtitle');
+            const modalIcon = document.getElementById('reservedPeriodModalIcon');
+            const submitButton = document.getElementById('reservedPeriodSubmitButton');
+            const submitText = document.getElementById('reservedPeriodSubmitText');
+            const activationState = document.getElementById('reservedActivationState');
+            const serviceCheckboxes = Array.from(document.querySelectorAll('[data-reserved-service]'));
+
+            if (!modal || !form || !methodField || !idField || !activationState) {
+                return;
+            }
+
+            form.reset();
+            form.action = reservedPeriodRoutes.store;
+            methodField.innerHTML = '';
+            idField.value = '';
+
+            modal.classList.remove('modal-theme-primary', 'modal-theme-edit');
+            modal.classList.add('modal-theme-primary');
+
+            modalTitle.textContent = 'Create Reserved Booking Period';
+            modalSubtitle.textContent = 'Reserve part of a clinic day for a selected patient group.';
+            modalIcon.className = 'fa-solid fa-calendar-check';
+            submitButton.className = 'ui-btn ui-btn-primary';
+            submitText.textContent = 'Save Reserved Period';
+
+            document.getElementById('reservedDate').value = '';
+            activationState.value = '0';
+            const activationCustomSelect = activationState.closest('.custom-select');
+            if (activationCustomSelect) {
+                window.syncCustomSelect?.(activationCustomSelect);
+            }
+            document.getElementById('reservedStartTime').value = '09:00';
+            document.getElementById('reservedEndTime').value = '13:00';
+            document.getElementById('reservedPatientType').value = 'student';
+            document.getElementById('reservedMaxCapacity').value = '10';
+            document.getElementById('reservedSlotDuration').value = '30';
+            document.getElementById('reservedNewSlotTime').value = '09:00';
+            reservedTimeslots = [];
+            serviceCheckboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+
+            const values = period || {};
+
+            if (mode === 'edit' && periodId) {
+                modal.classList.remove('modal-theme-primary');
+                modal.classList.add('modal-theme-edit');
+                form.action = reservedPeriodRoutes.update.replace('__PERIOD_ID__', periodId);
+                methodField.innerHTML = '<input type="hidden" name="_method" value="PUT">';
+                idField.value = periodId;
+
+                modalTitle.textContent = 'Edit Reserved Booking Period';
+                modalSubtitle.textContent = 'Update the window, target group, booking mode, or capacity.';
+                modalIcon.className = 'fa-solid fa-pen-to-square';
+                submitButton.className = 'ui-btn ui-btn-primary';
+                submitText.textContent = 'Update Reserved Period';
+            }
+
+            const setValue = (id, value, fallback = '') => {
+                const field = document.getElementById(id);
+                if (!field) return;
+
+                field.value = value ?? fallback;
+
+                if (field._flatpickr) {
+                    if (field.value) {
+                        const valueFormat = field.classList.contains('js-flatpickr-time') ?
+                            'H:i' :
+                            'Y-m-d';
+                        field._flatpickr.setDate(field.value, false, valueFormat);
+                    } else {
+                        field._flatpickr.clear(false);
+                    }
+                }
+
+                const customSelect = field.closest('.custom-select');
+                if (customSelect) {
+                    window.syncCustomSelect?.(customSelect);
+                }
+            };
+
+            const valuesAreActive = values.is_active === true ||
+                values.is_active === 1 ||
+                values.is_active === '1';
+
+            setValue('reservedActivationState', valuesAreActive ? '1' : '0', '0');
+            setValue('reservedTitle', values.title);
+            setValue(
+                'reservedDate',
+                values.reserved_date ? String(values.reserved_date).slice(0, 10) : ''
+            );
+            syncReservedDateAvailability(mode === 'edit' ? periodId : null);
+            setValue('reservedStartTime', values.start_time ? String(values.start_time).slice(0, 5) : '09:00');
+            setValue('reservedEndTime', values.end_time ? String(values.end_time).slice(0, 5) : '13:00');
+            setValue('reservedPatientType', values.target_patient_type, 'student');
+            updateReservedStudentTargetDropdowns(
+                values.program_code,
+                values.year_level,
+                values.section
+            );
+            setValue('reservedMaxCapacity', values.max_capacity, '10');
+            setValue('reservedSlotDuration', values.timeslot_duration_minutes, '30');
+            setValue('reservedNewSlotTime', '09:00');
+            setValue('reservedNotes', values.notes);
+
+            const allowedServices = Array.isArray(values.allowed_services) ?
+                values.allowed_services.map(service => String(service).toLowerCase()) :
+                (mode === 'edit' ? serviceCheckboxes.map(checkbox => checkbox.value.toLowerCase()) : []);
+
+            serviceCheckboxes.forEach(checkbox => {
+                checkbox.checked = allowedServices.includes(checkbox.value.toLowerCase());
+            });
+
+            window.initCharLimitFields?.(
+                modal
+            );
+
+            document
+                .getElementById('reservedNotes')
+                ?.dispatchEvent(
+                    new Event('input', {
+                        bubbles: true
+                    })
+                );
+
+            reservedTimeslots = Array.from(values.timeslots || values.slots || []).map(slot => ({
+                time: String(slot.time || slot.slot_time || '').slice(0, 5),
+            })).filter(slot => slot.time);
+            renderReservedTimeslots();
+            updateReservedSlotDuration();
+            setReservedBookingMode(values.booking_mode || 'timeslot');
+
+            toggleReservedStudentFields(
+                document.getElementById(
+                    'reservedPatientType'
+                ).value
+            );
+
+            window.openModal('reservedPeriodModalBackdrop');
+
+            Promise.resolve(
+                    window.initGlobalDatePickers?.(
+                        modal
+                    )
+                )
+                .then(() => {
+                    syncReservedDateAvailability(
+                        mode === 'edit' ? periodId : null
+                    );
+                })
+                .catch(error => {
+                    console.error(
+                        'Unable to initialize reserved period pickers.',
+                        error
+                    );
+                });
+        }
+
+        function openReservedPeriodDeleteModal(action, title) {
+            const form = document.getElementById('reservedPeriodDeleteForm');
+            const name = document.getElementById('reservedPeriodDeleteName');
+
+            if (!form || !name) return;
+
+            form.action = action;
+            name.textContent = title || 'Reserved booking period';
+            window.openModal('reservedPeriodDeleteModal');
+        }
+
+        function registerReservedBookingPeriodValidation() {
+            if (
+                typeof window.registerGlobalFormValidationRule !==
+                'function'
+            ) {
+                return false;
+            }
+
+            window.registerGlobalFormValidationRule(
+                'reservedBookingPeriod',
+                form => {
+                    const startField =
+                        document.getElementById('reservedStartTime');
+
+                    const endField =
+                        document.getElementById('reservedEndTime');
+
+                    const bookingModeGroup =
+                        document.getElementById(
+                            'reservedBookingModeGroup'
+                        );
+
+                    const allowedServicesGroup =
+                        document.getElementById('reservedAllowedServicesGroup');
+
+                    const slotPrompt =
+                        document.getElementById('reservedNewSlotTime');
+
+                    const start =
+                        startField?.value || '';
+
+                    const end =
+                        endField?.value || '';
+
+                    const bookingMode =
+                        form.querySelector(
+                            'input[name="booking_mode"]:checked'
+                        )?.value || '';
+
+                    let valid = true;
+                    let firstInvalid = null;
+
+                    window.showFormInputValidationMessage?.(
+                        endField,
+                        ''
+                    );
+
+                    window.clearGlobalGroupError?.(
+                        bookingModeGroup,
+                        'reserved-booking-mode'
+                    );
+
+                    window.clearGlobalGroupError?.(
+                        slotPrompt,
+                        'reserved-timeslots'
+                    );
+
+                    window.clearGlobalGroupError?.(
+                        allowedServicesGroup,
+                        'reserved-allowed-services'
+                    );
+
+                    if (!allowedServicesGroup?.querySelector('input[name="allowed_services[]"]:checked')) {
+                        window.showGlobalGroupError?.(
+                            allowedServicesGroup,
+                            'reserved-allowed-services',
+                            'Select at least one dental service.'
+                        );
+
+                        valid = false;
+                        firstInvalid ||= allowedServicesGroup;
+                    }
+
+                    if (!bookingMode) {
+                        window.showGlobalGroupError?.(
+                            bookingModeGroup,
+                            'reserved-booking-mode',
+                            'Please select how the patient will book.'
+                        );
+
+                        valid = false;
+                        firstInvalid ||= bookingModeGroup;
+                    }
+
+                    if (
+                        start &&
+                        end &&
+                        end <= start
+                    ) {
+                        window.showFormInputValidationMessage?.(
+                            endField,
+                            'End time must be later than start time.'
+                        );
+
+                        valid = false;
+                        firstInvalid ||= endField;
+                    }
+
+                    if (bookingMode === 'timeslot') {
+                        const duration =
+                            getReservedSlotDuration();
+
+                        const toMinutes = time => {
+                            const [
+                                hours,
+                                minutes
+                            ] = String(time)
+                                .split(':')
+                                .map(Number);
+
+                            return (
+                                hours * 60 +
+                                minutes
+                            );
+                        };
+
+                        const endMinutes =
+                            toMinutes(end);
+
+                        const sortedMinutes =
+                            reservedTimeslots
+                            .map(slot =>
+                                toMinutes(slot.time)
+                            )
+                            .sort(
+                                (a, b) => a - b
+                            );
+
+                        const hasInvalidSlot =
+                            reservedTimeslots.some(
+                                slot =>
+                                !slot.time ||
+                                slot.time < start ||
+                                (
+                                    toMinutes(slot.time) +
+                                    duration
+                                ) > endMinutes
+                            );
+
+                        const slotTimes =
+                            reservedTimeslots.map(
+                                slot => slot.time
+                            );
+
+                        const hasDuplicateSlot =
+                            new Set(slotTimes).size !==
+                            slotTimes.length;
+
+                        const hasOverlappingSlot =
+                            sortedMinutes.some(
+                                (minutes, index) =>
+                                index > 0 &&
+                                minutes <
+                                (
+                                    sortedMinutes[index - 1] +
+                                    duration
+                                )
+                            );
+
+                        const exceedsCapacity =
+                            reservedTimeslots.length >
+                            reservedPeriodMaxCapacity;
+
+                        let timeslotMessage = '';
+
+                        if (!reservedTimeslots.length) {
+                            timeslotMessage =
+                                'Add at least one timeslot for patients to select.';
+                        } else if (exceedsCapacity) {
+                            timeslotMessage =
+                                `A reserved period cannot have more than ${reservedPeriodMaxCapacity} timeslots.`;
+                        } else if (hasDuplicateSlot) {
+                            timeslotMessage =
+                                'Each timeslot must have a unique time.';
+                        } else if (hasOverlappingSlot) {
+                            timeslotMessage =
+                                'Timeslots cannot overlap based on the selected duration.';
+                        } else if (hasInvalidSlot) {
+                            timeslotMessage =
+                                'Every timeslot, including its duration, must fit within the reserved period.';
+                        }
+
+                        if (timeslotMessage) {
+                            window.showGlobalGroupError?.(
+                                slotPrompt,
+                                'reserved-timeslots',
+                                timeslotMessage
+                            );
+
+                            valid = false;
+                            firstInvalid ||= slotPrompt;
+                        }
+                    }
+
+                    return {
+                        valid,
+                        firstInvalid
+                    };
+                }
+            );
+
+            return true;
+        }
+
+        function renderClinicScheduleEmptyStates() {
+            if (!window.EmptyState) return;
+
+            if (document.getElementById('scheduleRulesEmptyState')) {
+                window.EmptyState.render({
+                    host: '#scheduleRulesEmptyState',
+                    icon: 'fa-calendar-xmark',
+                    title: 'No schedule rules yet',
+                    message: 'Add clinic hours and availability rules to begin scheduling appointments.',
+                    className: 'empty-state-compact clinic-schedule-empty-state',
+                    actionHtml: `
+                    <button type="button" data-ui-click="action-3658b7ca536b" class="empty-state-btn">
+                        <i class="fa-solid fa-plus" aria-hidden="true"></i>
+                        <span>Add schedule rule</span>
+                    </button>
+                `,
+                });
+            }
+
+            if (document.getElementById('reservedPeriodsEmptyState')) {
+                window.EmptyState.render({
+                    host: '#reservedPeriodsEmptyState',
+                    icon: 'fa-calendar-plus',
+                    title: 'No reserved booking periods yet',
+                    message: 'Create a dedicated booking period for a selected patient group.',
+                    className: 'empty-state-compact clinic-schedule-empty-state',
+                    @if ($canCreateReservedPeriods)
+                        actionHtml: `
+                    <button type="button" data-ui-click="action-210cc7fbd9be" class="empty-state-btn">
+                        <i class="fa-solid fa-plus" aria-hidden="true"></i>
+                        <span>Create reserved period</span>
+                    </button>
+                `,
+                    @endif
+                });
+            }
+        }
+
+        function bindClinicScheduleAjaxForms() {
+            const bindAjaxForm = (
+                formId,
+                optionsFactory
+            ) => {
+                const form =
+                    document.getElementById(
+                        formId
+                    );
+
+                if (
+                    !form ||
+                    form.dataset.ajaxBound ===
+                    'true'
+                ) {
+                    return;
+                }
+
+                form.dataset.ajaxBound =
+                    'true';
+
+                form.addEventListener(
+                    'submit',
+                    event => {
+                        event.preventDefault();
+
+                        const options =
+                            typeof optionsFactory ===
+                            'function' ?
+                            optionsFactory(event) :
+                            optionsFactory;
+
+                        submitClinicScheduleAjax(
+                            form,
+                            options
+                        );
+                    }
+                );
+            };
+
+            bindAjaxForm(
+                'ruleForm',
+                () => ({
+                    modalId: 'ruleModalBackdrop',
+
+                    submitButton: document.getElementById(
+                        'ruleSubmitBtn'
+                    ),
+
+                    successMessage: editingId ?
+                        'Schedule rule updated successfully.' : 'Schedule rule added successfully.',
+                })
+            );
+
+            bindAjaxForm(
+                'blockDateForm',
+                event => ({
+                    modalId: 'blockModalBackdrop',
+
+                    submitButton: event.submitter,
+
+                    successMessage: 'Date blocked successfully.',
+                })
+            );
+
+            bindAjaxForm(
+                'reservedPeriodForm',
+                event => {
+                    const periodId =
+                        document
+                        .getElementById(
+                            'reservedPeriodId'
+                        )
+                        ?.value;
+
+                    return {
+                        modalId: 'reservedPeriodModalBackdrop',
+
+                        submitButton: event.submitter ||
+                            document.getElementById(
+                                'reservedPeriodSubmitButton'
+                            ),
+
+                        successMessage: periodId ?
+                            'Reserved booking period updated successfully.' :
+                            'Reserved booking period created successfully.',
+                    };
+                }
+            );
+
+            bindAjaxForm(
+                'scheduleDeleteForm',
+                event => ({
+                    modalId: 'scheduleDeleteModal',
+
+                    submitButton: event.submitter,
+
+                    successMessage: 'Schedule rule deleted successfully.',
+                })
+            );
+
+            bindAjaxForm(
+                'blockedDateDeleteForm',
+                event => ({
+                    modalId: 'blockedDateDeleteModal',
+
+                    submitButton: event.submitter,
+
+                    successMessage: 'Blocked date removed successfully.',
+                })
+            );
+
+            /*
+             * Remove Reserved Period
+             */
+            bindAjaxForm(
+                'reservedPeriodDeleteForm',
+                event => ({
+                    modalId: 'reservedPeriodDeleteModal',
+
+                    submitButton: event.submitter,
+
+                    successMessage: 'Reserved booking period removed successfully.',
+                })
+            );
+        }
+
+        function initializeClinicScheduleDynamicUi() {
+            bindClinicScheduleAjaxForms();
+
+            bindReservedPeriodPickerTriggers();
+
+            renderClinicScheduleEmptyStates();
+
+            if (
+                !reservedPeriodValidationFailed
+            ) {
+                return;
+            }
+
+            const periodId =
+                reservedPeriodOldInput
+                .reserved_period_id ||
+                null;
+
+            openReservedPeriodModal(
+                periodId ?
+                'edit' :
+                'create',
+                periodId,
+                reservedPeriodOldInput
+            );
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeClinicScheduleDynamicUi, {
+                once: true
+            });
+        } else {
+            initializeClinicScheduleDynamicUi();
+        }
+    </script>
 @endsection

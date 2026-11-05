@@ -8,6 +8,27 @@ class Role extends Model
 {
     protected $fillable = ['name', 'slug'];
 
+    public static function displayNameFor(?string $slug, ?self $role = null): string
+    {
+        $normalizedSlug = strtolower(trim((string) $slug));
+
+        if (
+            $role &&
+            $normalizedSlug !== '' &&
+            strtolower((string) $role->slug) === $normalizedSlug &&
+            filled($role->name)
+        ) {
+            return ucwords($role->name);
+        }
+
+        return match ($normalizedSlug) {
+            'super_admin', 'admin' => 'Administrator',
+            'dentist', 'dentist_role' => 'Dentist',
+            'patient', 'patient_role' => 'Patient',
+            default => ucwords($role?->name ?: str_replace(['-', '_'], ' ', $normalizedSlug ?: 'user')),
+        };
+    }
+
     public function permissions()
     {
         return $this->belongsToMany(Permission::class, 'role_permissions');
@@ -20,11 +41,6 @@ class Role extends Model
 
     public function getDisplayNameAttribute(): string
     {
-        return match ($this->slug) {
-            'super_admin' => 'Admin',
-            'dentist' => 'Dentist',
-            'patient' => 'Patient',
-            default => $this->name,
-        };
+        return self::displayNameFor($this->slug, $this);
     }
 }

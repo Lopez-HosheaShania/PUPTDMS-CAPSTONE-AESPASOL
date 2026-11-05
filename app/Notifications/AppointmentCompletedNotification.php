@@ -35,6 +35,7 @@ class AppointmentCompletedNotification extends Notification
             'appointment_id' => $this->appointment->id,
             'patient_id' => $this->appointment->patient_id,
             'event' => 'appointment.completed',
+            'recipient_role' => optional($notifiable->role)->slug,
         ];
     }
 
@@ -54,6 +55,7 @@ class AppointmentCompletedNotification extends Notification
             'event' => 'appointment.completed',
             'created_at_label' => 'Just now',
             'state' => 'unread',
+            'recipient_role' => optional($notifiable->role)->slug,
         ]);
     }
 

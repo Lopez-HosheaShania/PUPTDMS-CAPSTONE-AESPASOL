@@ -16,7 +16,7 @@
 
     <button type="button" class="btn-view-mode active" data-view-mode="list" title="List view" aria-label="List view"
         aria-pressed="true">
-        <i class="fa-solid fa-rectangle-list"></i>
+        <i class="fa-solid fa-list"></i>
         <span class="view-mode-label">
             {{ $listLabel }}
         </span>
@@ -24,7 +24,7 @@
 
     <button type="button" class="btn-view-mode" data-view-mode="grid" title="Grid view" aria-label="Grid view"
         aria-pressed="false">
-        <i class="fa-solid fa-grip"></i>
+        <i class="fa-solid fa-table-cells-large"></i>
         <span class="view-mode-label">
             {{ $gridLabel }}
         </span>

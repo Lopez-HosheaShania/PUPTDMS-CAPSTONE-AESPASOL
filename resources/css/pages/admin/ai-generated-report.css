@@ -482,7 +482,7 @@
     position: relative;
     overflow: hidden;
     box-sizing: border-box;
-    padding: 0 34px 54px;
+    padding: 0 34px 92px;
     background: #fff;
     border: 1px solid #d1d5db;
     box-shadow: 0 14px 35px rgba(15, 23, 42, .18);
@@ -498,7 +498,7 @@
 
 .air-modal-print-hero {
     padding: 18px 0 15px;
-    margin-bottom: 12px;
+    margin-bottom: 6px;
     border-bottom: 1px solid #e8e8e8;
 }
 
@@ -991,7 +991,7 @@
     aspect-ratio: var(--air-preview-page-ratio) !important;
     height: auto !important;
     min-height: 0 !important;
-    padding: 0 28px 42px !important;
+    padding: 0 28px 92px !important;
 }
 
 .air-modal.is-preview-landscape .air-modal-preview-pages {
@@ -1003,7 +1003,7 @@
 }
 
 .air-modal.is-preview-landscape .air-modal-print-section {
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
 .air-modal.is-preview-landscape .air-modal-print-body-text,
@@ -1012,10 +1012,40 @@
     line-height: 1.45;
 }
 
+.air-modal.is-preview-landscape .air-modal-print-page-heading {
+    padding: 24px 0 8px;
+    margin-bottom: 16px;
+}
+
+.air-modal.is-preview-landscape .air-modal-print-table {
+    margin-bottom: 8px;
+}
+
 .air-modal.is-preview-landscape .air-modal-print-footer {
     left: 28px;
     right: 28px;
-    bottom: 16px;
+    bottom: 12px;
+    padding-top: 6px;
+    font-size: 5.1px;
+    line-height: 1.25;
+}
+
+.air-modal.is-preview-landscape .air-modal-print-footer {
+    left: 28px;
+    right: 28px;
+    bottom: 12px;
+}
+
+.air-modal.is-preview-landscape .air-modal-print-footer span {
+    margin-top: 1px;
+}
+
+.air-modal.is-preview-landscape .air-modal-print-footer em {
+    margin-top: 2px;
+}
+
+.air-modal.is-preview-landscape .air-modal-print-dot-list {
+    gap: 5px;
 }
 
 .air-modal-print-page-heading {
@@ -1055,6 +1085,32 @@
 
 .air-modal-print-table tr:nth-child(even) td {
     background: #f4f4f4;
+}
+
+.air-report-metrics-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 16px;
+    font-size: 0.92rem;
+}
+
+.air-report-metrics-table th {
+    padding: 10px 12px;
+    background: #9b1c1f;
+    color: #fff;
+    text-align: left;
+    font-weight: 800;
+    border: 1px solid #d8d8d8;
+}
+
+.air-report-metrics-table td {
+    padding: 10px 12px;
+    color: #454545;
+    border: 1px solid #ddd;
+}
+
+.air-report-metrics-table tbody tr:nth-child(even) td {
+    background: #f7f4f4;
 }
 
 .air-modal-print-risk-box {
@@ -1150,7 +1206,7 @@
         display: block !important;
         width: 210mm !important;
         min-height: 297mm !important;
-        padding: 24mm 18mm 28mm !important;
+        padding: 24mm 18mm 44mm !important;
         margin: 0 auto !important;
         background: #fff !important;
         overflow: hidden !important;
@@ -1162,7 +1218,7 @@
     body.print-layout-landscape .air-print-page {
         width: 297mm !important;
         min-height: 210mm !important;
-        padding: 22mm 18mm 24mm !important;
+        padding: 22mm 18mm 34mm !important;
     }
 
     .air-print-page:last-child {
@@ -2018,5 +2074,114 @@
 
     .air-modal-panel {
         border-left: 0 !important;
+    }
+}
+.air-report-title-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .65rem;
+}
+
+.air-advisory-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    border: 1px solid #e5caca;
+    border-radius: 999px;
+    background: #fff1f2;
+    color: #7f1417;
+    font-size: 8px;
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+.air-advisory-notice {
+    margin-bottom: 10px;
+}
+
+.air-advisory-note {
+    margin: 6px 0 0;
+    color: #52525b;
+    font-size: 9px;
+    line-height: 1.4;
+}
+
+.air-screen .air-advisory-note {
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.air-analysis-unavailable {
+    margin: 8px 0 0;
+    padding: 8px 10px;
+    border: 1px solid #e5caca;
+    border-radius: 6px;
+    color: #7f1417;
+    background: #fff1f2;
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.air-modal-print-hero .air-advisory-badge {
+    margin-top: 6px;
+    font-size: 6px;
+}
+
+.air-modal-print-sheet .air-advisory-note {
+    margin-top: 0;
+    font-size: 6px;
+    line-height: 1.45;
+}
+
+/* Keep the footer in document flow so longer analyses cannot cover it. */
+.air-modal-print-sheet {
+    display: flex;
+    flex-direction: column;
+    aspect-ratio: auto;
+    min-height: calc(var(--air-preview-page-width) * 297 / 210);
+    padding-bottom: 22px;
+}
+
+.air-modal-print-sheet > * {
+    flex-shrink: 0;
+}
+
+.air-modal-print-sheet .air-modal-print-footer {
+    position: static;
+    margin-top: auto;
+}
+
+.air-modal.is-preview-landscape .air-modal-print-sheet {
+    aspect-ratio: auto !important;
+    min-height: calc(var(--air-preview-page-width) * 210 / 297) !important;
+    padding-bottom: 22px !important;
+}
+
+@media print {
+    .air-print-page {
+        display: flex !important;
+        flex-direction: column !important;
+        padding-bottom: 9mm !important;
+    }
+
+    .air-print-page > * {
+        flex-shrink: 0;
+    }
+
+    .air-print-fixed-header {
+        flex-wrap: wrap !important;
+        padding-bottom: 2mm !important;
+    }
+
+    .air-print-fixed-header .air-advisory-badge {
+        color: #7f1417 !important;
+        font-size: 8px !important;
+        font-weight: 700 !important;
+    }
+
+    .air-print-fixed-footer {
+        position: static !important;
+        margin-top: auto !important;
+        break-inside: avoid;
     }
 }

@@ -19,7 +19,7 @@
                 </div>
             </div>
 
-            <button type="button" class="patient-doc-x" onclick="closeDocModal('dentalClearanceModal')"
+            <button type="button" class="patient-doc-x" data-ui-click="action-3321670b58fc"
                 aria-label="Close clearance request modal">
                 <i class="fa-solid fa-xmark"></i>
             </button>
@@ -96,7 +96,7 @@
 
         <div class="patient-doc-modal-footer">
             <button type="button" class="patient-doc-btn patient-doc-btn-secondary"
-                onclick="closeDocModal('dentalClearanceModal')">
+                data-ui-click="action-3321670b58fc">
                 Cancel
             </button>
             <button type="submit" class="patient-doc-btn patient-doc-btn-primary">
@@ -128,7 +128,7 @@
                 </div>
             </div>
 
-            <button type="button" class="patient-doc-x" onclick="closeDocModal('dentalHealthRecordModal')"
+            <button type="button" class="patient-doc-x" data-ui-click="action-2bb633a6f172"
                 aria-label="Close health record request modal">
                 <i class="fa-solid fa-xmark"></i>
             </button>
@@ -155,20 +155,6 @@
                                 <span>
                                     <strong>All Dental Records</strong>
                                     <small>Includes available dental history, diagnosis, and treatment details.</small>
-                                </span>
-                            </button>
-                            <button type="button" class="doc-dd-option" data-value="Medical Records">
-                                <span class="doc-dd-option-icon"><i class="fa-solid fa-notes-medical"></i></span>
-                                <span>
-                                    <strong>Medical Records</strong>
-                                    <small>Includes related health information recorded by the clinic.</small>
-                                </span>
-                            </button>
-                            <button type="button" class="doc-dd-option" data-value="Diagnosis and Treatment">
-                                <span class="doc-dd-option-icon"><i class="fa-solid fa-stethoscope"></i></span>
-                                <span>
-                                    <strong>Diagnosis and Treatment</strong>
-                                    <small>Focused copy of diagnosis notes and treatment information.</small>
                                 </span>
                             </button>
                         </div>
@@ -213,7 +199,7 @@
 
         <div class="patient-doc-modal-footer">
             <button type="button" class="patient-doc-btn patient-doc-btn-secondary"
-                onclick="closeDocModal('dentalHealthRecordModal')">
+                data-ui-click="action-2bb633a6f172">
                 Cancel
             </button>
             <button type="submit" class="patient-doc-btn patient-doc-btn-primary">
@@ -254,13 +240,13 @@
             </div>
         </div>
 
-        <button type="button" onclick="closeDocSuccessModal()" class="doc-success-btn">
+        <button type="button" data-ui-click="action-2b8f389ffdda" class="doc-success-btn">
             Okay, got it!
         </button>
     </div>
 </div>
 
-<script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     function setDocModalLock(isLocked) {
         document.body.classList.toggle('doc-modal-lock', Boolean(isLocked));
         document.documentElement.classList.toggle('doc-modal-lock', Boolean(isLocked));
@@ -368,6 +354,21 @@
         }, 2500);
     }
 
+    function showDocumentRequestErrorToast(message, title = 'Request Not Allowed') {
+        if (typeof window.showToast !== 'function') {
+            return false;
+        }
+
+        window.showToast({
+            type: 'error',
+            title,
+            message: message || 'Failed to submit request.',
+            duration: 6000
+        });
+
+        return true;
+    }
+
     function getDocRequestDetails(form) {
         return {
             documentType: form.querySelector('[name="document_type"]')?.value || 'Document Request',
@@ -416,7 +417,20 @@
                 const data = await response.json();
 
                 if (!response.ok || !data.success) {
-                    showInlineWarning(warningEl, data.message || 'Failed to submit request.');
+                    const message = data.message || 'Unable to submit this request.';
+
+                    warningEl?.classList.add('hidden');
+
+                    // Native <dialog> elements are rendered in the browser's top layer,
+                    // so close the request modal first to keep the global toast visible.
+                    closeDocModal(modalId);
+
+                    if (!showDocumentRequestErrorToast(message)) {
+                        // Fallback only if the global toast is unavailable.
+                        openDocModal(modalId);
+                        showInlineWarning(warningEl, message);
+                    }
+
                     return;
                 }
 
@@ -425,7 +439,15 @@
                 resetDocDropdowns(form);
                 openDocSuccessModal(requestDetails);
             } catch (error) {
-                showInlineWarning(warningEl, 'Something went wrong. Please try again.');
+                const message = 'Please try again.';
+
+                warningEl?.classList.add('hidden');
+                closeDocModal(modalId);
+
+                if (!showDocumentRequestErrorToast(message, 'Request Failed')) {
+                    openDocModal(modalId);
+                    showInlineWarning(warningEl, message);
+                }
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalBtnText;

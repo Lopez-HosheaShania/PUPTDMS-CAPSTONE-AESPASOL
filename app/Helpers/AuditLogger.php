@@ -3,19 +3,30 @@
 namespace App\Helpers;
 
 use App\Models\AuditLog;
-use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Request;
 use App\Support\BrowserDetection;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+use Throwable;
 
 class AuditLogger
 {
+    private static bool $loggingException = false;
+
     public static function log($action, $module, $description = null)
     {
-        $user = Auth::user();
+        $request = Request::instance();
+        $session = $request && $request->hasSession() ? $request->session() : null;
+
+        try {
+            $user = Auth::user();
+        } catch (Throwable) {
+            $user = null;
+        }
 
         $actorName = 'Unknown User';
-        $actorRole = session('role') ?? 'guest';
+        $actorRole = $session?->get('role') ?? 'guest';
         $actorIdentifier = null;
 
         if ($user) {
@@ -24,18 +35,18 @@ class AuditLogger
         }
 
         if ($actorRole === 'patient') {
-            $actorName = session('patient_name') ?? ($user->name ?? 'Unknown Patient');
-            $actorIdentifier = session('patient_id') ?? ($user->id ?? null);
+            $actorName = $session?->get('patient_name') ?? ($user->name ?? 'Unknown Patient');
+            $actorIdentifier = $session?->get('patient_id') ?? ($user->id ?? null);
         } elseif ($actorRole === 'dentist') {
-            $actorName = session('dentist_name') ?? ($user->name ?? 'Unknown Dentist');
-            $actorIdentifier = session('dentist_id') ?? ($user->id ?? null);
+            $actorName = $session?->get('dentist_name') ?? ($user->name ?? 'Unknown Dentist');
+            $actorIdentifier = $session?->get('dentist_id') ?? ($user->id ?? null);
         } elseif ($actorRole === 'admin' || $actorRole === 'super_admin') {
-            $actorName = session('admin_name') ?? ($user->name ?? 'Unknown Admin');
-            $actorIdentifier = session('admin_id') ?? ($user->id ?? null);
+            $actorName = $session?->get('admin_name') ?? ($user->name ?? 'Unknown Admin');
+            $actorIdentifier = $session?->get('admin_id') ?? ($user->id ?? null);
         }
 
         $deviceDetails = BrowserDetection::deviceDetailsFromRequest(
-            Request::instance()
+            $request
         );
 
         AuditLog::create([
@@ -46,49 +57,80 @@ class AuditLogger
             'action' => $action,
             'module' => $module,
             'description' => $description,
-            'ip_address' => Request::ip(),
-            'user_agent' => Request::userAgent(),
-            'browser_name' => self::supportsBrowserNameColumn()
-                ? $deviceDetails['browser_name']
-                : null,
+            'ip_address' => $request?->ip(),
+            'user_agent' => $request?->userAgent(),
+            'browser_name' => $deviceDetails['browser_name'],
 
-            'device_type' => self::supportsDeviceColumns()
-                ? $deviceDetails['device_type']
-                : null,
+            'device_type' => $deviceDetails['device_type'],
 
-            'device_name' => self::supportsDeviceColumns()
-                ? $deviceDetails['device_name']
-                : null,
+            'device_name' => $deviceDetails['device_name'],
 
-            'os_name' => self::supportsDeviceColumns()
-                ? $deviceDetails['os_name']
-                : null,
+            'os_name' => $deviceDetails['os_name'],
         ]);
     }
 
-    private static function supportsBrowserNameColumn(): bool
+    public static function logException(
+        Throwable $exception,
+        string $module = 'system',
+        ?int $statusCode = null
+    ): void
     {
-        static $supportsColumn;
-
-        if ($supportsColumn === null) {
-            $supportsColumn = Schema::hasColumn('audit_logs', 'browser_name');
+        if (self::$loggingException) {
+            return;
         }
 
-        return $supportsColumn;
+        self::$loggingException = true;
+
+        try {
+            $message = trim($exception->getMessage());
+            $statusCode ??= $exception instanceof HttpExceptionInterface
+                ? $exception->getStatusCode()
+                : 500;
+            $descriptionParts = array_filter([
+                (string) $statusCode,
+                $message !== '' ? $message : 'No exception message provided.',
+            ]);
+
+            self::log(
+                'error',
+                $module,
+                self::limitDescription(implode(' | ', $descriptionParts))
+            );
+        } catch (Throwable $loggingFailure) {
+            Log::channel(config('logging.default'))->error('Failed to write exception to audit_logs.', [
+                'original_exception' => get_class($exception),
+                'logging_exception' => get_class($loggingFailure),
+                'logging_message' => $loggingFailure->getMessage(),
+            ]);
+        } finally {
+            self::$loggingException = false;
+        }
     }
 
-    private static function supportsDeviceColumns(): bool
+    public static function logHttpError(int $statusCode, string $module = 'system'): void
     {
-        static $supportsColumns;
-
-        if ($supportsColumns === null) {
-            $supportsColumns = Schema::hasColumns('audit_logs', [
-                'device_type',
-                'device_name',
-                'os_name',
+        try {
+            self::log(
+                'error',
+                $module,
+                "{$statusCode} | Returned error response"
+            );
+        } catch (Throwable $loggingFailure) {
+            Log::channel(config('logging.default'))->error('Failed to write HTTP error to audit_logs.', [
+                'status_code' => $statusCode,
+                'logging_exception' => get_class($loggingFailure),
+                'logging_message' => $loggingFailure->getMessage(),
             ]);
         }
-
-        return $supportsColumns;
     }
+
+    private static function limitDescription(string $description, int $limit = 65535): string
+    {
+        if (mb_strlen($description) <= $limit) {
+            return $description;
+        }
+
+        return mb_substr($description, 0, $limit - 3) . '...';
+    }
+
 }

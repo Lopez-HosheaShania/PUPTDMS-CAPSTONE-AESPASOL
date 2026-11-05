@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers\Dentist;
 
+use App\Http\Requests\UpdateSavedOdontogramRequest;
+use App\Services\OdontogramRevisionService;
+use App\Services\ProcedureTimingService;
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\AppointmentProcedure;
@@ -24,23 +27,113 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 use App\Models\Patient;
 use Carbon\Carbon;
 use App\Models\ClinicSchedule;
 use App\Models\BlockedDate;
 use App\Helpers\PhilippineHolidays;
 use App\Helpers\BookingQuestions;
+use App\Models\OdontogramRevisionReasonType;
 
 class OdontogramController extends Controller
 {
+    private function isAdminExistingAppointmentContext(): bool
+    {
+        return request()->routeIs('admin.odontogram.existing-appointment.*');
+    }
+
+    private function existingAppointmentRouteName(string $suffix): string
+    {
+        $prefix = $this->isAdminExistingAppointmentContext()
+            ? 'admin.odontogram.existing-appointment.'
+            : 'dentist.odontogram.existing-appointment.';
+
+        return $prefix . $suffix;
+    }
+
+    private function existingAppointmentLayoutRole(): string
+    {
+        return $this->isAdminExistingAppointmentContext()
+            ? 'admin'
+            : 'dentist';
+    }
+
+    private function existingAppointmentBackUrl(Patient $patient): string
+    {
+        if ($this->isAdminExistingAppointmentContext()) {
+            return route('admin.existing-record.index');
+        }
+
+        return route('dentist.dentist.patient.profile', ['patient' => $patient->id]);
+    }
+
+    private function savedVisitEditBackUrl(Patient $patient): string
+    {
+        return route('dentist.dentist.patient.profile', [
+            'patient' => $patient->id,
+            'from' => request()->query('from', 'appointments'),
+        ]);
+    }
+
+    private function procedureEntrySource(?string $source, bool $existingAppointmentMode = false, bool $savedVisitEditMode = false): string
+    {
+        if ($existingAppointmentMode) {
+            return 'existing-appointment';
+        }
+
+        if ($savedVisitEditMode) {
+            return 'saved-visit';
+        }
+
+        $normalized = strtolower(trim((string) $source));
+
+        return match ($normalized) {
+            'walk-in', 'appointments', 'patient-profile' => $normalized,
+            default => 'appointments',
+        };
+    }
+
+    private function procedureDiscardReturnUrl(
+        string $source,
+        ?Appointment $appointment = null,
+        ?Patient $patient = null,
+        bool $existingAppointmentMode = false,
+        bool $savedVisitEditMode = false
+    ): string {
+        if ($existingAppointmentMode) {
+            return route(
+                $this->isAdminExistingAppointmentContext() ? 'admin.admin.patient.profile' : 'dentist.dentist.patient.profile',
+                ['patient' => $patient?->id]
+            );
+        }
+
+        if ($savedVisitEditMode) {
+            return $this->savedVisitEditBackUrl($patient ?? $appointment->patient);
+        }
+
+        return match ($source) {
+            'walk-in' => route('dentist.walk-in.index'),
+            'patient-profile' => route('dentist.dentist.patient.profile', [
+                'patient' => $patient?->id ?? $appointment?->patient_id,
+                'from' => 'patient-profile',
+            ]),
+            default => route('dentist.dentist.appointments'),
+        };
+    }
+
     private function getSavedOdontogramDataForPatient(Patient $patient): array
     {
         $patientOdontogram = PatientOdontogram::where('patient_id', $patient->id)->first();
 
         $latestProcedureWithOdontogram = $patientOdontogram
             ? null
-            : AppointmentProcedure::where('patient_id', $patient->id)
-            ->whereNotNull('odontogram_data')
+            : AppointmentProcedure::whereHas('appointment', function ($query) use ($patient) {
+                $query->where('patient_id', $patient->id);
+            })
+            ->whereHas('odontogram', fn($query) => $query->where('has_data', true))
             ->latest('updated_at')
             ->latest('id')
             ->first();
@@ -52,13 +145,13 @@ class OdontogramController extends Controller
 
     private function getProcedureWorkspaceContext(): array
     {
-        $appointmentCountsPerDay = Appointment::whereIn('status', ['upcoming', 'rescheduled'])
+        $appointmentCountsPerDay = Appointment::withoutGlobalScope('clinical_patients')->whereIn('status', ['upcoming', 'rescheduled'])
             ->selectRaw('appointment_date, COUNT(*) as count')
             ->groupBy('appointment_date')
             ->pluck('count', 'appointment_date')
             ->toArray();
 
-        $appointmentCountsPerSlot = Appointment::whereIn('status', ['upcoming', 'rescheduled'])
+        $appointmentCountsPerSlot = Appointment::withoutGlobalScope('clinical_patients')->whereIn('status', ['upcoming', 'rescheduled'])
             ->selectRaw('appointment_date, appointment_time, COUNT(*) as count')
             ->groupBy('appointment_date', 'appointment_time')
             ->get()
@@ -79,7 +172,7 @@ class OdontogramController extends Controller
                     return [
                         'name' => $appointment->patient->name ?? 'Unknown',
                         'time' => Carbon::parse($appointment->appointment_time)->format('h:i A'),
-                        'service' => $appointment->service_type,
+                        'service' => $appointment->service_type_name,
                     ];
                 })->toArray();
             })
@@ -97,7 +190,7 @@ class OdontogramController extends Controller
             ->map(fn($d) => Carbon::parse($d)->toDateString())
             ->toArray();
 
-        $philippineHolidays = PhilippineHolidays::range(
+        $philippineHolidays = PhilippineHolidays::recordsRange(
             yearsBefore: 15,
             yearsAfter: 15
         );
@@ -114,13 +207,13 @@ class OdontogramController extends Controller
 
     private function getExistingAppointmentCalendarContext(): array
     {
-        $appointmentCountsPerDay = Appointment::whereIn('status', ['upcoming', 'rescheduled'])
+        $appointmentCountsPerDay = Appointment::withoutGlobalScope('clinical_patients')->whereIn('status', ['upcoming', 'rescheduled'])
             ->selectRaw('appointment_date, COUNT(*) as count')
             ->groupBy('appointment_date')
             ->pluck('count', 'appointment_date')
             ->toArray();
 
-        $appointmentCountsPerSlot = Appointment::whereIn('status', ['upcoming', 'rescheduled'])
+        $appointmentCountsPerSlot = Appointment::withoutGlobalScope('clinical_patients')->whereIn('status', ['upcoming', 'rescheduled'])
             ->selectRaw('appointment_date, appointment_time, COUNT(*) as count')
             ->groupBy('appointment_date', 'appointment_time')
             ->get()
@@ -141,7 +234,7 @@ class OdontogramController extends Controller
             ->toArray();
 
         $philippineHolidays =
-            PhilippineHolidays::range(
+            PhilippineHolidays::recordsRange(
                 yearsBefore: 15,
                 yearsAfter: 15
             );
@@ -174,22 +267,14 @@ class OdontogramController extends Controller
         return Carbon::parse($trimmed)->format('H:i:s');
     }
 
-    private function parseDurationToSeconds(?string $duration): int
-    {
-        $normalized = trim((string) $duration);
-
-        if ($normalized === '') {
-            return 0;
-        }
-
-        [$hours, $minutes, $seconds] = array_map('intval', explode(':', $normalized));
-
-        return max(0, ($hours * 3600) + ($minutes * 60) + $seconds);
-    }
-
     private function existingAppointmentDraftSessionKey(Patient $patient): string
     {
         return 'existing_appointment_draft_patient_' . $patient->id;
+    }
+
+    private function procedureStartSessionKey(Appointment $appointment): string
+    {
+        return 'procedure_started_at_' . $appointment->id;
     }
 
     private function yesNoValue($value): string
@@ -237,7 +322,6 @@ class OdontogramController extends Controller
             'appointment_date' => now()->toDateString(),
             'appointment_time' => '09:00',
             'service_type' => '',
-            'procedure_duration_hms' => '00:30:00',
             'last_dental_visit' => optional($patient->dentalHistory?->last_dental_visit)->toDateString(),
             'previous_dentist' => $patient->dentalHistory?->previous_dentist,
             'extraction_date' => optional($patient->dentalHistoryDates?->extraction_date)->toDateString(),
@@ -256,13 +340,179 @@ class OdontogramController extends Controller
         ];
     }
 
+    private function backfillStudentEmergencyContactIfNeeded(Patient $patient): void
+    {
+        $isStudent = filled($patient->student_no)
+            || (filled($patient->email) && filled($patient->course_code))
+            || strtolower(trim((string) $patient->classification)) === 'student';
+
+        if (! $isStudent) {
+            return;
+        }
+
+        $medicalHistory = $patient->medicalHistory;
+
+        if (
+            filled($medicalHistory?->emergency_person)
+            && filled($medicalHistory?->emergency_number)
+            && filled($medicalHistory?->emergency_relation)
+        ) {
+            return;
+        }
+
+        try {
+            $studentService = app(\App\Services\StudentApiService::class);
+            $studentProfile = [];
+
+            if (filled($patient->email)) {
+                $studentProfile = data_get(
+                    $studentService->getStudentByEmail($patient->email),
+                    'data',
+                    []
+                );
+            }
+
+            $studentNumber = $patient->student_no
+                ?: data_get($studentProfile, 'studentNumber')
+                ?: data_get($studentProfile, 'student_number');
+
+            if (blank($studentNumber)) {
+                return;
+            }
+
+            $personalInfo = data_get(
+                $studentService->getPersonalInfoByStudentNumber($studentNumber),
+                'data',
+                []
+            );
+
+            if (! is_array($personalInfo) || $personalInfo === []) {
+                return;
+            }
+
+            $emergencyPerson = $this->cleanEmergencyContactValue(
+                $personalInfo['emergencyContactName']
+                    ?? $personalInfo['emergency_contact_name']
+                    ?? data_get($personalInfo, 'emergencyContact.name')
+                    ?? data_get($personalInfo, 'emergency_contact.name')
+                    ?? data_get($personalInfo, 'emergency_contact.contact_name')
+                    ?? data_get($personalInfo, 'emergencyContact.contactName')
+                    ?? null
+            );
+
+            $emergencyNumber = $this->normalizeEmergencyContactNumber(
+                $this->cleanEmergencyContactValue(
+                    $personalInfo['emergencyContactNumber']
+                        ?? $personalInfo['emergency_contact_number']
+                        ?? data_get($personalInfo, 'emergencyContact.number')
+                        ?? data_get($personalInfo, 'emergency_contact.number')
+                        ?? data_get($personalInfo, 'emergencyContact.contactNumber')
+                        ?? data_get($personalInfo, 'emergency_contact.contact_number')
+                        ?? null
+                )
+            );
+
+            $emergencyRelation = $this->normalizeEmergencyContactRelation(
+                $this->cleanEmergencyContactValue(
+                    $personalInfo['emergencyContactRelationship']
+                        ?? $personalInfo['emergency_contact_relationship']
+                        ?? $personalInfo['emergencyContactRelation']
+                        ?? $personalInfo['emergency_contact_relation']
+                        ?? data_get($personalInfo, 'emergencyContact.relationship')
+                        ?? data_get($personalInfo, 'emergency_contact.relationship')
+                        ?? data_get($personalInfo, 'emergencyContact.relation')
+                        ?? data_get($personalInfo, 'emergency_contact.relation')
+                        ?? data_get($personalInfo, 'emergency_contact.relationship_name')
+                        ?? data_get($personalInfo, 'emergencyContact.relationshipName')
+                        ?? data_get($personalInfo, 'emergencyContactRelationship.name')
+                        ?? data_get($personalInfo, 'emergency_contact_relationship.name')
+                        ?? null
+                )
+            );
+
+            if (! $emergencyPerson && ! $emergencyNumber && ! $emergencyRelation) {
+                return;
+            }
+
+            $medicalHistory = MedicalHistory::firstOrNew([
+                'patient_id' => $patient->id,
+            ]);
+
+            if ($emergencyPerson && blank($medicalHistory->emergency_person)) {
+                $medicalHistory->emergency_person = $emergencyPerson;
+            }
+
+            if ($emergencyNumber && blank($medicalHistory->emergency_number)) {
+                $medicalHistory->emergency_number = $emergencyNumber;
+            }
+
+            if ($emergencyRelation && blank($medicalHistory->emergency_relation)) {
+                $medicalHistory->emergency_relation = $emergencyRelation;
+            }
+
+            if ($medicalHistory->isDirty()) {
+                $medicalHistory->save();
+            }
+
+            $patient->unsetRelation('medicalHistory');
+            $patient->load('medicalHistory');
+        } catch (\Throwable $exception) {
+            logger()->warning('Existing appointment emergency contact backfill failed.', [
+                'patient_id' => $patient->id,
+                'message' => $exception->getMessage(),
+            ]);
+        }
+    }
+
+    private function cleanEmergencyContactValue(mixed $value): ?string
+    {
+        if (! is_scalar($value)) {
+            return null;
+        }
+
+        $value = trim((string) $value);
+
+        return $value !== '' ? $value : null;
+    }
+
+    private function normalizeEmergencyContactNumber(?string $value): ?string
+    {
+        $digits = preg_replace('/\D+/', '', (string) $value) ?? '';
+
+        if (str_starts_with($digits, '63') && strlen($digits) === 12) {
+            $digits = '0' . substr($digits, 2);
+        } elseif (str_starts_with($digits, '9') && strlen($digits) === 10) {
+            $digits = '0' . $digits;
+        }
+
+        return preg_match('/^09\d{9}$/', $digits) ? $digits : null;
+    }
+
+    private function normalizeEmergencyContactRelation(?string $value): ?string
+    {
+        return match (strtolower(trim((string) $value))) {
+            'father', 'dad', 'papa', 'tatay' => 'Father',
+            'mother', 'mom', 'mama', 'nanay' => 'Mother',
+            'uncle', 'tiyo', 'tito' => 'Uncle',
+            'aunt', 'auntie', 'tiya', 'tita' => 'Auntie',
+            'brother', 'kuya' => 'Brother',
+            'sister', 'ate' => 'Sister',
+            'grandmother', 'lola' => 'Grandmother',
+            'grandfather', 'lolo' => 'Grandfather',
+            'cousin', 'pinsan' => 'Cousin',
+            'guardian', 'legal guardian' => 'Legal Guardian',
+            'friend', 'kaibigan' => 'Friend',
+            'other relative', 'relative', 'kamag-anak', 'kamaganak' => 'Other Relative',
+            default => null,
+        };
+    }
+
     private function validateExistingAppointmentIntake(Request $request): array
     {
         return $request->validate([
             'appointment_date' => 'required|date',
             'appointment_time' => 'required|date_format:H:i',
             'service_type' => 'required|string|max:255',
-            'procedure_duration_hms' => ['required', 'regex:/^\d{2}:\d{2}:\d{2}$/'],
             'last_dental_visit' => 'nullable|date|before_or_equal:today',
             'previous_dentist' => 'nullable|string|max:50',
             'extraction_date' => 'nullable|date|before_or_equal:today',
@@ -325,14 +575,26 @@ class OdontogramController extends Controller
             );
         }
 
-        $medicalHistory = MedicalHistory::updateOrCreate(
-            ['patient_id' => $patient->id],
-            [
-                'emergency_person' => $draft['emergency_person'],
-                'emergency_number' => $draft['emergency_number'],
-                'emergency_relation' => $draft['emergency_relation'],
-            ]
-        );
+        $medicalHistory =
+            MedicalHistory::updateOrCreate(
+                [
+                    'patient_id' =>
+                    $patient->id,
+                ],
+                [
+                    'emergency_person' =>
+                    $draft['emergency_person']
+                        ?? null,
+
+                    'emergency_number' =>
+                    $draft['emergency_number']
+                        ?? null,
+
+                    'emergency_relation' =>
+                    $draft['emergency_relation']
+                        ?? null,
+                ]
+            );
 
         $questions = MedicalHistoryQuestion::whereIn('code', array_keys($draft['medical_answers'] ?? []))
             ->get()
@@ -438,16 +700,35 @@ class OdontogramController extends Controller
     private function persistProcedureSnapshot(
         Appointment $appointment,
         array $validated,
-        int $procedureDurationSeconds,
-        ?Carbon $procedureCompletedAt = null
+        bool $allowUnassignedDentistCorrection = false
     ): array {
+        $assigned = $appointment->dentist;
+        if ($assigned && $assigned->role && ! \App\Services\AssignedDentistService::isDentist($assigned)) {
+            $appointment->dentist_id = app(\App\Services\AssignedDentistService::class)
+                ->requireForPatient($appointment->patient_id, Auth::user())->id;
+            $appointment->unsetRelation('dentist');
+        }
+
+        if (!$allowUnassignedDentistCorrection) {
+            abort_if(
+                in_array(
+                    Auth::user()?->role?->slug,
+                    ['dentist', 'dentist_role'],
+                    true
+                )
+                    &&
+                    (int) $appointment->dentist_id !==
+                    (int) Auth::id(),
+                403,
+                'Only the assigned dentist may record treatment for this visit.'
+            );
+        }
+
         $appointment->loadMissing('patient');
         $patient = $appointment->patient;
         $completionAction = $validated['completion_action'] ?? 'finished';
-        $procedureCompletedAt = $procedureCompletedAt ?: now();
-        $procedureStartedAt = $procedureDurationSeconds > 0
-            ? $procedureCompletedAt->copy()->subSeconds($procedureDurationSeconds)
-            : null;
+        [$procedureStartedAt, $procedureCompletedAt, $procedureDurationSeconds] =
+            app(ProcedureTimingService::class)->forAppointment($appointment, $validated);
         $rawOdontogramData = $validated['odontogram_data'] ?? [];
 
         $cleanOdontogramData = collect($rawOdontogramData)
@@ -516,10 +797,21 @@ class OdontogramController extends Controller
             ->values()
             ->all();
 
-        if (count($cleanOdontogramData) === 0) {
-            throw new HttpResponseException(response()->json([
-                'message' => 'Please apply at least one treatment to the tooth chart before finishing the procedure.',
-            ], 422));
+        $allowsProcedureCompletionWithoutOdontogramChanges = $this->allowsProcedureCompletionWithoutOdontogramChanges(
+            $appointment->service_type_name
+        );
+
+        $hasOdontogramChanges = count($cleanOdontogramData) > 0;
+        if (
+            !$allowsProcedureCompletionWithoutOdontogramChanges &&
+            !$hasOdontogramChanges
+        ) {
+            throw new HttpResponseException(
+                response()->json([
+                    'message' =>
+                    'Please apply at least one treatment to the tooth chart before finishing the procedure.',
+                ], 422)
+            );
         }
 
         $legendCache = [];
@@ -563,7 +855,11 @@ class OdontogramController extends Controller
         ];
 
         $savedTeeth = 0;
-        $shouldUpdatePatientOdontogram = $this->shouldUpdatePatientOdontogram($patient, $appointment);
+        $shouldUpdatePatientOdontogram = $hasOdontogramChanges &&
+            $this->shouldUpdatePatientOdontogram(
+                $patient,
+                $appointment
+            );
 
         DB::transaction(function () use (
             $appointment,
@@ -577,46 +873,81 @@ class OdontogramController extends Controller
             $resolveLegendId,
             $surfaceMap,
             $shouldUpdatePatientOdontogram,
+            $hasOdontogramChanges,
             &$savedTeeth
         ) {
-            $submittedToothNumbers = collect($cleanOdontogramData)
-                ->pluck('tooth')
-                ->map(fn($toothNumber) => (int) $toothNumber)
-                ->all();
 
-            Tooth::where('patient_id', $patient->id)
-                ->whereNotIn('tooth_number', $submittedToothNumbers)
-                ->delete();
+            if ($hasOdontogramChanges && $shouldUpdatePatientOdontogram) {
+                $submittedToothNumbers = collect($cleanOdontogramData)
+                    ->pluck('tooth')
+                    ->map(fn($toothNumber) => (int) $toothNumber)
+                    ->all();
 
-            foreach ($cleanOdontogramData as $entry) {
-                $toothNumber = (int) $entry['tooth'];
+                Tooth::where('patient_id', $patient->id)
+                    ->whereNotIn('tooth_number', $submittedToothNumbers)
+                    ->delete();
 
-                $tooth = Tooth::firstOrCreate([
-                    'patient_id' => $patient->id,
-                    'tooth_number' => $toothNumber,
-                ]);
+                foreach ($cleanOdontogramData as $entry) {
+                    $toothNumber = (int) $entry['tooth'];
 
-                $savedTeeth++;
-
-                $toothLegendCode = data_get($entry, 'threeD.code') ?: data_get($entry, 'status.code');
-                $toothLegendLabel = data_get($entry, 'threeD.label') ?: data_get($entry, 'status.label');
-
-                $toothLegendId = $resolveLegendId($toothLegendCode, $toothLegendLabel);
-
-                $tooth->legends()->sync($toothLegendId ? [$toothLegendId] : []);
-
-                foreach ($surfaceMap as $surfaceKey => $surfaceNumber) {
-                    $surface = ToothSurface::firstOrCreate([
-                        'tooth_id' => $tooth->id,
-                        'surface_number' => $surfaceNumber,
+                    $tooth = Tooth::firstOrCreate([
+                        'patient_id' => $patient->id,
+                        'tooth_number' => $toothNumber,
                     ]);
 
-                    $surfaceCode = data_get($entry, "surfaces.$surfaceKey.code");
-                    $surfaceLabel = data_get($entry, "surfaces.$surfaceKey.label");
+                    $savedTeeth++;
 
-                    $surfaceLegendId = $resolveLegendId($surfaceCode, $surfaceLabel);
+                    $toothLegendCode =
+                        data_get($entry, 'threeD.code')
+                        ?: data_get($entry, 'status.code');
 
-                    $surface->legends()->sync($surfaceLegendId ? [$surfaceLegendId] : []);
+                    $toothLegendLabel =
+                        data_get($entry, 'threeD.label')
+                        ?: data_get($entry, 'status.label');
+
+                    $toothLegendId =
+                        $resolveLegendId(
+                            $toothLegendCode,
+                            $toothLegendLabel
+                        );
+
+                    $tooth->legends()->sync(
+                        $toothLegendId
+                            ? [$toothLegendId]
+                            : []
+                    );
+
+                    foreach ($surfaceMap as $surfaceKey => $surfaceNumber) {
+
+                        $surface = ToothSurface::firstOrCreate([
+                            'tooth_id' => $tooth->id,
+                            'surface_number' => $surfaceNumber,
+                        ]);
+
+                        $surfaceCode =
+                            data_get(
+                                $entry,
+                                "surfaces.$surfaceKey.code"
+                            );
+
+                        $surfaceLabel =
+                            data_get(
+                                $entry,
+                                "surfaces.$surfaceKey.label"
+                            );
+
+                        $surfaceLegendId =
+                            $resolveLegendId(
+                                $surfaceCode,
+                                $surfaceLabel
+                            );
+
+                        $surface->legends()->sync(
+                            $surfaceLegendId
+                                ? [$surfaceLegendId]
+                                : []
+                        );
+                    }
                 }
             }
 
@@ -634,24 +965,18 @@ class OdontogramController extends Controller
             }
 
             $procedurePayload = [
-                'patient_id' => $patient->id,
                 'odontogram_data' => $cleanOdontogramData,
                 'oral_examination' => $validated['oral_examination'] ?? null,
                 'diagnosis' => $validated['diagnosis'] ?? null,
                 'prescriptions' => $validated['prescriptions'] ?? null,
                 'completion_action' => $completionAction,
+                'procedure_started_at' => $procedureStartedAt,
+                'procedure_completed_at' => $procedureCompletedAt,
+                'procedure_duration_seconds' => max(0, $procedureDurationSeconds),
             ];
 
-            if (Schema::hasColumn('appointment_procedures', 'procedure_started_at')) {
-                $procedurePayload['procedure_started_at'] = $procedureStartedAt;
-            }
-
-            if (Schema::hasColumn('appointment_procedures', 'procedure_completed_at')) {
-                $procedurePayload['procedure_completed_at'] = $procedureCompletedAt;
-            }
-
-            if (Schema::hasColumn('appointment_procedures', 'procedure_duration_seconds')) {
-                $procedurePayload['procedure_duration_seconds'] = $procedureDurationSeconds ?: null;
+            if (array_key_exists('inventory_notes', $validated)) {
+                $procedurePayload['inventory_notes'] = $validated['inventory_notes'];
             }
 
             AppointmentProcedure::updateOrCreate(
@@ -663,6 +988,7 @@ class OdontogramController extends Controller
 
             $appointmentUpdate = [
                 'status' => 'completed',
+                'dentist_id' => $appointment->dentist_id,
                 'updated_at' => now(),
             ];
 
@@ -676,6 +1002,7 @@ class OdontogramController extends Controller
         });
 
         $appointment->refresh();
+        session()->forget($this->procedureStartSessionKey($appointment));
 
         return [
             'appointment' => $appointment,
@@ -688,7 +1015,7 @@ class OdontogramController extends Controller
     {
         $activeRole = session('impersonated_role') ?: session('role');
 
-        if ($activeRole !== 'dentist') {
+        if (!optional(Auth::user())->canAccessClinicalArea($activeRole)) {
             return redirect('/login');
         }
 
@@ -709,21 +1036,32 @@ class OdontogramController extends Controller
             'appointment' => $appointment->id,
         ]);
     }
-    public function show(Appointment $appointment)
+    public function show(Request $request, Appointment $appointment)
     {
         $activeRole = session('impersonated_role') ?: session('role');
 
-        if ($activeRole !== 'dentist') {
+        if (!optional(Auth::user())->canAccessClinicalArea($activeRole)) {
             return redirect('/login');
         }
 
-        $appointment->load('patient');
+        $appointment->load(['patient', 'reservedBookingPeriod']);
 
         if (!$appointment->patient) {
             abort(404, 'Patient not found for this appointment.');
         }
 
+        if (
+            $request->boolean('start_procedure')
+            && $appointment->reserved_booking_period_id
+            && ! $appointment->reservedProcedureWindowIsOpen()
+        ) {
+            return redirect()
+                ->route('dentist.dentist.appointments')
+                ->with('error', 'This reserved appointment can only be started during its reserved period.');
+        }
+
         $patient = $appointment->patient;
+        $entrySource = $this->procedureEntrySource($request->query('from'));
 
         $procedure = AppointmentProcedure::where('appointment_id', $appointment->id)->first();
         $savedOdontogramData = $this->getSavedOdontogramDataForPatient($patient);
@@ -735,6 +1073,9 @@ class OdontogramController extends Controller
             'savedOdontogramData',
         ), $this->getProcedureWorkspaceContext(), [
             'existingAppointmentMode' => false,
+            'discardProcedureContext' => $entrySource,
+            'discardProcedureReturnUrl' => $this->procedureDiscardReturnUrl($entrySource, $appointment, $patient),
+            'discardProcedureUrl' => route('dentist.odontogram.discard'),
             'serviceTypes' => ServiceType::activeForBooking()->orderBy('name')->get(['name']),
             'saveProcedureUrl' => route('dentist.odontogram.save', $appointment->id),
         ]));
@@ -744,53 +1085,106 @@ class OdontogramController extends Controller
     {
         $activeRole = session('impersonated_role') ?: session('role');
 
-        if ($activeRole !== 'dentist') {
+        if (!optional(Auth::user())->canAccessClinicalArea($activeRole)) {
             return redirect('/login');
         }
 
         session()->forget($this->existingAppointmentDraftSessionKey($patient));
 
-        $defaults = [
-            'appointment_date' => '',
-            'appointment_time' => '',
-            'service_type' => '',
-            'procedure_duration_hms' => '',
-            'last_dental_visit' => '',
-            'previous_dentist' => '',
-            'extraction_date' => '',
-            'dentures_date' => '',
-            'ortho_date' => '',
-            'additional_concerns' => '',
-            'emergency_person' => '',
-            'emergency_number' => '',
-            'emergency_relation' => '',
-            'dental_answers' => [],
-            'medical_answers' => [],
-            'diseases' => [],
-        ];
+        $patient->loadMissing(
+            'medicalHistory'
+        );
 
-        return view('dentist.add-existing-appointment', [
-            'patient' => $patient,
-            'serviceTypes' => ServiceType::activeForBooking()
-                ->orderBy('name')
-                ->get(),
+        $this->backfillStudentEmergencyContactIfNeeded($patient);
 
-            'diseases' => Disease::orderBy('sort_order')
-                ->get(),
+        $hasReusableSignature =
+            !empty($patient
+                ->medicalHistory
+                ?->patient_signature) &&
+            $patient
+            ->medicalHistory
+            ?->signature_review_status !==
+            'invalid_reupload_required';
 
-            'defaults' => $defaults,
+        $existingSignatureUrl = null;
 
-            'dentalQuestions' => BookingQuestions::dental(),
-            'medicalQuestions' => BookingQuestions::medical(),
+        if (
+            $hasReusableSignature &&
+            filled(
+                $patient
+                    ->medicalHistory
+                    ?->patient_signature
+            )
+        ) {
+            $signaturePath = ltrim(
+                str_replace(
+                    'storage/',
+                    '',
+                    $patient
+                        ->medicalHistory
+                        ->patient_signature
+                ),
+                '/'
+            );
 
-        ] + $this->getExistingAppointmentCalendarContext());
+            if (
+                Storage::disk('public')
+                ->exists($signaturePath)
+            ) {
+                $existingSignatureUrl =
+                    Storage::disk('public')
+                    ->url($signaturePath);
+            }
+        }
+
+        $defaults = $this->getPatientHistoryDefaults($patient);
+
+        $defaults['appointment_date'] = '';
+        $defaults['appointment_time'] = '';
+        $defaults['service_type'] = '';
+
+        return view(
+            'dentist.add-existing-appointment',
+            [
+                'patient' => $patient,
+                'layoutRole' => $this->existingAppointmentLayoutRole(),
+                'backUrl' => $this->existingAppointmentBackUrl($patient),
+                'storeIntakeUrl' => route($this->existingAppointmentRouteName('intake.store'), ['patient' => $patient->id]),
+                'historyAutosaveUrl' => route($this->existingAppointmentRouteName('history.autosave'), ['patient' => $patient->id]),
+                'slotEndpoint' => route($this->existingAppointmentRouteName('slots')),
+
+                'serviceTypes' =>
+                ServiceType::activeForBooking()
+                    ->orderBy('name')
+                    ->get(),
+
+                'diseases' =>
+                Disease::orderBy('sort_order')
+                    ->get(),
+
+                'defaults' => $defaults,
+
+                'dentalQuestions' =>
+                BookingQuestions::dental(),
+
+                'medicalQuestions' =>
+                BookingQuestions::medical(),
+
+                'hasReusableSignature' =>
+                $hasReusableSignature,
+
+                'existingSignatureUrl' =>
+                $existingSignatureUrl,
+
+            ] + $this->getExistingAppointmentCalendarContext()
+        );
     }
 
     public function storeExistingAppointmentIntake(Request $request, Patient $patient)
     {
         $activeRole = session('impersonated_role') ?: session('role');
 
-        if ($activeRole !== 'dentist') {
+        if (!optional(Auth::user())->canAccessClinicalArea($activeRole)) {
             return redirect('/login');
         }
 
@@ -829,9 +1223,26 @@ class OdontogramController extends Controller
             ->exists();
 
         if (!$serviceExists) {
-            return redirect()->back()
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' =>
+                    'Please select a valid service type.',
+
+                    'errors' => [
+                        'service_type' => [
+                            'Please select a valid service type.',
+                        ],
+                    ],
+                ], 422);
+            }
+
+            return redirect()
+                ->back()
                 ->withInput()
-                ->withErrors(['service_type' => 'Please select a valid service type.']);
+                ->withErrors([
+                    'service_type' =>
+                    'Please select a valid service type.',
+                ]);
         }
 
         $validated['dental_answers'] = collect($validated['dental_answers'] ?? [])
@@ -874,6 +1285,19 @@ class OdontogramController extends Controller
             $appointmentDate->isSaturday() ||
             $appointmentDate->isSunday()
         ) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' =>
+                    'The clinic is closed on Saturdays and Sundays.',
+
+                    'errors' => [
+                        'appointment_date' => [
+                            'The clinic is closed on Saturdays and Sundays.',
+                        ],
+                    ],
+                ], 422);
+            }
+
             return redirect()
                 ->back()
                 ->withInput()
@@ -883,27 +1307,34 @@ class OdontogramController extends Controller
                 ]);
         }
 
-        $holidayDates =
-            PhilippineHolidays::range(
-                yearsBefore: 15,
-                yearsAfter: 15
-            );
-
         $appointmentDateIso =
             $appointmentDate
             ->toDateString();
 
         if (
-            isset(
-                $holidayDates[$appointmentDateIso]
+            PhilippineHolidays::isBlockedForBooking(
+                $appointmentDateIso
             )
         ) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' =>
+                    'The clinic is closed on this Philippine holiday.',
+
+                    'errors' => [
+                        'appointment_date' => [
+                            'The clinic is closed on this Philippine holiday.',
+                        ],
+                    ],
+                ], 422);
+            }
+
             return redirect()
                 ->back()
                 ->withInput()
                 ->withErrors([
                     'appointment_date' =>
-                    'The clinic is closed on Philippine holidays.',
+                    'The clinic is closed on this Philippine holiday.',
                 ]);
         }
 
@@ -911,17 +1342,268 @@ class OdontogramController extends Controller
             $this->existingAppointmentDraftSessionKey($patient) => $validated,
         ]);
 
-        return redirect()->route(
-            'dentist.odontogram.existing-appointment.odontogram',
-            ['patient' => $patient->id]
-        );
+        $odontogramUrl =
+            route(
+                $this->existingAppointmentRouteName('odontogram'),
+                [
+                    'patient' =>
+                    $patient->id,
+                ]
+            );
+
+        if (
+            $request->expectsJson()
+        ) {
+            return response()->json([
+                'success' => true,
+
+                'message' =>
+                'The existing appointment details were recorded successfully.',
+
+                'odontogram_url' =>
+                $odontogramUrl,
+
+                'appointment' => [
+                    'patient' =>
+                    $patient->name,
+
+                    'service' =>
+                    $validated['service_type'],
+
+                    'date' =>
+                    Carbon::parse(
+                        $validated['appointment_date']
+                    )->format(
+                        'F j, Y'
+                    ),
+
+                    'time' =>
+                    Carbon::createFromFormat(
+                        'H:i',
+                        $validated['appointment_time']
+                    )->format(
+                        'g:i A'
+                    ),
+
+                ],
+            ]);
+        }
+
+        return redirect()
+            ->to(
+                $odontogramUrl
+            );
     }
 
-    public function showExistingAppointmentOdontogram(Patient $patient)
+    public function autosaveExistingAppointmentHistory(
+        Request $request,
+        Patient $patient
+    ) {
+        $activeRole =
+            session('impersonated_role')
+            ?: session('role');
+
+        if (!optional(Auth::user())->canAccessClinicalArea($activeRole)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized.',
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'last_dental_visit' => [
+                'nullable',
+                'date',
+                'before_or_equal:today',
+            ],
+
+            'previous_dentist' => [
+                'nullable',
+                'string',
+                'max:50',
+            ],
+
+            'extraction_date' => [
+                'nullable',
+                'date',
+                'before_or_equal:today',
+            ],
+
+            'dentures_date' => [
+                'nullable',
+                'date',
+                'before_or_equal:today',
+            ],
+
+            'ortho_date' => [
+                'nullable',
+                'date',
+                'before_or_equal:today',
+            ],
+
+            'additional_concerns' => [
+                'nullable',
+                'string',
+                'max:2000',
+            ],
+
+            'emergency_person' => [
+                'nullable',
+                'string',
+                'max:50',
+                'regex:/^[A-Za-zÑñ\s.\'-]+$/u',
+            ],
+
+            'emergency_number' => [
+                'nullable',
+                'string',
+                'max:15',
+            ],
+
+            'emergency_relation' => [
+                'nullable',
+                'string',
+                'max:50',
+            ],
+
+            'dental_answers' => [
+                'nullable',
+                'array',
+            ],
+
+            'medical_answers' => [
+                'nullable',
+                'array',
+            ],
+
+            'diseases' => [
+                'nullable',
+                'array',
+            ],
+
+            'diseases_present' => [
+                'nullable',
+                'boolean',
+            ],
+
+            'diseases.*' => [
+                'string',
+                'exists:diseases,code',
+            ],
+        ]);
+
+        $current =
+            $this->getPatientHistoryDefaults(
+                $patient
+            );
+
+        $draft = array_merge(
+            $current,
+            $validated
+        );
+
+        $draft['dental_answers'] =
+            array_merge(
+                $current['dental_answers'] ?? [],
+                $validated['dental_answers'] ?? []
+            );
+
+        $draft['medical_answers'] =
+            array_merge(
+                $current['medical_answers'] ?? [],
+                $validated['medical_answers'] ?? []
+            );
+
+        if (
+            array_key_exists(
+                'diseases_present',
+                $validated
+            )
+        ) {
+            $draft['diseases'] =
+                $validated['diseases']
+                ?? [];
+        } else {
+            $draft['diseases'] =
+                $current['diseases']
+                ?? [];
+        }
+
+        $draft['dental_answers'] =
+            collect(
+                $draft['dental_answers'] ?? []
+            )
+            ->map(
+                fn($value) =>
+                $this->yesNoValue($value)
+            )
+            ->all();
+
+        $draft['medical_answers'] =
+            collect(
+                $draft['medical_answers'] ?? []
+            )
+            ->map(
+                function (
+                    $value,
+                    $code
+                ) {
+                    if (
+                        in_array(
+                            $code,
+                            BookingQuestions::medicalCodesByType(
+                                'bool'
+                            ),
+                            true
+                        )
+                    ) {
+                        return $this
+                            ->yesNoValue(
+                                $value
+                            );
+                    }
+
+                    return is_string($value)
+                        ? trim($value)
+                        : $value;
+                }
+            )
+            ->all();
+
+        DB::transaction(function () use (
+            $patient,
+            $draft
+        ) {
+            $this
+                ->persistExistingAppointmentPatientHistory(
+                    $patient,
+                    $draft
+                );
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Patient history saved.',
+        ]);
+    }
+
+    public function showExistingAppointmentOdontogram(Request $request, Patient $patient)
     {
         $activeRole = session('impersonated_role') ?: session('role');
 
-        if ($activeRole !== 'dentist') {
+        if (
+            !optional(Auth::user())
+                ->canAccessClinicalArea(
+                    $activeRole
+                )
+        ) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' =>
+                    'Your session is no longer authorized.',
+                ], 403);
+            }
+
             return redirect('/login');
         }
 
@@ -929,19 +1611,31 @@ class OdontogramController extends Controller
 
         if (!$draft) {
             return redirect()
-                ->route('dentist.odontogram.existing-appointment.create', ['patient' => $patient->id])
+                ->route($this->existingAppointmentRouteName('create'), ['patient' => $patient->id])
                 ->with('error', 'Please complete the existing appointment details first.');
         }
+
+        $patient->loadMissing('user');
 
         return view('dentist.dentist-odontogram', [
             'patient' => $patient,
             'appointment' => null,
             'procedure' => null,
+            'layoutRole' => $this->existingAppointmentLayoutRole(),
+            'cancelProcedureRedirectUrl' => $this->existingAppointmentBackUrl($patient),
+            'discardProcedureContext' => $this->procedureEntrySource(null, true),
+            'discardProcedureReturnUrl' => $this->procedureDiscardReturnUrl(
+                $this->procedureEntrySource(null, true),
+                null,
+                $patient,
+                true
+            ),
+            'discardProcedureUrl' => route('dentist.odontogram.discard'),
             'savedOdontogramData' => $this->getSavedOdontogramDataForPatient($patient),
             'existingAppointmentMode' => true,
             'existingAppointmentDraft' => $draft,
             'isExistingAppointment' => true,
-            'saveProcedureUrl' => route('dentist.odontogram.existing-appointment.store', $patient->id),
+            'saveProcedureUrl' => route($this->existingAppointmentRouteName('store'), $patient->id),
             'appointmentCountsPerDay' => [],
             'appointmentCountsPerSlot' => [],
             'calendarAppointmentDetails' => [],
@@ -955,7 +1649,7 @@ class OdontogramController extends Controller
     {
         $activeRole = session('impersonated_role') ?: session('role');
 
-        if ($activeRole !== 'dentist') {
+        if (!optional(Auth::user())->canAccessClinicalArea($activeRole)) {
             return response()->json([
                 'slots' => [],
                 'message' => 'Unauthorized.',
@@ -969,6 +1663,14 @@ class OdontogramController extends Controller
         $iso = $request->date;
         $date = Carbon::parse($iso);
         $dayAbbr = $date->format('D');
+
+        if (PhilippineHolidays::isBlockedForBooking($iso)) {
+            return response()->json([
+                'slots' => [],
+                'message' =>
+                'The clinic is closed on this Philippine holiday.',
+            ]);
+        }
 
         $schedule = ClinicSchedule::active()
             ->get()
@@ -1013,17 +1715,21 @@ class OdontogramController extends Controller
         ]);
     }
 
-    public function save(Request $request, Appointment $appointment)
-    {
+    public function save(
+        Request $request,
+        Appointment $appointment,
+        OdontogramRevisionService $revisionService
+    ) {
         $activeRole = session('impersonated_role') ?: session('role');
 
-        if ($activeRole !== 'dentist') {
+        if (!optional(Auth::user())->canAccessClinicalArea($activeRole)) {
             return response()->json([
                 'message' => 'Unauthorized.',
             ], 403);
         }
 
-        $appointment->load('patient');
+        $appointment->load('patient.user');
+        $patient = $appointment->patient;
 
         if (!$appointment->patient) {
             return response()->json([
@@ -1032,7 +1738,7 @@ class OdontogramController extends Controller
         }
 
         $validated = $request->validate([
-            'odontogram_data' => 'required|array',
+            'odontogram_data' => 'present|array',
             'odontogram_data.*.tooth' => 'nullable|integer|min:1',
 
             'odontogram_data.*.status.code' => 'nullable|string|max:20',
@@ -1051,22 +1757,59 @@ class OdontogramController extends Controller
             'oral_examination' => 'nullable|string',
             'diagnosis' => 'nullable|string',
             'prescriptions' => 'nullable|string',
+            'inventory_notes' => 'sometimes|nullable|string|max:10000',
             'completion_action' => 'nullable|in:finished,follow_up',
-            'has_applied_treatment' => 'required|accepted',
-            'procedure_duration_seconds' => 'nullable|integer|min:0',
-        ]);
+            'has_applied_treatment' => 'required|boolean',
+            ...ProcedureTimingService::rules(),
+        ], [], ProcedureTimingService::attributes());
 
-        if (!$request->boolean('has_applied_treatment')) {
+        $allowsProcedureCompletionWithoutOdontogramChanges = $this->allowsProcedureCompletionWithoutOdontogramChanges(
+            $appointment->service_type_name
+        );
+
+        if (
+            !$allowsProcedureCompletionWithoutOdontogramChanges &&
+            !$request->boolean('has_applied_treatment')
+        ) {
             return response()->json([
-                'message' => 'Please apply at least one treatment to the tooth chart before finishing the procedure.',
+                'message' =>
+                'Please apply at least one treatment to the tooth chart before finishing the procedure.',
             ], 422);
         }
 
-        $result = $this->persistProcedureSnapshot(
+        $user = Auth::user();
+
+        $result = DB::transaction(function () use (
             $appointment,
             $validated,
-            max(0, (int) ($validated['procedure_duration_seconds'] ?? 0))
-        );
+            $revisionService,
+            $user
+        ) {
+            $result = $this->persistProcedureSnapshot(
+                $appointment,
+                $validated
+            );
+
+            $savedAppointment = $result['appointment'];
+
+            $savedAppointment->load('procedure');
+
+            $procedure = $savedAppointment->procedure;
+
+            if (!$procedure) {
+                throw new \LogicException(
+                    'The appointment procedure could not be loaded after saving.'
+                );
+            }
+
+            $revisionService->recordInitialRevision(
+                $procedure,
+                $user
+            );
+
+            return $result;
+        });
+
         $appointment = $result['appointment'];
         $completionAction = $validated['completion_action'] ?? 'finished';
 
@@ -1087,11 +1830,286 @@ class OdontogramController extends Controller
         ]);
     }
 
-    public function storeExistingAppointment(Request $request, Patient $patient)
+    public function editSavedVisit(Request $request, Appointment $appointment)
+    {
+        abort_if(in_array(Auth::user()?->role?->slug, ['dentist', 'dentist_role'], true) && (int) $appointment->dentist_id !== (int) Auth::id(), 403, 'Record subsequent care as a new visit.');
+        $activeRole = session('impersonated_role') ?: session('role');
+
+        if (!optional(Auth::user())->canAccessClinicalArea($activeRole)) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Unauthorized.',
+                ], 403);
+            }
+
+            return redirect('/login');
+        }
+
+        abort_unless(
+            $appointment
+                ->canEditCompletedOdontogram(
+                    Auth::user()
+                ),
+            403,
+            'The 7-day editing period for this completed odontogram has expired.'
+        );
+
+        $appointment->load([
+            'patient.user',
+            'procedure',
+        ]);
+
+        $patient = $appointment->patient;
+        $procedure = $appointment->procedure;
+
+        if (!$patient) {
+            abort(404, 'Patient not found for this appointment.');
+        }
+
+        $revisionReasonTypes =
+            OdontogramRevisionReasonType
+            ::active()
+            ->orderBy(
+                'sort_order'
+            )
+            ->orderBy(
+                'label'
+            )
+            ->get([
+                'id',
+                'code',
+                'label',
+                'requires_detail',
+            ]);
+
+        return view('dentist.dentist-odontogram', array_merge(
+            [
+                'patient' => $patient,
+                'appointment' => $appointment,
+                'procedure' => $procedure,
+                'layoutRole' => 'dentist',
+                'cancelProcedureRedirectUrl' => $this->savedVisitEditBackUrl($patient),
+                'discardProcedureContext' => $this->procedureEntrySource($request->query('from'), false, true),
+                'discardProcedureReturnUrl' => $this->procedureDiscardReturnUrl(
+                    $this->procedureEntrySource($request->query('from'), false, true),
+                    $appointment,
+                    $patient,
+                    false,
+                    true
+                ),
+                'discardProcedureUrl' => route('dentist.odontogram.discard'),
+                'savedOdontogramData' => $procedure?->odontogram_data ?? [],
+                'existingAppointmentMode' => false,
+                'savedVisitEditMode' => true,
+                'revisionReasonTypes' => $revisionReasonTypes,
+                'saveProcedureUrl' => route('dentist.odontogram.saved.update', [
+                    'appointment' => $appointment->id,
+                    'from' => $request->query('from', 'appointments'),
+                ]),
+                'serviceTypes' => ServiceType::activeForBooking()->orderBy('name')->get(['name']),
+            ],
+            $this->getProcedureWorkspaceContext()
+        ));
+    }
+
+    public function updateSavedVisit(
+        UpdateSavedOdontogramRequest $request,
+        Appointment $appointment,
+        OdontogramRevisionService $revisionService
+    ) {
+        abort_if(\App\Services\AssignedDentistService::isDentist(Auth::user()) && (int) $appointment->dentist_id !== (int) Auth::id(), 403, 'Record subsequent care as a new visit.');
+        $activeRole = session('impersonated_role') ?: session('role');
+
+        if (!optional(Auth::user())->canAccessClinicalArea($activeRole)) {
+            return response()->json([
+                'message' => 'Unauthorized.',
+            ], 403);
+        }
+
+        abort_unless(
+            $appointment
+                ->canEditCompletedOdontogram(
+                    Auth::user()
+                ),
+            403,
+            'The 7-day editing period for this completed odontogram has expired.'
+        );
+
+        $appointment->load([
+            'patient.user',
+            'procedure',
+        ]);
+
+        $patient = $appointment->patient;
+
+        if (!$patient) {
+            return response()->json([
+                'message' => 'Patient not found for this appointment.',
+            ], 404);
+        }
+
+        $procedure = $appointment->procedure;
+
+        $oldOdontogramData = $procedure?->odontogram_data ?? [];
+
+        $validated = $request->validated();
+
+        $changes = $revisionService->computeChanges(
+            $oldOdontogramData,
+            $validated['odontogram_data'] ?? []
+        );
+
+        if ($changes === []) {
+            return response()->json([
+                'message' => 'No odontogram changes were detected.',
+                'errors' => [
+                    'odontogram_data' => [
+                        'Please make an odontogram correction before saving.',
+                    ],
+                ],
+            ], 422);
+        }
+
+        $allowsProcedureCompletionWithoutOdontogramChanges = $this->allowsProcedureCompletionWithoutOdontogramChanges(
+            $appointment->service_type_name
+        );
+
+        if (
+            !$allowsProcedureCompletionWithoutOdontogramChanges &&
+            !$request->boolean('has_applied_treatment')
+        ) {
+            return response()->json([
+                'message' => 'Please apply at least one treatment to the tooth chart before saving the odontogram.',
+            ], 422);
+        }
+
+        $user = Auth::user();
+
+        $result = DB::transaction(function () use (
+            $appointment,
+            $validated,
+            $oldOdontogramData,
+            $revisionService,
+            $user
+        ) {
+            $result = $this->persistProcedureSnapshot(
+                $appointment,
+                array_merge($validated, [
+                    'completion_action' => 'finished',
+                ]),
+                allowUnassignedDentistCorrection: true
+            );
+
+            $savedAppointment = $result['appointment'];
+
+            $savedAppointment->load('procedure');
+
+            $procedure = $savedAppointment->procedure;
+
+            if (!$procedure) {
+                throw new \LogicException(
+                    'The appointment procedure could not be loaded after saving.'
+                );
+            }
+
+            $newOdontogramData = $procedure->odontogram_data ?? [];
+
+            $revisionService->recordRevision(
+                $procedure,
+                $newOdontogramData,
+                $oldOdontogramData,
+                (int) $validated['reason_type_id'],
+                $validated['reason_detail'] ?? null,
+                $validated['reason_notes'] ?? null,
+                $user
+            );
+
+            return $result;
+        });
+
+        return response()->json([
+            'message' => 'Saved visit odontogram updated successfully.',
+            'saved_teeth' => $result['saved_teeth'],
+            'status' => 'completed',
+            'redirect_url' => $this->savedVisitEditBackUrl($patient) . '&refresh=' . now()->timestamp,
+        ]);
+    }
+
+    public function discard(Request $request)
     {
         $activeRole = session('impersonated_role') ?: session('role');
 
-        if ($activeRole !== 'dentist') {
+        if (!optional(Auth::user())->canAccessClinicalArea($activeRole)) {
+            return response()->json([
+                'message' => 'Unauthorized.',
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'context' => 'required|string|in:walk-in,appointments,patient-profile,existing-appointment,saved-visit',
+            'appointment_id' => 'nullable|integer|exists:appointments,id',
+            'patient_id' => 'nullable|integer|exists:patients,id',
+        ]);
+
+        $context = $validated['context'];
+        $appointment = null;
+        $patient = null;
+
+        if (!empty($validated['appointment_id'])) {
+            $appointment = Appointment::with(['patient', 'procedure'])->findOrFail($validated['appointment_id']);
+            $patient = $appointment->patient;
+        }
+
+        if (!empty($validated['patient_id'])) {
+            $patient = $patient ?: Patient::findOrFail($validated['patient_id']);
+        }
+
+        if ($context === 'existing-appointment') {
+            abort_unless($patient, 404, 'Patient not found.');
+
+            session()->forget($this->existingAppointmentDraftSessionKey($patient));
+
+            return response()->json([
+                'redirect_url' => $this->procedureDiscardReturnUrl($context, null, $patient, true),
+            ]);
+        }
+
+        abort_unless($appointment && $patient, 404, 'Appointment not found.');
+        session()->forget($this->procedureStartSessionKey($appointment));
+
+        if ($context === 'walk-in') {
+            abort_if(!($appointment->is_walk_in ?? false), 422, 'Only temporary walk-in procedures can be discarded from this flow.');
+
+            if ($appointment->procedure()->exists() || $appointment->status === 'completed') {
+                return response()->json([
+                    'redirect_url' => $this->procedureDiscardReturnUrl($context, $appointment, $patient),
+                ]);
+            }
+
+            DB::transaction(function () use ($appointment) {
+                $appointment->delete();
+            });
+        }
+
+        return response()->json([
+            'redirect_url' => $this->procedureDiscardReturnUrl(
+                $context,
+                $appointment,
+                $patient,
+                false,
+                $context === 'saved-visit'
+            ),
+        ]);
+    }
+
+    public function storeExistingAppointment(
+        Request $request,
+        Patient $patient,
+        OdontogramRevisionService $revisionService
+    ) {
+        $activeRole = session('impersonated_role') ?: session('role');
+
+        if (!optional(Auth::user())->canAccessClinicalArea($activeRole)) {
             return response()->json([
                 'message' => 'Unauthorized.',
             ], 403);
@@ -1106,7 +2124,7 @@ class OdontogramController extends Controller
         }
 
         $validated = $request->validate([
-            'odontogram_data' => 'required|array',
+            'odontogram_data' => 'present|array',
             'odontogram_data.*.tooth' => 'nullable|integer|min:1',
             'odontogram_data.*.status.code' => 'nullable|string|max:20',
             'odontogram_data.*.status.label' => 'nullable|string|max:255',
@@ -1121,43 +2139,56 @@ class OdontogramController extends Controller
             'oral_examination' => 'nullable|string',
             'diagnosis' => 'nullable|string',
             'prescriptions' => 'nullable|string',
+            'inventory_notes' => 'sometimes|nullable|string|max:10000',
             'completion_action' => 'nullable|in:finished',
-            'has_applied_treatment' => 'required|accepted',
-        ]);
+            'has_applied_treatment' => 'required|boolean',
+            ...ProcedureTimingService::rules(),
+        ], [], ProcedureTimingService::attributes());
 
-        if (!$request->boolean('has_applied_treatment')) {
+        $allowsProcedureCompletionWithoutOdontogramChanges = $this->allowsProcedureCompletionWithoutOdontogramChanges(
+            $draft['service_type'] ?? ''
+        );
+
+        if (
+            !$allowsProcedureCompletionWithoutOdontogramChanges && !$request->boolean(
+                'has_applied_treatment'
+            )
+        ) {
             return response()->json([
-                'message' => 'Please apply at least one treatment to the tooth chart before saving this appointment.',
+                'message' =>
+                'Please apply at least one treatment to the tooth chart before saving this appointment.',
             ], 422);
         }
 
         $appointmentDate = Carbon::parse($draft['appointment_date'])->toDateString();
         $appointmentTime = $this->normalizeProcedureTime($draft['appointment_time']);
-        $procedureDurationSeconds = $this->parseDurationToSeconds($draft['procedure_duration_hms'] ?? '00:00:00');
-        $procedureCompletedAt = Carbon::parse(trim($appointmentDate . ' ' . $appointmentTime));
+
+        $serviceType = ServiceType::where(
+            'name',
+            $draft['service_type']
+        )->firstOrFail();
 
         $appointmentPayload = [
             'patient_id' => $patient->id,
-            'dentist_id' => auth()->id(),
-            'service_type' => $draft['service_type'],
+            'dentist_id' => app(\App\Services\AssignedDentistService::class)->requireForPatient($patient->id, Auth::user())->id,
+            'service_type_id' => $serviceType->id,
+            'service_type' => $serviceType->name,
             'appointment_date' => $appointmentDate,
             'appointment_time' => $appointmentTime,
             'status' => 'completed',
         ];
 
-        if (Schema::hasColumn('appointments', 'completed_at')) {
-            $appointmentPayload['completed_at'] = $procedureCompletedAt;
-        }
-
         $result = null;
+
+        $user = Auth::user();
 
         DB::transaction(function () use (
             $patient,
             $draft,
             $appointmentPayload,
             $validated,
-            $procedureDurationSeconds,
-            $procedureCompletedAt,
+            $revisionService,
+            $user,
             &$result
         ) {
             $this->persistExistingAppointmentPatientHistory($patient, $draft);
@@ -1168,9 +2199,24 @@ class OdontogramController extends Controller
                 $appointment,
                 array_merge($validated, [
                     'completion_action' => 'finished',
-                ]),
-                $procedureDurationSeconds,
-                $procedureCompletedAt
+                ])
+            );
+
+            $savedAppointment = $result['appointment'];
+
+            $savedAppointment->load('procedure');
+
+            $procedure = $savedAppointment->procedure;
+
+            if (!$procedure) {
+                throw new \LogicException(
+                    'The appointment procedure could not be loaded after saving.'
+                );
+            }
+
+            $revisionService->recordInitialRevision(
+                $procedure,
+                $user
             );
         });
 
@@ -1180,7 +2226,15 @@ class OdontogramController extends Controller
             'message' => 'Existing appointment saved successfully.',
             'saved_teeth' => $result['saved_teeth'],
             'status' => 'completed',
-            'redirect_url' => route('dentist.dentist.patient.profile', ['patient' => $patient->id]) . '?refresh=' . now()->timestamp,
+            'redirect_url' => $this->existingAppointmentBackUrl($patient) . '?refresh=' . now()->timestamp,
         ]);
+    }
+
+    private function allowsProcedureCompletionWithoutOdontogramChanges(?string $serviceType): bool
+    {
+        $normalizedServiceType = trim((string) $serviceType);
+
+        return strcasecmp($normalizedServiceType, 'Oral Prophylaxis') === 0 ||
+            strcasecmp($normalizedServiceType, 'Oral Check-Up') === 0;
     }
 }

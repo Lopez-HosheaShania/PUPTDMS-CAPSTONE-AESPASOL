@@ -1,199 +1,209 @@
 @props([
-    'questions',
-    'diseases',
-    'mode' => 'standard',
-    'answers' => [],
-    'defaults' => [],
-    'selectedDiseases' => [],
-    'isFemale' => false,
-    'dynamicFemale' => false,
+'questions',
+'diseases',
+'mode' => 'standard',
+'answers' => [],
+'defaults' => [],
+'selectedDiseases' => [],
+'isFemale' => false,
+'dynamicFemale' => false,
+'emergencyNameRule' => 'personName',
 ])
 
 @php
 
-    $isNested = $mode === 'nested';
+$isNested = $mode === 'nested';
 
-    $medicalQuestionMap = collect($questions)->flatten(1)->keyBy('code');
+$medicalQuestionMap = collect($questions)->flatten(1)->keyBy('code');
 
-    $selectedDiseaseValues = collect(old('diseases', collect($selectedDiseases)->all()));
+$selectedDiseaseValues = collect(old('diseases', collect($selectedDiseases)->all()));
 
-    $fieldName = function (string $code) use ($isNested) {
-        return $isNested ? "medical_answers[{$code}]" : $code;
-    };
+$fieldName = function (string $code) use ($isNested) {
+return $isNested ? "medical_answers[{$code}]" : $code;
+};
 
-    $fieldValue = function (string $code, string $fallback = '') use ($isNested, $answers, $defaults) {
-        if ($isNested) {
-            return old("medical_answers.{$code}", $answers[$code] ?? $fallback);
-        }
+$fieldValue = function (string $code, string $fallback = '') use ($isNested, $answers, $defaults) {
+if ($isNested) {
+return old("medical_answers.{$code}", $answers[$code] ?? $fallback);
+}
 
-        return old($code, $defaults[$code] ?? $fallback);
-    };
+return old($code, $defaults[$code] ?? $fallback);
+};
 
-    $allergyName = function (string $code) use ($isNested) {
-        return $isNested ? "medical_answers[{$code}]" : $code;
-    };
+$allergyName = function (string $code) use ($isNested) {
+return $isNested ? "medical_answers[{$code}]" : $code;
+};
 
-    $allergyValue = function (string $code, string $fallback = '') use ($isNested, $answers, $defaults) {
-        if ($isNested) {
-            return old("medical_answers.{$code}", $answers[$code] ?? $fallback);
-        }
+$allergyValue = function (string $code, string $fallback = '') use ($isNested, $answers, $defaults) {
+if ($isNested) {
+return old("medical_answers.{$code}", $answers[$code] ?? $fallback);
+}
 
-        return old($code, $defaults[$code] ?? $fallback);
-    };
+return old($code, $defaults[$code] ?? $fallback);
+};
 @endphp
 
-<div class="booking-section-card">
+<div class="section-stack grid gap-4">
+    <div class="booking-section-card">
 
-    <p class="booking-section-card-title">
-        <i class="fa-solid fa-heart-pulse text-xs"></i>
-        General Health
+        <p class="booking-section-card-title">
+            <i class="fa-solid fa-heart-pulse text-xs"></i>
+            General Health
 
-        <span class="booking-section-card-title-line"></span>
-    </p>
+            <span class="booking-section-card-title-line"></span>
+        </p>
 
-    <x-booking-question :name="$fieldName('good_health')" :label="$medicalQuestionMap->get('good_health')['label'] ?? 'Are you in good health?'" :checked-value="$fieldValue('good_health')" required />
+        <x-booking-question :name="$fieldName('good_health')"
+            :label="$medicalQuestionMap->get('good_health')['label'] ?? 'Are you in good health?'"
+            :checked-value="$fieldValue('good_health')" required />
 
-    <div id="good_health_box" class="{{ $fieldValue('good_health') === 'NO' ? '' : 'hidden' }} booking-conditional-field">
-        <div class="global-form-group" data-global-field>
-            <label class="global-form-label" for="good_health_details">
-                {{ $medicalQuestionMap->get('good_health_details')['label'] ?? 'If NO, please specify:' }}
-            </label>
+        <div id="good_health_box"
+            class="{{ $fieldValue('good_health') === 'NO' ? '' : 'hidden' }} booking-conditional-field">
+            <x-form-field :label="$medicalQuestionMap->get('good_health_details')['label'] ?? 'If NO, please specify:'"
+                for="good_health_details" :show-error="false">
+                <input type="text" id="good_health_details" name="{{ $fieldName('good_health_details') }}"
+                    value="{{ $fieldValue('good_health_details') }}" maxlength="150" class="form-input-custom"
+                    placeholder="Input here" data-required-when-visible="true"
+                    data-required-message="Please describe why you are not currently in good health.">
 
-            <input type="text" id="good_health_details" name="{{ $fieldName('good_health_details') }}"
-                value="{{ $fieldValue('good_health_details') }}" maxlength="150" class="form-input-custom"
-                placeholder="Input here">
-
-            <p class="field-help">
-                <span id="goodHealthCount">
-                    {{ strlen($fieldValue('good_health_details')) }}/150
-                </span>
-            </p>
+                <x-slot:help>
+                    <p class="field-help">
+                        <span id="goodHealthCount">
+                            {{ strlen($fieldValue('good_health_details')) }}/150
+                        </span>
+                    </p>
+                </x-slot:help>
+            </x-form-field>
         </div>
-    </div>
 
-    <x-booking-question :name="$fieldName('had_medical_exam')" :label="$medicalQuestionMap->get('had_medical_exam')['label'] ?? 'Have you had a medical examination?'" :checked-value="$fieldValue('had_medical_exam')" required />
+        <x-booking-question :name="$fieldName('had_medical_exam')"
+            :label="$medicalQuestionMap->get('had_medical_exam')['label'] ?? 'Have you had a medical examination?'"
+            :checked-value="$fieldValue('had_medical_exam')" required />
 
-    <div id="medical_exam_box"
-        class="{{ $fieldValue('had_medical_exam') === 'YES' ? '' : 'hidden' }} booking-conditional-field">
-        <div class="global-form-group" data-global-field>
-            <label class="global-form-label" for="medicalExamDate">
-                {{ $medicalQuestionMap->get('medical_exam_date')['label'] ?? 'Date of last medical examination' }}
-            </label>
+        <div id="medical_exam_box"
+            class="{{ $fieldValue('had_medical_exam') === 'YES' ? '' : 'hidden' }} booking-conditional-field">
+            <x-form-field
+                :label="$medicalQuestionMap->get('medical_exam_date')['label'] ?? 'Date of last medical examination'"
+                for="medicalExamDate" :show-error="false">
+                <div class="global-control-wrap">
+                    <i class="fa-regular fa-calendar global-control-icon" aria-hidden="true"></i>
 
-            <div class="global-control-wrap">
-                <i class="fa-regular fa-calendar global-control-icon" aria-hidden="true"></i>
-
-                <input type="text" id="medicalExamDate" name="{{ $fieldName('medical_exam_date') }}"
-                    value="{{ $fieldValue('medical_exam_date') }}"
-                    class="form-input-custom global-control-with-icon js-flatpickr-date-max-today"
-                    placeholder="Select date" readonly>
-            </div>
+                    <input type="text" id="medicalExamDate" name="{{ $fieldName('medical_exam_date') }}"
+                        value="{{ $fieldValue('medical_exam_date') }}"
+                        class="form-input-custom global-form-icon js-flatpickr-date-max-today" placeholder="Select date"
+                        data-required-when-visible="true"
+                        data-required-message="Please select the date of your last medical examination." readonly>
+                </div>
+            </x-form-field>
         </div>
-    </div>
 
-    <x-booking-question :name="$fieldName('under_treatment')" :label="$medicalQuestionMap->get('under_treatment')['label'] ??
-        'Are you currently receiving treatment for any illness?'" :checked-value="$fieldValue('under_treatment')" required />
+        <x-booking-question :name="$fieldName('under_treatment')" :label="$medicalQuestionMap->get('under_treatment')['label'] ??
+            'Are you currently receiving treatment for any illness?'" :checked-value="$fieldValue('under_treatment')"
+            required />
 
-    <div id="treatment_box"
-        class="{{ $fieldValue('under_treatment') === 'YES' ? '' : 'hidden' }} booking-conditional-field">
-        <div class="global-form-group" data-global-field>
-            <label class="global-form-label" for="treatment_details">
-                {{ $medicalQuestionMap->get('treatment_details')['label'] ?? 'If YES, please specify:' }}
-            </label>
+        <div id="treatment_box"
+            class="{{ $fieldValue('under_treatment') === 'YES' ? '' : 'hidden' }} booking-conditional-field">
+            <x-form-field :label="$medicalQuestionMap->get('treatment_details')['label'] ?? 'If YES, please specify:'"
+                for="treatment_details" :show-error="false">
+                <input type="text" id="treatment_details" name="{{ $fieldName('treatment_details') }}"
+                    value="{{ $fieldValue('treatment_details') }}" maxlength="150" class="form-input-custom"
+                    placeholder="Input here" data-required-when-visible="true"
+                    data-required-message="Please specify the illness or treatment you are currently receiving.">
 
-            <input type="text" id="treatment_details" name="{{ $fieldName('treatment_details') }}"
-                value="{{ $fieldValue('treatment_details') }}" maxlength="150" class="form-input-custom"
-                placeholder="Input here">
-
-            <p class="field-help">
-                <span id="treatmentCount">
-                    {{ strlen($fieldValue('treatment_details')) }}/150
-                </span>
-            </p>
+                <x-slot:help>
+                    <p class="field-help">
+                        <span id="treatmentCount">
+                            {{ strlen($fieldValue('treatment_details')) }}/150
+                        </span>
+                    </p>
+                </x-slot:help>
+            </x-form-field>
         </div>
-    </div>
 
-    <x-booking-question :name="$fieldName('hospitalized')" :label="$medicalQuestionMap->get('hospitalized')['label'] ?? 'Have you ever been hospitalized?'" :checked-value="$fieldValue('hospitalized')" required />
+        <x-booking-question :name="$fieldName('hospitalized')"
+            :label="$medicalQuestionMap->get('hospitalized')['label'] ?? 'Have you ever been hospitalized?'"
+            :checked-value="$fieldValue('hospitalized')" required />
 
-    <div id="hospital_box"
-        class="{{ $fieldValue('hospitalized') === 'YES' ? '' : 'hidden' }} booking-conditional-field">
-        <div class="global-form-group" data-global-field>
-            <label class="global-form-label" for="hospital_details">
-                {{ $medicalQuestionMap->get('hospital_details')['label'] ?? 'If YES, please provide details:' }}
-            </label>
+        <div id="hospital_box"
+            class="{{ $fieldValue('hospitalized') === 'YES' ? '' : 'hidden' }} booking-conditional-field">
+            <x-form-field
+                :label="$medicalQuestionMap->get('hospital_details')['label'] ?? 'If YES, please provide details:'"
+                for="hospital_details" :show-error="false">
+                <input type="text" id="hospital_details" name="{{ $fieldName('hospital_details') }}"
+                    value="{{ $fieldValue('hospital_details') }}" maxlength="150" class="form-input-custom"
+                    placeholder="Input here" data-required-when-visible="true"
+                    data-required-message="Please provide details about your hospitalization.">
 
-            <input type="text" id="hospital_details" name="{{ $fieldName('hospital_details') }}"
-                value="{{ $fieldValue('hospital_details') }}" maxlength="150" class="form-input-custom"
-                placeholder="Input here">
-
-            <p class="field-help">
-                <span id="hospitalCount">
-                    {{ strlen($fieldValue('hospital_details')) }}/150
-                </span>
-            </p>
+                <x-slot:help>
+                    <p class="field-help">
+                        <span id="hospitalCount">
+                            {{ strlen($fieldValue('hospital_details')) }}/150
+                        </span>
+                    </p>
+                </x-slot:help>
+            </x-form-field>
         </div>
+
     </div>
 
-</div>
+    <div class="booking-section-card mt-2">
 
-<div class="booking-section-card">
+        <p class="booking-section-card-title">
+            <i class="fa-solid fa-triangle-exclamation text-xs"></i>
+            Allergies
 
-    <p class="booking-section-card-title">
-        <i class="fa-solid fa-triangle-exclamation text-xs"></i>
-        Allergies
+            <span class="booking-section-card-title-line"></span>
+        </p>
 
-        <span class="booking-section-card-title-line"></span>
-    </p>
+        @foreach (collect($questions['allergies'] ?? [])->where('type', 'bool') as $question)
+        <x-booking-question :name="$allergyName($question['code'])" :label="$question['label']"
+            :checked-value="$allergyValue($question['code'])" required />
+        @endforeach
 
-    @foreach (collect($questions['allergies'] ?? [])->where('type', 'bool') as $question)
-        <x-booking-question :name="$allergyName($question['code'])" :label="$question['label']" :checked-value="$allergyValue($question['code'])" required />
-    @endforeach
+        <x-form-field class="booking-field-spacing"
+            :label="$medicalQuestionMap->get('allergy_others')['label'] ?? 'Others (please specify):'"
+            for="allergy_others" :show-error="false">
+            <input type="text" id="allergy_others" name="{{ $allergyName('allergy_others') }}"
+                value="{{ $allergyValue('allergy_others') }}" class="form-input-custom" placeholder="Input here">
+        </x-form-field>
 
-    <div class="global-form-group booking-field-spacing" data-global-field>
-        <label class="global-form-label">
-            {{ $medicalQuestionMap->get('allergy_others')['label'] ?? 'Others (please specify):' }}
-        </label>
-
-        <input type="text" name="{{ $allergyName('allergy_others') }}"
-            value="{{ $allergyValue('allergy_others') }}" class="form-input-custom" placeholder="Input here">
     </div>
 
-</div>
+    <div class="booking-section-card">
 
-<div class="booking-section-card">
+        <p class="booking-section-card-title">
+            <i class="fa-solid fa-pills text-xs"></i>
+            Medications
 
-    <p class="booking-section-card-title">
-        <i class="fa-solid fa-pills text-xs"></i>
-        Medications
+            <span class="booking-section-card-title-line"></span>
+        </p>
 
-        <span class="booking-section-card-title-line"></span>
-    </p>
+        <x-booking-question :name="$fieldName('medication')" :label="$medicalQuestionMap->get('medication')['label'] ??
+            'Are you taking any prescription or non-prescription medication?'"
+            :checked-value="$fieldValue('medication')" required />
 
-    <x-booking-question :name="$fieldName('medication')" :label="$medicalQuestionMap->get('medication')['label'] ??
-        'Are you taking any prescription or non-prescription medication?'" :checked-value="$fieldValue('medication')" required />
+        <div id="medication_box"
+            class="{{ $fieldValue('medication') === 'YES' ? '' : 'hidden' }} booking-conditional-field">
+            <x-form-field :label="$medicalQuestionMap->get('medication_details')['label'] ?? 'If YES, please specify:'"
+                for="medication_details" :show-error="false">
+                <input type="text" id="medication_details" name="{{ $fieldName('medication_details') }}"
+                    value="{{ $fieldValue('medication_details') }}" maxlength="150" class="form-input-custom"
+                    placeholder="Input here" data-required-when-visible="true"
+                    data-required-message="Please specify the medication you are currently taking.">
 
-    <div id="medication_box"
-        class="{{ $fieldValue('medication') === 'YES' ? '' : 'hidden' }} booking-conditional-field">
-        <div class="global-form-group" data-global-field>
-            <label class="global-form-label" for="medication_details">
-                {{ $medicalQuestionMap->get('medication_details')['label'] ?? 'If YES, please specify:' }}
-            </label>
-
-            <input type="text" id="medication_details" name="{{ $fieldName('medication_details') }}"
-                value="{{ $fieldValue('medication_details') }}" maxlength="150" class="form-input-custom"
-                placeholder="Input here">
-
-            <p class="field-help">
-                <span id="medicationCount">
-                    {{ strlen($fieldValue('medication_details')) }}/150
-                </span>
-            </p>
+                <x-slot:help>
+                    <p class="field-help">
+                        <span id="medicationCount">
+                            {{ strlen($fieldValue('medication_details')) }}/150
+                        </span>
+                    </p>
+                </x-slot:help>
+            </x-form-field>
         </div>
+
     </div>
 
-</div>
-
-@if ($dynamicFemale)
+    @if ($dynamicFemale)
 
     <div class="booking-section-card hidden" id="forWomenSection">
         <p class="booking-section-card-title">
@@ -204,16 +214,17 @@
         </p>
 
         @foreach ($questions['women'] ?? [] as $question)
-            <x-booking-question :name="$fieldName($question['code'])" :label="$question['label']" :checked-value="$fieldValue($question['code'])" required />
+        <x-booking-question :name="$fieldName($question['code'])" :label="$question['label']"
+            :checked-value="$fieldValue($question['code'])" required />
         @endforeach
     </div>
 
     <div id="nonFemaleDefaults">
         @foreach ($questions['women'] ?? [] as $question)
-            <input type="hidden" name="{{ $fieldName($question['code']) }}" value="NO">
+        <input type="hidden" name="{{ $fieldName($question['code']) }}" value="NO">
         @endforeach
     </div>
-@elseif ($isFemale)
+    @elseif ($isFemale)
     <div class="booking-section-card" id="forWomenSection">
         <p class="booking-section-card-title">
             <i class="fa-solid fa-venus text-xs"></i>
@@ -223,35 +234,37 @@
         </p>
 
         @foreach ($questions['women'] ?? [] as $question)
-            <x-booking-question :name="$fieldName($question['code'])" :label="$question['label']" :checked-value="$fieldValue($question['code'])" required />
+        <x-booking-question :name="$fieldName($question['code'])" :label="$question['label']"
+            :checked-value="$fieldValue($question['code'])" required />
         @endforeach
     </div>
-@else
+    @else
     @foreach ($questions['women'] ?? [] as $question)
-        <input type="hidden" name="{{ $fieldName($question['code']) }}" value="NO">
+    <input type="hidden" name="{{ $fieldName($question['code']) }}" value="NO">
     @endforeach
 
-@endif
+    @endif
 
-<div class="booking-section-card">
+    <div class="booking-section-card">
 
-    <p class="booking-section-card-title">
-        <i class="fa-solid fa-stethoscope text-xs"></i>
-        Medical Conditions
+        <p class="booking-section-card-title">
+            <i class="fa-solid fa-stethoscope text-xs"></i>
+            Medical Conditions
 
-        <span class="booking-section-card-title-line"></span>
-    </p>
+            <span class="booking-section-card-title-line"></span>
+        </p>
 
-    <p class="booking-section-description">
-        Please indicate below if you presently have or
-        have ever had any of the following:
-    </p>
+        <p class="booking-section-description">
+            Please indicate below if you presently have or
+            have ever had any of the following.
+            Select only if applicable.
+        </p>
 
-    <div class="medical-condition-grid">
+        <div class="medical-condition-grid">
 
-        @foreach ($diseases as $disease)
+            @foreach ($diseases as $disease)
             @php
-                $checked = $selectedDiseaseValues->contains($disease->code);
+            $checked = $selectedDiseaseValues->contains($disease->code);
             @endphp
 
             <label class="global-checkbox-row">
@@ -264,13 +277,15 @@
                 </span>
 
             </label>
-        @endforeach
+            @endforeach
+
+        </div>
 
     </div>
 
 </div>
 
-<div class="booking-section-card">
+<div class="booking-section-card mt-4">
 
     <p class="booking-section-card-title">
         <i class="fa-solid fa-smoking text-xs"></i>
@@ -279,66 +294,32 @@
         <span class="booking-section-card-title-line"></span>
     </p>
 
-    <x-booking-question :name="$fieldName('tobacco_use')" :label="$medicalQuestionMap->get('tobacco_use')['label'] ?? 'Do you use tobacco products or any derivatives?'" :checked-value="$fieldValue('tobacco_use')" required />
+    <x-booking-question :name="$fieldName('tobacco_use')"
+        :label="$medicalQuestionMap->get('tobacco_use')['label'] ?? 'Do you use tobacco products or any derivatives?'"
+        :checked-value="$fieldValue('tobacco_use')" required />
 
     <div id="tobacco_details"
         class="{{ $fieldValue('tobacco_use') === 'YES' ? '' : 'hidden' }} booking-conditional-field">
 
         <div class="booking-two-field-stack">
 
-            <div class="global-form-group" data-global-field>
-                <label class="global-form-label">
-                    {{ $medicalQuestionMap->get('tobacco_per_day')['label'] ?? 'How much per day:' }}
-                </label>
+            <x-form-field :label="$medicalQuestionMap->get('tobacco_per_day')['label'] ?? 'How much per day:'"
+                :show-error="false">
+                <x-number-stepper :name="$fieldName('tobacco_per_day')" :value="$fieldValue('tobacco_use') === 'YES'
+                        ? $fieldValue('tobacco_per_day', '1')
+                        : ''" min="1" max="100" step="1" decrease-label="Decrease" increase-label="Increase"
+                    data-required-when-visible="true"
+                    data-required-message="Please enter the tobacco amount per day." />
+            </x-form-field>
 
-                <div class="global-number-stepper" data-global-number-stepper>
-
-                    <button type="button" class="global-number-stepper-btn" data-number-step="-1"
-                        aria-label="Decrease">
-
-                        <i class="fa-solid fa-minus"></i>
-
-                    </button>
-
-
-                    <input type="number" name="{{ $fieldName('tobacco_per_day') }}"
-                        value="{{ $fieldValue('tobacco_per_day', '1') }}" min="1" max="100"
-                        step="1" class="global-number-stepper-input" data-number-stepper-input>
-
-
-                    <button type="button" class="global-number-stepper-btn" data-number-step="1"
-                        aria-label="Increase">
-
-                        <i class="fa-solid fa-plus"></i>
-
-                    </button>
-
-                </div>
-            </div>
-
-            <div class="global-form-group" data-global-field>
-                <label class="global-form-label">
-                    {{ $medicalQuestionMap->get('tobacco_per_week')['label'] ?? 'Per week:' }}
-                </label>
-
-                <div class="global-number-stepper" data-global-number-stepper>
-
-                    <button type="button" class="global-number-stepper-btn" data-number-step="-1"
-                        aria-label="Decrease">
-
-                        <i class="fa-solid fa-minus"></i>
-                    </button>
-
-                    <input type="number" name="{{ $fieldName('tobacco_per_week') }}"
-                        value="{{ $fieldValue('tobacco_per_week', '1') }}" min="1" max="7"
-                        step="1" class="global-number-stepper-input" data-number-stepper-input>
-
-                    <button type="button" class="global-number-stepper-btn" data-number-step="1"
-                        aria-label="Increase">
-                        <i class="fa-solid fa-plus"></i>
-                    </button>
-                </div>
-            </div>
+            <x-form-field :label="$medicalQuestionMap->get('tobacco_per_week')['label'] ?? 'Per week:'"
+                :show-error="false">
+                <x-number-stepper :name="$fieldName('tobacco_per_week')" :value="$fieldValue('tobacco_use') === 'YES'
+            ? $fieldValue('tobacco_per_week', '1')
+            : ''" min="1" max="7" step="1" decrease-label="Decrease" increase-label="Increase"
+                    data-required-when-visible="true"
+                    data-required-message="Please enter the tobacco amount per week." />
+            </x-form-field>
 
         </div>
 
@@ -356,7 +337,8 @@
     </p>
 
     @foreach ($questions['symptoms'] ?? [] as $question)
-        <x-booking-question :name="$fieldName($question['code'])" :label="$question['label']" :checked-value="$fieldValue($question['code'])" required />
+    <x-booking-question :name="$fieldName($question['code'])" :label="$question['label']"
+        :checked-value="$fieldValue($question['code'])" required />
     @endforeach
 
 </div>
@@ -372,63 +354,58 @@
 
     <div class="emergency-fields-stack">
 
-        <div class="global-form-group" data-global-field>
-            <label for="emergency_person" class="global-form-label">
-                Person to contact in case of emergency
-
-                <span class="required-mark">*</span>
-            </label>
-
+        <x-form-field label="Person to contact in case of emergency" for="emergency_person" required
+            :show-error="false">
             <input type="text" id="emergency_person" name="emergency_person" maxlength="50"
-                pattern="[A-Za-zÑñ\s.'-]+" value="{{ old('emergency_person', $defaults['emergency_person'] ?? '') }}"
-                class="form-input-custom" placeholder="Full name"
-                data-required-message="Please enter the emergency contact person's name."
-                data-pattern-message="Only letters, spaces, apostrophe, period, and hyphen are allowed." required>
-        </div>
+                value="{{ old('emergency_person', $defaults['emergency_person'] ?? '') }}" class="form-input-custom"
+                placeholder="Full name" data-validation-rule="{{ $emergencyNameRule }}"
+                @if ($emergencyNameRule === 'emergencyContactName')
+                    minlength="3" data-capitalize-words="name"
+                @endif
+                data-required-message="Please enter the emergency contact person's name." required>
+        </x-form-field>
 
-
-        <div class="global-form-group" data-global-field>
-            <label for="emergency_number" class="global-form-label">
-                Contact Number
-
-                <span class="required-mark">*</span>
-            </label>
-
+        <x-form-field label="Contact Number" for="emergency_number" required :show-error="false">
             <input type="tel" id="emergency_number" name="emergency_number"
                 value="{{ old('emergency_number', $defaults['emergency_number'] ?? '') }}" inputmode="numeric"
-                autocomplete="tel" maxlength="11" pattern="09[0-9]{9}" class="form-input-custom"
-                placeholder="09XXXXXXXXX" data-validation-rule="philippineMobile"
+                autocomplete="tel" maxlength="13" pattern="09[0-9]{2}\s?[0-9]{3}\s?[0-9]{4}" class="form-input-custom"
+                placeholder="0000 000 0000" data-validation-rule="philippineMobile"
                 data-required-message="Please enter an emergency contact number."
                 data-pattern-message="Contact number must start with 09 and contain exactly 11 digits." required>
-        </div>
+        </x-form-field>
 
+        @php
+        $selectedRelation = old('emergency_relation', $defaults['emergency_relation'] ?? '');
+        @endphp
 
-        <div class="global-form-group" data-global-field>
-            <label for="emergency_relation" class="global-form-label">
-                Relation to Patient
-
-                <span class="required-mark">*</span>
-            </label>
-
-            @php
-                $selectedRelation = old('emergency_relation', $defaults['emergency_relation'] ?? '');
-            @endphp
-
-            <select id="emergency_relation" name="emergency_relation" class="js-custom-select"
-                data-placeholder="Select relation" data-required-message="Please select the patient's relation."
-                required>
-                <option value="" disabled @selected($selectedRelation === '')>
+        <x-form-field label="Relation to Patient" for="emergency_relation" required :show-error="false">
+            <x-select id="emergency_relation" name="emergency_relation" data-placeholder="Select relation"
+                data-required-message="Please select the emergency contact's relationship to the patient." required>
+                <option value="" disabled @selected($selectedRelation==='' )>
                     Select relation
                 </option>
 
-                @foreach (['Mother', 'Father', 'Sibling', 'Guardian', 'Spouse', 'Grandparent', 'Aunt', 'Uncle', 'Cousin', 'Child'] as $relation)
-                    <option value="{{ $relation }}" @selected($selectedRelation === $relation)>
-                        {{ $relation }}
-                    </option>
+                @foreach (
+                [
+                'Father',
+                'Mother',
+                'Uncle',
+                'Auntie',
+                'Brother',
+                'Sister',
+                'Grandmother',
+                'Grandfather',
+                'Cousin',
+                'Legal Guardian',
+                'Friend',
+                'Other Relative',
+                ] as $relation
+                )
+                <option value="{{ $relation }}" @selected($selectedRelation===$relation)>
+                    {{ $relation }}
+                </option>
                 @endforeach
-            </select>
-        </div>
-
+            </x-select>
+        </x-form-field>
     </div>
-
 </div>

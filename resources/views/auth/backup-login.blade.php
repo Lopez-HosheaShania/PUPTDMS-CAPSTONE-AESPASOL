@@ -2,8 +2,10 @@
 
 @section('title', 'Backup Login | PUP Taguig Dental Clinic')
 
+@section('body-class', 'auth-guest-body backup-login-body')
+
 @section('styles')
-@vite('resources/css/pages/auth/backup-login.css')
+    @vite('resources/css/pages/auth/backup-login.css')
 @endsection
 
 @section('content')
@@ -22,48 +24,55 @@
 
           <h1 class="backup-brand-title">Admin-only backup access.</h1>
           <p class="backup-brand-copy">
-            This page is reserved for administrator fallback authentication when the primary IdP or SSO service is
-            temporarily unavailable.
+            Secure fallback access for administrators when the primary SSO service is temporarily
+            unavailable.
           </p>
 
-          <div class="backup-points">
-            <div class="backup-point">
-              <i class="fa-solid fa-database"></i>
-              <span>Uses the administrator credentials stored directly in your clinic system database.</span>
-            </div>
-            <div class="backup-point">
-              <i class="fa-solid fa-shield-halved"></i>
-              <span>Patient and dentist accounts are blocked here and must continue through the IdP.</span>
-            </div>
-            <div class="backup-point">
-              <i class="fa-solid fa-key"></i>
-              <span>Best used only after an admin local backup password has been injected or reset.</span>
-            </div>
+          <div class="backup-brand-status" aria-label="Backup access status">
+            <span>
+              <i class="fa-solid fa-user-shield" aria-hidden="true"></i>
+              Admin only
+            </span>
+
+            <span>
+              <i class="fa-solid fa-lock" aria-hidden="true"></i>
+              Secure fallback
+            </span>
           </div>
         </div>
 
         <div class="backup-brand-footer">
-          <span>Mula Sayo, Para Sa Bayan.</span>
           <span>Local fallback authentication</span>
         </div>
       </div>
 
       <div class="backup-form-wrap">
         <div class="backup-form-card">
-          <a href="{{ route('login') }}" class="backup-back-link">
-            <i class="fa-solid fa-arrow-left"></i>
-            Back to landing page
-          </a>
+          <div class="backup-form-toolbar">
+            <a href="{{ route('login') }}" class="backup-back-link">
+              <i class="fa-solid fa-arrow-left"></i>
+              Back to landing page
+            </a>
 
-          <div class="backup-eyebrow">
-            <i class="fa-solid fa-triangle-exclamation"></i>
-            Backup Login
+            <button type="button" class="auth-landing-theme-toggle" data-global-theme-toggle
+              data-tooltip="Switch to dark mode" data-tooltip-tone="neutral" aria-label="Switch to dark mode"
+              aria-pressed="false">
+
+              <i class="fa-solid fa-moon" data-global-theme-icon aria-hidden="true">
+              </i>
+            </button>
+          </div>
+
+          <div class="backup-form-heading-row">
+            <span class="backup-admin-pill">
+              <i class="fa-solid fa-user-shield" aria-hidden="true"></i>
+              Administrator access
+            </span>
           </div>
 
           <h2 class="backup-form-title">Sign in with your local admin account.</h2>
           <p class="backup-form-copy">
-            Use the admin email stored in the local database. Patients and dentists must sign in through the IdP,
-            even when this backup page is available.
+            {{ $idpStatusMessage ?? 'Primary SSO is temporarily unavailable.' }} Sign in using your local administrator credentials.
           </p>
 
           <form method="POST" action="{{ route('login.store') }}" class="backup-form">
@@ -72,34 +81,50 @@
 
             <div class="backup-field">
               <label for="email">Email Address</label>
-              <input id="email" name="email" type="email" placeholder="name@pup.edu.ph" value="{{ old('email') }}"
-                required>
+
+              <div class="backup-input-wrap">
+                <i class="fa-regular fa-envelope backup-input-leading-icon" aria-hidden="true"></i>
+
+                <input id="email" name="email" type="email" placeholder="name@pup.edu.ph" value="{{ old('email') }}"
+                  required>
+              </div>
             </div>
 
             <div class="backup-field">
               <label for="password">Local Password</label>
-              <input id="password" name="password" type="password" placeholder="Enter your backup login password"
-                required>
+
+              <div class="backup-input-wrap backup-password-wrap">
+                <i class="fa-solid fa-lock backup-input-leading-icon" aria-hidden="true"></i>
+
+                <input id="password" name="password" type="password" placeholder="Enter your password" required>
+
+                <button type="button" class="backup-password-toggle" id="backupPasswordToggle"
+                  data-tooltip="Show password" data-tooltip-tone="neutral" aria-label="Show password"
+                  aria-pressed="false">
+
+                  <i class="fa-regular fa-eye" id="backupPasswordIcon" aria-hidden="true">
+                  </i>
+                </button>
+              </div>
             </div>
 
             <button type="submit" class="backup-submit">Continue Locally</button>
           </form>
 
           <div class="backup-switch">
-            <span>SSO is available again?</span>
-            <a href="/auth/oidc/redirect" data-oidc-login-link>Return to SSO login</a>
-          </div>
+            <span>Prefer the standard sign-in method?</span>
 
-          <div class="backup-note">
-            Local login will only work for admin accounts that already have a password saved in the local `users`
-            table.
+            <a href="/auth/oidc/redirect" class="backup-sso-btn" data-oidc-login-link>
+              <i class="fa-solid fa-arrow-right-to-bracket"></i>
+              Use SSO Instead
+            </a>
           </div>
         </div>
       </div>
     </div>
   </section>
 </div>
-<script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
   function detectBrowserName() {
     const userAgent = navigator.userAgent || '';
 
@@ -146,6 +171,53 @@
     }
   }
 
+  function initBackupPasswordToggle() {
+    const passwordInput =
+      document.getElementById('password');
+
+    const toggleButton =
+      document.getElementById('backupPasswordToggle');
+
+    const icon =
+      document.getElementById('backupPasswordIcon');
+
+    if (!passwordInput || !toggleButton || !icon) {
+      return;
+    }
+
+    toggleButton.addEventListener('click', () => {
+      const isHidden =
+        passwordInput.type === 'password';
+
+      passwordInput.type =
+        isHidden ? 'text' : 'password';
+
+      icon.className = isHidden ?
+        'fa-regular fa-eye-slash' :
+        'fa-regular fa-eye';
+
+      const label = isHidden ?
+        'Hide password' :
+        'Show password';
+
+      toggleButton.setAttribute(
+        'aria-label',
+        label
+      );
+
+      toggleButton.setAttribute(
+        'data-tooltip',
+        label
+      );
+
+      toggleButton.setAttribute(
+        'aria-pressed',
+        isHidden ? 'true' : 'false'
+      );
+    });
+  }
+
   applyBrowserHintToOidcLinks();
+  initBackupPasswordToggle();
 </script>
 @endsection

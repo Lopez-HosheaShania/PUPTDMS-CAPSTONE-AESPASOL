@@ -1,12 +1,4 @@
-@import "@fortawesome/fontawesome-free/css/all.min.css";
-
-*,
-*::before,
-*::after {
-    box-sizing: border-box;
-}
-
-:root {
+body.error-page {
     --error-accent: #8B0000;
     --error-accent-dark: #650000;
     --error-accent-soft: #FEF2F2;
@@ -20,24 +12,15 @@
     --error-text: #5d0303;
     --error-muted: #29292a;
     --error-border: rgba(148, 163, 184, .28);
-}
 
-html,
-body {
     min-height: 100%;
+    margin: 0;
+    color: var(--error-text);
 }
 
-body {
+body.error-page {
+    min-height: 100%;
     margin: 0;
-
-    font-family:
-        Inter,
-        system-ui,
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        sans-serif;
-
     color: var(--error-text);
 }
 
@@ -750,9 +733,9 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
 
-    *,
-    *::before,
-    *::after {
+    body.error-page *,
+    body.error-page *::before,
+    body.error-page *::after {
         scroll-behavior: auto !important;
         transition-duration: .01ms !important;
         animation-duration: .01ms !important;

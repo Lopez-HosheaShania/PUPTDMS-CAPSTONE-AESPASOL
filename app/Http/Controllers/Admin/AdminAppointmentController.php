@@ -1,21 +1,70 @@
 <?php
 
 namespace App\Http\Controllers\Admin;
+
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class AdminAppointmentController extends Controller
 {
     public function index(Request $request)
     {
+        $user = Auth::user();
         $today = Carbon::today()->toDateString();
 
-        $appointments = Appointment::with(['patient'])
-            ->orderBy('appointment_date', 'asc')
-            ->orderBy('appointment_time', 'asc')
+        Appointment::cancelElapsedScheduledAppointments();
+
+        $upcomingAppointments = Appointment::with([
+            'patient',
+            'procedure',
+            'followUpAppointments',
+            'reservedBookingPeriod',
+        ])
+            ->whereIn('status', [
+                'upcoming',
+                'rescheduled',
+            ])
+            ->whereDate(
+                'appointment_date',
+                '>=',
+                $today
+            )
+            ->orderBy(
+                'appointment_date',
+                'asc'
+            )
+            ->orderBy(
+                'appointment_time',
+                'asc'
+            )
             ->get();
+
+        $pastAppointments = Appointment::with([
+            'patient',
+            'procedure',
+            'followUpAppointments',
+            'reservedBookingPeriod',
+        ])
+            ->whereIn('status', [
+                'completed',
+                'cancelled',
+            ])
+            ->orderBy(
+                'appointment_date',
+                'desc'
+            )
+            ->orderBy(
+                'appointment_time',
+                'desc'
+            )
+            ->get();
+
+        $appointments = $upcomingAppointments
+            ->merge($pastAppointments)
+            ->values();
 
         $todayCount = $appointments->filter(function ($appt) use ($today) {
             $status = strtolower($appt->status ?? '');
@@ -43,18 +92,6 @@ class AdminAppointmentController extends Controller
 
         $allCount = $appointments->count();
 
-        $upcomingAppointments = $appointments->filter(function ($appt) use ($today) {
-            $status = strtolower($appt->status ?? '');
-            return $appt->appointment_date >= $today
-                && !in_array($status, ['cancelled', 'completed'], true);
-        });
-
-        $pastAppointments = $appointments->filter(function ($appt) use ($today) {
-            $status = strtolower($appt->status ?? '');
-            return $appt->appointment_date < $today
-                || in_array($status, ['completed', 'cancelled'], true);
-        });
-
         if ($request->expectsJson()) {
             $appointments = $upcomingAppointments
                 ->merge($pastAppointments)
@@ -72,14 +109,14 @@ class AdminAppointmentController extends Controller
         return view('shared.appointments', [
             'layoutRole' => 'admin',
             'pageTitle' => 'Appointment Management',
-            'pageShellClass' => 'admin-page-shell',
+            'pageShellClass' => 'app-page-shell',
 
             'isDentistView' => false,
 
             'canStartProcedure' => false,
-            'canRescheduleAppointment' => false,
-            'canCancelAppointment' => false,
-            'canViewTreatmentRecord' => false,
+            'canRescheduleAppointment' => $user?->hasPermission('reschedule_appointments') ?? false,
+            'canCancelAppointment' => $user?->hasPermission('cancel_appointments') ?? false,
+            'canViewTreatmentRecord' => $user?->hasPermission('view_appointments') ?? false,
             'canScheduleFollowUp' => false,
 
             'patientProfileRouteName' => 'admin.admin.patient.profile',

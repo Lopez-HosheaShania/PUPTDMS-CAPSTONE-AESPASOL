@@ -1,0 +1,157 @@
+[data-theme="dark"] #mainContent.existing-record-page .empty-state p,
+[data-theme="dark"] #mainContent.existing-record-page #noResults p,
+.dark #mainContent.existing-record-page .empty-state p,
+.dark #mainContent.existing-record-page #noResults p {
+    color: #9ca3af !important;
+}
+
+[data-theme="dark"] #mainContent.existing-record-page .empty-state i,
+[data-theme="dark"] #mainContent.existing-record-page #noResults i,
+.dark #mainContent.existing-record-page .empty-state i,
+.dark #mainContent.existing-record-page #noResults i {
+    color: rgba(252, 165, 165, 0.4) !important;
+}
+
+.existing-record-directory {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 1rem;
+
+    padding: 1rem 1.1rem;
+
+    border:
+        1px solid var(--border);
+
+    border-radius: 16px;
+
+    background:
+        var(--surface);
+}
+
+.existing-record-directory-copy {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    min-width: 0;
+}
+
+.existing-record-directory-subtitle {
+    margin-top: .2rem;
+    color: var(--text-2);
+    font-size: .75rem;
+    line-height: 1.4;
+}
+
+.existing-record-patient-grid {
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+    grid-auto-rows: 1fr;
+    gap: 14px;
+    width: 100%;
+    min-width: 0;
+    margin-block: 1rem;
+    align-items: stretch;
+}
+
+.existing-record-patient-grid>.global-record-card {
+    width: 100%;
+    min-width: 0;
+    height: 100%;
+}
+
+.existing-record-patient-grid .global-record-card-grid {
+    height: 100%;
+}
+
+@media (min-width: 768px) and (max-width: 1180px) {
+    .existing-record-patient-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+}
+
+@media (max-width: 767px) {
+    .existing-record-patient-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        margin-block: .75rem;
+    }
+
+    .existing-record-directory {
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: flex-start;
+
+        gap: .75rem;
+
+        padding: .8rem;
+    }
+
+    .existing-record-directory-copy {
+        width: 100%;
+
+        align-items: flex-start;
+
+        gap: .6rem;
+    }
+
+    .existing-record-directory-copy>.global-icon-box {
+        flex: 0 0 auto;
+
+        margin-top: 1px;
+    }
+
+    .existing-record-directory-subtitle {
+        margin: 0;
+
+        font-size: .68rem;
+        line-height: 1.4;
+    }
+
+    .existing-record-directory .tab-group {
+        width: 100%;
+
+        display: grid;
+
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+
+        gap: .35rem;
+    }
+
+    .existing-record-directory .tab-btn {
+        width: 100%;
+        min-width: 0;
+
+        justify-content: center;
+    }
+}
+
+@media (max-width: 380px) {
+
+    .existing-record-directory {
+        gap: .65rem;
+
+        padding: .7rem;
+    }
+
+    .existing-record-directory-copy {
+        gap: .5rem;
+    }
+
+    .existing-record-directory-subtitle {
+        font-size: .65rem;
+    }
+
+    .existing-record-directory .tab-group {
+        gap: .3rem;
+    }
+
+    .existing-record-patient-grid {
+        gap: 8px;
+
+        margin-block: .65rem;
+    }
+}

@@ -42,6 +42,10 @@ return [
 
     'idp' => [
         'login_url' => env('IDP_LOGIN_URL'),
+        'health_url' => env('IDP_HEALTH_URL', env('IDP_LOGIN_URL')),
+        'health_timeout' => env('IDP_HEALTH_TIMEOUT', 3),
+        'health_cache_seconds' => env('IDP_HEALTH_CACHE_SECONDS', 30),
+        'force_down' => env('IDP_FORCE_DOWN', false),
     ],
 
     'openai' => [
@@ -53,6 +57,33 @@ return [
 
     'signature_ai' => [
         'threshold' => env('SIGNATURE_AI_THRESHOLD', 0.80),
+    ],
+
+    'ph_holidays' => [
+        'mcp_url' => env(
+            'PH_HOLIDAYS_MCP_URL',
+            'https://ph-holidays.godmode.ph/mcp'
+        ),
+
+        'connect_timeout' => (int) env(
+            'PH_HOLIDAYS_CONNECT_TIMEOUT',
+            5
+        ),
+
+        'timeout' => (int) env(
+            'PH_HOLIDAYS_TIMEOUT',
+            15
+        ),
+
+        'cache_hours' => (int) env(
+            'PH_HOLIDAYS_CACHE_HOURS',
+            24
+        ),
+
+        'fallback_cache_hours' => (int) env(
+            'PH_HOLIDAYS_FALLBACK_CACHE_HOURS',
+            6
+        ),
     ],
 
     'flss' => [
@@ -68,6 +99,11 @@ return [
 
     'hostinger' => [
         'hpanel_url' => env('HOSTINGER_HPANEL_URL', 'https://hpanel.hostinger.com'),
+    ],
+
+    'ocms' => [
+        'base_url' => env('OCMS_EXTERNAL_API_URL'),
+        'api_key' => env('OCMS_EXTERNAL_API_KEY'),
     ],
 
     'ogos' => [

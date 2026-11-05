@@ -33,11 +33,18 @@ class DentistEmergencyOutNotification extends Notification
             'patient_id' => $this->appointment->patient_id,
             'date' => optional($this->appointment->appointment_date)->format('M d, Y') ?? $this->appointment->appointment_date,
             'time' => $this->appointment->appointment_time,
+            'recipient_role' => optional($notifiable->role)->slug,
         ];
     }
 
     public function toBroadcast(object $notifiable): BroadcastMessage
     {
-        return new BroadcastMessage($this->toArray($notifiable));
+        return new BroadcastMessage(array_merge(
+            $this->toArray($notifiable),
+            [
+                'created_at_label' => 'Just now',
+                'state' => 'unread',
+            ]
+        ));
     }
 }

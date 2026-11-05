@@ -34,6 +34,34 @@ return [
 
     'lifetime' => (int) env('SESSION_LIFETIME', 120),
 
+    'idle_timeout_seconds' => (int) env('SESSION_IDLE_TIMEOUT_SECONDS', 600),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Custom Role Idle Timeout
+    |--------------------------------------------------------------------------
+    |
+    | Roles created through Role & Permissions use a one-hour idle timeout by
+    | default. Core roles continue using the existing role-specific behavior.
+    |
+    */
+
+    'custom_role_idle_timeout_seconds' => (int) env(
+        'CUSTOM_ROLE_IDLE_TIMEOUT_SECONDS',
+        3600
+    ),
+
+    'core_role_slugs' => [
+        'admin',
+        'dentist',
+        'patient',
+        'super_admin',
+    ],
+
+    'idle_timeout_exempt_roles' => [
+        'dentist',
+    ],
+
     'expire_on_close' => env('SESSION_EXPIRE_ON_CLOSE', false),
 
     /*

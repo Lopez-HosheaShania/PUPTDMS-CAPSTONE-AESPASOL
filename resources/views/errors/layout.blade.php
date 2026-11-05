@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+    @include('partials.security-bootstrap')
     <meta charset="UTF-8">
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -14,18 +15,24 @@
 
     <link rel="icon" type="image/png" href="{{ asset('images/PUPT-DMS-Logo.png') }}">
 
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite([
+    'resources/css/app.css',
+    'resources/css/pages/error-pages.css',
+    'resources/js/app.js',
+])
 </head>
 
 <body class="error-page error-page--@yield('tone', 'general')">
 
     @php
-        $primaryUrl = trim($__env->yieldContent('primary_url')) ?: url('/');
+        $customPrimaryUrl = trim($__env->yieldContent('primary_url'));
+        $customPrimaryLabel = trim($__env->yieldContent('primary_label'));
 
-        $primaryLabel = trim($__env->yieldContent('primary_label')) ?: 'Return Home';
+        $primaryUrl = $customPrimaryUrl ?: route('dashboard');
+        $primaryLabel = $customPrimaryLabel ?: 'Back to Dashboard';
     @endphp
 
-    <main class="error-stage" style="--error-background-image: url('{{ asset('images/PUP-Pylon.jpg') }}');">
+    <main class="error-stage" data-ui-style="--error-background-image: url(&#39;{{ asset('images/PUP-Pylon.jpg') }}&#39;);">
 
         <div class="error-ripples" aria-hidden="true">
             <span></span>
@@ -38,7 +45,7 @@
 
             <header class="error-panel__header">
 
-                <a href="{{ url('/') }}" class="error-brand" aria-label="Return to PUP Taguig Dental Clinic">
+                <a href="{{ $primaryUrl }}" class="error-brand" aria-label="Return to dashboard">
 
                     <span class="error-brand__logo">
                         <img src="{{ asset('images/PUPT-DMS-Logo.png') }}" alt="">
@@ -109,7 +116,7 @@
                         </span>
                     </a>
 
-                    <button type="button" class="error-action error-action--secondary" onclick="history.back()">
+                    <button type="button" class="error-action error-action--secondary" data-ui-click="action-1f0252ba48f2">
 
                         <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
 

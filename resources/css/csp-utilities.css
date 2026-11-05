@@ -1,0 +1,158 @@
+/* Static presentation rules migrated from browser templates. */
+[data-ui-presentation="presentation-86ffbe9be8cb"] { width: 42px; height: 18px; margin: 0 auto; }
+[data-ui-presentation="presentation-0f7350a468c1"] { width: 32px; height: 18px; }
+[data-ui-presentation="presentation-4b79035b2acd"] { width: 122px; height: 10px; }
+[data-ui-presentation="presentation-be510d0d5823"] { width: 82px; height: 12px; }
+[data-ui-presentation="presentation-ec95c252797e"] { width: 110px; height: 10px; }
+[data-ui-presentation="presentation-7afaa8eede4f"] { width: 66px; height: 12px; }
+[data-ui-presentation="presentation-6bee5473b01a"] { width: 102px; height: 10px; }
+[data-ui-presentation="presentation-ab9acd4fca12"] { width: 74px; height: 12px; }
+[data-ui-presentation="presentation-3eae6024334a"] { width: 34px; height: 8px; margin-top: 8px; }
+[data-ui-presentation="presentation-2febe2dcf7c3"] { width: 42px; height: 18px; }
+[data-ui-presentation="presentation-3d7207316986"] { height: 260px; }
+[data-ui-presentation="presentation-b7d4e63f99bb"] { font-size:.65rem;color:#9ca3af;text-transform:capitalize; }
+[data-ui-presentation="presentation-6f522262772c"] { font-size:.72rem;font-weight:600; }
+[data-ui-presentation="presentation-b7b9d5522554"] { font-size:.76rem; }
+[data-ui-presentation="presentation-3b9edb0f9a16"] { font-size:.68rem;color:#9ca3af; }
+[data-ui-presentation="presentation-ac79c536cac4"] { font-size:.74rem;font-weight:600; }
+[data-ui-presentation="presentation-2a953b0e4120"] { color:#9ca3af;font-size:.72rem; }
+[data-ui-presentation="presentation-b699c17309cd"] { width:120px; }
+[data-ui-presentation="presentation-e0db5fbf10d1"] { width:160px; }
+[data-ui-presentation="presentation-c5f3c1cb4243"] { width:60px; }
+[data-ui-presentation="presentation-fbff25e9fc50"] { overflow-x:auto; }
+[data-ui-presentation="presentation-546d6dae843c"] { width: 14%; }
+[data-ui-presentation="presentation-370509cd083e"] { width: 18%; }
+[data-ui-presentation="presentation-9fe033fb187b"] { width: 16%; }
+[data-ui-presentation="presentation-3ca932db06e0"] { width: 24%; }
+[data-ui-presentation="presentation-56d1e0204546"] { width: 28%; }
+[data-ui-presentation="presentation-0b97713c0ae4"] { padding:2rem;text-align:center;color:#dc2626;font-family:Arial,sans-serif; }
+[data-ui-presentation="presentation-c9730b18220d"] { padding:2rem;text-align:center;color:#94a3b8;font-family:Arial,sans-serif; }
+[data-ui-presentation="presentation-61faffc3a313"] { padding:1rem;color:#9ca3af; }
+[data-ui-presentation="presentation-905228b6d52d"] { font-size:14px; }
+[data-ui-presentation="presentation-0c34a6f2101e"] { font-size:16px; font-weight:700; color:#7B0D0D; margin-bottom:6px; }
+[data-ui-presentation="presentation-9726dc2e78a3"] { 
+                    display:none;
+                    text-align:center;
+                    padding:32px 20px;
+                    color:#8A7A6F;
+                    border-top:1px solid #F5F0EB;
+                 }
+[data-ui-presentation="presentation-fd02dceb6efb"] { 
+                                        background:linear-gradient(135deg,#7B0D0D,#9B1515);
+                                        color:#fff;
+                                        border:none;
+                                        border-radius:10px;
+                                        padding:8px 16px;
+                                        font-size:13px;
+                                        font-weight:700;
+                                        cursor:pointer;
+                                        display:flex;
+                                        align-items:center;
+                                        gap:6px;
+                                        box-shadow:0 3px 10px rgba(123,13,13,.25);
+                                     }
+[data-ui-presentation="presentation-c985aed09217"] { 
+                                        background:linear-gradient(135deg,#1D4ED8,#3B82F6);
+                                        color:#fff;
+                                        border:none;
+                                        border-radius:10px;
+                                        padding:8px 16px;
+                                        font-size:13px;
+                                        font-weight:700;
+                                        cursor:pointer;
+                                        display:flex;
+                                        align-items:center;
+                                        gap:6px;
+                                        box-shadow:0 3px 10px rgba(29,78,216,.25);
+                                     }
+[data-ui-presentation="presentation-4edc8a0dd9d4"] { display:flex; justify-content:center; gap:8px; }
+[data-ui-presentation="presentation-3a309476733d"] { color:#8A7A6F; }
+[data-ui-presentation="presentation-96c8011139f8"] { font-weight:600; color:#2D2420; }
+[data-ui-presentation="presentation-6b2a94ea3bb9"] { font-weight:600; }
+[data-ui-presentation="presentation-c98bf92f7006"] { border-bottom:1px solid #F5F0EB; }
+[data-ui-presentation="presentation-4157576c5fb2"] { 
+                        background:#FDFCFB;
+                        color:#7B0D0D;
+                        font-weight:700;
+                     }
+[data-ui-presentation="presentation-00af67f48c33"] { 
+        background:#fff;
+        border:1.5px solid #EDE8E2;
+        border-radius:14px;
+        overflow:hidden;
+        box-shadow:0 1px 4px rgba(0,0,0,0.04);
+     }
+[data-ui-presentation="presentation-fd2cf9e09b85"] { font-family:'Inter', sans-serif; }
+[data-ui-presentation="presentation-1d6fd219a2a1"] { 
+                margin:8px 0 0;
+                font-size:14px;
+                color:#8A7A6F;
+             }
+[data-ui-presentation="presentation-72b790b505ec"] { 
+                margin:0;
+                font-size:30px;
+                font-weight:800;
+                color:#7B0D0D;
+                line-height:1;
+             }
+[data-ui-presentation="presentation-dc8ec3996a54"] { 
+                font-size:11px;
+                color:#B5A99A;
+                letter-spacing:2px;
+                text-transform:uppercase;
+                margin-bottom:6px;
+                font-weight:600;
+             }
+[data-ui-presentation="presentation-a5e0610cadcf"] { display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:28px; gap:12px; flex-wrap:wrap; }
+[data-ui-presentation="presentation-1deab25c2d59"] { font-size:11px; color:#6b7280; }
+[data-ui-presentation="presentation-6d0e665a80a2"] { font-size:13px; font-weight:800; color:#111827; }
+[data-ui-presentation="presentation-6253876a649a"] { flex:1; }
+[data-ui-presentation="presentation-a5ed3463ae30"] { width:40px; height:40px; border-radius:10px; background:#059669; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; }
+[data-ui-presentation="presentation-9cbaa781f2c4"] { display:flex; flex-wrap:wrap; gap:5px; }
+[data-ui-presentation="presentation-893ad62d3536"] { font-size:13px; font-weight:800; color:#111827; margin-bottom:2px; }
+[data-ui-presentation="presentation-5c01c905323a"] { font-size:.85rem;color:rgba(255,255,255,.7); }
+[data-ui-presentation="presentation-528bc4dca1f0"] { font-size:1.1rem;font-weight:800;color:#fff;margin-bottom:6px; }
+[data-ui-presentation="presentation-bf9d57d795a3"] { font-size:20px; }
+[data-ui-presentation="presentation-e49f4a7d996c"] { font-size:11px; opacity:.8; margin-bottom:2px; text-transform:uppercase; font-weight:700; }
+[data-ui-presentation="presentation-d695b66e4b16"] { font-size: 20px; opacity: .8; }
+[data-ui-presentation="presentation-b82067b51cef"] { background: linear-gradient(135deg, var(--crimson), var(--crimson-dark)); border-radius: 12px; padding: 14px 18px; display: flex; align-items: center; gap: 14px; margin-bottom: 16px; color: #fff; }
+[data-ui-presentation="presentation-edf375e4ab95"] { font-size:12px; color:#b45309; }
+[data-ui-presentation="presentation-af8a65c98908"] { font-weight:800; font-size:13px; color:#92400e; }
+[data-ui-presentation="presentation-92d1add5cab5"] { font-size:24px; color:#d97706; }
+[data-ui-presentation="presentation-d0466aa33fa8"] { display:none; }
+[data-ui-presentation="presentation-547b9ec6e206"] { height:4px; background:rgba(255,255,255,0.2); border-radius:10px; }
+[data-ui-presentation="presentation-a2a16eabb7d3"] { font-size:11px; opacity:0.8; margin-bottom:14px; }
+[data-ui-presentation="presentation-c633d1bd1c0e"] { font-size:32px; font-weight:900; margin-bottom:2px; line-height:1; }
+[data-ui-presentation="presentation-ce0a19731674"] { font-size:15px; font-weight:800; margin-bottom:4px; }
+[data-ui-presentation="presentation-b6d781cbbc10"] { margin-top:12px; }
+[data-ui-presentation="presentation-eb7a770b988a"] { display:flex; align-items:center; gap:6px; }
+[data-ui-presentation="presentation-025fe5129171"] { font-size:11px; }
+[data-ui-presentation="presentation-36e81f861247"] { margin-top:4px; }
+[data-ui-presentation="presentation-9ce5128fda59"] { color:#16A34A;display:none; }
+[data-ui-presentation="presentation-c42f23b8ec8e"] { font-size:12px; }
+[data-ui-presentation="presentation-4199b6098b99"] { grid-template-columns: 38px minmax(0, 1fr) auto; }
+[data-ui-presentation="presentation-1e7752fa6c28"] { font-size:.65rem; opacity:.75; margin-left:4px; }
+[data-ui-presentation="presentation-0d3f386975b5"] { font-size:.75rem; margin-right:5px; }
+[data-ui-presentation="presentation-38965f9b18ca"] { margin:0; }
+[data-ui-presentation="presentation-fd315d817385"] { color: #8B0000; text-decoration: underline; font-weight: 700; }
+[data-ui-presentation="presentation-768bda7dd991"] { margin-bottom:0; }
+[data-ui-presentation="presentation-6e22c58a7a6a"] { display: none; }
+[data-ui-presentation="presentation-72dd1572d65e"] { width: 0%; }
+[data-ui-presentation="presentation-25a98a3a6a48"] { margin-top: 0; }
+[data-ui-presentation="presentation-7c1d0a16a55f"] { border-color: var(--border); }
+[data-ui-presentation="presentation-7c63aa9c4d24"] { font-size:.55rem;background:rgba(255,255,255,.25);border-radius:999px;padding:1px 6px;margin-top:2px }
+[data-ui-presentation="presentation-53164131daad"] { font-size:1rem;font-weight:800;line-height:1.2 }
+[data-ui-presentation="presentation-ffc624773df6"] { font-size:.65rem;opacity:.75 }
+[data-ui-presentation="presentation-23b8d2e99754"] { color: var(--text-1); }
+[data-ui-presentation="presentation-3d6d2187b3e9"] { width:20px;height:20px;min-width:20px; }
+[data-ui-presentation="presentation-420e169b733d"] { color: var(--status-text); }
+[data-ui-presentation="presentation-a3c9c5afaa4d"] { margin-top:1.25rem; }
+[data-ui-presentation="presentation-6ee96a7c8fe2"] { height:260px; }
+[data-ui-presentation="presentation-e60b4e4d83de"] { background:#378ADD; }
+[data-ui-presentation="presentation-40d6de4b5bbc"] { height:250px; }
+[data-ui-presentation="presentation-d89b49e27acc"] { background:#D85A30; }
+[data-ui-presentation="presentation-dc9ac35f7999"] { background:#1D9E75; }
+[data-ui-presentation="presentation-a4ece070e44f"] { background:#EF9F27; }
+[data-ui-presentation="presentation-556d7930b79e"] { mix-blend-mode:hard-light }
+[data-ui-presentation="presentation-fbacbcb1e0b6"] { mix-blend-mode: hard-light }
+[data-ui-presentation="presentation-da1734375798"] { mix-blend-mode: plus-darker }

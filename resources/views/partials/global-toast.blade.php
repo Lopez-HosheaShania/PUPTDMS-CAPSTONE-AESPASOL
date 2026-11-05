@@ -2,9 +2,18 @@
 
 @php
     $flashToasts = [];
-    $idleTimeoutSeconds = max(60, (int) env('SESSION_IDLE_TIMEOUT_SECONDS', 600));
+    $authUser = auth()->user();
+    $activeSessionRole = (string) (optional($authUser?->role)->slug ?: session('role'));
 
-    $idleTimeoutMinutes = max(1, (int) ceil($idleTimeoutSeconds / 60));
+    $idleTimeoutSeconds =
+        $authUser?->idleTimeoutSeconds($activeSessionRole) ?? max(0, (int) config('session.idle_timeout_seconds', 600));
+
+    $idleWarningSeconds =
+        $idleTimeoutSeconds > 0
+            ? min(max(1, $idleTimeoutSeconds - 1), max(10, min(120, (int) floor($idleTimeoutSeconds * 0.2))))
+            : 0;
+
+    $showSessionTimeout = $idleTimeoutSeconds > 0;
 
     if (session('success')) {
         $flashToasts[] = [
@@ -47,63 +56,84 @@
     }
 @endphp
 
-@if (\Illuminate\Support\Facades\Auth::check())
-    <div id="sessionTimeoutModal" class="ui-modal session-timeout-modal" data-session-timeout-modal data-modal-static
-        data-session-expired="{{ request()->attributes->get('session_idle_expired', false) ? 'true' : 'false' }}"
-        data-session-timeout-seconds="{{ $idleTimeoutSeconds }}"
+@if (\Illuminate\Support\Facades\Auth::check() && $showSessionTimeout)
+    <div id="sessionTimeoutModal" class="ui-modal" role="dialog" aria-modal="true" aria-hidden="true"
+        aria-labelledby="sessionTimeoutTitle" aria-describedby="sessionTimeoutDescription" data-modal-static
+        data-session-timeout-modal data-session-timeout-seconds="{{ $idleTimeoutSeconds }}"
+        data-session-warning-seconds="{{ $idleWarningSeconds }}"
         data-session-activity-url="{{ route('session.activity') }}"
-        data-session-expire-url="{{ route('session.expire') }}" data-session-redirect-url="{{ url('/') }}"
-        aria-hidden="true">
-        <div class="ui-modal-card session-timeout-card" role="alertdialog" aria-modal="true"
-            aria-labelledby="sessionTimeoutTitle" aria-describedby="sessionTimeoutDescription">
-            <div class="session-timeout-hero">
-                <div class="session-timeout-badge">
-                    <i class="fa-solid fa-shield-halved"></i>
-                    <span>Security notice</span>
-                </div>
+        data-session-status-url="{{ route('session.status') }}" data-session-expire-url="{{ route('session.expire') }}"
+        data-session-login-url="{{ route('login') }}"
+        data-session-redirect-url="{{ route('login', [
+            'logged_out' => 1,
+            'reason' => 'idle',
+        ]) }}"
+        data-session-activity-key="pupt-dms-session-activity-{{ auth()->id() }}">
 
-                <div class="session-timeout-icon">
-                    <div class="session-timeout-icon-inner">
-                        <i class="fa-solid fa-clock-rotate-left"></i>
+        <div class="ui-modal-card modal-sm">
+            <div class="modal-bd">
+                <div class="modal-form-section items-center text-center gap-3">
+                    <div class="modal-icon" data-session-state-icon aria-hidden="true">
+                        <i class="fa-regular fa-clock"></i>
                     </div>
+
+                    <div class="modal-copy modal-form-section items-center text-center gap-2">
+                        <h2 id="sessionTimeoutTitle" class="modal-title" data-session-state-title>
+                            Still there?
+                        </h2>
+
+                        <p id="sessionTimeoutDescription" class="modal-subtitle" data-session-state-description>
+                            You will be signed out soon because there has been no activity.
+                        </p>
+                    </div>
+
+                    <strong class="modal-title" data-session-countdown aria-live="polite" hidden>
+                        0:00
+                    </strong>
                 </div>
             </div>
 
-            <div class="session-timeout-content">
-                <h2 id="sessionTimeoutTitle" class="session-timeout-title">
-                    Your session has expired
-                </h2>
+            <div class="modal-ft modal-ft--centered">
+                <div class="modal-form-grid w-full" data-session-warning-actions hidden>
+                    <button type="button" class="ui-btn ui-btn-primary w-full" data-session-stay-signed-in
+                        data-modal-initial-focus>
+                        <span>Stay signed in</span>
+                    </button>
 
-                <p id="sessionTimeoutDescription" class="session-timeout-description">
-                    You have been signed out after
-                    {{ $idleTimeoutMinutes }}
-                    {{ $idleTimeoutMinutes === 1 ? 'minute' : 'minutes' }}
-                    of inactivity.
-                </p>
-
-                <div class="session-timeout-message">
-                    <span class="session-timeout-message-icon">
-                        <i class="fa-solid fa-lock"></i>
-                    </span>
-
-                    <p>
-                        For your security, access to the system
-                        has been paused. Sign in again to continue.
-                    </p>
+                    <button type="button" class="ui-btn ui-btn-secondary w-full" data-session-sign-out-now>
+                        <span>Sign out now</span>
+                    </button>
                 </div>
-            </div>
 
-            <div class="session-timeout-actions">
-                <button type="button" class="modal-btn-primary session-timeout-button" data-session-timeout-primary>
-                    <span>Sign In Again</span>
-                    <i class="fa-solid fa-arrow-right"></i>
+                <button type="button" class="ui-btn ui-btn-primary" data-session-sign-in-again hidden>
+                    <span>Sign in again</span>
                 </button>
             </div>
         </div>
     </div>
+@elseif (\Illuminate\Support\Facades\Auth::check())
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
+        (() => {
+            const activityUrl = @json(route('session.activity'));
+            const csrfToken = @json(csrf_token());
+
+            window.setInterval(() => {
+                fetch(activityUrl, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': csrfToken,
+                    },
+                    cache: 'no-store',
+                }).catch(() => {});
+            }, 5 * 60 * 1000);
+        })();
+    </script>
 @endif
 
-<script type="application/json" id="flashToastPayload">
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}" type="application/json" id="flashToastPayload">
 {!! json_encode(
     $flashToasts,
     JSON_HEX_TAG |

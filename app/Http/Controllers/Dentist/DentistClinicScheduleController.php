@@ -7,22 +7,31 @@ use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\BlockedDate;
 use App\Models\ClinicSchedule;
+use App\Models\ReservedBookingPeriod;
+use App\Models\ServiceType;
+use App\Services\StudentTargetOptionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 
 class DentistClinicScheduleController extends Controller
 {
-    private const ALL_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-
-    public function index()
+    public function index(StudentTargetOptionService $studentTargetOptionService)
     {
-        $schedules = ClinicSchedule::active()->orderBy('id')->get();
+        $schedules = ClinicSchedule::query()->orderByDesc('is_active')->orderBy('id')->get();
         $blockedDates = BlockedDate::orderBy('date')->get();
+        $reservedBookingPeriods = ReservedBookingPeriod::query()
+            ->withScheduleColumns()
+            ->with(['creator:id,name', 'slots'])
+            ->orderBy('reserved_date')
+            ->orderBy('start_time')
+            ->get();
+        $studentTargetOptions = $studentTargetOptionService->get();
+        $serviceTypes = ServiceType::activeForBooking()->orderBy('name')->get(['name', 'description']);
 
         $startDate = Carbon::now()->startOfMonth()->subMonth();
         $endDate = Carbon::now()->endOfMonth()->addMonths(3);
 
-        $appointmentCountsPerDay = Appointment::whereBetween('appointment_date', [
+        $appointmentCountsPerDay = Appointment::withoutGlobalScope('clinical_patients')->whereBetween('appointment_date', [
             $startDate->toDateString(),
             $endDate->toDateString(),
         ])
@@ -32,11 +41,13 @@ class DentistClinicScheduleController extends Controller
             ->pluck('cnt', 'appointment_date')
             ->toArray();
 
-        $weeklyAppointments = Appointment::with('patient')
-            ->whereBetween('appointment_date', [
-                $startDate->toDateString(),
-                $endDate->toDateString(),
-            ])
+        $weeklyAppointments = Appointment::with([
+            'patient',
+            'serviceType',
+        ])->whereBetween('appointment_date', [
+            $startDate->toDateString(),
+            $endDate->toDateString(),
+        ])
             ->whereIn('status', ['upcoming', 'rescheduled'])
             ->orderBy('appointment_date')
             ->orderBy('appointment_time')
@@ -47,7 +58,7 @@ class DentistClinicScheduleController extends Controller
                     'appointment_date' => Carbon::parse($appointment->appointment_date)->toDateString(),
                     'appointment_time' => Carbon::parse($appointment->appointment_time)->format('H:i'),
                     'display_time' => Carbon::parse($appointment->appointment_time)->format('g:i A'),
-                    'service_type' => $appointment->service_type,
+                    'service_type' => $appointment->service_type_name,
                     'other_services' => $appointment->other_services,
                     'status' => $appointment->status,
                     'patient_name' => optional($appointment->patient)->name ?? 'Unknown Patient',
@@ -55,19 +66,22 @@ class DentistClinicScheduleController extends Controller
             })
             ->values();
 
-        $philippineHolidays = PhilippineHolidays::range(0, 1);
+        $philippineHolidays = PhilippineHolidays::recordsRange(0, 1);
         $notifications = [];
 
         return view('shared.clinic-schedule', [
             'schedules' => $schedules,
             'blockedDates' => $blockedDates,
+            'reservedBookingPeriods' => $reservedBookingPeriods,
+            'studentTargetOptions' => $studentTargetOptions,
+            'serviceTypes' => $serviceTypes,
             'appointmentCountsPerDay' => $appointmentCountsPerDay,
             'weeklyAppointments' => $weeklyAppointments,
             'philippineHolidays' => $philippineHolidays,
             'notifications' => $notifications,
 
             'layoutRole' => 'dentist',
-            'pageShellClass' => 'dentist-page-shell',
+            'pageShellClass' => 'app-page-shell',
             'isDentistView' => true,
 
             'clinicScheduleRouteNames' => [
@@ -76,6 +90,9 @@ class DentistClinicScheduleController extends Controller
                 'destroy' => 'dentist.dentist.clinic_schedule.destroy',
                 'block' => 'dentist.dentist.clinic_schedule.block',
                 'unblock' => 'dentist.dentist.clinic_schedule.unblock',
+                'reserved_store' => 'dentist.dentist.clinic_schedule.reserved_periods.store',
+                'reserved_update' => 'dentist.dentist.clinic_schedule.reserved_periods.update',
+                'reserved_destroy' => 'dentist.dentist.clinic_schedule.reserved_periods.destroy',
             ],
         ]);
     }
@@ -83,7 +100,11 @@ class DentistClinicScheduleController extends Controller
     public function store(Request $request)
     {
         $validated = $this->validateRule($request);
-        $this->ensureDaysAreAvailable($request, $validated['days']);
+        $this->ensureMaxSlotsFitSchedule($request, $validated);
+
+        if ((bool) $validated['is_active']) {
+            $this->ensureNoOverlappingActiveSchedule($request, $validated['days']);
+        }
 
         ClinicSchedule::create($this->prepareRule($validated));
 
@@ -93,7 +114,15 @@ class DentistClinicScheduleController extends Controller
     public function update(Request $request, ClinicSchedule $clinicSchedule)
     {
         $validated = $this->validateRule($request);
-        $this->ensureDaysAreAvailable($request, $validated['days'], $clinicSchedule->id);
+        $this->ensureMaxSlotsFitSchedule($request, $validated);
+
+        if ((bool) $validated['is_active']) {
+            $this->ensureNoOverlappingActiveSchedule(
+                $request,
+                $validated['days'],
+                $clinicSchedule->id
+            );
+        }
 
         $clinicSchedule->update($this->prepareRule($validated));
 
@@ -161,11 +190,16 @@ class DentistClinicScheduleController extends Controller
             }
         }
 
-        $philippineHolidays = PhilippineHolidays::range(0, 1);
+        $philippineHolidays = PhilippineHolidays::recordsRange(0, 1);
 
-        foreach ($philippineHolidays as $date => $name) {
-            if ($date >= $start->toDateString() && $date <= $end->toDateString()) {
-                $unavailable[] = $date;
+        foreach ($philippineHolidays as $date => $holiday) {
+            if (
+                $date >= $start->toDateString() &&
+                $date <= $end->toDateString() &&
+                ($holiday['is_blocked_for_booking'] ?? false)
+            ) {
+                $unavailable[] =
+                    $date;
             }
         }
 
@@ -189,12 +223,11 @@ class DentistClinicScheduleController extends Controller
             ]);
         }
 
-        $philippineHolidays = PhilippineHolidays::range(0, 1);
-
-        if (isset($philippineHolidays[$iso])) {
+        if (PhilippineHolidays::isBlockedForBooking($iso)) {
             return response()->json([
                 'slots' => [],
-                'message' => 'The clinic is closed on holidays.',
+                'message' =>
+                'The clinic is closed on this Philippine holiday.',
             ]);
         }
 
@@ -209,7 +242,7 @@ class DentistClinicScheduleController extends Controller
             ]);
         }
 
-        $bookedSlotCounts = Appointment::where('appointment_date', $iso)
+        $bookedSlotCounts = Appointment::withoutGlobalScope('clinical_patients')->where('appointment_date', $iso)
             ->whereIn('status', ['upcoming', 'rescheduled'])
             ->selectRaw('appointment_time, COUNT(*) as cnt')
             ->groupBy('appointment_time')
@@ -222,6 +255,10 @@ class DentistClinicScheduleController extends Controller
             return response()->json([
                 'slots' => [],
                 'message' => 'All slots for this day are fully booked.',
+                'max_slots' => $schedule->max_slots,
+                'booked' => $totalBooked,
+                'remaining' => 0,
+                'slot_duration_minutes' => $schedule->slot_duration_minutes ?: 60,
             ]);
         }
 
@@ -233,6 +270,7 @@ class DentistClinicScheduleController extends Controller
             'open_time' => $schedule->open_time,
             'close_time' => $schedule->close_time,
             'break_time' => $schedule->break_time,
+            'slot_duration_minutes' => $schedule->slot_duration_minutes ?: 60,
         ]);
     }
 
@@ -241,64 +279,77 @@ class DentistClinicScheduleController extends Controller
         return $request->validate([
             'days' => 'required|array|min:1',
             'days.*' => 'in:Mon,Tue,Wed,Thu,Fri,Sat,Sun',
+            'is_active' => 'required|boolean',
             'status' => 'required|in:open,closed,limited',
             'open_time' => 'required_unless:status,closed|nullable|date_format:H:i',
             'close_time' => 'required_unless:status,closed|nullable|date_format:H:i|after:open_time',
             'break_time' => 'nullable|string',
-            'max_slots' => 'required_unless:status,closed|nullable|integer|min:1|max:50',
+            'max_slots' => 'required_unless:status,closed|nullable|integer|min:1|max:30',
+            'slot_duration_minutes' => 'required_unless:status,closed|nullable|integer|min:5|max:240|multiple_of:5',
             'notes' => 'nullable|string|max:500',
+        ], [
+            'slot_duration_minutes.required_unless' => 'Set how long each appointment slot should last.',
+            'slot_duration_minutes.multiple_of' => 'Slot duration must use 5-minute increments.',
         ]);
     }
 
-    private function ensureDaysAreAvailable(Request $request, array $days, ?int $ignoreId = null): void
-    {
-        $conflictingDays = $this->findConflictingScheduleDays($days, $ignoreId);
+    private function ensureNoOverlappingActiveSchedule(
+        Request $request,
+        array $selectedDays,
+        ?int $ignoreId = null
+    ): void {
+        $query = ClinicSchedule::active();
 
-        if (empty($conflictingDays)) {
+        if ($ignoreId !== null) {
+            $query->where('id', '<>', $ignoreId);
+        }
+
+        $hasOverlappingSchedule = $query
+            ->get()
+            ->contains(function (ClinicSchedule $schedule) use ($selectedDays) {
+                return count(array_intersect($schedule->days ?? [], $selectedDays)) > 0;
+            });
+
+        if (! $hasOverlappingSchedule) {
             return;
         }
 
         $request->validate([
-            'days' => [
-                function ($attribute, $value, $fail) use ($conflictingDays) {
-                    $fail('A schedule already exists for ' . $this->formatDays($conflictingDays) . '. Edit the existing schedule instead of adding another rule for the same day.');
+            'is_active' => [
+                function ($attribute, $value, $fail) {
+                    $fail(
+                        'Another active clinic schedule already uses one or more selected days. '
+                            . 'Set the overlapping active schedule to Inactive before activating this schedule.'
+                    );
                 },
             ],
         ]);
     }
 
-    private function findConflictingScheduleDays(array $days, ?int $ignoreId = null): array
+    private function ensureMaxSlotsFitSchedule(Request $request, array $validated): void
     {
-        $query = ClinicSchedule::active();
-
-        if ($ignoreId !== null) {
-            $query->whereKeyNot($ignoreId);
+        if (($validated['status'] ?? null) === 'closed') {
+            return;
         }
 
-        $conflictingDays = [];
+        $possibleSlots = ClinicSchedule::possibleSlotCount(
+            $validated['open_time'],
+            $validated['close_time'],
+            $validated['break_time'] ?? null,
+            (int) ($validated['slot_duration_minutes'] ?? 60)
+        );
 
-        foreach ($query->get() as $schedule) {
-            $conflictingDays = array_merge(
-                $conflictingDays,
-                array_intersect($days, $schedule->days ?? [])
-            );
+        if ((int) ($validated['max_slots'] ?? 0) <= $possibleSlots) {
+            return;
         }
 
-        return $this->sortDays(array_values(array_unique($conflictingDays)));
-    }
-
-    private function sortDays(array $days): array
-    {
-        $order = array_flip(self::ALL_DAYS);
-
-        usort($days, fn($a, $b) => ($order[$a] ?? 99) <=> ($order[$b] ?? 99));
-
-        return $days;
-    }
-
-    private function formatDays(array $days): string
-    {
-        return implode(', ', $this->sortDays($days));
+        $request->validate([
+            'max_slots' => [
+                function ($attribute, $value, $fail) use ($possibleSlots) {
+                    $fail("Max appointments cannot exceed {$possibleSlots} for the selected hours, lunch break, and slot duration.");
+                },
+            ],
+        ]);
     }
 
     private function prepareRule(array $validated): array
@@ -319,8 +370,9 @@ class DentistClinicScheduleController extends Controller
             'close_time' => $validated['close_time'] ?? null,
             'break_time' => $validated['break_time'] ?? null,
             'max_slots' => $validated['max_slots'] ?? 0,
+            'slot_duration_minutes' => $validated['slot_duration_minutes'] ?? 60,
             'notes' => $validated['notes'] ?? null,
-            'is_active' => true,
+            'is_active' => (bool) $validated['is_active'],
         ];
     }
 }

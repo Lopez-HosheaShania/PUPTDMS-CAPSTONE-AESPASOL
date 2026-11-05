@@ -1,10 +1,10 @@
 .odontogram-preview {
     width: 100%;
     min-width: 0;
-
+    min-height: 22px;
+    padding: 2px 7px;
     border: 1px solid var(--border);
     border-radius: 18px;
-
     background: var(--card);
     overflow: hidden;
 }
@@ -12,64 +12,37 @@
 .odontogram-preview-head {
     padding: .75rem 1rem;
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
     gap: 1rem;
     border-bottom: 1px solid var(--border);
 }
 
+.odontogram-preview-head>div {
+    min-width: 0;
+}
+
 .odontogram-preview-subtitle {
-    margin: .2rem 0 0;
+    margin: 0;
     color: var(--text-2);
     font-size: .76rem;
     font-weight: 650;
-}
-
-.odontogram-preview-stage {
-    position: relative;
-    width: 100%;
-    min-width: 0;
-    height: 360px;
-    overflow: hidden;
-    background: var(--surface);
 }
 
 .odontogram-preview-canvas {
     width: 100%;
     height: 100%;
     min-height: 360px;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
 }
 
 .odontogram-preview-canvas canvas {
     width: 100% !important;
     height: 100% !important;
+    max-width: 100% !important;
     display: block;
-}
-
-.odontogram-preview-loading {
-    position: absolute;
-    inset: 0;
-    z-index: 3;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: .65rem;
-    background: var(--surface);
-    color: var(--text-2);
-    font-size: .78rem;
-    font-weight: 700;
-}
-
-.odontogram-preview-loading i {
-    color: var(--crimson);
-    font-size: 1.8rem;
-}
-
-.odontogram-preview-loading.is-hidden {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
 }
 
 .odontogram-preview-tooltip {
@@ -198,10 +171,15 @@
 }
 
 .odontogram-preview-marking-swatch {
+    display: inline-block;
+    flex: 0 0 9px;
     width: 9px;
     height: 9px;
+    min-width: 9px;
+    min-height: 9px;
     border-radius: 3px;
     border: 1px solid rgba(0, 0, 0, .12);
+    box-sizing: border-box;
 }
 
 .odontogram-preview-empty-marking {
@@ -331,6 +309,78 @@
     background: var(--card);
 }
 
+.odontogram-dentition-toggle {
+    position: absolute;
+
+    top: auto;
+    left: auto;
+
+    right: 10px;
+    bottom: 10px;
+
+    z-index: 10;
+
+    display: inline-flex;
+    align-items: center;
+
+    gap: 7px;
+
+    min-height: 34px;
+    max-width: calc(100% - 20px);
+
+    box-sizing: border-box;
+
+    padding: 5px 8px;
+
+    border: 1px solid var(--border);
+    border-radius: 9px;
+
+    background: var(--surface);
+    color: var(--text-2);
+
+    font: inherit;
+    font-size: .7rem;
+    line-height: 1;
+
+    cursor: pointer;
+    user-select: none;
+}
+
+.odontogram-dentition-toggle>span:not(.global-switch) {
+    white-space: nowrap;
+    font-weight: 600;
+}
+
+.odontogram-dentition-toggle[data-view="adult"] [data-dentition-label="adult"],
+.odontogram-dentition-toggle[data-view="baby"] [data-dentition-label="baby"] {
+    color: var(--text-1);
+    font-weight: 800;
+}
+
+.odontogram-preview-history-notice {
+    position: absolute;
+
+    top: 12px;
+    left: 12px;
+    right: 12px;
+
+    z-index: 12;
+
+    width: auto;
+    margin: 0;
+}
+
+.odontogram-preview-tall .odontogram-preview-stage,
+.odontogram-preview-tall .odontogram-preview-side-panel {
+
+    height: 430px;
+}
+
+.odontogram-preview-tall .odontogram-preview-canvas {
+
+    min-height: 430px;
+}
+
 @media (max-width: 900px) {
     .record-modal-wide {
         width: min(94vw, 760px);
@@ -356,5 +406,48 @@
 
     .odontogram-preview-panel-empty {
         min-height: 300px;
+    }
+
+    .odontogram-preview-tall .odontogram-preview-stage {
+
+        height: 420px;
+    }
+
+    .odontogram-preview-tall .odontogram-preview-canvas {
+
+        min-height: 420px;
+    }
+
+    .odontogram-preview-tall .odontogram-preview-side-panel {
+
+        height: auto;
+        min-height: 300px;
+    }
+}
+
+@media (max-width: 640px) {
+    .odontogram-preview-head {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+
+    .odontogram-dentition-toggle {
+        top: auto;
+        left: auto;
+
+        right: 8px;
+        bottom: 8px;
+
+        max-width: calc(100% - 16px);
+
+        gap: 6px;
+        padding: 4px 7px;
+
+        min-height: 32px;
+
+        font-size: .66rem;
     }
 }

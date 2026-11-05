@@ -9,6 +9,7 @@ use App\Models\BlockedDate;
 use App\Models\ClinicSchedule;
 use App\Models\SystemSetting;
 use App\Models\User;
+use App\Services\DentistDutyService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -23,24 +24,46 @@ class DentistDashboardController extends Controller
 
         $todayAppointments = Appointment::with('patient')
             ->whereDate('appointment_date', $today)
-            ->whereIn('status', ['upcoming', 'rescheduled', 'pending', 'confirmed'])
+            ->whereIn('status', [
+                'upcoming',
+                'rescheduled',
+                'pending',
+                'confirmed',
+                'completed',
+                'cancelled',
+            ])
             ->orderBy('appointment_time', 'asc')
             ->get();
 
-        $startOfMonth = $now->copy()->startOfMonth()->toDateString();
-        $endOfMonth = $now->copy()->endOfMonth()->toDateString();
+        $calendarEndDate =
+            Carbon::today()
+            ->addDays(90)
+            ->toDateString();
 
-        $calendarAppointments = Appointment::with('patient')
-            ->whereBetween('appointment_date', [$startOfMonth, $endOfMonth])
+        $calendarAppointments =
+            Appointment::with('patient')
+            ->whereDate(
+                'appointment_date',
+                '>=',
+                $today
+            )
+            ->whereDate(
+                'appointment_date',
+                '<=',
+                $calendarEndDate
+            )
             ->whereIn('status', [
-                'pending',
-                'confirmed',
                 'upcoming',
                 'rescheduled',
-                'completed',
             ])
-            ->orderBy('appointment_date', 'asc')
-            ->orderBy('appointment_time', 'asc')
+            ->orderBy(
+                'appointment_date',
+                'asc'
+            )
+            ->orderBy(
+                'appointment_time',
+                'asc'
+            )
             ->get();
 
         $appointmentCountsPerDay = $calendarAppointments
@@ -64,16 +87,18 @@ class DentistDashboardController extends Controller
                         ? Carbon::parse($appointment->appointment_time)->format('h:i A')
                         : '—';
 
-                    $service = $appointment->service_type === 'others'
+                    $serviceTypeName = $appointment->service_type_name;
+
+                    $service = $serviceTypeName === 'others'
                         ? ($appointment->other_services ?? 'Other Service')
-                        : ($appointment->service_type ?? 'General Service');
+                        : ($serviceTypeName ?? 'General Service');
 
                     return [
                         'id' => $appointment->id,
                         'name' => $name,
                         'time' => $time,
                         'service' => ucwords($service),
-                        'status' => $appointment->status ?? 'pending',
+                        'status' => $appointment->status ?? 'upcoming',
                         'date' => Carbon::parse($appointment->appointment_date)->format('Y-m-d'),
 
                         'patientProfileUrl' => $appointment->patient_id
@@ -89,21 +114,29 @@ class DentistDashboardController extends Controller
                             'dentist.dentist.appointments.cancel',
                             $appointment->id
                         ),
+                        'is_walk_in' =>
+                        (bool) ($appointment->is_walk_in ?? false),
+
+                        'is_follow_up' =>
+                        (bool) ($appointment->is_follow_up ?? false),
                     ];
                 })->values()->toArray();
             })
             ->toArray();
 
-        $dashboardAppointmentWindow = Appointment::with('patient')
+        $dashboardAppointmentWindow = Appointment::with([
+            'patient',
+            'reservedBookingPeriod',
+            'serviceType',
+        ])
+
             ->whereBetween('appointment_date', [
-                Carbon::today()->subDays(90)->toDateString(),
+                Carbon::today()->toDateString(),
                 Carbon::today()->addDays(90)->toDateString(),
             ])
             ->whereIn('status', [
                 'upcoming',
                 'rescheduled',
-                'completed',
-                'cancelled',
             ])
             ->orderBy('appointment_date', 'asc')
             ->orderBy('appointment_time', 'asc')
@@ -121,9 +154,11 @@ class DentistDashboardController extends Controller
                         ? Carbon::parse($appointment->appointment_time)->format('h:i A')
                         : '—';
 
-                    $service = $appointment->service_type === 'others'
+                    $serviceTypeName = $appointment->service_type_name;
+
+                    $service = $serviceTypeName === 'others'
                         ? ($appointment->other_services ?? 'Other Service')
-                        : ($appointment->service_type ?? 'General Service');
+                        : ($serviceTypeName ?? 'General Service');
 
                     return [
                         'id' => $appointment->id,
@@ -132,6 +167,17 @@ class DentistDashboardController extends Controller
                         'service' => ucwords($service),
                         'status' => $appointment->status ?? 'upcoming',
                         'date' => Carbon::parse($appointment->appointment_date)->format('Y-m-d'),
+                        'is_walk_in' => (bool) ($appointment->is_walk_in ?? false),
+                        'is_follow_up' => (bool) ($appointment->is_follow_up ?? false),
+                        'is_reserved' => filled($appointment->reserved_booking_period_id),
+                        'reserved_title' => $appointment->reservedBookingPeriod?->title,
+
+                        'patientPhotoUrl' =>
+                        optional($appointment->patient)->profile_photo_url
+                            ?? optional($appointment->patient)->profile_picture_url
+                            ?? optional($appointment->patient)->avatar_url
+                            ?? optional($appointment->patient)->photo_url
+                            ?? '',
 
                         'patientProfileUrl' => $appointment->patient_id
                             ? route('dentist.dentist.patient.profile', $appointment->patient_id)
@@ -222,16 +268,11 @@ class DentistDashboardController extends Controller
             ->limit(3)
             ->get();
 
-        $gadRaw = DB::table('daily_treatment_records')
-            ->whereYear('treatment_date', $now->year)
-            ->whereMonth('treatment_date', $now->month)
-            ->select(
-                'office_type',
-                'gender',
-                DB::raw('COUNT(*) as total')
-            )
-            ->groupBy('office_type', 'gender')
-            ->get();
+        $gadRaw = app(\App\Services\AppointmentReportRecords::class)
+            ->between($now->copy()->startOfMonth(), $now->copy()->endOfMonth())
+            ->groupBy(fn ($row) => json_encode([$row->office_type, $row->gender]))
+            ->map(fn ($rows) => (object) ['office_type' => $rows->first()->office_type,
+                'gender' => $rows->first()->gender, 'total' => $rows->count()])->values();
 
         $gadLabels = [
             'Student',
@@ -244,17 +285,13 @@ class DentistDashboardController extends Controller
         $gadMale = [];
 
         foreach ($gadLabels as $label) {
-            $key = $label === 'Student'
-                ? null
-                : $label;
-
             $gadFemale[] = (int) $gadRaw
-                ->where('office_type', $key)
+                ->filter(fn($row) => $this->normalizeDashboardOfficeType($row->office_type) === strtolower($label))
                 ->where('gender', 'Female')
                 ->sum('total');
 
             $gadMale[] = (int) $gadRaw
-                ->where('office_type', $key)
+                ->filter(fn($row) => $this->normalizeDashboardOfficeType($row->office_type) === strtolower($label))
                 ->where('gender', 'Male')
                 ->sum('total');
         }
@@ -266,7 +303,7 @@ class DentistDashboardController extends Controller
             )
             ->toArray();
 
-        $philippineHolidays = PhilippineHolidays::range(
+        $philippineHolidays = PhilippineHolidays::recordsRange(
             yearsBefore: 1,
             yearsAfter: 5
         );
@@ -283,12 +320,7 @@ class DentistDashboardController extends Controller
             })
             ->toArray();
 
-        $clinicStatus = strtolower(
-            (string) SystemSetting::getSetting(
-                'clinic_status',
-                'in'
-            )
-        );
+        $clinicStatus = app(DentistDutyService::class)->currentStatusFor(auth()->user());
 
         $notifications = collect([]);
 
@@ -323,7 +355,8 @@ class DentistDashboardController extends Controller
             'status' => ['required', 'in:in,out'],
         ]);
 
-        $oldStatus = SystemSetting::getSetting('clinic_status', 'in');
+        $dutyService = app(DentistDutyService::class);
+        $oldStatus = $dutyService->currentStatusFor($request->user());
         $newStatus = strtolower($request->status);
 
         SystemSetting::setSetting(
@@ -348,12 +381,26 @@ class DentistDashboardController extends Controller
             );
         }
 
+        if ($newStatus === 'out') {
+            $summary = $dutyService->clockOut($request->user(), Carbon::now(), false);
+        } else {
+            $dutyService->clockIn($request->user(), Carbon::now());
+            $summary = [
+                'appointments_cancelled' => 0,
+                'cancelled_appointment_ids' => [],
+                'notifications_created' => 0,
+            ];
+        }
+
         return response()->json([
             'success' => true,
             'status' => $newStatus,
             'message' => $newStatus === 'out'
                 ? 'Clinic marked as closed.'
                 : 'Clinic marked as open.',
+            'appointments_cancelled' => $summary['appointments_cancelled'],
+            'cancelled_appointment_ids' => $summary['cancelled_appointment_ids'],
+            'notifications_created' => $summary['notifications_created'],
         ]);
     }
 
@@ -372,5 +419,39 @@ class DentistDashboardController extends Controller
         }
 
         return User::where('patient_id', $patient->id)->first();
+    }
+
+    private function normalizeDashboardOfficeType(?string $officeType): string
+    {
+        $officeType = strtolower(trim((string) $officeType));
+
+        if (
+            $officeType === '' ||
+            str_contains($officeType, 'student')
+        ) {
+            return 'student';
+        }
+
+        if (str_contains($officeType, 'faculty')) {
+            return 'faculty';
+        }
+
+        if (
+            str_contains($officeType, 'admin') ||
+            str_contains($officeType, 'administrative') ||
+            str_contains($officeType, 'personnel')
+        ) {
+            return 'administrative';
+        }
+
+        if (
+            str_contains($officeType, 'dependent') ||
+            str_contains($officeType, 'alumni') ||
+            str_contains($officeType, 'guest')
+        ) {
+            return 'dependent';
+        }
+
+        return 'student';
     }
 }

@@ -9,7 +9,7 @@ class DeactivateExpiredDentistsCommand extends Command
 {
     protected $signature = 'dentists:deactivate-expired';
 
-    protected $description = 'Deactivate dentist accounts whose approved access expiration has already passed.';
+    protected $description = 'Apply approved dentist continuity plans, end temporary coverage, and deactivate expired legacy accounts.';
 
     public function handle(DentistTransitionService $service): int
     {

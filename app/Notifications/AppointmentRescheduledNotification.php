@@ -37,6 +37,7 @@ class AppointmentRescheduledNotification extends Notification
             'appointment_id' => $this->appointment->id,
             'patient_id' => $this->appointment->patient_id,
             'event' => 'appointment.rescheduled',
+            'recipient_role' => optional($notifiable->role)->slug,
         ];
     }
 
@@ -57,6 +58,7 @@ class AppointmentRescheduledNotification extends Notification
             'event' => 'appointment.rescheduled',
             'created_at_label' => 'Just now',
             'state' => 'unread',
+            'recipient_role' => optional($notifiable->role)->slug,
         ]);
     }
 

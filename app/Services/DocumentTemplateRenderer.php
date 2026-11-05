@@ -4,9 +4,11 @@ namespace App\Services;
 
 use App\Models\DocumentTemplate;
 use App\Models\DocumentTemplateField;
-use App\Models\DailyTreatmentRecord;
-use App\Models\DentalServiceRecord;
 use App\Models\Inventory;
+use App\Models\Appointment;
+use App\Models\DocumentRequest;
+use App\Models\User;
+use App\Support\DentistName;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -27,14 +29,27 @@ class DocumentTemplateRenderer
             ->get()
             ->keyBy('field_key');
 
-        return preg_replace_callback('/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/', function (array $matches) use ($fields, $context) {
-            $fieldKey = $matches[1];
+        $replacementCount = 0;
+        return preg_replace_callback('/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/', function (array $matches) use ($fields, $context, $content) {
+            $fieldKey = $matches[1][0];
             $field = $fields->get($fieldKey);
 
             $value = $this->resolveValue($fieldKey, $field, $context);
 
+            if (in_array($fieldKey, ['dentist_name', 'submitted_by', 'noted_by'], true)) {
+                $offset = $matches[0][1];
+                $before = html_entity_decode(strip_tags(substr($content, max(0, $offset - 512), min(512, $offset))), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                $after = html_entity_decode(strip_tags(substr($content, $offset + strlen($matches[0][0]), 512)), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                $hasPrefix = preg_match('/(?:^|[^\p{L}])Dr\.?\s*$/iu', $before) === 1;
+                $hasSuffix = preg_match('/^\s*,?\s*(?:D\.?\s*M\.?\s*D\.?|M\.?\s*D\.?)(?!\p{L})/iu', $after) === 1;
+                $value = implode('; ', array_map(
+                    fn (string $name) => ReportSignatory::dentistNameForReport($name, ! $hasPrefix, ! $hasSuffix),
+                    explode('; ', (string) $value),
+                ));
+            }
+
             return e((string) $value);
-        }, $content) ?? $content;
+        }, $content, -1, $replacementCount, PREG_OFFSET_CAPTURE) ?? $content;
     }
 
     public function renderForPreview(DocumentTemplate $template): string
@@ -44,6 +59,38 @@ class DocumentTemplateRenderer
 
     private function buildTemplateContext(DocumentTemplate $template, array $context): array
     {
+        $actor = auth()->user();
+        $signatories = app(ReportSignatory::class);
+        $preparer = $signatories->currentPreparerProfile();
+        $profile = match (true) {
+            ($context['document_request'] ?? null) instanceof DocumentRequest => $signatories->documentProfile($context['document_request']),
+            ($context['appointment'] ?? null) instanceof Appointment => $signatories->profileForDentist(DentistName::clinicianForAppointment($context['appointment'])),
+            ($context['dentist'] ?? null) instanceof User => $signatories->profileForDentist($context['dentist']),
+            default => $signatories->currentProfile(),
+        };
+        $dentistName = match (true) {
+            ($context['document_request'] ?? null) instanceof DocumentRequest => DentistName::forDocumentRequest($context['document_request']),
+            ($context['appointment'] ?? null) instanceof Appointment => DentistName::forAppointment($context['appointment']),
+            ($context['dentist'] ?? null) instanceof User => DentistName::forUser($context['dentist']),
+            default => $this->reportDentists($template, $context),
+        };
+        $dentistName = $profile?->name ?? $dentistName;
+        $dentistName = implode('; ', array_map([ReportSignatory::class, 'dentistNameForReport'], explode('; ', $dentistName)));
+        $signature = $profile?->signatureDataUri() ?? '';
+        $context = array_merge([
+            'dentist_name' => $dentistName,
+            'submitted_by' => $dentistName,
+            'noted_by' => $dentistName,
+            'prepared_by' => $preparer?->name ?? DentistName::forUser($actor),
+            'prepared_by_role' => $preparer ? ReportSignatory::preparerLabel($preparer->user) : ($actor?->display_role_name ?? ''),
+            'dentist_signature' => $signature,
+            'submitted_by_signature' => $signature,
+            'noted_by_signature' => $signature,
+            'prepared_by_signature' => $preparer?->signatureDataUri() ?? '',
+            'lic_no' => $profile?->license_number ?? '',
+            'dentist_license_no' => $profile?->license_number ?? '',
+        ], $context);
+
         if ($template->document_type === 'dental_cases') {
             return array_merge($this->buildDentalCasesContext(), $context);
         }
@@ -71,18 +118,40 @@ class DocumentTemplateRenderer
         return $context;
     }
 
+    private function reportDentists(DocumentTemplate $template, array $context): string
+    {
+        if (isset($context['records']) && is_iterable($context['records'])) {
+            return implode('; ', DentistName::forRecords($context['records']));
+        }
+
+        if (! in_array($template->document_type, ['dental_cases', 'gad_report', 'daily_treatment_record', 'dental_services'], true)) {
+            return '';
+        }
+
+        [$from, $to] = $template->document_type === 'gad_report'
+            ? $this->resolveGadReportRange($context)
+            : [now()->startOfMonth(), now()->endOfMonth()];
+        $records = app(AppointmentReportRecords::class)->between($from, $to);
+        $records = match ($template->document_type) {
+            'daily_treatment_record' => $records->take(12),
+            'dental_services' => $records->take(15),
+            default => $records,
+        };
+
+        return implode('; ', DentistName::forRecords($records));
+    }
+
     private function buildDentalCasesContext(): array
     {
         $currentMonth = now();
         $clinicName = setting('clinic_name', 'Taguig Dental Clinic');
 
-        $records = DailyTreatmentRecord::query()
-            ->whereYear('treatment_date', $currentMonth->year)
-            ->whereMonth('treatment_date', $currentMonth->month)
-            ->select('office_type', 'treatment_done', DB::raw('COUNT(*) as total'))
-            ->groupBy('office_type', 'treatment_done')
-            ->orderByDesc('total')
-            ->get();
+        $records = app(AppointmentReportRecords::class)->between($currentMonth->copy()->startOfMonth(), $currentMonth->copy()->endOfMonth())
+            ->filter(fn ($row) => filled($row->diagnosis))
+            ->groupBy(fn ($row) => json_encode([$row->office_type, $row->diagnosis]))
+            ->map(fn ($rows) => (object) ['office_type' => $rows->first()->office_type,
+                'diagnosis' => $rows->first()->diagnosis, 'total' => $rows->sum('dental_case_teeth_count')])
+            ->sortByDesc('total')->values();
 
         $groups = [
             'students' => [
@@ -114,7 +183,7 @@ class DocumentTemplateRenderer
                 $row = $groupRows->get($i);
                 $slot = $i + 1;
 
-                $group['diagnosis'][$slot] = $row?->treatment_done ?? '—';
+                $group['diagnosis'][$slot] = $row?->diagnosis ?? '—';
                 $group['cases'][$slot] = $row ? (string) $row->total : '—';
             }
         }
@@ -156,9 +225,7 @@ class DocumentTemplateRenderer
         $monthYear = $this->formatGadReportPeriod($from, $to);
         $campusName = strtoupper(setting('clinic_name', 'Taguig Dental Clinic'));
 
-        $records = DentalServiceRecord::query()
-            ->whereBetween('time_in', [$from, $to])
-            ->get();
+        $records = app(AppointmentReportRecords::class)->between($from, $to);
 
         $departmentLabels = [
             'students' => ['student'],
@@ -268,12 +335,12 @@ class DocumentTemplateRenderer
             'total_administrative' => $this->formatGadCount($headers['administrative'] ?? 0),
             'total_dependent' => $this->formatGadCount($headers['dependent'] ?? 0),
             'grand_total' => $this->formatGadCount($grandTotal),
-            'prepared_by_signature' => asset('images/sir.lim-sign.png'),
-            'prepared_by' => 'Ronilo I. Lim',
+            'prepared_by_signature' => '',
+            'prepared_by' => '',
             'prepared_by_role' => 'Dental Aide',
-            'submitted_by_signature' => asset('images/dr.angeles-sign.png'),
-            'submitted_by' => 'Nelson P. Angeles, DMD',
-            'submitted_by_role' => 'Dentist II',
+            'submitted_by_signature' => '',
+            'submitted_by' => '',
+            'submitted_by_role' => 'Dentist',
         ];
     }
 
@@ -397,25 +464,18 @@ class DocumentTemplateRenderer
         $currentMonth = now();
         $clinicName = setting('clinic_name', 'Taguig Dental Clinic');
 
-        $records = DailyTreatmentRecord::query()
-            ->whereYear('treatment_date', $currentMonth->year)
-            ->whereMonth('treatment_date', $currentMonth->month)
-            ->orderByDesc('treatment_date')
-            ->orderByDesc('id')
-            ->take(12)
-            ->get()
-            ->values();
+        $records = app(AppointmentReportRecords::class)->between($currentMonth->copy()->startOfMonth(), $currentMonth->copy()->endOfMonth())->take(12)->values();
 
         $context = [
             'pup_logo' => asset('images/PUP.png'),
             'bagong_pilipinas_logo' => asset('images/bagong-pilipinas.png'),
             'report_month_year' => strtoupper($currentMonth->format('F Y')),
             'clinic_name' => strtoupper($clinicName),
-            'prepared_by_signature' => asset('images/sir.lim-sign.png'),
-            'prepared_by' => 'Ronilo I. Lim',
+            'prepared_by_signature' => '',
+            'prepared_by' => '',
             'prepared_by_role' => 'Dental Aide',
-            'noted_by_signature' => asset('images/dr.angeles-sign.png'),
-            'noted_by' => 'Nelson P. Angeles, DMD',
+            'noted_by_signature' => '',
+            'noted_by' => '',
             'noted_by_role' => 'Dentist',
         ];
 
@@ -429,13 +489,13 @@ class DocumentTemplateRenderer
 
             $officeOrProgram = $record?->office_type ?: ($record?->program_code ?: '—');
 
-            $context['row_' . $i . '_date'] = $record?->treatment_date?->format('m/d/y') ?? '—';
+            $context['row_' . $i . '_date'] = $record?->time_in?->format('m/d/y g:i A') ?? '—';
             $context['row_' . $i . '_patient_name'] = $record?->patient_name ?? '—';
             $context['row_' . $i . '_contact'] = $contact !== '' ? $contact : '—';
             $context['row_' . $i . '_office'] = $officeOrProgram;
             $context['row_' . $i . '_gender'] = $record?->gender ?? '—';
             $context['row_' . $i . '_treatment'] = $record?->treatment_done ?? '—';
-            $context['row_' . $i . '_processed'] = $record?->updated_at?->format('m/d/y g:i A') ?? '—';
+            $context['row_' . $i . '_processed'] = $record?->time_out?->format('m/d/y g:i A') ?? '—';
             $context['row_' . $i . '_minutes'] = $record ? (string) $record->minutes_processed : '—';
             $context['row_' . $i . '_signature'] = $record?->has_signature ? '✓' : '—';
         }
@@ -447,14 +507,7 @@ class DocumentTemplateRenderer
     {
         $currentMonth = now();
 
-        $records = DentalServiceRecord::query()
-            ->whereYear('time_in', $currentMonth->year)
-            ->whereMonth('time_in', $currentMonth->month)
-            ->orderByDesc('time_in')
-            ->orderByDesc('id')
-            ->take(15)
-            ->get()
-            ->values();
+        $records = app(AppointmentReportRecords::class)->between($currentMonth->copy()->startOfMonth(), $currentMonth->copy()->endOfMonth())->take(15)->values();
 
         $context = [
             'pup_logo' => asset('images/PUP.png'),
@@ -467,14 +520,7 @@ class DocumentTemplateRenderer
         for ($i = 1; $i <= 15; $i++) {
             $record = $records->get($i - 1);
 
-            $middleInitial = '';
-            if ($record?->patient_middle_name && trim((string) $record->patient_middle_name) !== '') {
-                $middleInitial = strtoupper(substr((string) $record->patient_middle_name, 0, 1)) . '.';
-            }
-
-            $name = $record
-                ? trim(($record->patient_last_name ?? '') . ', ' . ($record->patient_first_name ?? '') . ' ' . $middleInitial)
-                : '—';
+            $name = $record?->dental_services_patient_name ?? '—';
 
             $courseSectionDepartment = '—';
             if ($record) {
@@ -494,12 +540,12 @@ class DocumentTemplateRenderer
             }
 
             $processingTime = '—';
-            if ($record?->time_in && $record?->time_out) {
-                $processingTime = (string) $record->time_in->diffInMinutes($record->time_out);
+            if ($record?->dental_services_minutes_processed !== null) {
+                $processingTime = (string) $record->dental_services_minutes_processed;
             }
 
             $context['date_' . $i] = $record?->time_in?->format('m/d/y') ?? '—';
-            $context['time_in_' . $i] = $record?->time_in?->format('h:i A') ?? '—';
+            $context['time_in_' . $i] = $record?->dental_services_time_in?->format('h:i A') ?? '—';
             $context['patient_name_' . $i] = $name;
             $context['course_section_department_' . $i] = $courseSectionDepartment;
             $context['age_' . $i] = $record?->age !== null ? (string) $record->age : '—';
@@ -509,10 +555,12 @@ class DocumentTemplateRenderer
             $context['pwd_' . $i] = $record?->is_pwd ? '✓' : '—';
             $context['email_address_' . $i] = $record?->email ?? '—';
             $context['contact_number_' . $i] = $record?->contact ?? '—';
-            $context['time_processed_' . $i] = $record?->time_out?->format('h:i A') ?? '—';
+            $context['time_processed_' . $i] = $record?->dental_services_time_processed?->format('h:i A') ?? '—';
             $context['processing_time_' . $i] = $processingTime;
-            $context['emergency_case_' . $i] = ($record?->visit_type === 'Emergency') ? '✓' : '—';
-            $context['non_emergency_case_' . $i] = ($record?->visit_type === 'Non-Emergency') ? '✓' : '—';
+            $isEmergency = (bool) ($record?->is_emergency ?? false);
+
+            $context['emergency_case_' . $i] = $isEmergency ? '✓' : '—';
+            $context['non_emergency_case_' . $i] = $isEmergency ? '—' : '✓';
             $context['signature_' . $i] = $record?->has_signature ? '✓' : '—';
         }
 
@@ -521,6 +569,14 @@ class DocumentTemplateRenderer
 
     private function resolveValue(string $fieldKey, ?DocumentTemplateField $field, array $context): mixed
     {
+        if (array_key_exists($fieldKey, $context) && in_array($fieldKey, [
+            'dentist_name', 'submitted_by', 'noted_by', 'prepared_by', 'prepared_by_role',
+            'dentist_signature', 'submitted_by_signature', 'noted_by_signature', 'prepared_by_signature',
+            'lic_no', 'dentist_license_no',
+        ], true)) {
+            return $context[$fieldKey];
+        }
+
         if (array_key_exists($fieldKey, $context) && $context[$fieldKey] !== null && $context[$fieldKey] !== '') {
             return $context[$fieldKey];
         }

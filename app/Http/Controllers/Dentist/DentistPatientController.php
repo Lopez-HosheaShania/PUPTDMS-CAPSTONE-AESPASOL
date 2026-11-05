@@ -4,23 +4,39 @@ namespace App\Http\Controllers\Dentist;
 
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
+use App\Models\OdontogramRevision;
 use App\Models\Patient;
+use App\Models\ReservedBookingPeriod;
+use App\Services\DentistDutyService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Helpers\PhilippineHolidays;
 use App\Helpers\AuditLogger;
+use Illuminate\Support\Facades\Auth;
 
 class DentistPatientController extends Controller
 {
+    private function syncDutyEndAppointments(): void
+    {
+        $dentist = Auth::user();
+
+        if ($dentist) {
+            app(DentistDutyService::class)->syncOutDentistAppointments($dentist);
+        }
+    }
+
     public function index()
     {
         $activeRole = session('impersonated_role') ?: session('role');
 
-        if ($activeRole !== 'dentist') {
+        if (!optional(Auth::user())->canAccessClinicalArea($activeRole)) {
             return redirect('/login');
         }
 
+        $this->syncDutyEndAppointments();
         $today = Carbon::today()->toDateString();
+
+        Appointment::cancelElapsedScheduledAppointments();
 
         $appointments = Appointment::with('patient')
             ->whereHas('patient')
@@ -84,7 +100,7 @@ class DentistPatientController extends Controller
         return view('shared.patient-list', [
             'layoutRole' => 'dentist',
             'pageTitle' => 'Patient Directory',
-            'pageShellClass' => 'admin-page-shell dentist-page-shell',
+            'pageShellClass' => 'app-page-shell app-page-shell',
             'isDentistView' => true,
             'patientProfileRouteName' => 'dentist.dentist.patient.profile',
 
@@ -103,11 +119,17 @@ class DentistPatientController extends Controller
 
     public function profile(Patient $patient)
     {
+        if (Auth::user()?->hasAnyRole(['admin', 'super_admin'])) {
+            return app(\App\Http\Controllers\Admin\AdminPatientController::class)->show($patient, 'dentist');
+        }
+
         $activeRole = session('impersonated_role') ?: session('role');
 
-        if ($activeRole !== 'dentist') {
+        if (!optional(Auth::user())->canAccessClinicalArea($activeRole)) {
             return redirect('/login');
         }
+
+        $this->syncDutyEndAppointments();
 
         $patient->loadMissing([
             'user',
@@ -122,7 +144,14 @@ class DentistPatientController extends Controller
 
         $today = Carbon::today()->toDateString();
 
-        $futureVisits = Appointment::with(['procedure', 'followUpAppointments', 'dentist'])
+        Appointment::cancelElapsedScheduledAppointments();
+
+        $futureVisits = Appointment::with([
+            'procedure',
+            'followUpAppointments',
+            'dentist',
+            'reservedBookingPeriod',
+        ])
             ->where('patient_id', $patient->id)
             ->whereDate('appointment_date', '>=', $today)
             ->whereIn('status', ['upcoming', 'rescheduled'])
@@ -130,21 +159,58 @@ class DentistPatientController extends Controller
             ->orderBy('appointment_time', 'asc')
             ->get();
 
-        $pastVisits = Appointment::with(['procedure', 'followUpAppointments', 'dentist'])
+        $pastVisits = Appointment::with([
+            'procedure',
+            'followUpAppointments',
+            'dentist',
+            'reservedBookingPeriod',
+        ])
             ->where('patient_id', $patient->id)
-            ->where(function ($query) use ($today) {
-                $query->whereDate('appointment_date', '<', $today)
-                    ->orWhereIn('status', ['completed', 'cancelled']);
-            })
+            ->whereIn('status', [
+                'completed',
+                'cancelled',
+            ])
             ->orderBy('appointment_date', 'desc')
             ->orderBy('appointment_time', 'desc')
             ->get();
 
-        $totalVisits = $pastVisits->count();
-        $lastVisit = $pastVisits->first();
+        $revisionHistoryByAppointment =
+            OdontogramRevision::query()
+            ->with(['changedBy:id,name', 'reasonType:id,code,label',])
+            ->whereIn(
+                'appointment_id',
+                $pastVisits->pluck('id')
+            )
+            ->orderByDesc('version_number')
+            ->get()
+            ->groupBy('appointment_id');
+
+        $pastVisits->each(
+            function ($visit) use (
+                $revisionHistoryByAppointment
+            ) {
+                $visit->setRelation(
+                    'odontogramRevisions',
+                    $revisionHistoryByAppointment
+                        ->get(
+                            $visit->id,
+                            collect()
+                        )
+                );
+            }
+        );
+
+        $completedVisits = $pastVisits
+            ->where('status', 'completed')
+            ->values();
+
+        $totalVisits = $completedVisits->count();
+
+        $lastVisit = $completedVisits->first();
+
         $nextAppointment = $futureVisits->first();
 
-        $philippineHolidays = PhilippineHolidays::range(1, 1);
+        $philippineHolidays = PhilippineHolidays::recordsRange(1, 1);
 
         $appointmentCountsPerDay = Appointment::where('patient_id', $patient->id)
             ->whereIn('status', ['upcoming', 'rescheduled'])

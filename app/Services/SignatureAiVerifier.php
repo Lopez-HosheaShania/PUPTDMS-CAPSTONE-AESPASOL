@@ -18,8 +18,8 @@ class SignatureAiVerifier
     public function verify(UploadedFile $file): array
     {
         if (!$this->aiServiceManager->shouldUse('signature')) {
-            return $this->manualReviewResult(
-                'AI signature verification is currently unavailable. Signature accepted for manual review.'
+            return $this->unavailableResult(
+                'AI signature verification is currently unavailable. Please draw your signature instead.'
             );
         }
 
@@ -34,7 +34,7 @@ class SignatureAiVerifier
         $threshold = (float) config('services.signature_ai.threshold', 0.75);
 
         if (empty($apiKey)) {
-            return $this->manualReviewResult(
+            return $this->unavailableResult(
                 'OpenAI API key is not configured.'
             );
         }
@@ -214,8 +214,8 @@ PROMPT;
                     'status' => $response->status(),
                 ]);
 
-                return $this->manualReviewResult(
-                    'AI verification failed. Signature accepted for manual review.'
+                return $this->unavailableResult(
+                    'AI verification failed. Please draw your signature instead.'
                 );
             }
 
@@ -355,8 +355,8 @@ PROMPT;
                 'message' => $e->getMessage(),
             ]);
 
-            return $this->manualReviewResult(
-                'Unable to verify signature image. Signature accepted for manual review.'
+            return $this->unavailableResult(
+                'Unable to verify signature image. Please draw your signature instead.'
             );
         }
     }
@@ -463,6 +463,7 @@ PROMPT;
         }
 
         $allowedTypes = [
+            'verification_unavailable',
             'signature',
             'handwritten_signature',
             'cursive_signature',
@@ -532,21 +533,10 @@ PROMPT;
         ];
     }
 
-    private function manualReviewResult(string $reason): array
+    private function unavailableResult(string $reason): array
     {
         $this->aiServiceManager->recordFallback('signature', $reason);
 
-        return [
-            'accepted' => true,
-            'valid' => true,
-            'is_signature' => true,
-            'ai_is_signature' => false,
-            'confidence' => 0.0,
-            'detected_type' => 'manual_review_required',
-            'reason' => $reason,
-            'message' => 'Signature accepted for manual review.',
-            'review_required' => true,
-            'review_status' => 'pending_manual_review',
-        ];
+        return $this->failResult('verification_unavailable', $reason);
     }
 }

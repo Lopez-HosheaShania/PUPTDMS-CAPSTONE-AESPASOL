@@ -1,3 +1,172 @@
+#mainContent .report-hero-actions:has([data-open-modal="reportSignatoryModal"]) {
+    max-width: 100%;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 767px) {
+    #mainContent.dentist-report-page .report-hero-actions:has([data-open-modal="reportSignatoryModal"]) {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    #mainContent.dentist-report-page .report-hero-actions [data-open-modal="reportSignatoryModal"] {
+        order: 1;
+    }
+}
+
+#reportSignatoryModal .modal-ft {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+}
+
+#reportSignatoryModal .modal-ft>button {
+    flex: 0 1 9rem;
+    width: 9rem;
+    min-width: 0;
+    height: 46px;
+    min-height: 46px;
+    padding: 0 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .82rem;
+    line-height: 1;
+}
+
+#reportSignatoryModal .report-signature-upload {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .85rem;
+    padding: 1.1rem;
+    border: 1.5px dashed var(--border);
+    border-radius: 14px;
+    background: var(--surface);
+    transition: border-color .18s ease, background .18s ease;
+}
+
+#reportSignatoryModal .report-signature-upload:hover,
+#reportSignatoryModal .report-signature-upload:focus-within {
+    border-color: var(--crimson);
+    background: var(--crimson-light);
+}
+
+#reportSignatoryModal .report-signature-upload:focus-within {
+    outline: 2px solid var(--crimson);
+    outline-offset: 3px;
+}
+
+#reportSignatoryModal .report-signature-upload input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+#reportSignatoryModal .report-signature-upload-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: var(--card);
+    color: var(--crimson);
+    border: 1px solid var(--border);
+}
+
+#reportSignatoryModal .report-signature-upload-copy {
+    display: grid;
+    flex: 1 1 160px;
+    gap: .25rem;
+}
+
+#reportSignatoryModal .report-signature-upload-copy strong {
+    color: var(--text-1);
+    font-size: .85rem;
+    font-weight: 750;
+}
+
+#reportSignatoryModal .report-signature-upload-copy>span {
+    color: var(--text-3);
+    font-size: .75rem;
+    line-height: 1.5;
+}
+
+#reportSignatoryModal .report-signature-upload-action {
+    padding: .5rem .7rem;
+    border: 1px solid var(--crimson-mid);
+    border-radius: 8px;
+    color: var(--crimson);
+    background: var(--card);
+    font-size: .75rem;
+    font-weight: 750;
+}
+
+#reportSignatoryModal .report-signature-file-status {
+    margin: .65rem 0 .25rem;
+    color: var(--text-2);
+    font-size: .75rem;
+    overflow-wrap: anywhere;
+}
+
+#reportSignatoryModal .report-signature-error {
+    margin-top: .5rem;
+    color: var(--danger, #dc2626);
+    font-size: .75rem;
+}
+
+#reportSignatoryModal .report-signature-preview {
+    padding: .85rem;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--surface);
+}
+
+#reportSignatoryModal .report-signature-preview-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    margin-bottom: .65rem;
+    color: var(--text-2);
+    font-size: .75rem;
+    font-weight: 700;
+}
+
+#reportSignatoryModal .report-signature-preview-heading button {
+    color: var(--crimson);
+    font: inherit;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+}
+
+#reportSignatoryModal .report-signature-preview-image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 90px;
+    padding: .75rem;
+    border-radius: 8px;
+    background: #fff;
+}
+
+#reportSignatoryModal .report-signature-preview-image img {
+    max-width: 100%;
+    max-height: 100px;
+    object-fit: contain;
+}
+
+#reportSignatoryModal [hidden] {
+    display: none;
+}
+
 .section-label {
     display: flex;
     align-items: center;
@@ -11,7 +180,7 @@
 }
 
 .section-label i {
-    color: var(--brand-red, #8B0000) !important;
+    color: var(--crimson-1, #8B0000);
 }
 
 .section-label::before {
@@ -20,7 +189,7 @@
     width: 3px;
     height: 14px;
     border-radius: 999px;
-    background: linear-gradient(180deg, var(--brand-red, #8B0000), var(--crimson-dark, #6b0000));
+    background: linear-gradient(180deg, var(--crimson-1, #8B0000), var(--crimson-1-dark, #6b0000));
 }
 
 hr.section-divider {
@@ -31,17 +200,17 @@ hr.section-divider {
 
 [data-theme="dark"] .section-label,
 .dark .section-label {
-    color: var(--text-muted, #8B949E) !important;
+    color: var(--text-muted, #8B949E);
 }
 
 [data-theme="dark"] .section-label i,
 .dark .section-label i {
-    color: #FCA5A5 !important;
+    color: #FCA5A5;
 }
 
 [data-theme="dark"] hr.section-divider,
 .dark hr.section-divider {
-    border-top-color: var(--border-dark, rgba(255, 255, 255, .10)) !important;
+    border-top-color: var(--border-dark, rgba(255, 255, 255, .10));
 }
 
 .chart-legend {
@@ -82,11 +251,11 @@ hr.section-divider {
 
 .chart-wrap canvas {
     display: block;
-    width: 100% !important;
+    width: 100%;
     max-width: 100%;
 }
 
-#mainContent.admin-page-shell {
+#mainContent.app-page-shell {
     padding-bottom: calc(6rem + env(safe-area-inset-bottom));
 }
 
@@ -104,17 +273,38 @@ hr.section-divider {
     }
 
     .chart-wrap[style] {
-        height: 220px !important;
+        height: 220px;
     }
 
-    #mainContent.admin-page-shell {
-        padding-bottom: calc(8rem + env(safe-area-inset-bottom));
+    .dentist-report-page .dentist-hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        gap: .75rem;
+    }
+
+    .dentist-report-page .dentist-hero-content {
+        min-width: 0;
+        padding-right: 0;
+    }
+
+    .dentist-report-page .report-hero-actions {
+        width: auto;
+        margin: 0;
+        align-self: center;
+    }
+
+    .dentist-report-page .report-hero-actions .ui-btn {
+        min-height: 34px;
+        padding: 0 .75rem;
+        white-space: nowrap;
+        font-size: .7rem;
     }
 }
 
 @media (max-width: 480px) {
     .chart-wrap[style] {
-        height: 205px !important;
+        height: 205px;
     }
 
 }
@@ -124,7 +314,6 @@ hr.section-divider {
     align-items: flex-start;
     gap: .7rem;
     width: 100%;
-    margin-bottom: 1rem;
     padding: .85rem 1rem;
     border-radius: 14px;
     font-size: .78rem;
@@ -138,7 +327,7 @@ hr.section-divider {
 
 .alert-warning i {
     margin-top: .12rem;
-    color: var(--status-pending-solid, #D97706) !important;
+    color: var(--status-pending-solid, #D97706);
 }
 
 .alert-warning strong {
@@ -167,12 +356,12 @@ hr.section-divider {
 
 [data-theme="dark"] .alert-warning i,
 .dark .alert-warning i {
-    color: var(--status-pending-solid, #FBBF24) !important;
+    color: var(--status-pending-solid, #FBBF24);
 }
 
 [data-theme="dark"] .item-cell,
 .dark .item-cell {
-    color: var(--text-primary, #F3F4F6) !important;
+    color: var(--text-primary, #F3F4F6);
 }
 
 @media (max-width: 767px) {
@@ -205,7 +394,7 @@ hr.section-divider {
 
 .forecast-note i {
     margin-top: .12rem;
-    color: var(--brand-red, #8B0000) !important;
+    color: var(--crimson-1, #8B0000);
     flex-shrink: 0;
 }
 
@@ -229,83 +418,83 @@ hr.section-divider {
 }
 
 .report-movement-table .forecast-opening {
-    color: #7C3AED !important;
+    color: #7C3AED;
 }
 
 .report-movement-table .forecast-stock-in {
-    color: #0F766E !important;
+    color: #0F766E;
 }
 
 .report-movement-table .forecast-used {
-    color: #2563EB !important;
+    color: #2563EB;
 }
 
 .report-movement-table .forecast-ending {
-    color: #15803D !important;
+    color: #15803D;
 }
 
 .report-movement-table .forecast-average {
-    color: #D97706 !important;
+    color: #D97706;
 }
 
 .report-movement-table .forecast-days {
-    color: #475569 !important;
+    color: #475569;
 }
 
 .report-movement-table .forecast-reorder {
-    color: #B45309 !important;
+    color: #B45309;
 }
 
 [data-theme="dark"] .forecast-note,
 .dark .forecast-note {
-    color: var(--text-muted, #8B949E) !important;
-    background: rgba(139, 0, 0, .14) !important;
-    border-color: rgba(252, 165, 165, .16) !important;
+    color: var(--text-muted, #8B949E);
+    background: rgba(139, 0, 0, .14);
+    border-color: rgba(252, 165, 165, .16);
 }
 
 [data-theme="dark"] .forecast-note i,
 .dark .forecast-note i {
-    color: #FCA5A5 !important;
+    color: #FCA5A5;
 }
 
 [data-theme="dark"] .report-movement-table-wrap,
 .dark .report-movement-table-wrap {
-    border-top-color: rgba(255, 255, 255, .08) !important;
+    border-top-color: rgba(255, 255, 255, .08);
 }
 
 [data-theme="dark"] .report-movement-table .forecast-opening,
 .dark .report-movement-table .forecast-opening {
-    color: #C4B5FD !important;
+    color: #C4B5FD;
 }
 
 [data-theme="dark"] .report-movement-table .forecast-stock-in,
 .dark .report-movement-table .forecast-stock-in {
-    color: #5EEAD4 !important;
+    color: #5EEAD4;
 }
 
 [data-theme="dark"] .report-movement-table .forecast-used,
 .dark .report-movement-table .forecast-used {
-    color: #60A5FA !important;
+    color: #60A5FA;
 }
 
 [data-theme="dark"] .report-movement-table .forecast-ending,
 .dark .report-movement-table .forecast-ending {
-    color: #86EFAC !important;
+    color: #86EFAC;
 }
 
 [data-theme="dark"] .report-movement-table .forecast-average,
 .dark .report-movement-table .forecast-average {
-    color: #FCD34D !important;
+    color: #FCD34D;
 }
 
 [data-theme="dark"] .report-movement-table .forecast-days,
 .dark .report-movement-table .forecast-days {
-    color: #CBD5E1 !important;
+    color: #CBD5E1;
 }
 
 [data-theme="dark"] .report-movement-table .forecast-reorder,
 .dark .report-movement-table .forecast-reorder {
-    color: #FDBA74 !important;
+    color: #FDBA74;
 }
 
 @media (max-width: 767px) {
@@ -348,13 +537,13 @@ hr.section-divider {
         width: 100%;
         padding: 0;
         border-bottom: 0;
-        text-align: right !important;
+        text-align: right;
         font-size: .77rem;
         line-height: 1.35;
     }
 
     .report-movement-table td::before {
-        content: attr(data-label) !important;
+        content: attr(data-label);
         flex-shrink: 0;
         color: var(--um-muted, #6B7280);
         font-size: .64rem;
@@ -367,243 +556,243 @@ hr.section-divider {
     .report-movement-table .item-cell {
         display: block;
         padding-bottom: .65rem;
-        text-align: left !important;
+        text-align: left;
         font-size: .9rem;
         border-bottom: 1px solid var(--um-border, #ebe7e2);
     }
 
     .report-movement-table .item-cell::before {
-        display: none !important;
+        display: none;
     }
 
     .report-movement-table .report-stock-pill {
         max-width: 70%;
-        white-space: normal !important;
+        white-space: normal;
         text-align: center;
-        line-height: 1.2 !important;
+        line-height: 1.2;
     }
 
     [data-theme="dark"] .report-movement-table tr,
     .dark .report-movement-table tr {
-        background: rgba(13, 17, 23, .58) !important;
-        border-color: var(--border-dark, rgba(255, 255, 255, .10)) !important;
-        box-shadow: 0 10px 24px rgba(0, 0, 0, .30) !important;
+        background: rgba(13, 17, 23, .58);
+        border-color: var(--border-dark, rgba(255, 255, 255, .10));
+        box-shadow: 0 10px 24px rgba(0, 0, 0, .30);
     }
 
     [data-theme="dark"] .report-movement-table td::before,
     .dark .report-movement-table td::before {
-        color: var(--text-muted, #8B949E) !important;
+        color: var(--text-muted, #8B949E);
     }
 
     [data-theme="dark"] .report-movement-table .item-cell,
     .dark .report-movement-table .item-cell {
-        border-bottom-color: var(--border-dark, rgba(255, 255, 255, .10)) !important;
+        border-bottom-color: var(--border-dark, rgba(255, 255, 255, .10));
     }
 }
 
 @media (max-width: 767px) {
     #mainContent .page-banner .page-banner-inner>div:first-child {
-        width: 100% !important;
-        text-align: left !important;
-        align-items: flex-start !important;
+        width: 100%;
+        text-align: left;
+        align-items: flex-start;
     }
 
     #mainContent .page-banner .page-title {
-        width: 100% !important;
-        text-align: left !important;
-        margin-left: 0 !important;
-        margin-right: auto !important;
+        width: 100%;
+        text-align: left;
+        margin-left: 0;
+        margin-right: auto;
     }
 }
 
 @media (min-width: 768px) and (max-width: 1280px) {
 
-    #mainContent.admin-page-shell {
-        overflow-x: hidden !important;
-        padding-left: 1rem !important;
-        padding-right: 1rem !important;
-        padding-bottom: calc(6rem + env(safe-area-inset-bottom)) !important;
+    #mainContent.app-page-shell {
+        overflow-x: hidden;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        padding-bottom: calc(6rem + env(safe-area-inset-bottom));
     }
 
-    #mainContent.admin-page-shell .page-banner,
+    #mainContent.app-page-shell .page-banner,
     #mainContent .page-banner {
-        width: 100% !important;
-        text-align: left !important;
+        width: 100%;
+        text-align: left;
     }
 
-    #mainContent.admin-page-shell .page-banner .page-banner-inner,
+    #mainContent.app-page-shell .page-banner .page-banner-inner,
     #mainContent .page-banner .page-banner-inner {
-        display: flex !important;
-        align-items: center !important;
-        justify-content: space-between !important;
-        gap: 1rem !important;
-        width: 100% !important;
-        min-width: 0 !important;
-        text-align: left !important;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        width: 100%;
+        min-width: 0;
+        text-align: left;
     }
 
-    #mainContent.admin-page-shell .page-banner .page-banner-inner>div:first-child,
+    #mainContent.app-page-shell .page-banner .page-banner-inner>div:first-child,
     #mainContent .page-banner .page-banner-inner>div:first-child {
-        flex: 1 1 auto !important;
-        min-width: 0 !important;
-        width: auto !important;
-        max-width: 100% !important;
-        margin-left: 0 !important;
-        margin-right: auto !important;
-        text-align: left !important;
-        align-items: flex-start !important;
-        justify-content: center !important;
+        flex: 1 1 auto;
+        min-width: 0;
+        width: auto;
+        max-width: 100%;
+        margin-left: 0;
+        margin-right: auto;
+        text-align: left;
+        align-items: flex-start;
+        justify-content: center;
     }
 
-    #mainContent.admin-page-shell .page-banner .page-title,
+    #mainContent.app-page-shell .page-banner .page-title,
     #mainContent .page-banner .page-title {
-        width: 100% !important;
-        max-width: 100% !important;
-        margin-left: 0 !important;
-        margin-right: auto !important;
-        text-align: left !important;
-        justify-content: flex-start !important;
-        white-space: nowrap !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
+        width: 100%;
+        max-width: 100%;
+        margin-left: 0;
+        margin-right: auto;
+        text-align: left;
+        justify-content: flex-start;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
-    #mainContent.admin-page-shell .page-banner .page-subtitle,
+    #mainContent.app-page-shell .page-banner .page-subtitle,
     #mainContent .page-banner .page-subtitle {
-        text-align: left !important;
-        margin-left: 0 !important;
-        margin-right: auto !important;
-        max-width: 100% !important;
+        text-align: left;
+        margin-left: 0;
+        margin-right: auto;
+        max-width: 100%;
     }
 
-    #mainContent.admin-page-shell .page-banner .page-banner-inner>div:last-child,
+    #mainContent.app-page-shell .page-banner .page-banner-inner>div:last-child,
     #mainContent .page-banner .page-banner-inner>div:last-child {
-        flex: 0 0 auto !important;
-        margin-left: auto !important;
-        justify-content: flex-end !important;
+        flex: 0 0 auto;
+        margin-left: auto;
+        justify-content: flex-end;
     }
 
     .chart-wrap[style] {
-        height: 260px !important;
+        height: 260px;
     }
 
     .chart-legend {
-        gap: .45rem .75rem !important;
-        margin-bottom: .8rem !important;
-        font-size: .72rem !important;
+        gap: .45rem .75rem;
+        margin-bottom: .8rem;
+        font-size: .72rem;
     }
 
     .forecast-note {
-        margin: .95rem 1.05rem !important;
-        padding: .75rem .85rem !important;
-        font-size: .72rem !important;
+        margin: .95rem 1.05rem;
+        padding: .75rem .85rem;
+        font-size: .72rem;
     }
 
     .report-movement-table-wrap {
-        width: 100% !important;
-        max-width: 100% !important;
-        overflow-x: auto !important;
-        -webkit-overflow-scrolling: touch !important;
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     .item-cell {
-        max-width: 280px !important;
+        max-width: 280px;
     }
 
     .report-movement-table {
-        min-width: 980px !important;
+        min-width: 980px;
     }
 
     .report-movement-table th,
     .report-movement-table td {
-        font-size: .72rem !important;
+        font-size: .72rem;
     }
 }
 
 @media (min-width: 768px) and (max-width: 900px) {
 
-    #mainContent.admin-page-shell .page-banner .page-banner-inner,
+    #mainContent.app-page-shell .page-banner .page-banner-inner,
     #mainContent .page-banner .page-banner-inner {
-        align-items: flex-start !important;
+        align-items: flex-start;
     }
 
-    #mainContent.admin-page-shell .page-banner .page-title,
+    #mainContent.app-page-shell .page-banner .page-title,
     #mainContent .page-banner .page-title {
-        white-space: normal !important;
-        line-height: 1.15 !important;
+        white-space: normal;
+        line-height: 1.15;
     }
 
     .chart-wrap[style] {
-        height: 235px !important;
+        height: 235px;
     }
 }
 
 .report-movement-table,
 .report-inventory-table {
-    table-layout: auto !important;
-    min-width: 1180px !important;
+    table-layout: auto;
+    min-width: 1180px;
 }
 
 .report-movement-table th:first-child,
 .report-movement-table td:first-child,
 .report-inventory-table th:first-child,
 .report-inventory-table td:first-child {
-    width: 220px !important;
-    min-width: 220px !important;
-    max-width: 260px !important;
-    text-align: left !important;
+    width: 220px;
+    min-width: 220px;
+    max-width: 260px;
+    text-align: left;
 }
 
 .item-cell,
 .report-movement-table .item-cell,
 .report-inventory-table .item-cell {
-    width: 220px !important;
-    min-width: 220px !important;
-    max-width: 260px !important;
-    white-space: normal !important;
-    word-break: normal !important;
-    overflow-wrap: normal !important;
-    line-height: 1.3 !important;
-    text-align: left !important;
+    width: 220px;
+    min-width: 220px;
+    max-width: 260px;
+    white-space: normal;
+    word-break: normal;
+    overflow-wrap: normal;
+    line-height: 1.3;
+    text-align: left;
 }
 
 .item-cell {
-    hyphens: none !important;
+    hyphens: none;
 }
 
 @media (min-width: 768px) and (max-width: 1280px) {
 
     .report-movement-table,
     .report-inventory-table {
-        min-width: 1240px !important;
+        min-width: 1240px;
     }
 
     .report-movement-table th:first-child,
     .report-movement-table td:first-child,
     .report-inventory-table th:first-child,
     .report-inventory-table td:first-child {
-        width: 240px !important;
-        min-width: 240px !important;
-        max-width: 280px !important;
+        width: 240px;
+        min-width: 240px;
+        max-width: 280px;
     }
 
     .item-cell,
     .report-movement-table .item-cell,
     .report-inventory-table .item-cell {
-        width: 240px !important;
-        min-width: 240px !important;
-        max-width: 280px !important;
-        white-space: normal !important;
-        word-break: normal !important;
-        overflow-wrap: normal !important;
+        width: 240px;
+        min-width: 240px;
+        max-width: 280px;
+        white-space: normal;
+        word-break: normal;
+        overflow-wrap: normal;
     }
 }
 
 .printable-form-card,
 .report-template-card,
 .template-card {
-    min-width: 0 !important;
-    overflow: visible !important;
+    min-width: 0;
+    overflow: visible;
 }
 
 .printable-form-card h3,
@@ -612,13 +801,13 @@ hr.section-divider {
 .report-template-card .template-title,
 .template-card h3,
 .template-card .template-title {
-    white-space: normal !important;
-    overflow: visible !important;
-    text-overflow: unset !important;
-    display: block !important;
-    line-height: 1.25 !important;
-    max-width: 100% !important;
-    word-break: break-word !important;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+    display: block;
+    line-height: 1.25;
+    max-width: 100%;
+    word-break: break-word;
 }
 
 .report-preview-wrapper,
@@ -628,12 +817,12 @@ hr.section-divider {
 .print-preview-body,
 .template-preview-wrapper,
 .template-preview-body {
-    width: 100% !important;
-    max-width: 100% !important;
-    overflow-x: auto !important;
-    overflow-y: auto !important;
-    padding: 2rem 1rem !important;
-    box-sizing: border-box !important;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: auto;
+    padding: 2rem 1rem;
+    box-sizing: border-box;
 }
 
 .report-paper,
@@ -643,11 +832,11 @@ hr.section-divider {
 .report-sheet,
 .print-sheet,
 .preview-sheet {
-    box-sizing: border-box !important;
-    overflow: visible !important;
-    flex-shrink: 0 !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
+    box-sizing: border-box;
+    overflow: visible;
+    flex-shrink: 0;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .report-paper.legal,
@@ -657,8 +846,8 @@ hr.section-divider {
 .report-sheet.legal,
 .print-sheet.legal,
 .preview-sheet.legal {
-    width: 8.5in !important;
-    min-height: 14in !important;
+    width: 8.5in;
+    min-height: 14in;
 }
 
 .report-paper.letter,
@@ -668,8 +857,8 @@ hr.section-divider {
 .report-sheet.letter,
 .print-sheet.letter,
 .preview-sheet.letter {
-    width: 8.5in !important;
-    min-height: 11in !important;
+    width: 8.5in;
+    min-height: 11in;
 }
 
 .report-paper.a4,
@@ -679,8 +868,8 @@ hr.section-divider {
 .report-sheet.a4,
 .print-sheet.a4,
 .preview-sheet.a4 {
-    width: 210mm !important;
-    min-height: 297mm !important;
+    width: 210mm;
+    min-height: 297mm;
 }
 
 .report-paper img,
@@ -690,9 +879,9 @@ hr.section-divider {
 .report-sheet img,
 .print-sheet img,
 .preview-sheet img {
-    max-width: 100% !important;
-    height: auto !important;
-    object-fit: contain !important;
+    max-width: 100%;
+    height: auto;
+    object-fit: contain;
 }
 
 @media screen and (max-width: 1024px) {
@@ -704,8 +893,8 @@ hr.section-divider {
     .print-preview-body,
     .template-preview-wrapper,
     .template-preview-body {
-        justify-content: flex-start !important;
-        align-items: flex-start !important;
+        justify-content: flex-start;
+        align-items: flex-start;
     }
 
     .report-paper,
@@ -715,8 +904,8 @@ hr.section-divider {
     .report-sheet,
     .print-sheet,
     .preview-sheet {
-        margin-left: 0 !important;
-        margin-right: 0 !important;
+        margin-left: 0;
+        margin-right: 0;
     }
 }
 
@@ -729,10 +918,10 @@ hr.section-divider {
     .print-preview-body,
     .template-preview-wrapper,
     .template-preview-body {
-        padding: 0 !important;
-        margin: 0 !important;
-        overflow: visible !important;
-        background: #fff !important;
+        padding: 0;
+        margin: 0;
+        overflow: visible;
+        background: #fff;
     }
 
     .report-paper,
@@ -742,11 +931,11 @@ hr.section-divider {
     .report-sheet,
     .print-sheet,
     .preview-sheet {
-        margin: 0 auto !important;
-        overflow: visible !important;
-        box-shadow: none !important;
-        transform: none !important;
-        zoom: 1 !important;
+        margin: 0 auto;
+        overflow: visible;
+        box-shadow: none;
+        transform: none;
+        zoom: 1;
     }
 }
 
@@ -956,24 +1145,13 @@ hr.section-divider {
     justify-content: center;
     padding: 6px 10px;
     border-radius: 999px;
-    background: linear-gradient(180deg, #fff5f5 0%, #ffe9e9 100%);
-    border: 1px solid #f3caca;
-    color: #8B0000;
-    font-size: 0.68rem;
+    background: var(--crimson-1-light);
+    border: 1px solid var(--crimson-1-mid);
+    color: var(--crimson-1);
+    font-size: .68rem;
     font-weight: 800;
-    letter-spacing: 0.04em;
+    letter-spacing: .04em;
     white-space: nowrap;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .8);
-}
-
-.chart-title,
-.chart-title i {
-    color: #8B0000;
-    font-size: 0.98rem;
-    font-weight: 800;
-    display: flex;
-    align-items: center;
-    gap: 8px;
 }
 
 .stock-row {
@@ -1028,9 +1206,10 @@ hr.section-divider {
 .analytics-section-label {
     font-size: 0.8rem;
     font-weight: 700;
-    color: #8B0000;
+    color: var(--crimson-1);
     letter-spacing: .10em;
     text-transform: uppercase;
+    margin-top: 14px;
     margin-bottom: 14px;
     display: flex;
     align-items: center;
@@ -1061,19 +1240,35 @@ hr.section-divider {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
-    padding: 12px 14px;
+
+    gap: .75rem;
+    padding: .75rem .875rem;
+
     border-radius: 14px;
-    background: #fafafa;
-    border: 1px solid #f1f5f9;
+
+    background: var(--card);
+    border: 1px solid var(--border);
+}
+
+.service-name {
+    color: var(--text-1);
+    font-size: .85rem;
+    font-weight: 700;
+}
+
+.service-count {
+    color: var(--text-3);
+    font-size: .8rem;
+    font-weight: 800;
+    white-space: nowrap;
 }
 
 .service-rank {
     width: 28px;
     height: 28px;
     border-radius: 999px;
-    background: #8B0000;
-    color: white;
+    background: var(--crimson);
+    color: var(--color-white);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1087,19 +1282,6 @@ hr.section-divider {
     align-items: center;
     gap: 10px;
     min-width: 0;
-}
-
-.service-name {
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: #1f2937;
-}
-
-.service-count {
-    font-size: 0.8rem;
-    font-weight: 800;
-    color: #8B0000;
-    white-space: nowrap;
 }
 
 .report-date-range-section {
@@ -1116,7 +1298,7 @@ hr.section-divider {
 }
 
 .report-date-range-title {
-    color: var(--text-1, #111827);
+    color: var(--text-1);
     font-size: .72rem;
     font-weight: 900;
     letter-spacing: .065em;
@@ -1172,48 +1354,9 @@ hr.section-divider {
     width: 100%;
 }
 
-.fp-date-icon {
-    position: absolute;
-    right: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #9CA3AF;
-    font-size: 14px;
-    pointer-events: none;
-}
-
 #dateFrom[readonly],
 #dateTo[readonly] {
     cursor: pointer;
-}
-
-.report-hero-meta {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-top: 14px;
-}
-
-.summary-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 5px 11px;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.82);
-    border: 1px solid rgba(139, 0, 0, 0.10);
-    color: #6B7280;
-    font-size: 11px;
-    font-weight: 800;
-    line-height: 1;
-}
-
-.summary-tag-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 999px;
-    flex-shrink: 0;
 }
 
 .report-hero-actions {
@@ -1225,728 +1368,428 @@ hr.section-divider {
     gap: 10px;
 }
 
-[data-theme="dark"] #mainContent .chart-title,
 [data-theme="dark"] #mainContent .service-name,
 [data-theme="dark"] #mainContent .stock-name,
-.dark #mainContent .chart-title,
 .dark #mainContent .service-name,
 .dark #mainContent .stock-name {
-    color: #F8FAFC !important;
-}
-
-[data-theme="dark"] #mainContent .analytics-section-label,
-[data-theme="dark"] #mainContent .chart-title i,
-.dark #mainContent .analytics-section-label,
-.dark #mainContent .chart-title i {
-    color: #FCA5A5 !important;
+    color: #F8FAFC;
 }
 
 [data-theme="dark"] #mainContent .metric-chip,
 .dark #mainContent .metric-chip {
-    background: rgba(139, 0, 0, 0.18) !important;
-    border-color: rgba(252, 165, 165, 0.22) !important;
-    color: #FCA5A5 !important;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
-}
-
-[data-theme="dark"] #mainContent .service-row,
-[data-theme="dark"] #mainContent .stock-bar-bg,
-.dark #mainContent .service-row,
-.dark #mainContent .stock-bar-bg {
-    background: rgba(13, 17, 23, 0.72) !important;
-    border-color: rgba(255, 255, 255, 0.10) !important;
-}
-
-[data-theme="dark"] #mainContent .summary-tag,
-.dark #mainContent .summary-tag {
-    background: rgba(13, 17, 23, 0.70) !important;
-    border-color: rgba(255, 255, 255, 0.12) !important;
-    color: #C9D1D9 !important;
-}
-
-#mainContent.dentist-page-shell {
-    background: #F9FAFB !important;
-}
-
-#mainContent .report-hero-meta {
-    margin-top: 12px !important;
+    background: rgba(139, 0, 0, 0.18);
+    border-color: rgba(252, 165, 165, 0.22);
+    color: #FCA5A5;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 #mainContent .report-hero-actions {
-    margin-left: 0 !important;
-    align-self: flex-end !important;
-    margin-top: 12px !important;
+    margin-left: 0;
+    align-self: flex-end;
+    margin-top: 12px;
 }
 
 #mainContent .chart-loading {
-    background: transparent !important;
-    border-radius: 16px !important;
+    background: transparent;
+    border-radius: 16px;
 }
 
 #mainContent .service-name,
 #mainContent .stock-name {
-    color: #111827 !important;
-}
-
-#mainContent .service-row {
-    background:
-        radial-gradient(circle at top left, rgba(139, 0, 0, 0.04), transparent 42%),
-        #FFFFFF !important;
-    border-color: rgba(139, 0, 0, 0.10) !important;
+    color: #111827;
 }
 
 [data-theme="dark"] #mainContent .chart-loading,
 .dark #mainContent .chart-loading {
-    background: transparent !important;
-    color: #C9D1D9 !important;
-}
-
-[data-theme="dark"] #mainContent .service-name,
-[data-theme="dark"] #mainContent .stock-name,
-[data-theme="dark"] #mainContent .text-gray-800,
-.dark #mainContent .service-name,
-.dark #mainContent .stock-name,
-.dark #mainContent .text-gray-800 {
-    color: #F8FAFC !important;
-}
-
-[data-theme="dark"] #mainContent .text-gray-400,
-[data-theme="dark"] #mainContent .text-gray-500,
-.dark #mainContent .text-gray-400,
-.dark #mainContent .text-gray-500 {
-    color: #C9D1D9 !important;
-}
-
-[data-theme="dark"] #mainContent .service-row,
-.dark #mainContent .service-row {
-    background: rgba(13, 17, 23, 0.72) !important;
-    border-color: rgba(255, 255, 255, 0.10) !important;
-    box-shadow: none !important;
+    background: transparent;
+    color: #C9D1D9;
 }
 
 [data-theme="dark"] #mainContent .stock-bar-bg,
 .dark #mainContent .stock-bar-bg {
-    background: #30363D !important;
+    background: var(--surface);
 }
 
-#mainContent.dentist-page-shell .report-hero-actions {
-    position: relative !important;
-    z-index: 4 !important;
-    margin-left: auto !important;
-    margin-top: 0 !important;
-    padding-right: 0 !important;
-    align-self: center !important;
-    display: flex !important;
-    justify-content: flex-end !important;
-    flex: 0 0 auto !important;
+#mainContent.app-page-shell .report-hero-actions {
+    position: relative;
+    z-index: 4;
+    margin-left: auto;
+    margin-top: 0;
+    padding-right: 0;
+    align-self: center;
+    display: flex;
+    justify-content: flex-end;
+    flex: 0 0 auto;
 }
 
-#mainContent.dentist-page-shell .report-hero-meta {
-    margin-top: 12px !important;
+#mainContent.app-page-shell .analytics-section-label {
+    letter-spacing: .08em;
 }
 
-#mainContent.dentist-page-shell .analytics-section-label {
-    letter-spacing: .08em !important;
+.report-panel-title {
+    margin: 0 0 1rem;
+
+    color: var(--text-3);
+
+    font-size: .7rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-align: center;
+    text-transform: uppercase;
 }
 
-#mainContent.dentist-page-shell.dentist-report-page .dentist-hero,
-#mainContent.dentist-page-shell.dentist-report-page .dentist-hero-content {
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-    box-sizing: border-box !important;
+.dentist-report-page .dentist-hero {
+    align-items: center;
 }
 
-#mainContent.dentist-page-shell.dentist-report-page .dentist-hero-content>.min-w-0 {
-    flex: 1 1 auto !important;
-    width: auto !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-}
-
-#mainContent.dentist-page-shell.dentist-report-page .dentist-hero-icon {
-    flex: 0 0 auto !important;
+.dentist-report-page .report-hero-actions {
+    margin-left: auto;
+    flex: 0 0 auto;
 }
 
 @media only screen and (max-width: 600px) {
-    #mainContent.dentist-page-shell {
-        padding-left: 10px !important;
-        padding-right: 10px !important;
-        padding-bottom: 28px !important;
-        overflow-x: hidden !important;
+    #mainContent.app-page-shell {
+        padding-left: 10px;
+        padding-right: 10px;
+        padding-bottom: 28px;
+        overflow-x: hidden;
     }
 
-    #mainContent.dentist-page-shell .w-full.fade-in {
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
+    #mainContent.app-page-shell .analytics-section-label {
+        font-size: 0.58rem;
+        line-height: 1.25;
+        margin-top: 18px;
+        margin-bottom: 12px;
     }
 
-    #mainContent.dentist-page-shell .dentist-hero {
-        padding: 16px 14px !important;
-        border-radius: 20px !important;
-        margin-bottom: 18px !important;
-        overflow: hidden !important;
+    #mainContent.app-page-shell .analytics-main-grid,
+    #mainContent.app-page-shell .analytics-secondary-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 14px;
+        margin-bottom: 22px;
     }
 
-    #mainContent.dentist-page-shell.dentist-report-page .dentist-hero-content {
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
-        padding-right: 0 !important;
-
-        display: flex !important;
-        flex-wrap: nowrap !important;
-        align-items: flex-start !important;
-        gap: 0 !important;
+    #mainContent.app-page-shell #gadChartWrap,
+    #mainContent.app-page-shell #weeklyChartWrap {
+        min-height: 230px;
     }
 
-    #mainContent.dentist-page-shell.dentist-report-page .dentist-hero-content>.min-w-0 {
-        flex: 1 1 auto !important;
-        width: auto !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
+    #mainContent.app-page-shell .relative.h-\[280px\] {
+        height: 230px;
     }
 
-    #mainContent.dentist-page-shell.dentist-report-page .dentist-hero-icon {
-        width: 46px !important;
-        height: 46px !important;
-        min-width: 46px !important;
-        flex: 0 0 46px !important;
-
-        border-radius: 15px !important;
-        align-self: flex-start !important;
-
-        margin-top: 0 !important;
-        margin-right: 12px !important;
+    #mainContent.app-page-shell .metric-chip {
+        font-size: 0.6rem;
+        padding: 5px 8px;
+        white-space: nowrap;
     }
 
-    @supports (display: grid) {
-        #mainContent.dentist-page-shell.dentist-report-page .dentist-hero-content {
-            display: grid !important;
-            grid-template-columns: 46px minmax(0, 1fr) !important;
-            column-gap: 12px !important;
-            row-gap: 0 !important;
-            align-items: start !important;
-        }
-
-        #mainContent.dentist-page-shell.dentist-report-page .dentist-hero-icon {
-            margin-right: 0 !important;
-        }
+    #mainContent.app-page-shell .service-row {
+        padding: 10px 11px;
+        gap: 10px;
+        border-radius: 13px;
     }
 
-    #mainContent.dentist-page-shell .dentist-hero-title {
-        font-size: 1.45rem !important;
-        line-height: 1.05 !important;
-        letter-spacing: -0.045em !important;
-        white-space: normal !important;
+    #mainContent.app-page-shell .service-meta {
+        min-width: 0;
     }
 
-    #mainContent.dentist-page-shell .dentist-hero-eyebrow {
-        font-size: 0.62rem !important;
-        line-height: 1 !important;
-        margin-bottom: 6px !important;
-        white-space: nowrap !important;
+    #mainContent.app-page-shell .service-name {
+        font-size: 0.76rem;
+        line-height: 1.2;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
-    #mainContent.dentist-page-shell .report-hero-meta {
-        grid-column: 1 / -1 !important;
-        display: grid !important;
-        grid-template-columns: 1fr !important;
-        gap: 7px !important;
-        width: 100% !important;
-        margin-top: 10px !important;
-    }
-
-    #mainContent.dentist-page-shell .summary-tag {
-        width: 100% !important;
-        max-width: 100% !important;
-        justify-content: flex-start !important;
-        font-size: 0.64rem !important;
-        line-height: 1.1 !important;
-        padding: 7px 10px !important;
-        white-space: nowrap !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-    }
-
-    #mainContent.dentist-page-shell .report-hero-actions {
-        width: 100% !important;
-        margin: 12px 0 0 !important;
-        align-self: stretch !important;
-        justify-content: stretch !important;
-    }
-
-    #mainContent.dentist-page-shell .analytics-section-label {
-        font-size: 0.7rem !important;
-        line-height: 1.25 !important;
-        margin-bottom: 12px !important;
-    }
-
-    #mainContent.dentist-page-shell .analytics-main-grid,
-    #mainContent.dentist-page-shell .analytics-secondary-grid {
-        display: grid !important;
-        grid-template-columns: 1fr !important;
-        gap: 14px !important;
-        margin-bottom: 22px !important;
-    }
-
-    #mainContent.dentist-page-shell .chart-title {
-        font-size: 0.86rem !important;
-        line-height: 1.25 !important;
-    }
-
-    #mainContent.dentist-page-shell #gadChartWrap,
-    #mainContent.dentist-page-shell #weeklyChartWrap {
-        min-height: 230px !important;
-    }
-
-    #mainContent.dentist-page-shell .relative.h-\[280px\] {
-        height: 230px !important;
-    }
-
-    #mainContent.dentist-page-shell .metric-chip {
-        font-size: 0.6rem !important;
-        padding: 5px 8px !important;
-        white-space: nowrap !important;
-    }
-
-    #mainContent.dentist-page-shell .service-row {
-        padding: 10px 11px !important;
-        gap: 10px !important;
-        border-radius: 13px !important;
-    }
-
-    #mainContent.dentist-page-shell .service-meta {
-        min-width: 0 !important;
-    }
-
-    #mainContent.dentist-page-shell .service-name {
-        font-size: 0.76rem !important;
-        line-height: 1.2 !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-    }
-
-    #mainContent.dentist-page-shell .service-count {
-        font-size: 0.68rem !important;
-        white-space: nowrap !important;
+    #mainContent.app-page-shell .service-count {
+        font-size: 0.68rem;
+        white-space: nowrap;
     }
 
     #createReportModal .ui-modal-card {
-        width: 100% !important;
-        max-width: 100% !important;
-        height: auto !important;
-        max-height: 90dvh !important;
-        margin: 0 !important;
-        border-radius: 24px 24px 0 0 !important;
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+        max-height: 90dvh;
+        margin: 0;
+        border-radius: 24px 24px 0 0;
     }
 
     #createReportModal .grid.grid-cols-2 {
-        grid-template-columns: 1fr !important;
-        gap: 10px !important;
+        grid-template-columns: 1fr;
+        gap: 10px;
     }
 
     #createReportModal #reportQty {
-        width: 100% !important;
+        width: 100%;
     }
 
     #createReportModal #reportQty+span {
-        display: block !important;
-        margin-left: 0 !important;
-        margin-top: 5px !important;
+        display: block;
+        margin-left: 0;
+        margin-top: 5px;
     }
 
     #createReportModal .border-t {
-        display: grid !important;
-        grid-template-columns: 1fr !important;
-        gap: 10px !important;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
     }
 
     #createReportModal .border-t button {
-        width: 100% !important;
-        justify-content: center !important;
+        width: 100%;
+        justify-content: center;
     }
 
     #downloadCompleteModal .ui-modal-card {
-        width: calc(100vw - 24px) !important;
-        max-width: calc(100vw - 24px) !important;
-    }
-}
-
-@media only screen and (max-width: 359px) {
-    #mainContent.dentist-page-shell.dentist-report-page .dentist-hero-content {
-        gap: 0 !important;
-    }
-
-    #mainContent.dentist-page-shell.dentist-report-page .dentist-hero-icon {
-        width: 42px !important;
-        height: 42px !important;
-        min-width: 42px !important;
-        flex-basis: 42px !important;
-        margin-top: 0 !important;
-        margin-right: 10px !important;
-        border-radius: 13px !important;
-    }
-
-    #mainContent.dentist-page-shell.dentist-report-page .dentist-hero-title {
-        font-size: 1.25rem !important;
-        overflow-wrap: normal !important;
-        word-break: normal !important;
-    }
-
-    #mainContent.dentist-page-shell.dentist-report-page .dentist-hero-eyebrow {
-        white-space: normal !important;
-        line-height: 1.15 !important;
-    }
-
-    @supports (display: grid) {
-        #mainContent.dentist-page-shell.dentist-report-page .dentist-hero-content {
-            grid-template-columns: 42px minmax(0, 1fr) !important;
-            column-gap: 10px !important;
-        }
-
-        #mainContent.dentist-page-shell.dentist-report-page .dentist-hero-icon {
-            margin-right: 0 !important;
-        }
+        width: calc(100vw - 24px);
+        max-width: calc(100vw - 24px);
     }
 }
 
 @media only screen and (min-width: 601px) and (max-width: 991px) {
     #mainContent.dentist-report-page .dentist-hero-content {
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
-        align-items: flex-start !important;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        align-items: flex-start;
     }
 
     #mainContent.dentist-report-page .dentist-hero-content>.min-w-0 {
-        flex: 1 1 auto !important;
-        width: auto !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
+        flex: 1 1 auto;
+        width: auto;
+        max-width: 100%;
+        min-width: 0;
     }
 
     #mainContent.dentist-report-page .dentist-hero-icon {
-        align-self: flex-start !important;
-        margin-top: 18px !important;
-    }
-
-    #mainContent.dentist-report-page .report-hero-meta {
-        max-width: 100% !important;
-    }
-
-    #mainContent.dentist-report-page .summary-tag {
-        max-width: 100% !important;
+        align-self: flex-start;
+        margin-top: 18px;
     }
 }
 
 @media only screen and (min-width: 600px) {
 
-    #mainContent.dentist-page-shell .analytics-main-grid,
-    #mainContent.dentist-page-shell .analytics-secondary-grid {
-        grid-template-columns: 1fr !important;
-        gap: 16px !important;
-    }
-
-    #mainContent.dentist-page-shell .report-hero-meta {
-        display: flex !important;
-        flex-wrap: wrap !important;
+    #mainContent.app-page-shell .analytics-main-grid,
+    #mainContent.app-page-shell .analytics-secondary-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
     }
 }
 
 @media only screen and (min-width: 768px) {
-    #mainContent.dentist-page-shell {
-        padding-left: 1.25rem !important;
-        padding-right: 1.25rem !important;
+    #mainContent.app-page-shell {
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
     }
 
-    #mainContent.dentist-page-shell .dentist-hero {
-        padding: 22px 24px !important;
+    #mainContent.app-page-shell .dentist-hero-content {
+        padding-right: 0;
     }
 
-    #mainContent.dentist-page-shell .dentist-hero-content {
-        padding-right: 0 !important;
+    #mainContent.app-page-shell .dentist-hero-title {
+        font-size: 1.9rem;
     }
 
-    #mainContent.dentist-page-shell .dentist-hero-title {
-        font-size: 1.9rem !important;
+    #mainContent.app-page-shell .report-hero-actions {
+        margin-left: auto;
+        flex-shrink: 0;
     }
 
-    #mainContent.dentist-page-shell .report-hero-actions {
-        margin-left: auto !important;
-        flex-shrink: 0 !important;
-    }
-
-    #mainContent.dentist-page-shell .analytics-main-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: 18px !important;
+    #mainContent.app-page-shell .analytics-main-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
     }
 
 
-    #mainContent.dentist-page-shell .analytics-secondary-grid {
-        grid-template-columns: 1fr !important;
-        gap: 18px !important;
-    }
-}
-
-@media only screen and (min-width: 601px) and (max-width: 991px) {
-    #mainContent.dentist-page-shell.dentist-report-page .dentist-hero-content {
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
-        align-items: flex-start !important;
-    }
-
-    #mainContent.dentist-page-shell.dentist-report-page .dentist-hero-content>.min-w-0 {
-        flex: 1 1 auto !important;
-        width: auto !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
-    }
-
-    #mainContent.dentist-page-shell.dentist-report-page .dentist-hero-icon {
-        align-self: flex-start !important;
-        margin-top: 18px !important;
-    }
-
-    #mainContent.dentist-page-shell.dentist-report-page .report-hero-meta,
-    #mainContent.dentist-page-shell.dentist-report-page .summary-tag {
-        max-width: 100% !important;
+    #mainContent.app-page-shell .analytics-secondary-grid {
+        grid-template-columns: 1fr;
+        gap: 18px;
     }
 }
 
 @media only screen and (min-width: 992px) {
-    #mainContent.dentist-page-shell .dentist-hero-title {
-        font-size: 2rem !important;
+    #mainContent.app-page-shell .dentist-hero-title {
+        font-size: 2rem;
     }
 
-    #mainContent.dentist-page-shell .analytics-main-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: 18px !important;
+    #mainContent.app-page-shell .analytics-main-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
     }
 
-    #mainContent.dentist-page-shell .analytics-secondary-grid {
-        grid-template-columns: 1.35fr .9fr !important;
-        gap: 18px !important;
+    #mainContent.app-page-shell .analytics-secondary-grid {
+        grid-template-columns: 1.35fr .9fr;
+        gap: 18px;
     }
 }
 
 @media only screen and (min-width: 1200px) {
-    #mainContent.dentist-page-shell {
-        padding-left: 1.5rem !important;
-        padding-right: 1.5rem !important;
+    #mainContent.app-page-shell {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
     }
 
-    #mainContent.dentist-page-shell .dentist-hero {
-        padding: 24px 30px !important;
+    #mainContent.app-page-shell .dentist-hero-title {
+        font-size: 2rem;
     }
 
-    #mainContent.dentist-page-shell .dentist-hero-title {
-        font-size: 2rem !important;
+    #mainContent.app-page-shell .analytics-main-grid {
+        grid-template-columns: 1.2fr 1.2fr .9fr;
+        gap: 20px;
     }
 
-    #mainContent.dentist-page-shell .analytics-main-grid {
-        grid-template-columns: 1.2fr 1.2fr .9fr !important;
-        gap: 20px !important;
-    }
-
-    #mainContent.dentist-page-shell .analytics-secondary-grid {
-        grid-template-columns: 1.5fr .9fr !important;
-        gap: 20px !important;
+    #mainContent.app-page-shell .analytics-secondary-grid {
+        grid-template-columns: 1.5fr .9fr;
+        gap: 20px;
     }
 }
 
-#mainContent.dentist-page-shell .report-period-select {
-    width: auto !important;
-    min-width: 168px !important;
+#mainContent.app-page-shell .report-inventory-grid {
+    align-items: stretch;
+}
+
+#mainContent.app-page-shell .inventory-chart-panel,
+#mainContent.app-page-shell .low-stock-alert-card {
+    min-width: 0;
+}
+
+#mainContent.app-page-shell .chart-loading.hidden {
+    display: none;
+}
+
+.dentist-report-page .analytics-main-grid .card-header,
+.dentist-report-page .analytics-secondary-grid .card-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    gap: .75rem;
+    width: 100%;
+    min-width: 0;
+}
+
+.dentist-report-page .analytics-main-grid .card-header-left,
+.dentist-report-page .analytics-secondary-grid .card-header-left {
+    min-width: 0;
+    grid-column: 1;
+}
+
+.dentist-report-page .analytics-main-grid .card-header-right,
+.dentist-report-page .analytics-secondary-grid .card-header-right {
+    grid-column: 2;
+    justify-self: end;
+    align-self: start;
+
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+}
+
+.dentist-report-page .analytics-main-grid .card-header-right .custom-select {
+    width: 130px;
+    min-width: 130px;
+    max-width: 130px;
+}
+
+.dentist-report-page .analytics-secondary-grid .card-header-right .metric-chip {
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
+.dentist-report-page .analytics-main-grid>.card {
+    position: relative;
+}
+
+.dentist-report-page .analytics-main-grid>.card:has(.custom-select.is-open) {
+    z-index: 100;
+    overflow: visible;
+}
+
+.dentist-report-page .analytics-main-grid>.card:has(.custom-select.is-open) .card-header,
+.dentist-report-page .analytics-main-grid>.card:has(.custom-select.is-open) .card-body {
+    overflow: visible;
 }
 
 @media only screen and (max-width: 600px) {
 
-    #mainContent.dentist-page-shell .report-period-select {
-        width: 100% !important;
-        min-width: 0 !important;
-    }
-}
-
-#mainContent.dentist-page-shell .printable-forms-card,
-#mainContent.dentist-page-shell .report-inventory-shell {
-    overflow: hidden !important;
-}
-
-#mainContent.dentist-page-shell .report-inventory-grid {
-    align-items: stretch !important;
-}
-
-#mainContent.dentist-page-shell .inventory-chart-panel,
-#mainContent.dentist-page-shell .low-stock-alert-card {
-    min-width: 0 !important;
-}
-
-#mainContent.dentist-page-shell .low-stock-title-icon {
-    width: 34px !important;
-    height: 34px !important;
-    min-width: 34px !important;
-    border-radius: 12px !important;
-    background: #FEF2F2 !important;
-    color: #DC2626 !important;
-    border: 1px solid #FECACA !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-}
-
-#mainContent.dentist-page-shell .low-stock-title-icon i {
-    color: currentColor !important;
-    font-size: .82rem !important;
-}
-
-[data-theme="dark"] #mainContent.dentist-page-shell .low-stock-title-icon,
-.dark #mainContent.dentist-page-shell .low-stock-title-icon {
-    background: rgba(220, 38, 38, 0.16) !important;
-    color: #FCA5A5 !important;
-    border-color: rgba(252, 165, 165, 0.22) !important;
-}
-
-#mainContent.dentist-page-shell .stock-good-icon {
-    width: 48px !important;
-    height: 48px !important;
-    min-width: 48px !important;
-    border-radius: 999px !important;
-    margin: 0 auto 0.75rem !important;
-
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-
-    background: #DCFCE7 !important;
-    color: #16A34A !important;
-    border: 1px solid #BBF7D0 !important;
-    box-shadow: 0 10px 22px rgba(22, 163, 74, 0.10) !important;
-}
-
-#mainContent.dentist-page-shell .stock-good-icon i {
-    color: currentColor !important;
-    font-size: 1.15rem !important;
-    line-height: 1 !important;
-}
-
-[data-theme="dark"] #mainContent.dentist-page-shell .stock-good-icon,
-.dark #mainContent.dentist-page-shell .stock-good-icon {
-    background: rgba(22, 163, 74, 0.16) !important;
-    color: #86EFAC !important;
-    border-color: rgba(134, 239, 172, 0.24) !important;
-    box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.06),
-        0 14px 28px rgba(0, 0, 0, 0.24) !important;
-}
-
-#mainContent.dentist-page-shell .chart-loading.hidden {
-    display: none !important;
-}
-
-@media only screen and (max-width: 600px) {
-
-    #mainContent.dentist-page-shell .printable-forms-card,
-    #mainContent.dentist-page-shell .report-inventory-shell {
-        padding: 14px !important;
-        border-radius: 18px !important;
+    #mainContent.app-page-shell .printable-template-grid,
+    #mainContent.app-page-shell .report-inventory-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
     }
 
-    #mainContent.dentist-page-shell .printable-template-grid,
-    #mainContent.dentist-page-shell .report-inventory-grid {
-        grid-template-columns: 1fr !important;
-        gap: 14px !important;
+    #mainContent.app-page-shell .inventory-chart-panel .relative {
+        height: 235px;
+        min-height: 235px;
     }
 
-    #mainContent.dentist-page-shell .inventory-chart-panel .relative {
-        height: 235px !important;
-        min-height: 235px !important;
-    }
-
-    #mainContent.dentist-page-shell .low-stock-alert-card {
-        padding: 14px !important;
-        border-radius: 16px !important;
+    #mainContent.app-page-shell .low-stock-alert-card {
+        padding: 14px;
+        border-radius: 16px;
     }
 }
 
 @media only screen and (min-width: 600px) {
 
-    #mainContent.dentist-page-shell .printable-template-grid,
-    #mainContent.dentist-page-shell .report-inventory-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    #mainContent.app-page-shell .printable-template-grid,
+    #mainContent.app-page-shell .report-inventory-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    #mainContent.dentist-page-shell .low-stock-alert-card {
-        grid-column: 1 / -1 !important;
+    #mainContent.app-page-shell .low-stock-alert-card {
+        grid-column: 1 / -1;
     }
 }
 
 @media only screen and (min-width: 992px) {
 
-    #mainContent.dentist-page-shell .printable-template-grid,
-    #mainContent.dentist-page-shell .report-inventory-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    #mainContent.app-page-shell .printable-template-grid,
+    #mainContent.app-page-shell .report-inventory-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
-    #mainContent.dentist-page-shell .low-stock-alert-card {
-        grid-column: auto !important;
+    #mainContent.app-page-shell .low-stock-alert-card {
+        grid-column: auto;
     }
 }
 
 #createReportModal {
-    z-index: 99999 !important;
+    z-index: 99999;
 }
 
 #createReportModal.open {
-    display: flex !important;
+    display: flex;
 }
 
 #createReportModal .um-user-modal-body {
-    flex: 1 1 auto !important;
-    min-height: 0 !important;
-    overflow-y: auto !important;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
 }
 
 #createReportModal .um-user-main-card {
-    width: 100% !important;
+    width: 100%;
 }
 
 #createReportModal .fp-date-input-wrap {
-    position: relative !important;
-    width: 100% !important;
+    position: relative;
+    width: 100%;
 }
 
 #createReportModal .fp-date-icon {
-    position: absolute !important;
-    right: 14px !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
-    color: #9CA3AF !important;
-    font-size: 14px !important;
-    pointer-events: none !important;
-}
-
-#mainContent.dentist-report-page .card,
-#mainContent.dentist-report-page .card-header {
-    overflow: visible !important;
-}
-
-#mainContent.dentist-report-page .card-header {
-    position: relative;
-    z-index: 20;
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9CA3AF;
+    font-size: 14px;
+    pointer-events: none;
 }
 
 #mainContent.dentist-report-page .card-body {
     position: relative;
     z-index: 1;
-}
-
-#mainContent.dentist-report-page .card-header-right,
-#mainContent.dentist-report-page .card-header-right .custom-select {
-    position: relative;
-    z-index: 30;
 }
 
 .printable-template-grid {
@@ -1992,8 +1835,8 @@ hr.section-divider {
     width: 42px;
     height: 42px;
     border-radius: 13px;
-    background: var(--crimson-light, #fef2f2);
-    color: var(--crimson, #8b0000);
+    background: var(--crimson);
+    color: var(--text-primary);
 }
 
 .printable-template-copy {
@@ -2002,7 +1845,7 @@ hr.section-divider {
 
 .printable-template-title {
     margin: 0;
-    color: var(--text-1, #1f2937);
+    color: var(--text-1);
     font-size: .9rem;
     font-weight: 850;
     line-height: 1.35;
@@ -2011,7 +1854,7 @@ hr.section-divider {
 
 .printable-template-code {
     margin: .2rem 0 0;
-    color: var(--text-3, #94a3b8);
+    color: var(--text-3);
     font-size: .7rem;
     font-weight: 700;
 }
@@ -2029,16 +1872,628 @@ hr.section-divider {
     }
 }
 
+.printable-carousel-toolbar {
+    display: none;
+}
+
 @media (max-width: 700px) {
+    .printable-carousel-toolbar {
+        display: grid;
+
+        grid-template-columns:
+            36px minmax(0, 1fr) 36px;
+
+        align-items: center;
+        gap: .65rem;
+
+        margin-bottom: .75rem;
+    }
+
+    .printable-forms-carousel {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .printable-carousel-toolbar {
+        display: grid;
+
+        grid-template-columns:
+            36px minmax(0, 1fr) 36px;
+
+        align-items: center;
+
+        gap: .65rem;
+
+        margin-bottom: .75rem;
+    }
+
+    .printable-carousel-counter {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        color: var(--text-3, #94a3b8);
+
+        font-size: .68rem;
+        font-weight: 800;
+        letter-spacing: .04em;
+    }
+
+    .printable-carousel-btn {
+        width: 36px;
+        height: 36px;
+
+        margin: 0;
+
+        justify-self: center;
+    }
+
     .printable-template-grid {
+        display: grid;
+
         grid-template-columns: 1fr;
+
+        gap: .7rem;
+
+        width: 100%;
+        min-width: 0;
+
+        overflow: hidden;
     }
 
     .printable-template-item {
-        flex-direction: column;
+        min-height: 0;
+
+        padding: .8rem;
+
+        display: grid;
+
+        grid-template-columns:
+            minmax(0, 1fr) auto;
+
+        align-items: center;
+
+        gap: .7rem;
+
+        border-radius: 15px;
+    }
+
+    .printable-template-main {
+        min-width: 0;
+    }
+
+    .printable-template-icon {
+        width: 38px;
+        height: 38px;
+        flex-basis: 38px;
+
+        border-radius: 12px;
+    }
+
+    .printable-template-title {
+        font-size: .8rem;
+    }
+
+    .printable-template-code {
+        font-size: .63rem;
+    }
+
+    .printable-template-meta {
+        gap: .3rem;
+        margin-top: .5rem;
     }
 
     .printable-template-item>.ui-btn {
+        width: 36px;
+        min-width: 36px;
+
+        height: 36px;
+        min-height: 36px;
+
+        padding: 0;
+
+        border-radius: 11px;
+    }
+
+    .printable-print-label {
+        display: none;
+    }
+}
+
+.report-inventory-content {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+}
+
+.report-inventory-content:has(canvas) {
+    min-height: 220px;
+    height: 220px;
+}
+
+.report-inventory-content>canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.report-inventory-content>.empty-state-host {
+    width: 100%;
+    height: auto;
+    min-height: 0;
+}
+
+.dentist-report-page .analytics-main-grid .card-header {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: .65rem;
+}
+
+.dentist-report-page .analytics-main-grid .card-header-left {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.dentist-report-page .analytics-main-grid .card-header-right {
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 0;
+    margin-left: auto;
+}
+
+.dentist-report-page .analytics-main-grid .card-header-right .custom-select {
+    width: 128px;
+    min-width: 128px;
+    max-width: 128px;
+}
+
+.dentist-report-page .analytics-main-grid .card-header-right .custom-select-button {
+    min-height: 34px;
+    padding: 0 .6rem;
+    gap: .4rem;
+
+    border-radius: 10px;
+
+    font-size: .68rem;
+}
+
+.dentist-report-page .analytics-main-grid .card-header-right .custom-select-option {
+    min-height: 34px;
+    padding: 0 .6rem;
+    font-size: .68rem;
+}
+
+.inventory-chart-panel,
+.report-inventory-panel,
+.low-stock-alert-card {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--card);
+}
+
+.report-panel-heading {
+    display: flex;
+    align-items: flex-start;
+    gap: .65rem;
+    width: 100%;
+    min-width: 0;
+    margin-bottom: .75rem;
+}
+
+.report-panel-heading>div {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.report-inventory-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.inventory-chart-panel,
+.report-inventory-panel,
+.low-stock-alert-card {
+    min-width: 0;
+}
+
+.report-inventory-content {
+    position: relative;
+    width: 100%;
+    min-height: 240px;
+    height: 240px;
+}
+
+.report-inventory-content>canvas {
+    width: 100%;
+    height: 100%;
+}
+
+.report-inventory-grid .empty-state {
+    min-height: 0;
+    height: auto;
+    padding: 1rem .75rem;
+}
+
+.report-inventory-grid .empty-state.empty-state-compact {
+    min-height: 0;
+    height: auto;
+    padding: 1rem .75rem;
+}
+
+.report-inventory-grid .empty-state-icon {
+    width: 46px;
+    height: 46px;
+    min-width: 46px;
+
+    margin-bottom: .65rem;
+
+    border-radius: 14px;
+}
+
+.report-inventory-grid .empty-state-icon i {
+    font-size: 18px;
+}
+
+.report-inventory-grid .empty-state-title {
+    font-size: .86rem;
+    line-height: 1.2;
+}
+
+.report-inventory-grid .empty-state-sub {
+    max-width: 240px;
+    margin-top: .35rem;
+
+    font-size: .68rem;
+    line-height: 1.4;
+}
+
+.report-inventory-grid .empty-state .ui-btn {
+    min-height: 28px;
+    margin-top: .7rem;
+    padding: 0 .7rem;
+
+    font-size: .62rem;
+}
+
+@media (min-width: 601px) and (max-width: 991px) {
+    .report-inventory-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+    .low-stock-alert-card {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 600px) {
+    .report-inventory-content {
+        min-height: 220px;
+        height: 220px;
+    }
+
+    .dentist-report-page .analytics-main-grid .card-header,
+    .dentist-report-page .analytics-secondary-grid .card-header {
+        display: grid;
+
+        grid-template-columns:
+            minmax(0, 1fr) auto;
+
+        align-items: start;
+
+        column-gap: .5rem;
+        row-gap: 0;
+
         width: 100%;
     }
+
+    .dentist-report-page .analytics-main-grid .card-header-left,
+    .dentist-report-page .analytics-secondary-grid .card-header-left {
+        grid-column: 1;
+        grid-row: 1;
+
+        display: flex;
+        align-items: flex-start;
+
+        min-width: 0;
+        width: 100%;
+    }
+
+    .dentist-report-page .analytics-main-grid .card-header-left>div {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .dentist-report-page .analytics-main-grid .card-header-right,
+    .dentist-report-page .analytics-secondary-grid .card-header-right {
+        grid-column: 2;
+        grid-row: 1;
+
+        width: auto;
+
+        margin: 0;
+
+        align-self: start;
+        justify-self: end;
+    }
+
+    .dentist-report-page .analytics-main-grid .card-header-right .custom-select {
+        width: 88px;
+        min-width: 88px;
+        max-width: 88px;
+    }
+
+    .dentist-report-page .analytics-main-grid .card-header-right .custom-select-button {
+        min-height: 30px;
+
+        padding: 0 .5rem;
+
+        gap: .35rem;
+
+        border-radius: 9px;
+
+        font-size: .6rem;
+    }
+
+    .dentist-report-page .analytics-main-grid .card-header-right .custom-select-button i {
+        font-size: .52rem;
+    }
+
+    .dentist-report-page .analytics-main-grid .card-title {
+        white-space: nowrap;
+        overflow: visible;
+        text-overflow: clip;
+    }
+
+    .dentist-report-page .analytics-main-grid .card-subtitle {
+        white-space: normal;
+        overflow: visible;
+        text-overflow: clip;
+    }
+
+    .report-inventory-shell .card-header {
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        justify-content: space-between;
+
+        gap: .6rem;
+    }
+
+    .report-inventory-shell .card-header-right .ui-btn {
+        min-height: 30px;
+        padding: 0 9px;
+        font-size: .58rem;
+    }
+
+    .report-inventory-shell .card-header-right .ui-btn i {
+        font-size: .58rem;
+    }
+
+    .report-inventory-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .report-inventory-content {
+        height: 210px;
+        min-height: 210px;
+    }
+
+    .inventory-chart-panel,
+    .report-inventory-panel,
+    .low-stock-alert-card {
+        padding: .8rem;
+        border-radius: 14px;
+    }
+
+    .report-panel-heading {
+        gap: .55rem;
+        margin-bottom: .55rem;
+    }
+
+    .report-panel-heading .card-header-icon {
+        width: 30px;
+        height: 30px;
+        min-width: 30px;
+        border-radius: 9px;
+    }
+
+    .report-panel-heading .card-title {
+        font-size: .72rem;
+        line-height: 1.2;
+    }
+
+    .report-panel-heading .card-subtitle {
+        margin-top: 2px;
+        font-size: .6rem;
+        line-height: 1.25;
+    }
+
+    .report-panel-heading .card-header-icon {
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+    }
+
+    .report-panel-heading .card-title {
+        font-size: .74rem;
+    }
+
+    .report-panel-heading .card-subtitle {
+        font-size: .6rem;
+    }
+
+    .report-inventory-content:has(canvas) {
+        height: 190px;
+        min-height: 190px;
+    }
+
+    .report-inventory-content:has(.empty-state-host) {
+        height: auto;
+        min-height: 0;
+    }
+}
+
+@media (max-width: 420px) {
+    .dentist-report-page .dentist-hero {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .dentist-report-page .report-hero-actions {
+        justify-self: start;
+        margin-left: 56px;
+    }
+}
+
+@media (max-width: 991px) {
+
+    .report-inventory-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .low-stock-alert-card {
+        grid-column: 1 / -1;
+    }
+}
+
+#createReportModal .monthly-report-counts {
+    min-width: 0;
+    display: grid;
+    gap: .6rem;
+}
+
+#createReportModal .monthly-report-counts[hidden] {
+    display: none;
+}
+
+#createReportModal .monthly-report-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4rem;
+}
+
+#createReportModal .monthly-report-counts > .modal-helper-text {
+    margin: 0;
+    font-size: .74rem;
+    font-style: normal;
+    line-height: 1.45;
+}
+
+#createReportModal .monthly-report-table-wrap {
+    overflow: auto;
+    max-height: 58vh;
+    max-width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+}
+
+#createReportModal [data-monthly-count-group] {
+    min-width: 0;
+}
+
+#createReportModal [data-monthly-count-group] > .global-field-error {
+    white-space: normal;
+}
+
+#createReportModal [data-monthly-count-group] > .global-field-error.show {
+    margin-bottom: .625rem;
+}
+
+#createReportModal .monthly-report-table {
+    width: 100%;
+    min-width: 760px;
+    table-layout: fixed;
+}
+
+#createReportModal .monthly-report-table th:first-child {
+    width: 190px;
+    white-space: normal;
+}
+
+#createReportModal .monthly-report-table tbody th,
+#createReportModal .monthly-report-table tfoot th {
+    padding: .4rem .6rem;
+    font-size: .78rem;
+    font-weight: 600;
+    line-height: 1.35;
+    text-align: left;
+    vertical-align: middle;
+}
+
+#createReportModal .monthly-report-table tbody td,
+#createReportModal .monthly-report-table tfoot td,
+#createReportModal .monthly-report-table thead th {
+    padding: .35rem .3rem;
+    vertical-align: middle;
+}
+
+#createReportModal .monthly-report-table th:last-child {
+    width: 54px;
+}
+
+#createReportModal .monthly-report-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--surface);
+    font-size: .65rem;
+    line-height: 1.3;
+}
+
+#createReportModal .monthly-report-source {
+    display: block;
+    margin-top: .15rem;
+    color: var(--text-2);
+    font-size: .66rem;
+    font-weight: 400;
+    white-space: normal;
+    line-height: 1.3;
+}
+
+#createReportModal .monthly-report-table output {
+    font-size: .78rem;
+    font-variant-numeric: tabular-nums;
+}
+
+#createReportModal .monthly-count-stepper {
+    grid-template-columns: 28px minmax(42px, 1fr) 28px;
+    gap: 2px;
+    height: 34px;
+    min-height: 34px;
+    padding: 2px;
+    border-radius: 9px;
+}
+
+#createReportModal .monthly-count-stepper .global-number-stepper-btn {
+    width: 28px;
+    min-width: 28px;
+    height: 28px;
+    min-height: 28px;
+    border-radius: 6px;
+    font-size: .7rem;
+}
+
+#createReportModal .monthly-count-stepper .global-number-stepper-input {
+    height: 28px;
+    min-height: 28px;
+    padding: 0 .1rem;
+    font-size: .78rem;
+    font-weight: 600;
+}
+
+#createReportModal .monthly-report-counts .global-checkbox-label {
+    font-size: .76rem;
+    line-height: 1.4;
+}
+
+#createReportModal .monthly-report-table tfoot {
+    font-weight: 700;
 }

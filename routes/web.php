@@ -2,7 +2,6 @@
 
 use App\Helpers\AuditLogger;
 use App\Helpers\PhilippineHolidays;
-use App\Http\Controllers\Admin\AcademicPeriodController;
 use App\Http\Controllers\Admin\AdminAppointmentController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminInventoryController;
@@ -10,21 +9,20 @@ use App\Http\Controllers\Admin\AdminPatientController;
 use App\Http\Controllers\Admin\AdminReportController;
 use App\Http\Controllers\Admin\AdminSessionManagementController;
 use App\Http\Controllers\Admin\ClinicScheduleController;
-use App\Http\Controllers\Admin\DentalRecordController;
 use App\Http\Controllers\Admin\DentistTransitionController;
 use App\Http\Controllers\Admin\DocumentRequestController as AdminDocumentRequestController;
 use App\Http\Controllers\Admin\DocumentTemplateController;
-use App\Http\Controllers\Admin\ExternalAdminController;
 use App\Http\Controllers\Admin\RolePermissionController;
-use App\Http\Controllers\Admin\ServiceTypeController;
 use App\Http\Controllers\Admin\SystemLogController;
 use App\Http\Controllers\Admin\SystemSettingsController;
 use App\Http\Controllers\Admin\UserManagementController;
+use App\Http\Controllers\Admin\RolePreviewController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\Auth\BackupLoginController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Auth\OIDCController;
 use App\Http\Controllers\ChatbotController;
+use App\Http\Controllers\ClinicSchedule\ReservedBookingPeriodController;
 use App\Http\Controllers\Dentist\DentistAppointmentController;
 use App\Http\Controllers\Dentist\DentistClinicScheduleController;
 use App\Http\Controllers\Dentist\DentistDashboardController;
@@ -32,54 +30,54 @@ use App\Http\Controllers\Dentist\DentistPatientController;
 use App\Http\Controllers\Dentist\InventoryController;
 use App\Http\Controllers\Dentist\OdontogramController;
 use App\Http\Controllers\Dentist\WalkInController;
+use App\Http\Controllers\Shared\AcademicPeriodController;
+use App\Http\Controllers\Shared\DentalRecordController;
+use App\Http\Controllers\Shared\ExternalAdminController;
+use App\Http\Controllers\Shared\FacultyController;
+use App\Http\Controllers\Shared\ServiceTypeController;
 use App\Http\Controllers\DocumentRequestController;
-use App\Http\Controllers\FacultyController;
 use App\Http\Controllers\HomepageController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\RecordController;
 use App\Http\Controllers\Security\SessionManagementController;
 use App\Models\Patient;
 use App\Models\Role;
+use App\Models\User;
 use App\Services\StudentApiService;
+use App\Services\IdpHealthService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 
-// api nila albert
-
-Route::get('/debug-ogos-config', function () {
-    return response()->json([
-        'base_url' => config('services.ogos.base_url'),
-        'token_url' => config('services.ogos.token_url'),
-        'client_id' => config('services.ogos.client_id'),
-        'client_secret_exists' => filled(config('services.ogos.client_secret')),
-        'client_secret_length' => strlen((string) config('services.ogos.client_secret')),
-    ]);
-});
-
-Route::get('/test-student-api', function (StudentApiService $studentApiService) {
-    $email = 'student5@gmail.com'; // palitan mo kung needed
-
-    return response()->json($studentApiService->getStudentByEmail($email));
-});
-
 // kela matt
-Route::get('/faculties', [FacultyController::class, 'getFacultyList']);
+Route::get('/faculties', [FacultyController::class, 'getFacultyList'])
+    ->middleware([
+        'auth',
+        'permission:view_faculty_integration,create_faculty_integration,update_faculty_integration',
+    ])
+    ->name('shared.faculties.index');
 
 Route::get('/faculty-integration', function () {
-    return view('admin.faculty-integration');
-})->name('admin.faculty.integration');
+    $user = Auth::user();
 
-Route::post('/faculty-integration/store', [FacultyController::class, 'store'])
-    ->name('admin.faculty.store');
+    abort_unless($user, 403);
+
+    if ($user->hasAnyRole(['super_admin', 'admin'])) {
+        return redirect()->route('admin.faculty.integration');
+    }
+
+    if ($user->hasAnyRole(['dentist', 'dentist_role'])) {
+        return redirect()->route('dentist.faculty.integration');
+    }
+
+    abort(403);
+})
+    ->middleware('auth')
+    ->name('faculty.integration.redirect');
 
 // routes/web.php---
-
-Route::get('/debug-session', function () {
-    return response()->json(session()->all());
-});
 
 Route::get('/csrf-token', function () {
     return response()->json(['token' => csrf_token()]);
@@ -101,13 +99,50 @@ Route::middleware(['web'])->group(function () {
 Route::get('/', fn() => redirect('/login'));
 
 // Patient Login
-Route::view('/login', 'auth.login')->name('login');
+Route::get('/login', function (IdpHealthService $idpHealthService) {
+    return view('auth.login', $idpHealthService->loginViewData());
+})->name('login');
 Route::get('/backup-login', [BackupLoginController::class, 'show'])->name('backup.login');
 
-// Patient Register
-Route::get('/register', function () {
-    return view('auth.register');
-})->name('register');
+Route::get('/dashboard', function () {
+    if (!Auth::check()) {
+        return redirect()
+            ->route('login');
+    }
+
+    $role = strtolower(
+        (string) optional(
+            Auth::user()->role
+        )->slug
+    );
+
+    return match ($role) {
+        'admin',
+        'super_admin' =>
+        redirect()
+            ->route(
+                'admin.admin.dashboard'
+            ),
+
+        'dentist',
+        'dentist_role' =>
+        redirect()
+            ->route(
+                'dentist.dentist.dashboard'
+            ),
+
+        'patient',
+        'patient_role' =>
+        redirect()
+            ->route(
+                'patient.dashboard'
+            ),
+
+        default =>
+        redirect()
+            ->route('login'),
+    };
+})->name('dashboard');
 
 /*
 |--------------------------------------------------------------------------
@@ -183,25 +218,26 @@ Route::post('/login', [BackupLoginController::class, 'store'])->name('login.stor
 // Logout (all roles)
 Route::post('/logout', [LogoutController::class, 'logout'])->name('logout');
 
-Route::post(
-    '/session/expire',
-    [
-        SessionManagementController::class,
-        'expire',
-    ]
-)->name('session.expire');
+Route::post('/session/expire', [SessionManagementController::class, 'expire',])
+    ->name('session.expire');
 
-Route::post(
-    '/session/activity',
-    [
-        SessionManagementController::class,
-        'activity',
-    ]
-)
+Route::get('/session/status', [SessionManagementController::class, 'status',])
+    ->name('session.status');
+
+Route::post('/session/activity', [SessionManagementController::class, 'activity',])
     ->middleware('auth')
     ->name('session.activity');
 
+Route::put('/reports/signatory', [\App\Http\Controllers\Dentist\ReportSignatoryController::class, 'update'])
+    ->middleware('auth')->name('reports.signatory.update');
+
+Route::post('/reports/signatory/validate-signature', [\App\Http\Controllers\Dentist\ReportSignatoryController::class, 'validateSignature'])
+    ->middleware(['auth', 'throttle:10,1'])->name('reports.signatory.validate-signature');
+
 Route::middleware('auth')->prefix('notifications')->name('notifications.')->group(function () {
+    Route::get('/poll', [NotificationController::class, 'poll'])
+        ->name('poll');
+
     Route::post('/{notificationId}/read', [NotificationController::class, 'markAsRead'])
         ->name('mark-read');
 
@@ -226,6 +262,26 @@ Route::middleware('auth')->prefix('security')->name('security.')->group(function
         ->name('sessions.destroy-others');
 });
 
+Route::get(
+    '/clinical/patients/search',
+    [WalkInController::class, 'searchPatient']
+)
+    ->middleware([
+        'auth',
+        'permission:view_patient_profiles,manage_existing_records,manage_walk_in_patients',
+    ])
+    ->name('shared.existing-record.search-patient');
+
+Route::post(
+    '/clinical/patients/resolve-external',
+    [WalkInController::class, 'resolveExternalPatient']
+)
+    ->middleware([
+        'auth',
+        'permission:manage_existing_records,manage_walk_in_patients',
+    ])
+    ->name('shared.existing-record.resolve-external-patient');
+
 /*
 |--------------------------------------------------------------------------
 | ADMIN / SUPER ADMIN ROUTES
@@ -236,21 +292,35 @@ Route::prefix('admin')
     ->middleware(['auth', 'role:admin'])
     ->group(function () {
 
+        Route::get('/faculty-integration', function () {
+            return view('shared.faculty-integration');
+        })
+            ->middleware('permission:view_faculty_integration,create_faculty_integration,update_faculty_integration')
+            ->name('admin.faculty.integration');
+
+        Route::post('/faculty-integration/store', [FacultyController::class, 'store'])
+            ->middleware('permission:create_faculty_integration')
+            ->name('admin.faculty.store');
+
         /*
         |--------------------------------------------------------------------------
         | CMS ACCESS (External Admin Integration)
         |--------------------------------------------------------------------------
         */
         Route::get('/assign-cms-access', [ExternalAdminController::class, 'index'])
+            ->middleware('permission:view_cms_integration')
             ->name('admin.assign-cms-access');
 
         Route::post('/assign-cms-access', [ExternalAdminController::class, 'store'])
+            ->middleware('permission:create_cms_integration')
             ->name('admin.assign-cms-access.store');
 
         Route::get('/external-admins/search', [ExternalAdminController::class, 'search'])
+            ->middleware('permission:view_cms_integration')
             ->name('admin.external_admins.search');
 
         Route::get('/external-admins/{adminId}', [ExternalAdminController::class, 'show'])
+            ->middleware('permission:view_cms_integration')
             ->name('admin.external_admins.show');
 
         /*
@@ -259,19 +329,17 @@ Route::prefix('admin')
         |--------------------------------------------------------------------------
         */
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])
+            ->middleware('permission:access_super_admin_dashboard')
             ->name('admin.admin.dashboard');
 
         Route::get('/dental-records', [DentalRecordController::class, 'index'])
+            ->middleware('permission:view_dental_records')
             ->name('admin.dental-records.index');
 
-        // Safe stub routes used by blades to avoid missing-route exceptions.
-        // These redirect to the index until full handlers are implemented.
+        Route::get('/dental-records/{appointment}', [DentalRecordController::class, 'show'])
+            ->middleware('permission:view_dental_records')
+            ->name('admin.dental-records.show');
 
-        Route::get('/dental-records/{id}', function ($id) {
-            return redirect()->route('admin.dental-records.index');
-        })->name('admin.dental-records.show');
-
-        // Route aliases for blade views
         Route::get('/reports-index', function () {
             return redirect()->route('admin.reports');
         })->name('admin.reports.index');
@@ -285,13 +353,23 @@ Route::prefix('admin')
         | REPORTS & ANALYTICS
         |--------------------------------------------------------------------------
         */
+        Route::get('/report-files', [AdminReportController::class, 'reportFiles'])
+            ->middleware('permission:create_report_files')
+            ->name('admin.report-files');
+
+        Route::get('/report-files/cancellation-breakdown', [AdminReportController::class, 'cancellationBreakdown'])
+            ->middleware('permission:create_report_files')->name('admin.reports.cancellation-breakdown');
+
         Route::get('/reports', [AdminReportController::class, 'index'])
+            ->middleware('permission:view_reports,view_ai_reports,create_ai_generative_reports')
             ->name('admin.reports');
 
         Route::get('/reports/ai-generated', [AdminReportController::class, 'aiGenerated'])
+            ->middleware('permission:view_ai_reports')
             ->name('admin.reports.ai-generated');
 
         Route::get('/reports/ai-generated/download', [AdminReportController::class, 'downloadAiGenerated'])
+            ->middleware('permission:create_ai_generative_reports')
             ->name('admin.reports.ai-generated.download');
 
         /*
@@ -300,19 +378,45 @@ Route::prefix('admin')
         |--------------------------------------------------------------------------
         */
         Route::get('/role-permissions', [RolePermissionController::class, 'index'])
+            ->middleware('permission:view_roles_permissions')
             ->name('admin.role_permissions');
 
         Route::post('/role-permissions/update', [RolePermissionController::class, 'update'])
+            ->middleware('permission:update_role_permissions')
             ->name('admin.role_permissions.update');
 
         Route::post('/role-permissions/reset', [RolePermissionController::class, 'reset'])
+            ->middleware('permission:update_role_permissions')
             ->name('admin.role_permissions.reset');
 
         Route::post('/role-permissions/store-role', [RolePermissionController::class, 'storeRole'])
+            ->middleware('permission:create_custom_roles')
             ->name('admin.role_permissions.store_role');
 
-        Route::delete('/role-permissions/{id}/destroy', [RolePermissionController::class, 'destroyRole'])
+        Route::match(['post', 'delete'], '/role-permissions/{id}/destroy', [RolePermissionController::class, 'destroyRole'])
+            ->middleware('permission:delete_custom_roles')
             ->name('admin.role_permissions.destroy_role');
+
+        /*
+        |--------------------------------------------------------------------------
+        | ROLE PREVIEW
+        |--------------------------------------------------------------------------
+        */
+        Route::post('/role-preview/start', [RolePreviewController::class, 'start'])
+            ->middleware('permission:access_super_admin_dashboard')
+            ->name('admin.role_preview.start');
+
+        Route::get('/role-preview/patient', [RolePreviewController::class, 'patient'])
+            ->middleware('permission:access_super_admin_dashboard')
+            ->name('admin.role_preview.patient');
+
+        Route::get('/role-preview/dentist', [RolePreviewController::class, 'dentist'])
+            ->middleware('permission:access_super_admin_dashboard')
+            ->name('admin.role_preview.dentist');
+
+        Route::post('/role-preview/stop', [RolePreviewController::class, 'stop'])
+            ->middleware('permission:access_super_admin_dashboard')
+            ->name('admin.role_preview.stop');
 
         /*
         |--------------------------------------------------------------------------
@@ -320,27 +424,39 @@ Route::prefix('admin')
         |--------------------------------------------------------------------------
         */
         Route::get('/system-logs', [SystemLogController::class, 'index'])
+            ->middleware('permission:view_system_logs,export_system_logs,archive_system_logs')
             ->name('admin.system_logs');
 
         Route::get('/session-management', [AdminSessionManagementController::class, 'index'])
+            ->middleware('permission:manage_audit_trail')
             ->name('admin.session_management.index');
 
+        Route::get('/session-management/check', [AdminSessionManagementController::class, 'checkLatest'])
+            ->middleware('permission:manage_audit_trail')
+            ->name('admin.session_management.check');
+
         Route::delete('/session-management/sessions/{reference}', [AdminSessionManagementController::class, 'destroySession'])
+            ->middleware('permission:manage_audit_trail')
             ->name('admin.session_management.destroy_session');
 
         Route::delete('/session-management/users/{user}', [AdminSessionManagementController::class, 'destroyUserSessions'])
+            ->middleware('permission:manage_audit_trail')
             ->name('admin.session_management.destroy_user_sessions');
 
         Route::get('/system-logs/fetch', [SystemLogController::class, 'fetchLatest'])
+            ->middleware('permission:view_system_logs,export_system_logs,archive_system_logs')
             ->name('admin.system_logs.fetch');
 
         Route::get('/system-logs/check', [SystemLogController::class, 'checkLatest'])
+            ->middleware('permission:view_system_logs,export_system_logs,archive_system_logs')
             ->name('admin.system_logs.check');
 
         Route::get('/system-logs/export', [SystemLogController::class, 'export'])
+            ->middleware('permission:export_system_logs')
             ->name('admin.system_logs.export');
 
         Route::post('/system-logs/archive', [SystemLogController::class, 'archive'])
+            ->middleware('permission:archive_system_logs')
             ->name('admin.system_logs.archive');
 
         /*
@@ -349,12 +465,15 @@ Route::prefix('admin')
         |--------------------------------------------------------------------------
         */
         Route::get('/patient-directory', [AdminPatientController::class, 'index'])
+            ->middleware('permission:view_patient_profiles')
             ->name('admin.patient_directory');
 
         Route::get('/patients', [AdminPatientController::class, 'index'])
+            ->middleware('permission:view_patient_profiles')
             ->name('admin.admin.patients');
 
         Route::get('/patient/{patient}', [AdminPatientController::class, 'show'])
+            ->middleware('permission:view_patient_profiles')
             ->name('admin.admin.patient.profile');
 
         /*
@@ -363,25 +482,36 @@ Route::prefix('admin')
         |--------------------------------------------------------------------------
         */
         Route::get('/appointments', [AdminAppointmentController::class, 'index'])
+            ->middleware('permission:view_appointments')
             ->name('admin.admin.appointments');
 
-        /*
-        |--------------------------------------------------------------------------
-        | PATIENT LIST (FOR IMPERSONATION)
-        |--------------------------------------------------------------------------
-        */
-        Route::get('/patients/list', function () {
-            $user = Auth::user();
+        Route::get('/add-existing-record', [\App\Http\Controllers\Shared\ExistingRecordController::class, 'index'])
+            ->middleware('permission:manage_existing_records')
+            ->name('admin.existing-record.index');
 
-            if (! $user || ! in_array(optional($user->role)->slug, ['super_admin', 'admin'])) {
-                return response()->json(['message' => 'Unauthorized'], 403);
-            }
-            $patients = Patient::select('id', 'name', 'email', 'phone')
-                ->orderBy('name')
-                ->get();
+        Route::get('/patients/{patient}/existing-appointment', [\App\Http\Controllers\Dentist\OdontogramController::class, 'createExistingAppointment'])
+            ->middleware('permission:create_procedure_records')
+            ->name('admin.odontogram.existing-appointment.create');
 
-            return response()->json($patients);
-        })->name('admin.patients.list');
+        Route::post('/patients/{patient}/existing-appointment', [\App\Http\Controllers\Dentist\OdontogramController::class, 'storeExistingAppointmentIntake'])
+            ->middleware('permission:create_medical_records')
+            ->name('admin.odontogram.existing-appointment.intake.store');
+
+        Route::patch('/patients/{patient}/existing-appointment/history/autosave', [\App\Http\Controllers\Dentist\OdontogramController::class, 'autosaveExistingAppointmentHistory'])
+            ->middleware('permission:create_medical_records')
+            ->name('admin.odontogram.existing-appointment.history.autosave');
+
+        Route::get('/existing-appointment/slots', [\App\Http\Controllers\Dentist\OdontogramController::class, 'existingAppointmentSlotsForDate'])
+            ->middleware('permission:create_procedure_records')
+            ->name('admin.odontogram.existing-appointment.slots');
+
+        Route::get('/patients/{patient}/existing-appointment/odontogram', [\App\Http\Controllers\Dentist\OdontogramController::class, 'showExistingAppointmentOdontogram'])
+            ->middleware('permission:create_procedure_records')
+            ->name('admin.odontogram.existing-appointment.odontogram');
+
+        Route::post('/patients/{patient}/existing-appointment/save', [\App\Http\Controllers\Dentist\OdontogramController::class, 'storeExistingAppointment'])
+            ->middleware('permission:create_procedure_records')
+            ->name('admin.odontogram.existing-appointment.store');
 
         /*
         |--------------------------------------------------------------------------
@@ -389,21 +519,27 @@ Route::prefix('admin')
         |--------------------------------------------------------------------------
         */
         Route::get('/academic-periods', [AcademicPeriodController::class, 'index'])
+            ->middleware('permission:view_academic_periods')
             ->name('admin.academic_periods');
 
         Route::post('/academic-periods', [AcademicPeriodController::class, 'store'])
+            ->middleware('permission:create_academic_period')
             ->name('admin.academic_periods.store');
 
         Route::put('/academic-periods/{academicPeriod}', [AcademicPeriodController::class, 'update'])
+            ->middleware('permission:update_academic_period')
             ->name('admin.academic_periods.update');
 
         Route::delete('/academic-periods/{academicPeriod}', [AcademicPeriodController::class, 'destroy'])
+            ->middleware('permission:delete_academic_period')
             ->name('admin.academic_periods.destroy');
 
         Route::patch('/academic-periods/{academicPeriod}/set-active', [AcademicPeriodController::class, 'setActive'])
+            ->middleware('permission:update_academic_period')
             ->name('admin.academic_periods.set_active');
 
-        Route::post('/admin/academic-periods/sync-flss', [AcademicPeriodController::class, 'syncFromFlss'])
+        Route::post('/academic-periods/sync-flss', [AcademicPeriodController::class, 'syncFromFlss'])
+            ->middleware('permission:update_academic_period')
             ->name('admin.academic_periods.sync_flss');
 
         /*
@@ -412,43 +548,68 @@ Route::prefix('admin')
         |--------------------------------------------------------------------------
         */
         Route::get('/clinic-schedule', [ClinicScheduleController::class, 'index'])
+            ->middleware('permission:view_clinic_schedule')
             ->name('admin.clinic_schedule');
 
         Route::post('/clinic-schedule', [ClinicScheduleController::class, 'store'])
+            ->middleware('permission:create_clinic_schedule')
             ->name('admin.clinic_schedule.store');
 
         Route::put('/clinic-schedule/rules/{clinicSchedule}', [ClinicScheduleController::class, 'update'])
+            ->middleware('permission:update_clinic_schedule')
             ->name('admin.clinic_schedule.update');
 
         Route::delete('/clinic-schedule/rules/{clinicSchedule}', [ClinicScheduleController::class, 'destroy'])
+            ->middleware('permission:delete_clinic_schedule')
             ->name('admin.clinic_schedule.destroy');
 
+        Route::post('/clinic-schedule/reserved-periods', [ReservedBookingPeriodController::class, 'store'])
+            ->middleware('permission:create_clinic_schedule')
+            ->name('admin.clinic_schedule.reserved_periods.store');
+
+        Route::put('/clinic-schedule/reserved-periods/{reservedBookingPeriod}', [ReservedBookingPeriodController::class, 'update'])
+            ->middleware('permission:update_clinic_schedule')
+            ->name('admin.clinic_schedule.reserved_periods.update');
+
+        Route::delete('/clinic-schedule/reserved-periods/{reservedBookingPeriod}', [ReservedBookingPeriodController::class, 'destroy'])
+            ->middleware('permission:delete_clinic_schedule')
+            ->name('admin.clinic_schedule.reserved_periods.destroy');
+
         Route::post('/clinic-schedule/block-date', [ClinicScheduleController::class, 'blockDate'])
+            ->middleware('permission:create_clinic_schedule')
             ->name('admin.clinic_schedule.block');
 
         Route::delete('/clinic-schedule/block-date/{blockedDate}', [ClinicScheduleController::class, 'unblockDate'])
+            ->middleware('permission:delete_clinic_schedule')
             ->name('admin.clinic_schedule.unblock');
 
         Route::get('/clinic-schedule/unavailable-dates', [ClinicScheduleController::class, 'unavailableDates'])
+            ->middleware('permission:view_clinic_schedule')
             ->name('admin.clinic_schedule.unavailable_dates');
 
         Route::get('/clinic-schedule/slots', [ClinicScheduleController::class, 'slotsForDate'])
+            ->middleware('permission:view_clinic_schedule')
             ->name('admin.clinic_schedule.slots');
 
         // INVENTORY
         Route::get('/inventory', [AdminInventoryController::class, 'index'])
+            ->middleware('permission:view_inventory')
             ->name('admin.inventory');
 
         Route::get('/inventory/data', [AdminInventoryController::class, 'fetch'])
+            ->middleware('permission:view_inventory')
             ->name('admin.inventory.data');
 
         Route::post('/inventory', [AdminInventoryController::class, 'store'])
+            ->middleware('permission:add_inventory')
             ->name('admin.inventory.store');
 
         Route::put('/inventory/{inventory}', [AdminInventoryController::class, 'update'])
+            ->middleware('permission:update_inventory')
             ->name('admin.inventory.update');
 
         Route::delete('/inventory/{inventory}', [AdminInventoryController::class, 'destroy'])
+            ->middleware('permission:delete_inventory')
             ->name('admin.inventory.destroy');
     });
 
@@ -458,24 +619,33 @@ Route::prefix('admin')
     ->group(function () {
 
         Route::get('/document-requests', [AdminDocumentRequestController::class, 'index'])
+            ->middleware('permission:view_document_requests')
             ->name('admin.document-requests.index');
 
         Route::get('/document-requests/data', [AdminDocumentRequestController::class, 'data'])
+            ->middleware('permission:view_document_requests')
             ->name('admin.document-requests.data');
 
         Route::get('/document-requests/export', [AdminDocumentRequestController::class, 'export'])
+            ->middleware('permission:view_document_requests')
             ->name('admin.document-requests.export');
 
         Route::get('/document-requests/print-queue', [AdminDocumentRequestController::class, 'printQueue'])
+            ->middleware('permission:view_document_requests')
             ->name('admin.document-requests.print-queue');
 
         Route::get('/document-requests/{id}', [AdminDocumentRequestController::class, 'show'])
+            ->middleware('permission:view_document_requests')
             ->name('admin.document-requests.show');
 
         Route::patch('/document-requests/{id}/approve', [AdminDocumentRequestController::class, 'approve'])
+            ->middleware('permission:view_document_requests')
+            ->middleware('permission:approve_document_requests')
             ->name('admin.document-requests.approve');
 
         Route::patch('/document-requests/{id}/reject', [AdminDocumentRequestController::class, 'reject'])
+            ->middleware('permission:view_document_requests')
+            ->middleware('permission:reject_document_requests')
             ->name('admin.document-requests.reject');
     });
 
@@ -487,22 +657,27 @@ Route::prefix('admin')
 
         // LIST PAGE
         Route::get('/document-template', [DocumentTemplateController::class, 'index'])
+            ->middleware('permission:manage_document_templates')
             ->name('document-template');
 
         // PREVIEW (AJAX)
         Route::get('/document-template/{id}', [DocumentTemplateController::class, 'show'])
+            ->middleware('permission:manage_document_templates')
             ->name('document-template.show');
 
         // ARCHIVE
         Route::patch('/document-template/{id}/archive', [DocumentTemplateController::class, 'archive'])
+            ->middleware('permission:manage_document_templates')
             ->name('document-template.archive');
 
         // ACTIVATE
         Route::patch('/document-template/{id}/activate', [DocumentTemplateController::class, 'activate'])
+            ->middleware('permission:manage_document_templates')
             ->name('document-template.activate');
 
         // SET DEFAULT
         Route::patch('/document-template/{id}/default', [DocumentTemplateController::class, 'setDefault'])
+            ->middleware('permission:manage_document_templates')
             ->name('document-template.default');
     });
 
@@ -511,9 +686,18 @@ Route::prefix('admin')
     ->middleware(['auth', 'role:admin'])
     ->group(function () {
         Route::get('/system-settings', [SystemSettingsController::class, 'index'])
+            ->middleware('permission:manage_system_settings,set_notification_rules')
             ->name('admin.system_settings');
 
+        Route::get('/retention-policy', [\App\Http\Controllers\Admin\RetentionPolicyController::class, 'index'])
+            ->middleware('permission:manage_system_settings')->name('admin.retention.index');
+        Route::get('/retention-review', [\App\Http\Controllers\Admin\RetentionPolicyController::class, 'review'])
+            ->middleware('permission:manage_system_settings')->name('admin.retention.review');
+        Route::put('/retention-policy/{policy}', [\App\Http\Controllers\Admin\RetentionPolicyController::class, 'update'])
+            ->middleware('permission:manage_system_settings')->name('admin.retention.update');
+
         Route::post('/system-settings', [SystemSettingsController::class, 'update'])
+            ->middleware('permission:manage_system_settings,set_notification_rules')
             ->name('admin.system_settings.update');
     });
 /*
@@ -527,18 +711,15 @@ Route::prefix('admin')
     ->group(function () {
 
         Route::get('/user-management', [UserManagementController::class, 'index'])
+            ->middleware('permission:view_account_details,disable_users,update_user_role')
             ->name('admin.user_management');
 
-        Route::post('/user-management', [UserManagementController::class, 'store'])
-            ->name('admin.user_management.store');
-
         Route::put('/user-management/{user}', [UserManagementController::class, 'update'])
+            ->middleware('permission:update_user_role')
             ->name('admin.user_management.update');
 
-        Route::post('/user-management/{user}/reset-password', [UserManagementController::class, 'resetPassword'])
-            ->name('admin.user_management.reset_password');
-
         Route::post('/user-management/{user}/toggle-status', [UserManagementController::class, 'toggleStatus'])
+            ->middleware('permission:disable_users')
             ->name('admin.user_management.toggle_status');
 
         /*
@@ -555,6 +736,9 @@ Route::prefix('admin')
         Route::post('/dentist-transitions', [DentistTransitionController::class, 'store'])
             ->name('admin.dentist-transitions.store');
 
+        Route::put('/dentist-transitions/current-dentist', [DentistTransitionController::class, 'assignCurrentDentist'])
+            ->name('admin.dentist-transitions.assign-current');
+
         Route::get('/dentist-transitions/{transition}', [DentistTransitionController::class, 'show'])
             ->name('admin.dentist-transitions.show');
 
@@ -570,8 +754,6 @@ Route::prefix('admin')
         Route::put('/dentist-transitions/{transition}/assignments', [DentistTransitionController::class, 'assignments'])
             ->name('admin.dentist-transitions.assignments');
 
-        Route::put('/dentist-transitions/{transition}/checklist', [DentistTransitionController::class, 'checklist'])
-            ->name('admin.dentist-transitions.checklist');
 
         Route::post('/dentist-transitions/{transition}/finalize', [DentistTransitionController::class, 'finalize'])
             ->name('admin.dentist-transitions.finalize');
@@ -581,6 +763,10 @@ Route::prefix('admin')
 
         Route::post('/dentist-transitions/{transition}/extend-access', [DentistTransitionController::class, 'extendAccess'])
             ->name('admin.dentist-transitions.extend-access');
+
+        Route::post('/dentist-transitions/{transition}/end-temporary', [DentistTransitionController::class, 'endTemporary'])
+            ->middleware('permission:finalize_dentist_transitions')
+            ->name('admin.dentist-transitions.end-temporary');
     });
 
 Route::prefix('admin')
@@ -588,122 +774,19 @@ Route::prefix('admin')
     ->middleware(['auth', 'role:admin'])
     ->group(function () {
 
-        Route::get('/service-types', [ServiceTypeController::class, 'index'])->name('service-types');
-        Route::post('/service-types', [ServiceTypeController::class, 'store'])->name('service-types.store');
-        Route::put('/service-types/{id}', [ServiceTypeController::class, 'update'])->name('service-types.update');
-        Route::delete('/service-types/{id}', [ServiceTypeController::class, 'destroy'])->name('service-types.destroy');
+        Route::get('/service-types', [ServiceTypeController::class, 'index'])
+            ->middleware('permission:view_service_type,create_service_type,delete_service_type,update_default_service_type')
+            ->name('service-types');
+        Route::post('/service-types', [ServiceTypeController::class, 'store'])
+            ->middleware('permission:create_service_type')
+            ->name('service-types.store');
+        Route::put('/service-types/{id}', [ServiceTypeController::class, 'update'])
+            ->middleware('permission:update_default_service_type')
+            ->name('service-types.update');
+        Route::delete('/service-types/{id}', [ServiceTypeController::class, 'destroy'])
+            ->middleware('permission:delete_service_type')
+            ->name('service-types.destroy');
     });
-
-/*
-|--------------------------------------------------------------------------
-| ADMIN IMPERSONATION ROUTES
-|--------------------------------------------------------------------------
-*/
-
-Route::post('/impersonate', function (Request $request) {
-
-    /** @var \App\Models\User $user */
-    $user = Auth::user();
-
-    if (! $user || ! $user->hasAnyRole(['super_admin', 'admin'])) {
-        return response()->json(['message' => 'Unauthorized'], 403);
-    }
-
-    $request->validate([
-        'role' => 'required|string',
-    ]);
-
-    $targetRole = strtolower(trim($request->role));
-
-    if (! session()->has('impersonator_role')) {
-        session([
-            'impersonator_role' => optional(Auth::user()->role)->slug,
-            'impersonator_admin_id' => Auth::id(),
-            'impersonator_admin_email' => Auth::user()->email,
-        ]);
-    }
-
-    if (in_array($targetRole, ['dentist', 'dentist_role'], true)) {
-
-        session([
-            'impersonated_role' => 'dentist',
-        ]);
-
-        session()->forget(['impersonated_patient_id']);
-
-        AuditLogger::log(
-            'impersonation_started',
-            'authentication',
-            'Admin started impersonating Dentist dashboard'
-        );
-
-        return response()->json([
-            'redirect' => route('dentist.dentist.dashboard'),
-        ]);
-    }
-
-    if (in_array($targetRole, ['patient', 'patient_role'], true)) {
-
-        $request->validate([
-            'patient_id' => 'required|exists:patients,id',
-        ]);
-
-        $patient = Patient::find($request->patient_id);
-
-        if (! $patient) {
-            return response()->json([
-                'message' => 'Selected patient not found.',
-            ], 422);
-        }
-
-        session([
-            'impersonated_role' => 'patient',
-            'impersonated_patient_id' => $patient->id,
-        ]);
-
-        AuditLogger::log(
-            'impersonation_started',
-            'authentication',
-            'Admin started impersonating Patient ID ' . $patient->id
-        );
-
-        return response()->json([
-            'redirect' => route('patient.dashboard'),
-        ]);
-    }
-
-    return response()->json([
-        'message' => 'Unsupported role: ' . $targetRole,
-    ], 422);
-})->name('admin.impersonate');
-
-Route::post('/stop-impersonation', function () {
-
-    /** @var \App\Models\User $user */
-    $user = Auth::user();
-
-    if (! $user || ! $user->hasAnyRole(['super_admin', 'admin'])) {
-        return response()->json(['message' => 'Unauthorized'], 403);
-    }
-
-    if (session()->has('impersonator_role')) {
-        AuditLogger::log(
-            'impersonation_stopped',
-            'authentication',
-            'Admin stopped impersonation'
-        );
-    }
-
-    session()->forget([
-        'impersonated_role',
-        'impersonated_patient_id',
-        'impersonator_role',
-        'impersonator_admin_id',
-        'impersonator_admin_email',
-    ]);
-
-    return redirect()->route('admin.admin.dashboard');
-})->name('admin.stop_impersonation');
 
 /*
 |--------------------------------------------------------------------------
@@ -720,6 +803,10 @@ Route::middleware(['role:patient'])->group(function () {
     Route::get('/book-appointment', [AppointmentController::class, 'create'])
         ->middleware('permission:book_appointments')
         ->name('patient.book.appointment');
+
+    Route::get('/book-appointment/reserved/{reservedBookingPeriod}', [AppointmentController::class, 'create'])
+        ->middleware('permission:book_appointments')
+        ->name('book.appointment.reserved');
 
     Route::get('/available-slots', [AppointmentController::class, 'availableSlots'])
         ->middleware('permission:book_appointments')
@@ -755,6 +842,7 @@ Route::middleware(['role:patient'])->group(function () {
 
     // Clinic Schedule
     Route::get('/book-appointment/slots', [AppointmentController::class, 'slotsForDate'])
+        ->middleware('permission:book_appointments')
         ->name('book.appointment.slots');
 });
 
@@ -782,7 +870,7 @@ Route::prefix('patient')->middleware(['role:patient'])->group(function () {
     })->middleware('permission:access_patient_dashboard')->name('patient.dashboard');
 
     Route::get('/appointment', [AppointmentController::class, 'index'])
-        ->middleware('permission:view_own_appointments')
+        ->middleware('permission:view_own_appointments,book_appointments')
         ->name('patient.appointment.index');
 
     Route::get('/appointment/create', [AppointmentController::class, 'create'])
@@ -801,9 +889,13 @@ Route::prefix('patient')->middleware(['role:patient'])->group(function () {
         ->middleware('permission:book_appointments')
         ->name('book.appointment.store');
 
-            Route::get('/book-appointment/draft', [AppointmentController::class, 'getDraft'])
+    Route::get('/book-appointment/draft', [AppointmentController::class, 'getDraft'])
         ->middleware('permission:book_appointments')
         ->name('book.appointment.draft.show');
+
+    Route::get('/book-appointment/verify-personal-information', [AppointmentController::class, 'verifyPersonalInformation'])
+        ->middleware('permission:book_appointments')
+        ->name('book.appointment.verify-personal-information');
 
     Route::put('/book-appointment/draft', [AppointmentController::class, 'saveDraft'])
         ->middleware('permission:book_appointments')
@@ -814,28 +906,16 @@ Route::prefix('patient')->middleware(['role:patient'])->group(function () {
         ->name('book.appointment.draft.delete');
 
     Route::post('/book-appointment/validate-signature', [AppointmentController::class, 'validateSignature'])
+        ->middleware('permission:book_appointments')
         ->name('book.appointment.validate-signature');
 
-    Route::get('/signature-review', [AppointmentController::class, 'showSignatureReview'])
-        ->middleware('permission:book_appointments')
-        ->name('patient.signature-review.show');
-
-    Route::post('/signature-review', [AppointmentController::class, 'updateSignatureReview'])
-        ->middleware('permission:book_appointments')
-        ->name('patient.signature-review.update');
-
     Route::get('/appointments', [AppointmentController::class, 'index'])
-        ->middleware('permission:view_own_appointments')
+        ->middleware('permission:view_own_appointments,book_appointments')
         ->name('book.appointment.index');
 
-    Route::get('/patient/appointments/cancelled', function () {
-        return view('patient.cancelled'); // <-- include 'patient.'
+    Route::get('/appointments/cancelled', function () {
+        return view('patient.cancelled');
     })->name('patient.appointment.cancelled.view');
-});
-
-Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
-    Route::post('/patients/{patient}/signature/invalid', [AppointmentController::class, 'markSignatureInvalid'])
-        ->name('admin.patient.signature.invalid');
 });
 
 /*
@@ -844,193 +924,38 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::prefix('dentist')->middleware(['role:dentist'])->group(function () {
-    Route::post('/patients/{patient}/signature/invalid', [AppointmentController::class, 'markSignatureInvalid'])
-        ->middleware('permission:manage_patient_profiles')
-        ->name('dentist.patient.signature.invalid');
-
-    Route::get('/dashboard', function () {
-        $now = \Carbon\Carbon::now();
-        $today = $now->toDateString();
-
-        $todayAppointments = \App\Models\Appointment::with('patient')
-            ->whereDate('appointment_date', $today)
-            ->whereIn('status', ['upcoming', 'rescheduled', 'pending', 'confirmed'])
-            ->orderBy('appointment_time', 'asc')
-            ->get();
-
-        $startOfMonth = $now->copy()->startOfMonth()->toDateString();
-        $endOfMonth = $now->copy()->endOfMonth()->toDateString();
-
-        $calendarAppointments = \App\Models\Appointment::with('patient')
-            ->whereBetween('appointment_date', [$startOfMonth, $endOfMonth])
-            ->whereIn('status', ['pending', 'confirmed', 'upcoming', 'rescheduled', 'completed'])
-            ->orderBy('appointment_date', 'asc')
-            ->orderBy('appointment_time', 'asc')
-            ->get();
-
-        $appointmentCountsPerDay = $calendarAppointments
-            ->groupBy(function ($appointment) {
-                return \Carbon\Carbon::parse($appointment->appointment_date)->format('Y-m-d');
-            })
-            ->map(function ($items) {
-                return $items->count();
-            })
-            ->toArray();
-
-        $calendarAppointmentDetails = $calendarAppointments
-            ->groupBy(function ($appointment) {
-                return \Carbon\Carbon::parse($appointment->appointment_date)->format('Y-m-d');
-            })
-            ->map(function ($items) {
-                return $items->map(function ($appointment) {
-                    $name = $appointment->patient->name ?? 'Unknown Patient';
-
-                    $time = ! empty($appointment->appointment_time)
-                        ? \Carbon\Carbon::parse($appointment->appointment_time)->format('h:i A')
-                        : '—';
-
-                    $service = $appointment->service_type === 'others'
-                        ? ($appointment->other_services ?? 'Other Service')
-                        : ($appointment->service_type ?? 'General Service');
-
-                    return [
-                        'id' => $appointment->id,
-                        'name' => $name,
-                        'time' => $time,
-                        'service' => ucwords($service),
-                        'status' => $appointment->status ?? 'pending',
-                        'date' => \Carbon\Carbon::parse($appointment->appointment_date)->format('Y-m-d'),
-                        'patientProfileUrl' => $appointment->patient_id
-                            ? route('dentist.dentist.patient.profile', $appointment->patient_id)
-                            : '#',
-                        'rescheduleUrl' => route(
-                            'dentist.dentist.appointments.reschedule.update',
-                            $appointment->id
-                        ),
-                        'cancelUrl' => route('dentist.dentist.appointments.cancel', $appointment->id),
-                    ];
-                })->values()->toArray();
-            })
-            ->toArray();
-
-        $dentalCasesThisMonth = \App\Models\Appointment::whereYear('appointment_date', $now->year)
-            ->whereMonth('appointment_date', $now->month)
-            ->where('status', 'completed')
-            ->count();
-
-        $lastMonth = $now->copy()->subMonth();
-
-        $dentalCasesLastMonth = \App\Models\Appointment::whereYear('appointment_date', $lastMonth->year)
-            ->whereMonth('appointment_date', $lastMonth->month)
-            ->where('status', 'completed')
-            ->count();
-
-        $dentalCasesDelta = $dentalCasesLastMonth > 0
-            ? round((($dentalCasesThisMonth - $dentalCasesLastMonth) / $dentalCasesLastMonth) * 100)
-            : null;
-
-        $totalApptsThisMonth = \App\Models\Appointment::whereYear('appointment_date', $now->year)
-            ->whereMonth('appointment_date', $now->month)
-            ->whereIn('status', ['upcoming', 'rescheduled', 'completed', 'cancelled', 'pending', 'confirmed'])
-            ->count();
-
-        $totalApptsLastMonth = \App\Models\Appointment::whereYear('appointment_date', $lastMonth->year)
-            ->whereMonth('appointment_date', $lastMonth->month)
-            ->whereIn('status', ['pending', 'confirmed', 'upcoming', 'rescheduled', 'completed', 'cancelled'])
-            ->count();
-
-        $totalApptsDelta = $totalApptsLastMonth > 0
-            ? round((($totalApptsThisMonth - $totalApptsLastMonth) / $totalApptsLastMonth) * 100)
-            : null;
-
-        $medicalSupplies = \Illuminate\Support\Facades\DB::table('inventory_items')
-            ->where('category', 'Supplies')
-            ->orderByRaw('(qty - used) ASC')
-            ->limit(3)
-            ->get();
-
-        $medicineSupplies = \Illuminate\Support\Facades\DB::table('inventory_items')
-            ->where('category', 'Medicine')
-            ->orderByRaw('(qty - used) ASC')
-            ->limit(3)
-            ->get();
-
-        $gadRaw = \Illuminate\Support\Facades\DB::table('daily_treatment_records')
-            ->whereYear('treatment_date', $now->year)
-            ->whereMonth('treatment_date', $now->month)
-            ->select('office_type', 'gender', \Illuminate\Support\Facades\DB::raw('COUNT(*) as total'))
-            ->groupBy('office_type', 'gender')
-            ->get();
-
-        $gadLabels = ['Student', 'Administrative', 'Faculty', 'Dependent'];
-        $gadFemale = [];
-        $gadMale = [];
-
-        foreach ($gadLabels as $label) {
-            $key = $label === 'Student' ? null : $label;
-            $gadFemale[] = (int) $gadRaw->where('office_type', $key)->where('gender', 'Female')->sum('total');
-            $gadMale[] = (int) $gadRaw->where('office_type', $key)->where('gender', 'Male')->sum('total');
-        }
-
-        $philippineHolidays = PhilippineHolidays::range(yearsBefore: 1, yearsAfter: 5);
-        $notifications = collect([]);
-        $unavailableDates = [];
-
-        $clinicStatus = strtolower(
-            (string) \App\Models\SystemSetting::getSetting(
-                'clinic_status',
-                'in'
-            )
-        );
-
-        return view('dentist.dentist-dashboard', compact(
-            'todayAppointments',
-            'appointmentCountsPerDay',
-            'calendarAppointmentDetails',
-            'philippineHolidays',
-            'unavailableDates',
-            'notifications',
-            'dentalCasesThisMonth',
-            'dentalCasesDelta',
-            'totalApptsThisMonth',
-            'totalApptsDelta',
-            'medicalSupplies',
-            'medicineSupplies',
-            'gadLabels',
-            'gadFemale',
-            'gadMale',
-            'clinicStatus'
-        ));
-    })->middleware('permission:access_dentist_dashboard')->name('dentist.dentist.dashboard');
+Route::prefix('dentist')->middleware(['auth'])->group(function () {
+    Route::get('/dashboard', [DentistDashboardController::class, 'index'])
+        ->middleware('permission:access_dentist_dashboard')
+        ->name('dentist.dentist.dashboard');
 
     // Appointments
     Route::get('/appointments', [DentistAppointmentController::class, 'index'])
-        ->middleware('permission:manage_appointments')
+        ->middleware('permission:view_appointments,reschedule_appointments,cancel_appointments,create_follow_up_appointments,create_procedure_records')
         ->name('dentist.dentist.appointments');
 
     Route::get('/appointments/{appointment}/patient-profile', [DentistAppointmentController::class, 'patientProfile'])
-        ->middleware('permission:manage_patient_profiles')
+        ->middleware('permission:view_appointments,reschedule_appointments,cancel_appointments,create_follow_up_appointments,create_procedure_records')
         ->name('dentist.dentist.appointments.patientProfile');
 
     Route::put('/appointments/{id}/reschedule', [DentistAppointmentController::class, 'updateReschedule'])
-        ->middleware('permission:manage_appointments')
+        ->middleware('permission:reschedule_appointments')
         ->name('dentist.dentist.appointments.reschedule.update');
 
     Route::post('/appointments/{id}/follow-up', [DentistAppointmentController::class, 'storeFollowUp'])
-        ->middleware('permission:manage_appointments')
+        ->middleware('permission:create_follow_up_appointments')
         ->name('dentist.dentist.appointments.follow-up.store');
 
-    Route::get('/dentist/appointment-slots', [AppointmentController::class, 'slotsForDate'])
-        ->middleware(['role:dentist'])
+    Route::get('/appointment-slots', [AppointmentController::class, 'slotsForDate'])
+        ->middleware('permission:reschedule_appointments')
         ->name('dentist.appointment.slots');
 
     Route::post('/appointments/{id}/cancel', [DentistAppointmentController::class, 'cancel'])
-        ->middleware('permission:manage_appointments')
+        ->middleware('permission:cancel_appointments')
         ->name('dentist.dentist.appointments.cancel');
 
     Route::get('/appointments/{id}/start', [DentistAppointmentController::class, 'start'])
-        ->middleware('permission:manage_appointments')
+        ->middleware('permission:create_procedure_records')
         ->name('dentist.dentist.appointments.start');
 
     /*
@@ -1039,138 +964,185 @@ Route::prefix('dentist')->middleware(['role:dentist'])->group(function () {
 |--------------------------------------------------------------------------
 */
     Route::get('/clinic-schedule', [DentistClinicScheduleController::class, 'index'])
-        ->middleware('permission:manage_appointments')
+        ->middleware('permission:view_clinic_schedule')
         ->name('dentist.dentist.clinic_schedule');
 
     Route::post('/clinic-schedule', [DentistClinicScheduleController::class, 'store'])
-        ->middleware('permission:manage_appointments')
+        ->middleware('permission:create_clinic_schedule')
         ->name('dentist.dentist.clinic_schedule.store');
 
     Route::put('/clinic-schedule/rules/{clinicSchedule}', [DentistClinicScheduleController::class, 'update'])
-        ->middleware('permission:manage_appointments')
+        ->middleware('permission:update_clinic_schedule')
         ->name('dentist.dentist.clinic_schedule.update');
 
     Route::delete('/clinic-schedule/rules/{clinicSchedule}', [DentistClinicScheduleController::class, 'destroy'])
-        ->middleware('permission:manage_appointments')
+        ->middleware('permission:delete_clinic_schedule')
         ->name('dentist.dentist.clinic_schedule.destroy');
 
+    Route::post('/clinic-schedule/reserved-periods', [ReservedBookingPeriodController::class, 'store'])
+        ->middleware('permission:create_clinic_schedule')
+        ->name('dentist.dentist.clinic_schedule.reserved_periods.store');
+
+    Route::put('/clinic-schedule/reserved-periods/{reservedBookingPeriod}', [ReservedBookingPeriodController::class, 'update'])
+        ->middleware('permission:update_clinic_schedule')
+        ->name('dentist.dentist.clinic_schedule.reserved_periods.update');
+
+    Route::delete('/clinic-schedule/reserved-periods/{reservedBookingPeriod}', [ReservedBookingPeriodController::class, 'destroy'])
+        ->middleware('permission:delete_clinic_schedule')
+        ->name('dentist.dentist.clinic_schedule.reserved_periods.destroy');
+
     Route::post('/clinic-schedule/block-date', [DentistClinicScheduleController::class, 'blockDate'])
-        ->middleware('permission:manage_appointments')
+        ->middleware('permission:create_clinic_schedule')
         ->name('dentist.dentist.clinic_schedule.block');
 
     Route::delete('/clinic-schedule/block-date/{blockedDate}', [DentistClinicScheduleController::class, 'unblockDate'])
-        ->middleware('permission:manage_appointments')
+        ->middleware('permission:delete_clinic_schedule')
         ->name('dentist.dentist.clinic_schedule.unblock');
 
     Route::get('/clinic-schedule/unavailable-dates', [DentistClinicScheduleController::class, 'unavailableDates'])
-        ->middleware('permission:manage_appointments')
+        ->middleware('permission:view_clinic_schedule,update_clinic_schedule,create_clinic_schedule,delete_clinic_schedule')
         ->name('dentist.dentist.clinic_schedule.unavailable_dates');
 
     Route::get('/clinic-schedule/slots', [DentistClinicScheduleController::class, 'slotsForDate'])
-        ->middleware('permission:manage_appointments')
+        ->middleware('permission:view_clinic_schedule,update_clinic_schedule,create_clinic_schedule,delete_clinic_schedule')
         ->name('dentist.dentist.clinic_schedule.slots');
 
     // Patients
     Route::get('/patients', [DentistPatientController::class, 'index'])
-        ->middleware('permission:manage_patient_profiles')
+        ->middleware('permission:view_patient_profiles')
         ->name('dentist.dentist.patients');
 
     Route::get('/patients/{patient}/profile', [DentistPatientController::class, 'profile'])
-        ->middleware('permission:manage_patient_profiles')
+        ->middleware('permission:view_patient_profiles,view_dental_records')
         ->name('dentist.dentist.patient.profile');
 
     // Report Page
     Route::get('/report', [\App\Http\Controllers\Dentist\DentistReportController::class, 'index'])
-        ->middleware('permission:manage_reports')
+        ->middleware('permission:view_reports,create_report_files')
         ->name('dentist.dentist.report');
 
+    Route::get('/report/cancellation-breakdown', [AdminReportController::class, 'cancellationBreakdown'])
+        ->middleware('permission:view_reports,create_report_files')->name('dentist.reports.cancellation-breakdown');
+
     Route::get('/report/gad-data', [\App\Http\Controllers\Dentist\DentistReportController::class, 'gadData'])
-        ->middleware('permission:manage_reports')
+        ->middleware('permission:view_reports,create_report_files')
         ->name('dentist.dentist.report.gad-data');
 
     Route::post('/report/gad-download', [\App\Http\Controllers\Dentist\DentistReportController::class, 'downloadGadReport'])
-        ->middleware('permission:manage_reports')
+        ->middleware('permission:create_report_files')
         ->name('dentist.dentist.report.gad-download');
 
     Route::post('/report/annual-dental-clearance-download', [\App\Http\Controllers\Dentist\DentistReportController::class, 'downloadAnnualDentalClearance'])
-        ->middleware('permission:manage_reports')
+        ->middleware('permission:create_report_files')
         ->name('dentist.dentist.report.annual-clearance-download');
 
     Route::post('/report/dental-clearance-download', [\App\Http\Controllers\Dentist\DentistReportController::class, 'downloadDentalClearance'])
-        ->middleware('permission:manage_reports')
+        ->middleware('permission:create_report_files')
         ->name('dentist.dentist.report.dental-clearance-download');
 
     Route::post('/report/dental-services-download', [\App\Http\Controllers\Dentist\DentistReportController::class, 'downloadDentalServicesReport'])
-        ->middleware('permission:manage_reports')
+        ->middleware('permission:create_report_files')
         ->name('dentist.dentist.report.dental-services-download');
 
     Route::post('/report/medicine-inventory-download', [\App\Http\Controllers\Dentist\DentistReportController::class, 'downloadMedicineInventoryReport'])
-        ->middleware('permission:manage_reports')
+        ->middleware('permission:create_report_files')
         ->name('dentist.dentist.report.medicine-inventory-download');
 
+    Route::post('/report/dpt-download', [\App\Http\Controllers\Dentist\DptReportController::class, 'download'])
+        ->middleware('permission:create_report_files')
+        ->name('dentist.dentist.report.dpt-download');
+
     Route::post('/report/daily-treatment-record-download', [\App\Http\Controllers\Dentist\DentistReportController::class, 'downloadDailyTreatmentRecordReport'])
-        ->middleware('permission:manage_reports')
+        ->middleware('permission:create_report_files')
         ->name('dentist.dentist.report.daily-treatment-record-download');
 
     Route::post('/report/dental-health-record-download', [\App\Http\Controllers\Dentist\DentistReportController::class, 'downloadDentalHealthRecord'])
-        ->middleware('permission:manage_reports')
+        ->middleware('permission:create_report_files')
         ->name('dentist.dentist.report.dental-health-record-download');
 
     Route::post('/report/dental-supplies-inventory-download', [\App\Http\Controllers\Dentist\DentistReportController::class, 'downloadDentalSuppliesInventoryReport'])
-        ->middleware('permission:manage_reports')
+        ->middleware('permission:create_report_files')
         ->name('dentist.dentist.report.dental-supplies-inventory-download');
 
     Route::post('/report/dental-cases-download', [\App\Http\Controllers\Dentist\DentistReportController::class, 'downloadDentalCasesReport'])
-        ->middleware('permission:manage_reports')
+        ->middleware('permission:create_report_files')
         ->name('dentist.dentist.report.dental-cases-download');
 
     Route::post('/report/monthly-report-download', [\App\Http\Controllers\Dentist\DentistReportController::class, 'downloadMonthlyReport'])
-        ->middleware('permission:manage_reports')
+        ->middleware('permission:create_report_files')
         ->name('dentist.dentist.report.monthly-report-download');
 
+    Route::post('/report/monthly-report-counts', [\App\Http\Controllers\Dentist\DentistReportController::class, 'monthlyReportCounts'])
+        ->middleware('permission:create_report_files')
+        ->name('dentist.dentist.report.monthly-report-counts');
+
     Route::get('/report/weekly-data', [\App\Http\Controllers\Dentist\DentistReportController::class, 'weeklyData'])
-        ->middleware('permission:manage_reports')
+        ->middleware('permission:create_report_files')
         ->name('dentist.dentist.report.weekly-data');
 
     Route::get('/report/daily-treatment-record', [\App\Http\Controllers\Dentist\DentistReportController::class, 'dailyTreatmentRecord'])
-        ->middleware('permission:manage_reports')
+        ->middleware('permission:create_report_files')
         ->name('dentist.dentist.report.daily-treatment');
 
     Route::get('/report/dental-services', [\App\Http\Controllers\Dentist\DentalServicesRecordController::class, 'index'])
-        ->middleware('permission:manage_reports')
+        ->middleware('permission:create_report_files')
         ->name('dentist.dentist.report.dental-services');
 
+    Route::get('/report/dental-services/data', [\App\Http\Controllers\Dentist\DentalServicesRecordController::class, 'data'])
+        ->middleware('permission:create_report_files')
+        ->name('dentist.dentist.report.dental-services.data');
+
     Route::get('/report/daily-treatment-record/list', [\App\Http\Controllers\Dentist\DentistReportController::class, 'dailyTreatmentRecordList'])
-        ->middleware('permission:manage_reports')
+        ->middleware('permission:create_report_files')
         ->name('dentist.dentist.reports.daily-treatment-record.list');
 
-    Route::post('/report/daily-treatment-record/store', [\App\Http\Controllers\Dentist\DentistReportController::class, 'storeDailyTreatmentRecord'])
-        ->middleware('permission:manage_reports')
-        ->name('dentist.dentist.reports.daily-treatment-record.store');
+
 
     Route::get('/report/templates/{template}/print', [\App\Http\Controllers\Dentist\DentistReportController::class, 'printTemplate'])
-        ->middleware('permission:manage_reports')
+        ->middleware('permission:create_report_files')
         ->name('dentist.dentist.report.templates.print');
 
     // Walk-in Patients
     Route::get('/walk-in', [WalkInController::class, 'index'])
+        ->middleware('permission:manage_walk_in_patients')
         ->name('dentist.walk-in.index');
 
     Route::get('/walk-in/search-patient', [WalkInController::class, 'searchPatient'])
+        ->middleware('permission:view_patient_profiles')
         ->name('dentist.walk-in.search-patient');
 
     Route::get(
         '/walk-in/patients/{patient}/booking-information',
         [WalkInController::class, 'patientBookingInformation']
-    )->name('dentist.walk-in.patient-booking-information');
+    )
+        ->middleware('permission:manage_walk_in_patients')
+        ->name('dentist.walk-in.patient-booking-information');
+
+    Route::get('/walk-in/guest/check-identity', [WalkInController::class, 'checkGuestIdentity'])
+        ->middleware('permission:manage_walk_in_patients')
+        ->name('dentist.walk-in.guest.identity.check');
 
     Route::post('/walk-in/guest', [WalkInController::class, 'storeGuest'])
+        ->middleware('permission:manage_walk_in_patients')
         ->name('dentist.walk-in.guest.store');
+
+    Route::post('/walk-in/guest', [WalkInController::class, 'storeGuest'])
+        ->middleware('permission:manage_walk_in_patients')
+        ->name('dentist.walk-in.guest.store');
+
     Route::post('/walk-in/start', [WalkInController::class, 'startWalkIn'])
+        ->middleware('permission:manage_walk_in_patients')
         ->name('dentist.walk-in.start');
 
-    Route::get('/add-existing-record', [\App\Http\Controllers\Dentist\ExistingRecordController::class, 'index'])
-        ->middleware('permission:manage_appointments')
+    Route::post(
+        '/walk-in/resolve-external-patient',
+        [WalkInController::class, 'resolveExternalPatient']
+    )
+        ->middleware('permission:manage_walk_in_patients')
+        ->name('dentist.walk-in.external.resolve');
+
+    Route::get('/add-existing-record', [\App\Http\Controllers\Shared\ExistingRecordController::class, 'index'])
+        ->middleware('permission:manage_existing_records')
         ->name('dentist.existing-record.index');
 
     // Document Requests
@@ -1182,95 +1154,333 @@ Route::prefix('dentist')->middleware(['role:dentist'])->group(function () {
 
     // Document Requests – list page
     Route::get('/document-requests', [DocumentRequestController::class, 'dentistIndex'])
-        ->middleware('permission:manage_document_requests')
+        ->middleware('permission:view_document_requests,approve_document_requests,reject_document_requests')
         ->name('dentist.dentist.documentrequests');
 
     // Approve (AJAX POST)
     Route::post('/document-requests/{id}/approve', [DocumentRequestController::class, 'approve'])
+        ->middleware('permission:view_document_requests')
+        ->middleware('permission:approve_document_requests')
         ->name('dentist.dentist.documentrequests.approve');
 
     // Reject (AJAX POST)
     Route::post('/document-requests/{id}/reject', [DocumentRequestController::class, 'reject'])
+        ->middleware('permission:view_document_requests')
+        ->middleware('permission:reject_document_requests')
         ->name('dentist.dentist.documentrequests.reject');
 
     Route::get('/document-requests/data', [DocumentRequestController::class, 'dentistData'])
+        ->middleware('permission:view_document_requests,approve_document_requests,reject_document_requests')
         ->name('dentist.dentist.documentrequests.data');
 
     // Generate (AJAX POST)
     Route::post('/document-requests/generate', [DocumentRequestController::class, 'generate'])
+        ->middleware('permission:view_document_requests,approve_document_requests,reject_document_requests')
         ->name('dentist.dentist.documentrequests.generate');
 
     // Odontogram
     Route::get('/odontogram/patient/{patient}/start', [OdontogramController::class, 'startForPatient'])
-        ->middleware('permission:manage_appointments')
+        ->middleware('permission:create_procedure_records')
         ->name('dentist.odontogram.start');
 
     Route::get('/odontogram/{appointment}', [OdontogramController::class, 'show'])
-        ->middleware('permission:manage_appointments')
+        ->middleware('permission:create_procedure_records')
         ->name('dentist.odontogram');
 
+    Route::get('/odontogram/{appointment}/saved/edit', [OdontogramController::class, 'editSavedVisit'])
+        ->middleware('permission:create_procedure_records')
+        ->name('dentist.odontogram.saved.edit');
+
     Route::post('/odontogram/{appointment}/save', [OdontogramController::class, 'save'])
-        ->middleware('permission:manage_appointments')
+        ->middleware('permission:create_procedure_records')
         ->name('dentist.odontogram.save');
+
+    Route::post('/odontogram/discard', [OdontogramController::class, 'discard'])
+        ->middleware('permission:create_procedure_records')
+        ->name('dentist.odontogram.discard');
+
+    Route::post('/odontogram/{appointment}/saved/update', [OdontogramController::class, 'updateSavedVisit'])
+        ->middleware('permission:create_procedure_records')
+        ->name('dentist.odontogram.saved.update');
 
     // Add Existing Appointment - Odontogram
     Route::get('/odontogram/patient/{patient}/existing-appointment', [OdontogramController::class, 'createExistingAppointment'])
-        ->middleware('permission:manage_appointments')
+        ->middleware('permission:create_procedure_records')
         ->name('dentist.odontogram.existing-appointment.create');
 
     Route::post('/odontogram/patient/{patient}/existing-appointment', [OdontogramController::class, 'storeExistingAppointmentIntake'])
-        ->middleware('permission:manage_appointments')
+        ->middleware('permission:create_medical_records')
         ->name('dentist.odontogram.existing-appointment.intake.store');
 
+    Route::patch(
+        '/odontogram/patient/{patient}/existing-appointment/history/autosave',
+        [
+            OdontogramController::class,
+            'autosaveExistingAppointmentHistory',
+        ]
+    )
+        ->middleware(
+            'permission:create_medical_records'
+        )
+        ->name(
+            'dentist.odontogram.existing-appointment.history.autosave'
+        );
+
     Route::get('/odontogram/existing-appointment/slots', [OdontogramController::class, 'existingAppointmentSlotsForDate'])
-        ->middleware('permission:manage_appointments')
+        ->middleware('permission:create_procedure_records')
         ->name('dentist.odontogram.existing-appointment.slots');
 
     Route::get('/odontogram/patient/{patient}/existing-appointment/odontogram', [OdontogramController::class, 'showExistingAppointmentOdontogram'])
-        ->middleware('permission:manage_appointments')
+        ->middleware('permission:create_procedure_records')
         ->name('dentist.odontogram.existing-appointment.odontogram');
 
     Route::post('/odontogram/patient/{patient}/existing-appointment/save', [OdontogramController::class, 'storeExistingAppointment'])
-        ->middleware('permission:manage_appointments')
+        ->middleware('permission:create_procedure_records')
         ->name('dentist.odontogram.existing-appointment.store');
 
     // Inventory
     Route::get('/inventory', [InventoryController::class, 'index'])
-        ->middleware('permission:manage_inventory')
+        ->middleware('permission:view_inventory')
         ->name('dentist.dentist.inventory');
 
     Route::get('/inventory/data', [InventoryController::class, 'fetch'])
-        ->middleware('permission:manage_inventory')
+        ->middleware('permission:view_inventory')
         ->name('dentist.dentist.inventory.data');
 
+    Route::get('/inventory/procedure-notes', [InventoryController::class, 'procedureNotes'])
+        ->middleware('permission:view_inventory')->name('dentist.inventory.procedure-notes');
+
     Route::post('/inventory', [InventoryController::class, 'store'])
-        ->middleware('permission:manage_inventory')
+        ->middleware('permission:add_inventory')
         ->name('dentist.dentist.inventory.store');
 
     Route::put('/inventory/{inventory}', [InventoryController::class, 'update'])
-        ->middleware('permission:manage_inventory')
+        ->middleware('permission:update_inventory')
         ->name('dentist.dentist.inventory.update');
 
     Route::delete('/inventory/{inventory}', [InventoryController::class, 'destroy'])
-        ->middleware('permission:manage_inventory')
+        ->middleware('permission:delete_inventory')
         ->name('dentist.dentist.inventory.destroy');
 
     // clinic status
-    Route::post('/dentist/clinic-status', [DentistDashboardController::class, 'updateClinicStatus'])
+    Route::post('/clinic-status', [DentistDashboardController::class, 'updateClinicStatus'])
+        ->middleware('permission:update_clinic_schedule')
         ->name('dentist.clinic-status.update');
 
+    Route::get('/system-settings', [SystemSettingsController::class, 'index'])
+        ->middleware('permission:manage_system_settings,set_notification_rules')
+        ->name('dentist.system_settings');
+
+    Route::post('/system-settings', [SystemSettingsController::class, 'update'])
+        ->middleware('permission:manage_system_settings,set_notification_rules')
+        ->name('dentist.system_settings.update');
+
+    Route::get('/academic-periods', [AcademicPeriodController::class, 'index'])
+        ->middleware('permission:view_academic_periods,update_academic_period,create_academic_period,delete_academic_period')
+        ->name('dentist.academic_periods');
+
+    Route::post('/academic-periods', [AcademicPeriodController::class, 'store'])
+        ->middleware('permission:create_academic_period')
+        ->name('dentist.academic_periods.store');
+
+    Route::put('/academic-periods/{academicPeriod}', [AcademicPeriodController::class, 'update'])
+        ->middleware('permission:update_academic_period')
+        ->name('dentist.academic_periods.update');
+
+    Route::delete('/academic-periods/{academicPeriod}', [AcademicPeriodController::class, 'destroy'])
+        ->middleware('permission:delete_academic_period')
+        ->name('dentist.academic_periods.destroy');
+
+    Route::patch('/academic-periods/{academicPeriod}/set-active', [AcademicPeriodController::class, 'setActive'])
+        ->middleware('permission:update_academic_period')
+        ->name('dentist.academic_periods.set_active');
+
+    Route::post('/academic-periods/sync-flss', [AcademicPeriodController::class, 'syncFromFlss'])
+        ->middleware('permission:update_academic_period')
+        ->name('dentist.academic_periods.sync_flss');
+
+    Route::get('/report-files', [AdminReportController::class, 'reportFiles'])
+        ->middleware('permission:create_report_files')
+        ->name('dentist.report-files');
+    Route::get('/reports', [AdminReportController::class, 'index'])
+        ->middleware('permission:view_reports,view_ai_reports,create_ai_generative_reports')
+        ->name('dentist.reports');
+
+    Route::get('/reports/ai-generated', [AdminReportController::class, 'aiGenerated'])
+        ->middleware('permission:view_ai_reports')
+        ->name('dentist.reports.ai-generated');
+
+    Route::get('/reports/ai-generated/download', [AdminReportController::class, 'downloadAiGenerated'])
+        ->middleware('permission:create_ai_generative_reports')
+        ->name('dentist.reports.ai-generated.download');
+
+    Route::get('/role-permissions', [RolePermissionController::class, 'index'])
+        ->middleware('permission:view_roles_permissions,create_custom_roles,update_role_permissions,delete_custom_roles')
+        ->name('dentist.role_permissions');
+
+    Route::post('/role-permissions/update', [RolePermissionController::class, 'update'])
+        ->middleware('permission:update_role_permissions')
+        ->name('dentist.role_permissions.update');
+
+    Route::post('/role-permissions/reset', [RolePermissionController::class, 'reset'])
+        ->middleware('permission:update_role_permissions')
+        ->name('dentist.role_permissions.reset');
+
+    Route::post('/role-permissions/store-role', [RolePermissionController::class, 'storeRole'])
+        ->middleware('permission:create_custom_roles')
+        ->name('dentist.role_permissions.store_role');
+
+    Route::match(['post', 'delete'], '/role-permissions/{id}/destroy', [RolePermissionController::class, 'destroyRole'])
+        ->middleware('permission:delete_custom_roles')
+        ->name('dentist.role_permissions.destroy_role');
+
+    Route::get('/system-logs', [SystemLogController::class, 'index'])
+        ->middleware('permission:view_system_logs,export_system_logs,archive_system_logs')
+        ->name('dentist.system_logs');
+
+    Route::get('/system-logs/fetch', [SystemLogController::class, 'fetchLatest'])
+        ->middleware('permission:view_system_logs,export_system_logs,archive_system_logs')
+        ->name('dentist.system_logs.fetch');
+
+    Route::get('/system-logs/check', [SystemLogController::class, 'checkLatest'])
+        ->middleware('permission:view_system_logs,export_system_logs,archive_system_logs')
+        ->name('dentist.system_logs.check');
+
+    Route::get('/system-logs/export', [SystemLogController::class, 'export'])
+        ->middleware('permission:export_system_logs')
+        ->name('dentist.system_logs.export');
+
+    Route::post('/system-logs/archive', [SystemLogController::class, 'archive'])
+        ->middleware('permission:archive_system_logs')
+        ->name('dentist.system_logs.archive');
+
+    Route::get('/service-types', [ServiceTypeController::class, 'index'])
+        ->middleware('permission:view_service_type,create_service_type,delete_service_type,update_default_service_type')
+        ->name('dentist.service-types');
+
+    Route::post('/service-types', [ServiceTypeController::class, 'store'])
+        ->middleware('permission:create_service_type')
+        ->name('dentist.service-types.store');
+
+    Route::put('/service-types/{id}', [ServiceTypeController::class, 'update'])
+        ->middleware('permission:update_default_service_type')
+        ->name('dentist.service-types.update');
+
+    Route::delete('/service-types/{id}', [ServiceTypeController::class, 'destroy'])
+        ->middleware('permission:delete_service_type')
+        ->name('dentist.service-types.destroy');
+
+    Route::get('/assign-cms-access', [ExternalAdminController::class, 'index'])
+        ->middleware('permission:view_cms_integration,create_cms_integration')
+        ->name('dentist.assign-cms-access');
+
+    Route::post('/assign-cms-access', [ExternalAdminController::class, 'store'])
+        ->middleware('permission:create_cms_integration')
+        ->name('dentist.assign-cms-access.store');
+
+    Route::get('/external-admins/search', [ExternalAdminController::class, 'search'])
+        ->middleware('permission:view_cms_integration,create_cms_integration')
+        ->name('dentist.external-admins.search');
+
+    Route::get('/external-admins/{adminId}', [ExternalAdminController::class, 'show'])
+        ->middleware('permission:view_cms_integration,create_cms_integration')
+        ->name('dentist.external-admins.show');
+
+    Route::get('/faculty-integration', function () {
+        return view('shared.faculty-integration');
+    })
+        ->middleware('permission:view_faculty_integration,create_faculty_integration,update_faculty_integration')
+        ->name('dentist.faculty.integration');
+
+    Route::post('/faculty-integration/store', [FacultyController::class, 'store'])
+        ->middleware('permission:create_faculty_integration')
+        ->name('dentist.faculty.store');
+
+    Route::get('/user-management', [UserManagementController::class, 'index'])
+        ->middleware('permission:view_account_details,disable_users,update_user_role')
+        ->name('dentist.user_management');
+
+    Route::put('/user-management/{user}', [UserManagementController::class, 'update'])
+        ->middleware('permission:update_user_role')
+        ->name('dentist.user_management.update');
+
+    Route::post('/user-management/{user}/toggle-status', [UserManagementController::class, 'toggleStatus'])
+        ->middleware('permission:disable_users')
+        ->name('dentist.user_management.toggle_status');
+
+    Route::get('/dental-records', [DentalRecordController::class, 'index'])
+        ->middleware('permission:view_dental_records,manage_dental_records')
+        ->name('dentist.dental-records.index');
+
+    Route::get('/dental-records/{appointment}', [DentalRecordController::class, 'show'])
+        ->middleware('permission:view_dental_records,manage_dental_records')
+        ->name('dentist.dental-records.show');
+
+    Route::get('/document-template', [DocumentTemplateController::class, 'index'])
+        ->middleware('permission:manage_document_templates')
+        ->name('dentist.document-template');
+
+    Route::get('/document-template/{id}', [DocumentTemplateController::class, 'show'])
+        ->middleware('permission:manage_document_templates')
+        ->name('dentist.document-template.show');
+
+    Route::patch('/document-template/{id}/archive', [DocumentTemplateController::class, 'archive'])
+        ->middleware('permission:manage_document_templates')
+        ->name('dentist.document-template.archive');
+
+    Route::patch('/document-template/{id}/activate', [DocumentTemplateController::class, 'activate'])
+        ->middleware('permission:manage_document_templates')
+        ->name('dentist.document-template.activate');
+
+    Route::patch('/document-template/{id}/default', [DocumentTemplateController::class, 'setDefault'])
+        ->middleware('permission:manage_document_templates')
+        ->name('dentist.document-template.default');
+
     // Dentist Continuity Transitions
-    Route::get('/transitions', [\App\Http\Controllers\Dentist\DentistTransitionController::class, 'index'])
+    Route::get('/transitions', [DentistTransitionController::class, 'index'])
+        ->middleware('permission:view_dentist_transitions,create_dentist_transitions,update_dentist_transitions,assign_dentist_successors,finalize_dentist_transitions,cancel_dentist_transitions,extend_dentist_access')
         ->name('dentist.dentist.transitions.index');
 
-    Route::get('/transitions/{transition}', [\App\Http\Controllers\Dentist\DentistTransitionController::class, 'show'])
+    Route::get('/transitions/create', [DentistTransitionController::class, 'create'])
+        ->middleware('permission:create_dentist_transitions')
+        ->name('dentist.dentist.transitions.create');
+
+    Route::post('/transitions', [DentistTransitionController::class, 'store'])
+        ->middleware('permission:create_dentist_transitions')
+        ->name('dentist.dentist.transitions.store');
+
+    Route::get('/transitions/{transition}', [DentistTransitionController::class, 'show'])
+        ->middleware('permission:view_dentist_transitions')
         ->name('dentist.dentist.transitions.show');
 
-    Route::put('/transitions/{transition}/assignments', [\App\Http\Controllers\Dentist\DentistTransitionController::class, 'assignments'])
+    Route::get('/transitions/{transition}/edit', [DentistTransitionController::class, 'edit'])
+        ->middleware('permission:update_dentist_transitions')
+        ->name('dentist.dentist.transitions.edit');
+
+    Route::put('/transitions/{transition}', [DentistTransitionController::class, 'update'])
+        ->middleware('permission:update_dentist_transitions')
+        ->name('dentist.dentist.transitions.update');
+
+    Route::post('/transitions/{transition}/generate-items', [DentistTransitionController::class, 'generateItems'])
+        ->middleware('permission:update_dentist_transitions')
+        ->name('dentist.dentist.transitions.generate-items');
+
+    Route::put('/transitions/{transition}/assignments', [DentistTransitionController::class, 'assignments'])
+        ->middleware('permission:assign_dentist_successors')
         ->name('dentist.dentist.transitions.assignments');
 
-    Route::put('/transitions/{transition}/checklist', [\App\Http\Controllers\Dentist\DentistTransitionController::class, 'checklist'])
-        ->name('dentist.dentist.transitions.checklist');
+
+    Route::post('/transitions/{transition}/finalize', [DentistTransitionController::class, 'finalize'])
+        ->middleware('permission:finalize_dentist_transitions')
+        ->name('dentist.dentist.transitions.finalize');
+
+    Route::post('/transitions/{transition}/cancel', [DentistTransitionController::class, 'cancel'])
+        ->middleware('permission:cancel_dentist_transitions')
+        ->name('dentist.dentist.transitions.cancel');
+
+    Route::post('/transitions/{transition}/extend-access', [DentistTransitionController::class, 'extendAccess'])
+        ->middleware('permission:extend_dentist_access')
+        ->name('dentist.dentist.transitions.extend-access');
 });
 
 /*
@@ -1293,3 +1503,47 @@ Route::prefix('dentist')->middleware(['role:dentist'])->group(function () {
 });*/
 
 Route::post('/chat/send', [ChatbotController::class, 'chat']);
+
+if (app()->environment('local')) {
+
+    // api nila albert
+    Route::get('/debug-ogos-config', function () {
+        return response()->json([
+            'base_url' => config('services.ogos.base_url'),
+            'token_url' => config('services.ogos.token_url'),
+            'client_id' => config('services.ogos.client_id'),
+            'client_secret_exists' => filled(config('services.ogos.client_secret')),
+            'client_secret_length' => strlen((string) config('services.ogos.client_secret')),
+        ]);
+    });
+
+    Route::get('/test-student-api', function (StudentApiService $studentApiService) {
+        $email = 'student5@gmail.com';
+
+        return response()->json($studentApiService->getStudentByEmail($email));
+    });
+
+    Route::get('/dev/error-pages/{code}', function (string $code) {
+        $allowedCodes = [
+            '401',
+            '402',
+            '403',
+            '404',
+            '419',
+            '429',
+            '500',
+            '503',
+        ];
+
+        abort_unless(
+            in_array($code, $allowedCodes, true),
+            404
+        );
+
+        return response()->view(
+            "errors.{$code}",
+            [],
+            (int) $code
+        );
+    })->where('code', '[0-9]+');
+}

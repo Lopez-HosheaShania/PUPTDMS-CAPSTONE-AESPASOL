@@ -5,14 +5,21 @@ namespace App\Http\Controllers\Admin;
 use App\Helpers\AuditLogger;
 use App\Http\Controllers\Controller;
 use App\Models\SystemSetting;
+use App\Models\RetentionPolicy;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class SystemSettingsController extends Controller
 {
+    private const GROUP_PERMISSIONS = [
+        'general' => ['manage_system_settings'],
+        'clinic' => ['manage_audit_trail'],
+        'notifications' => ['set_notification_rules'],
+        'backup' => ['manage_audit_trail'],
+    ];
+
     private const BOOLEAN_KEYS = [
         'maintenance_mode',
-        'debug_mode',
         'ai_chatbot_enabled',
         'ai_signature_enabled',
         'ai_reports_enabled',
@@ -20,8 +27,8 @@ class SystemSettingsController extends Controller
         'notif_new_appointment',
         'notif_cancellation',
         'notif_document_request',
-        'notif_appointment_completed',
         'notif_rescheduled',
+        'notif_follow_up_scheduled',
         'notif_document_approved',
         'notif_document_rejected',
         'notif_reminder_24h',
@@ -38,7 +45,6 @@ class SystemSettingsController extends Controller
         'general' => [
             'language',
             'maintenance_mode',
-            'debug_mode',
             'ai_mode',
             'ai_chatbot_enabled',
             'ai_signature_enabled',
@@ -59,15 +65,14 @@ class SystemSettingsController extends Controller
             'notif_new_appointment',
             'notif_cancellation',
             'notif_document_request',
-            'notif_appointment_completed',
             'notif_rescheduled',
+            'notif_follow_up_scheduled',
             'notif_document_approved',
             'notif_document_rejected',
             'notif_reminder_24h',
             'notif_confirmation',
             'notif_follow_up_reminder',
             'notif_follow_up_today_reminder',
-            'notif_channels',
         ],
 
         'backup' => [
@@ -83,12 +88,14 @@ class SystemSettingsController extends Controller
 
     public function index()
     {
-        if (!session('admin_logged_in')) {
-            return redirect('/admin/login');
-        }
-
         $settings = SystemSetting::query()->get()->keyBy('key');
         $notifications = collect([]);
+        $user = auth()->user();
+        $canManageRetention = $user && $user->status === 'active'
+            && $user->hasAnyRole(['admin', 'super_admin'])
+            && ! session()->has('impersonated_role')
+            && $user->hasPermission('manage_system_settings');
+
 
         AuditLogger::log(
             'view',
@@ -96,18 +103,33 @@ class SystemSettingsController extends Controller
             'Admin viewed the system settings page'
         );
 
-        return view('admin.system-settings', compact('settings', 'notifications'));
+        return view('admin.system-settings', [
+            'canManageRetention' => $canManageRetention,
+            'retentionPolicies' => $canManageRetention ? RetentionPolicy::current()->get()
+                ->sortBy(fn ($policy) => array_search($policy->category, array_keys(config('retention.categories')), true))
+                ->values() : collect(),
+            'settings' => $settings,
+            'notifications' => $notifications,
+            'layoutRole' => $this->resolveLayoutRole(),
+            'updateRoute' => $this->routeName('update'),
+            'allowedSettingGroups' => $this->allowedSettingGroups(),
+        ]);
     }
 
     public function update(Request $request)
     {
-        if (!session('admin_logged_in')) {
-            return redirect('/admin/login');
-        }
-
         $validated = $request->validate($this->rules(), $this->messages());
+        $allowedGroups = $this->allowedSettingGroups();
 
         foreach (self::ALLOWED_GROUPS as $group => $keys) {
+            if (!in_array($group, $allowedGroups, true) && $this->requestTouchesAnySetting($request, $keys)) {
+                abort(403, 'You do not have permission to update this settings group.');
+            }
+
+            if (!in_array($group, $allowedGroups, true)) {
+                continue;
+            }
+
             foreach ($keys as $key) {
                 $value = $this->resolveValue($request, $validated, $key);
 
@@ -122,20 +144,68 @@ class SystemSettingsController extends Controller
         );
 
         return redirect()
-            ->route('admin.system_settings')
+            ->route($this->routeName('index'))
             ->with('success', 'Settings saved successfully.');
+    }
+
+    private function resolveLayoutRole(): string
+    {
+        return request()->routeIs('dentist.system_settings*') ? 'dentist' : 'admin';
+    }
+
+    private function allowedSettingGroups(): array
+    {
+        $user = auth()->user();
+
+        if (!$user) {
+            return [];
+        }
+
+        return collect(self::GROUP_PERMISSIONS)
+            ->filter(function (array $permissions): bool {
+                foreach ($permissions as $permission) {
+                    if (auth()->user()?->hasPermission($permission)) {
+                        return true;
+                    }
+                }
+
+                return false;
+            })
+            ->keys()
+            ->values()
+            ->all();
+    }
+
+    private function requestTouchesAnySetting(Request $request, array $keys): bool
+    {
+        foreach ($keys as $key) {
+            if ($request->has($key)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function routeName(string $action): string
+    {
+        if (request()->routeIs('dentist.system_settings*')) {
+            return match ($action) {
+                'index' => 'dentist.system_settings',
+                'update' => 'dentist.system_settings.update',
+            };
+        }
+
+        return match ($action) {
+            'index' => 'admin.system_settings',
+            'update' => 'admin.system_settings.update',
+        };
     }
 
     private function resolveValue(Request $request, array $validated, string $key): string
     {
         if (in_array($key, self::BOOLEAN_KEYS, true)) {
             return $request->boolean($key) ? '1' : '0';
-        }
-
-        if ($key === 'notif_channels') {
-            $channels = $validated['notif_channels'] ?? [];
-
-            return empty($channels) ? '' : implode(',', $channels);
         }
 
         $value = $validated[$key] ?? '';
@@ -153,7 +223,6 @@ class SystemSettingsController extends Controller
             'language' => ['nullable', Rule::in(['English (US)', 'Filipino'])],
 
             'maintenance_mode' => ['nullable', 'boolean'],
-            'debug_mode' => ['nullable', 'boolean'],
             'ai_mode' => ['nullable', Rule::in(['normal', 'degraded', 'offline'])],
             'ai_chatbot_enabled' => ['nullable', 'boolean'],
             'ai_signature_enabled' => ['nullable', 'boolean'],
@@ -170,17 +239,14 @@ class SystemSettingsController extends Controller
             'notif_new_appointment' => ['nullable', 'boolean'],
             'notif_cancellation' => ['nullable', 'boolean'],
             'notif_document_request' => ['nullable', 'boolean'],
-            'notif_appointment_completed' => ['nullable', 'boolean'],
             'notif_rescheduled' => ['nullable', 'boolean'],
+            'notif_follow_up_scheduled' => ['nullable', 'boolean'],
             'notif_document_approved' => ['nullable', 'boolean'],
             'notif_document_rejected' => ['nullable', 'boolean'],
             'notif_reminder_24h' => ['nullable', 'boolean'],
             'notif_confirmation' => ['nullable', 'boolean'],
             'notif_follow_up_reminder' => ['nullable', 'boolean'],
             'notif_follow_up_today_reminder' => ['nullable', 'boolean'],
-
-            'notif_channels' => ['nullable', 'array'],
-            'notif_channels.*' => [Rule::in(['Email', 'SMS', 'WhatsApp', 'In-App'])],
 
             'backup_frequency' => ['nullable', Rule::in(['Every 6 hours', 'Daily', 'Weekly', 'Monthly'])],
             'backup_retention_days' => ['nullable', 'integer', 'min:7', 'max:365'],
@@ -200,7 +266,6 @@ class SystemSettingsController extends Controller
             'backup_retention_days.min' => 'Backup retention must be at least 7 days.',
             'backup_retention_days.max' => 'Backup retention cannot exceed 365 days.',
             'backup_time.date_format' => 'Backup time must use the HH:MM format.',
-            'notif_channels.*.in' => 'One or more selected notification channels are invalid.',
         ];
     }
 }

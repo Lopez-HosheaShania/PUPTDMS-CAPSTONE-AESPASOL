@@ -1,0 +1,510 @@
+function closeCustomSelect(wrapper) {
+    const menu = wrapper.customSelectMenu;
+    if (menu?.classList.contains('is-portaled')) {
+        menu.classList.remove('is-portaled');
+        wrapper.appendChild(menu);
+        for (const property of ['left', 'right', 'top', 'bottom', 'width']) {
+            menu.style.removeProperty(property);
+        }
+    }
+
+    wrapper.classList.remove('is-open', 'drop-up');
+    wrapper.querySelector('.custom-select-button')?.setAttribute('aria-expanded', 'false');
+}
+
+function closeCustomSelects(except = null) {
+    document.querySelectorAll('.custom-select.is-open').forEach(wrapper => {
+        if (wrapper === except) return;
+
+        closeCustomSelect(wrapper);
+    });
+}
+
+export function syncCustomSelect(wrapper) {
+    if (
+        !wrapper ||
+        typeof wrapper.querySelector !== 'function'
+    ) {
+        return;
+    }
+
+    const select = wrapper.querySelector('select');
+
+    const valueText =
+        wrapper.querySelector(
+            '[data-custom-select-value]'
+        );
+
+    const button =
+        wrapper.querySelector(
+            '.custom-select-button'
+        );
+
+    if (
+        !select ||
+        !valueText ||
+        !button
+    ) {
+        return;
+    }
+
+    const selectedOption = select.options[select.selectedIndex];
+
+    valueText.textContent =
+        selectedOption?.textContent?.trim() ||
+        select.dataset.placeholder ||
+        'Select option';
+
+    wrapper.classList.toggle('is-disabled', select.disabled);
+    wrapper.classList.toggle('has-value', Boolean(select.value));
+
+    button.disabled = select.disabled;
+
+    (wrapper.customSelectMenu ?? wrapper)
+        .querySelectorAll('.custom-select-option')
+        .forEach(option => {
+            const isActive =
+                Number(option.dataset.index) === select.selectedIndex;
+
+            option.classList.toggle('is-active', isActive);
+            option.setAttribute(
+                'aria-selected',
+                isActive ? 'true' : 'false'
+            );
+        });
+}
+
+function positionCustomSelectMenu(
+    wrapper
+) {
+    if (!wrapper) return;
+
+    const button =
+        wrapper.querySelector(
+            '.custom-select-button'
+        );
+
+    const menu = wrapper.customSelectMenu ??
+        wrapper.querySelector(
+            '.custom-select-menu'
+        );
+
+    if (!button || !menu) {
+        return;
+    }
+
+    if (
+        wrapper.closest(
+            '.flatpickr-calendar'
+        )
+    ) {
+        const isYearSelect =
+            Boolean(
+                wrapper.querySelector(
+                    '.custom-flatpickr-year'
+                )
+            );
+
+        menu.style.setProperty(
+            '--custom-select-max-height',
+            isYearSelect
+                ? '220px'
+                : '210px'
+        );
+
+        return;
+    }
+
+    const buttonRect =
+        button.getBoundingClientRect();
+
+    const scrollContainer =
+        wrapper.closest(
+            [
+                '.um-user-modal-body',
+                '.modal-body',
+                '.modal-bd',
+                '[data-modal-scroll]',
+                '.ui-modal-card',
+                'dialog'
+            ].join(',')
+        );
+
+    const boundaryRect =
+        scrollContainer
+            ?.getBoundingClientRect();
+
+    const boundaryTop =
+        boundaryRect
+            ? Math.max(
+                boundaryRect.top,
+                8
+            )
+            : 8;
+
+    const boundaryBottom =
+        boundaryRect
+            ? Math.min(
+                boundaryRect.bottom,
+                window.innerHeight - 8
+            )
+            : window.innerHeight - 8;
+
+    const spaceBelow =
+        Math.max(
+            0,
+            boundaryBottom -
+            buttonRect.bottom -
+            10
+        );
+
+    const spaceAbove =
+        Math.max(
+            0,
+            buttonRect.top -
+            boundaryTop -
+            10
+        );
+
+    const previousDisplay =
+        menu.style.display;
+
+    const previousVisibility =
+        menu.style.visibility;
+
+    const previousPointerEvents =
+        menu.style.pointerEvents;
+
+    const previousTransition =
+        menu.style.transition;
+
+    menu.style.display =
+        'block';
+
+    menu.style.visibility =
+        'hidden';
+
+    menu.style.pointerEvents =
+        'none';
+
+    menu.style.transition =
+        'none';
+
+    const naturalHeight =
+        Math.max(
+            menu.scrollHeight,
+            96
+        );
+
+    const preferredHeight =
+        Math.min(
+            naturalHeight,
+            360
+        );
+
+    const shouldOpenUp =
+        spaceBelow < preferredHeight &&
+        spaceAbove > spaceBelow;
+
+    wrapper.classList.toggle(
+        'drop-up',
+        shouldOpenUp
+    );
+
+    const availableSpace =
+        shouldOpenUp
+            ? spaceAbove
+            : spaceBelow;
+
+    const maxHeight =
+        Math.max(
+            96,
+            Math.min(
+                360,
+                availableSpace
+            )
+        );
+
+    menu.style.setProperty(
+        '--custom-select-max-height',
+        `${maxHeight}px`
+    );
+
+    const filterPanel =
+        wrapper.closest(
+            '.filter-drawer-panel'
+        );
+
+    if (wrapper.querySelector('select[data-custom-select-floating]')) {
+        // Keep the global menu outside overflow containers such as scrollable tables.
+        const width = Math.min(buttonRect.width, window.innerWidth - 16);
+        menu.classList.add('is-portaled');
+        menu.style.width = `${width}px`;
+        menu.style.left = `${Math.max(8, Math.min(buttonRect.left, window.innerWidth - width - 8))}px`;
+        menu.style.right = 'auto';
+        menu.style.top = shouldOpenUp ? 'auto' : `${buttonRect.bottom + 8}px`;
+        menu.style.bottom = shouldOpenUp ? `${window.innerHeight - buttonRect.top + 8}px` : 'auto';
+        document.body.appendChild(menu);
+    } else if (filterPanel) {
+        const panelRect =
+            filterPanel.getBoundingClientRect();
+
+        menu.classList.add(
+            'is-floating'
+        );
+
+        menu.style.left =
+            `${buttonRect.left - panelRect.left}px`;
+
+        menu.style.right =
+            'auto';
+
+        menu.style.width =
+            `${buttonRect.width}px`;
+
+        if (shouldOpenUp) {
+            menu.style.top =
+                'auto';
+
+            menu.style.bottom =
+                `${panelRect.bottom -
+                buttonRect.top +
+                8
+                }px`;
+        } else {
+            menu.style.top =
+                `${buttonRect.bottom -
+                panelRect.top +
+                8
+                }px`;
+
+            menu.style.bottom =
+                'auto';
+        }
+    }
+
+    menu.style.display =
+        previousDisplay;
+
+    menu.style.visibility =
+        previousVisibility;
+
+    menu.style.pointerEvents =
+        previousPointerEvents;
+
+    menu.style.transition =
+        previousTransition;
+}
+
+export function initCustomSelects(root = document) {
+    const scope =
+        root && typeof root.querySelectorAll === 'function'
+            ? root
+            : document;
+
+    const customSelectSelector = [
+        'select.js-custom-select',
+
+        '[data-global-selects] select:not([data-native-select])' +
+        ':not(.global-page-size-native)' +
+        ':not(.flatpickr-monthDropdown-months)'
+    ].join(',');
+
+    scope.querySelectorAll(customSelectSelector).forEach(select => {
+        if (select.dataset.customSelectReady === 'true') return;
+
+        select.dataset.customSelectReady = 'true';
+        select.classList.add('custom-select-native');
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'custom-select';
+
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'custom-select-button';
+        button.setAttribute('aria-haspopup', 'listbox');
+        button.setAttribute('aria-expanded', 'false');
+
+        const value = document.createElement('span');
+        value.dataset.customSelectValue = '';
+
+        const icon = document.createElement('i');
+        icon.className = 'fa-solid fa-chevron-down';
+        icon.setAttribute('aria-hidden', 'true');
+
+        button.append(value, icon);
+
+        const menu = document.createElement('div');
+        menu.className = 'custom-select-menu';
+        menu.setAttribute('role', 'listbox');
+        wrapper.customSelectMenu = menu;
+
+        Array.from(select.options).forEach(option => {
+            if (option.hidden || option.disabled) return;
+
+            const item = document.createElement('button');
+
+            item.type = 'button';
+            item.className = 'custom-select-option';
+            item.dataset.index = String(option.index);
+            item.dataset.value = option.value;
+            item.setAttribute('role', 'option');
+
+            const label = document.createElement('span');
+            label.textContent = option.textContent.trim();
+
+            item.append(label);
+
+            item.addEventListener('click', event => {
+                event.preventDefault();
+                event.stopPropagation();
+
+                if (select.disabled) return;
+
+                select.selectedIndex =
+                    option.index;
+
+                syncCustomSelect(wrapper);
+
+                closeCustomSelect(wrapper);
+
+                select.dispatchEvent(
+                    new Event('input', {
+                        bubbles: true
+                    })
+                );
+
+                select.dispatchEvent(
+                    new Event('change', {
+                        bubbles: true
+                    })
+                );
+            });
+
+            menu.appendChild(item);
+        });
+
+        select.parentNode.insertBefore(wrapper, select);
+
+        wrapper.append(select, button, menu);
+
+        button.addEventListener('pointerdown', event => {
+            event.stopPropagation();
+        });
+
+        menu.addEventListener('pointerdown', event => {
+            event.stopPropagation();
+        });
+
+        button.addEventListener('click', event => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            if (select.disabled) return;
+
+            const willOpen =
+                !wrapper.classList.contains('is-open');
+
+            closeCustomSelects(wrapper);
+
+            if (willOpen) {
+                positionCustomSelectMenu(wrapper);
+                wrapper.classList.add('is-open');
+
+                if (select.classList.contains('custom-flatpickr-year')) {
+                    requestAnimationFrame(() => {
+                        const activeOption =
+                            wrapper.querySelector('.custom-select-option.is-active');
+
+                        activeOption?.scrollIntoView({
+                            block: 'center',
+                            inline: 'nearest'
+                        });
+
+                        activeOption?.focus({
+                            preventScroll: true
+                        });
+                    });
+                }
+            } else {
+                closeCustomSelect(wrapper);
+            }
+
+            button.setAttribute(
+                'aria-expanded',
+                willOpen ? 'true' : 'false'
+            );
+        });
+
+        select.addEventListener('change', () => {
+            syncCustomSelect(wrapper);
+        });
+
+        syncCustomSelect(wrapper);
+    });
+}
+
+document.addEventListener('scroll', event => {
+    if (!event.target.closest?.('.custom-select-menu.is-portaled')) {
+        document.querySelectorAll('.custom-select.is-open').forEach(wrapper => {
+            if (wrapper.customSelectMenu?.classList.contains('is-portaled')) {
+                closeCustomSelect(wrapper);
+            }
+        });
+    }
+    if (
+        event.target instanceof Element &&
+        event.target.closest(
+            '.filter-drawer-body'
+        )
+    ) {
+        closeCustomSelects();
+    }
+},
+    true
+);
+
+window.addEventListener('resize', () => closeCustomSelects());
+
+document.addEventListener('pointerdown', event => {
+    if (
+        event.target.closest?.(
+            '.custom-select'
+        )
+    ) {
+        return;
+    }
+
+    closeCustomSelects();
+}
+);
+
+document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') {
+        closeCustomSelects();
+    }
+});
+
+window.initCustomSelects = initCustomSelects;
+window.syncCustomSelect = syncCustomSelect;
+
+function bootCustomSelects() {
+    initCustomSelects(
+        document
+    );
+}
+
+if (
+    document.readyState ===
+    'loading'
+) {
+    document.addEventListener(
+        'DOMContentLoaded',
+        bootCustomSelects,
+        {
+            once: true
+        }
+    );
+} else {
+    bootCustomSelects();
+}

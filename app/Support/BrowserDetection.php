@@ -101,6 +101,9 @@ class BrowserDetection
                 if (
                     $model !== ''
                     && !in_array(strtolower($model), [
+                        // Chrome's reduced Android user agent uses "K" as a
+                        // generic model placeholder rather than a device name.
+                        'k',
                         'wv',
                         'mobile',
                         'tablet',
@@ -126,12 +129,34 @@ class BrowserDetection
 
         return 'Unknown Device';
     }
+
+    public static function deviceNameForDisplay(?string $storedDeviceName, ?string $userAgent): string
+    {
+        $deviceName = trim((string) $storedDeviceName);
+
+        if (
+            $deviceName !== ''
+            && !(
+                strtolower($deviceName) === 'k'
+                && Str::contains($userAgent, 'Android', true)
+            )
+        ) {
+            return $deviceName;
+        }
+
+        return self::detectDeviceName($userAgent);
+    }
+
     public static function detectFromRequest(Request $request): string
     {
+        $browserNameHint = $request->hasSession()
+            ? $request->session()->get('browser_name_hint')
+            : null;
+
         $provided = self::normalizeBrowserName(
             $request->input('browser_name')
                 ?? $request->header('X-Browser-Name')
-                ?? $request->session()->get('browser_name_hint')
+                ?? $browserNameHint
         );
 
         if ($provided !== null) {

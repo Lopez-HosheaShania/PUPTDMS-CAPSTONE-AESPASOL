@@ -21,8 +21,7 @@
 ])
 
 <div id="{{ $id }}" {{ $attributes->class(['filter-drawer-wrapper']) }} aria-hidden="true">
-    <div class="filter-drawer-overlay" aria-hidden="true"
-        @if ($closeCallback) onclick="{{ $closeCallback }}" @endif></div>
+    <div class="filter-drawer-overlay" aria-hidden="true"></div>
 
     <div class="filter-drawer-panel" role="dialog" aria-modal="true" aria-labelledby="{{ $id }}Title">
 
@@ -36,9 +35,9 @@
                 </h2>
             </div>
 
-            <button @if ($closeId) id="{{ $closeId }}" @endif type="button"
-                class="filter-drawer-close" @if ($closeCallback) onclick="{{ $closeCallback }}" @endif
-                aria-label="Close filters">
+            <button @if ($closeId) id="{{ $closeId }}" @endif type="button" class="modal-x"
+                @if ($closeCallback) data-ui-click="{{ $closeCallback }}" @endif aria-label="Close filters"
+                data-tooltip="Close" data-tooltip-tone="neutral">
                 <i class="fa-solid fa-xmark"></i>
             </button>
 
@@ -51,8 +50,8 @@
         <div class="filter-drawer-footer">
 
             <button @if ($clearId) id="{{ $clearId }}" @endif type="button"
-                class="filter-clear-btn ui-btn ui-btn-secondary ui-btn-sm"
-                @if ($clearCallback) onclick="{{ $clearCallback }}" @endif>
+                class="ui-btn ui-btn-secondary"
+                @if ($clearCallback) data-ui-click="{{ $clearCallback }}" @endif>
                 <i class="fa-regular fa-trash-can"></i>
                 <span>{{ $clearLabel }}</span>
             </button>
@@ -60,16 +59,14 @@
             <div class="filter-footer-actions">
 
                 <button @if ($cancelId) id="{{ $cancelId }}" @endif type="button"
-                    class="filter-cancel-btn ui-btn ui-btn-secondary"
-                    @if ($cancelCallback) onclick="{{ $cancelCallback }}" @endif>
-                    <i class="fa-solid fa-xmark"></i>
+                    class="ui-btn ui-btn-secondary"
+                    @if ($cancelCallback) data-ui-click="{{ $cancelCallback }}" @endif>
                     <span>{{ $cancelLabel }}</span>
                 </button>
 
                 <button @if ($applyId) id="{{ $applyId }}" @endif type="button"
-                    class="filter-apply-btn ui-btn ui-btn-primary"
-                    @if ($applyCallback) onclick="{{ $applyCallback }}" @endif>
-                    <i class="fa-solid fa-check"></i>
+                    class="ui-btn ui-btn-primary"
+                    @if ($applyCallback) data-ui-click="{{ $applyCallback }}" @endif>
 
                     @if ($resultsId)
                         <span id="{{ $resultsId }}" class="filter-results-text">

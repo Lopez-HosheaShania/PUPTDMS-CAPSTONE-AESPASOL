@@ -31,6 +31,7 @@ class DocumentRequestRejectedNotification extends Notification
             'document_request_id' => $this->documentRequest->id,
             'status' => $this->documentRequest->status,
             'event' => 'document.request.rejected',
+            'recipient_role' => optional($notifiable->role)->slug,
         ];
     }
 

@@ -3,26 +3,153 @@ body.role-patient {
     color: var(--page-text);
 }
 
-body.role-patient .patient-page-shell {
-    padding: 78px 0.75rem 1.25rem;
-    min-height: 100dvh;
+.patient-hero {
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+
+    padding: 2rem 2rem 3rem;
+    border-radius: 1.25rem;
+
+    background:
+        radial-gradient(circle at top right,
+            var(--alpha-white-16),
+            transparent 28%),
+        linear-gradient(135deg,
+            var(--crimson-shimmer-mid),
+            var(--crimson),
+            var(--crimson-deeper));
+
+    box-shadow:
+        0 16px 32px var(--alpha-crimson-15);
+}
+
+.patient-hero::after {
+    content: '';
+
+    position: absolute;
+    right: -20px;
+    bottom: -20px;
+
+    width: 180px;
+    height: 180px;
+
+    border-radius: 50%;
+
+    background:
+        var(--alpha-white-5);
+
+    pointer-events: none;
+}
+
+.patient-hero-title {
+    position: relative;
+    z-index: 1;
+
+    margin: 0;
+    padding: 0;
+
+    color:
+        var(--text-on-brand);
+
+    font-size:
+        clamp(1.35rem,
+            3vw,
+            2rem);
+
+    font-weight: 800;
+    line-height: 1.05;
+}
+
+.patient-hero-subtitle {
+    position: relative;
+    z-index: 1;
+
+    margin: .3rem 0 0;
+    padding: 0;
+
+    color:
+        var(--alpha-white-72);
+
+    font-size: .85rem;
+    line-height: 1.25;
+}
+
+.patient-hero-stats {
+    position: relative;
+    z-index: 1;
+
+    display: flex;
+    flex-wrap: wrap;
+
+    gap: 12px;
+
+    margin-top: 1.2rem;
+}
+
+.patient-hero-stat {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 6px 16px;
+
+    border:
+        1px solid var(--alpha-white-25);
+
+    border-radius: 999px;
+
+    background:
+        var(--alpha-white-15);
+
+    color:
+        var(--text-on-brand);
+
+    font-size: .75rem;
+    font-weight: 700;
+
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.patient-hero-inner {
+    position: relative;
+    z-index: 1;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 1.5rem;
+
+    width: 100%;
+    min-width: 0;
+}
+
+.patient-hero-copy {
+    min-width: 0;
     flex: 1 1 auto;
-    background: #F9FAFB;
-    color: #111827;
-    margin-top: 1rem !important;
 }
 
-@media (min-width: 768px) {
-    body.role-patient .patient-page-shell {
-        padding-left: 1.25rem;
-        padding-right: 1.25rem;
+.patient-hero-inner .patient-hero-stats {
+    flex: 0 0 auto;
+
+    justify-content: flex-end;
+
+    margin-top: 0;
+}
+
+@media (max-width: 768px) {
+    .patient-hero-inner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
     }
-}
 
-@media (min-width: 1280px) {
-    body.role-patient .patient-page-shell {
-        padding-left: 1.5rem;
-        padding-right: 1.5rem;
+    .patient-hero-inner .patient-hero-stats {
+        width: 100%;
+        justify-content: flex-start;
     }
 }
 
@@ -106,4 +233,55 @@ body.role-patient #mobFab.open i {
 [data-theme="dark"] body.role-patient #mobFab,
 .dark body.role-patient #mobFab {
     border-color: #101111;
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    .patient-hero {
+        padding: 1.75rem 1.5rem 2.5rem;
+    }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+    .patient-hero {
+        padding: 1.5rem 1.25rem 2.25rem;
+    }
+
+    .patient-hero-title {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .patient-hero {
+        padding: 1.25rem 1rem 1.8rem;
+        border-radius: 1rem;
+    }
+
+    .patient-hero-title {
+        font-size:
+            clamp(1.15rem,
+                6vw,
+                1.4rem);
+
+        line-height: 1.15;
+    }
+
+    .patient-hero-subtitle {
+        font-size: .75rem;
+        line-height: 1.4;
+    }
+
+    .patient-hero-stats {
+        margin-top: .8rem;
+        gap: .45rem;
+    }
+
+    .patient-hero-stat {
+        width: auto;
+        max-width: 100%;
+
+        padding: 5px 9px;
+
+        font-size: .67rem;
+    }
 }

@@ -18,10 +18,6 @@ body.role-patient #mainContent.book-container #step4 .booking-step-header {
     transform: none !important;
 }
 
-.slot-chip {
-    transition: all 0.2s;
-}
-
 .confirm-checkbox-wrap:hover {
     border-color: #8B0000;
 }
@@ -29,49 +25,6 @@ body.role-patient #mainContent.book-container #step4 .booking-step-header {
 .file-upload-zone:hover {
     border-color: #8B0000;
     background: #fff1f1;
-}
-
-.mini-tab {
-    position: fixed !important;
-    left: 50%;
-    bottom: 2rem;
-    transform: translate3d(-50%, 20px, 0);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.7rem;
-    min-height: 54px;
-    width: max-content;
-    max-width: min(calc(100vw - 2rem), 560px);
-    padding: 0.85rem 1.2rem;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 16px;
-    background: #c11313;
-    color: #ffffff;
-    box-shadow:
-        0 18px 42px rgba(0, 0, 0, 0.28),
-        0 1px 0 rgba(255, 255, 255, 0.08) inset;
-    font-size: 0.88rem;
-    font-weight: 700;
-    line-height: 1.4;
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-    transition:
-        opacity 0.22s ease,
-        visibility 0.22s ease,
-        transform 0.22s ease;
-    z-index: 99999;
-}
-
-.mini-tab.show {
-    opacity: 1;
-    visibility: visible;
-    transform: translate3d(-50%, 0, 0);
-}
-
-.mini-tab i {
-    color: #ffd42a;
 }
 
 #miniTabText {
@@ -86,195 +39,6 @@ input[type="text"],
 input[type="email"],
 textarea {
     padding-right: 2.5rem !important;
-}
-
-.time-panel::before {
-    content: "";
-    position: absolute;
-    inset: 0 0 auto 0;
-    height: 160px;
-    background: linear-gradient(180deg, rgba(139, 0, 0, 0.05), rgba(139, 0, 0, 0.01), transparent);
-    pointer-events: none;
-}
-
-#slotGrid.slot-grid-ui {
-    display: grid !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-template-rows: repeat(4, 60px);
-    grid-auto-rows: 60px;
-    grid-auto-flow: column;
-    gap: 0.85rem !important;
-    margin-top: 0.8rem;
-    align-items: stretch;
-}
-
-#slotGrid .slot-chip {
-    width: 100%;
-    height: 60px;
-    min-height: 60px;
-    border-radius: 16px !important;
-    border: 1px solid #e7d8d2 !important;
-    background: #ffffff !important;
-    color: #2f2f2f !important;
-    font-weight: 700 !important;
-    font-size: 0.98rem !important;
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-    gap: 0.6rem;
-    padding: 0 0.9rem !important;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.03);
-    transition:
-        transform 0.22s ease,
-        box-shadow 0.22s ease,
-        border-color 0.22s ease,
-        background 0.22s ease,
-        color 0.22s ease,
-        opacity 0.22s ease;
-}
-
-#slotGrid .slot-chip:hover:not(:disabled):not(.disabled):not(.selected):not(.bg-\[\#8B0000\]) {
-    transform: translateY(-2px);
-    border-color: #d5b2a9 !important;
-    box-shadow: 0 16px 30px rgba(139, 0, 0, 0.10);
-    background: linear-gradient(180deg, #fffafa 0%, #fff3f2 100%) !important;
-}
-
-[data-theme="dark"] #mainContent #slotGrid .slot-chip:hover:not(:disabled):not(.disabled):not(.selected):not(.bg-\[\#8B0000\]),
-[data-theme="dark"] #mainContent #slotGrid .slot-chip.hover\:bg-\[\#fff5f5\]:hover {
-    background: var(--bg-panel) !important;
-    border-color: rgba(255, 247, 247, 0.492) !important;
-    color: var(--text-1) !important;
-    box-shadow:
-        0 14px 28px rgba(0, 0, 0, 0.28) !important;
-}
-
-[data-theme="dark"] #mainContent #slotGrid .slot-chip:hover i {
-    color: #fca5a5 !important;
-}
-
-#slotGrid .slot-chip.selected:hover,
-#slotGrid .slot-chip[aria-pressed="true"]:hover,
-#slotGrid .slot-chip.bg-\[\#8B0000\]:hover {
-    transform: none !important;
-    box-shadow: 0 16px 32px rgba(139, 0, 0, 0.22) !important;
-    background: linear-gradient(135deg, #8B0000, #660000) !important;
-    border-color: #8B0000 !important;
-    color: #fff !important;
-    cursor: default !important;
-}
-
-#slotGrid .slot-chip.bg-\[\#8B0000\]:hover i,
-#slotGrid .slot-chip.selected:hover i,
-#slotGrid .slot-chip[aria-pressed="true"]:hover i {
-    color: #fff !important;
-}
-
-#slotGrid .slot-chip.selected:hover {
-    background: linear-gradient(135deg, #8B0000, #660000) !important;
-    color: #fff !important;
-}
-
-#slotGrid .slot-chip.selected,
-#slotGrid .slot-chip[aria-pressed="true"],
-#slotGrid .slot-chip.bg-\[\#8B0000\] {
-    background: linear-gradient(135deg, #8B0000 0%, #660000 100%) !important;
-    border-color: #8B0000 !important;
-    color: #ffffff !important;
-    box-shadow: 0 16px 32px rgba(139, 0, 0, 0.22);
-}
-
-#slotGrid .slot-chip.selected i,
-#slotGrid .slot-chip[aria-pressed="true"] i,
-#slotGrid .slot-chip.bg-\[\#8B0000\] i {
-    color: #ffffff !important;
-}
-
-#slotGrid .slot-chip.disabled,
-#slotGrid .slot-chip:disabled {
-    height: 60px;
-    min-height: 60px;
-    opacity: 0.6;
-    cursor: not-allowed;
-    box-shadow: none;
-    transform: none;
-    background: #f8f5f4 !important;
-    color: #8f8580 !important;
-    border-color: #e8dfdb !important;
-}
-
-#slotGrid .slot-chip span,
-#slotGrid .slot-chip small,
-#slotGrid .slot-chip strong {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-#dateBanner {
-    font-size: 0.92rem !important;
-    font-weight: 800 !important;
-    border-radius: 16px !important;
-    padding: 0.9rem 1rem !important;
-}
-
-#slotPlaceholder {
-    border: 1px dashed #e7d8d2;
-    border-radius: 22px;
-    background: linear-gradient(180deg, #fffdfd 0%, #fff7f6 100%);
-    min-height: 320px;
-}
-
-#slotGrid .slot-chip i {
-    color: #8B0000 !important;
-    font-size: 0.9rem !important;
-    transition: color 0.22s ease, transform 0.22s ease;
-}
-
-#slotGrid .slot-chip.selected i,
-#slotGrid .slot-chip[aria-pressed="true"] i,
-#slotGrid .slot-chip.bg-\[\#8B0000\] i {
-    color: #fff !important;
-}
-
-#slotGrid .slot-chip,
-#slotGrid .slot-chip:hover,
-#slotGrid .slot-chip.selected,
-#slotGrid .slot-chip:active {
-    transform: none !important;
-    animation: none !important;
-}
-
-#slotGrid .slot-chip.selected,
-#slotGrid .slot-chip[aria-pressed="true"],
-#slotGrid .slot-chip.bg-\[\#8B0000\] {
-    background: linear-gradient(135deg, #8B0000, #660000) !important;
-    border-color: #8B0000 !important;
-    color: #fff !important;
-    transform: translateY(-1px);
-    box-shadow: 0 14px 30px rgba(139, 0, 0, 0.24);
-}
-
-#slotGrid .slot-chip.selected::before,
-#slotGrid .slot-chip[aria-pressed="true"]::before,
-#slotGrid .slot-chip.bg-\[\#8B0000\]::before {
-    color: #fff;
-    opacity: 0.95;
-}
-
-#slotGrid .slot-chip:active {
-    transform: scale(0.985);
-}
-
-#slotGrid .slot-chip span,
-#slotGrid .slot-chip strong {
-    transition: color 0.22s ease;
-}
-
-#slotGrid .slot-chip span,
-#slotGrid .slot-chip small,
-#slotGrid .slot-chip strong {
-    white-space: nowrap;
 }
 
 @media (max-width: 640px) {
@@ -301,83 +65,10 @@ textarea {
 
 @media only screen and (max-width: 600px) {
 
-    .mini-tab {
-        left: 50%;
-        right: auto;
-        bottom: 0.75rem;
-        max-width: calc(100vw - 1rem);
-        width: calc(100vw - 1rem);
-        padding: 0.8rem 0.95rem;
-        border-radius: 16px;
-        font-size: 0.78rem;
-        line-height: 1.35;
-        box-shadow: 0 16px 30px rgba(0, 0, 0, 0.24);
-    }
-
-    #miniTabText {
-        white-space: normal;
-        word-break: break-word;
-    }
-
-    #slotGrid.slot-grid-ui {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        grid-template-rows: repeat(4, 56px);
-        grid-auto-rows: 56px;
-        grid-auto-flow: column;
-        gap: 0.75rem !important;
-    }
-
-    #slotGrid .slot-chip,
-    #slotGrid .slot-chip.disabled,
-    #slotGrid .slot-chip:disabled {
-        height: 56px;
-        min-height: 56px;
-        font-size: 0.92rem !important;
-        border-radius: 14px !important;
-        padding: 0 0.85rem !important;
-    }
-
-    #slotPlaceholder {
-        min-height: 180px;
-    }
-
     #dateBanner {
-        font-size: 0.84rem !important;
-        padding: 0.8rem 0.9rem !important;
-    }
-}
-
-@media only screen and (min-width: 768px) {
-
-    .mini-tab {
-        width: max-content;
-        max-width: none;
-        white-space: nowrap;
-        padding: 0.95rem 1.5rem;
-    }
-
-    #slotGrid.slot-grid-ui {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        grid-template-rows: repeat(4, 58px);
-        grid-auto-rows: 58px;
-        grid-auto-flow: column;
-    }
-
-    #slotPlaceholder {
-        min-height: 260px;
-    }
-}
-
-@media only screen and (min-width: 992px) {
-
-    #slotGrid.slot-grid-ui {
-        grid-template-rows: repeat(4, 60px);
-        grid-auto-rows: 60px;
-        grid-auto-flow: column;
-    }
-
-    #slotPlaceholder {
-        min-height: 320px;
+        padding: .6rem .7rem !important;
+        border-radius: 12px !important;
+        font-size: .72rem !important;
     }
 }
 
@@ -416,165 +107,18 @@ textarea {
     border-color: rgba(255, 255, 255, 0.10) !important;
 }
 
-[data-theme="dark"] #slotGrid .slot-chip:not(.selected):not(:disabled) {
-    background: var(--card) !important;
-    border-color: var(--border) !important;
-    color: var(--text-1) !important;
-}
-
-[data-theme="dark"] #slotPlaceholder {
-    color: var(--text-3) !important;
-}
-
-[data-theme="dark"] #slotPlaceholder>div:first-child {
-    background: rgba(139, 0, 0, 0.22) !important;
-    color: #fca5a5 !important;
-}
-
-[data-theme="dark"] #selectedSlotDisplay {
-    background: rgba(139, 0, 0, 0.20) !important;
-    border-color: rgba(252, 165, 165, 0.25) !important;
-    color: #fecaca !important;
-}
-
-[data-theme="dark"] .book-container {
-    background: transparent;
-}
-
-[data-theme="dark"] .book-title {
-    color: #E6EDF3;
-}
-
-[data-theme="dark"] .book-label {
-    color: #9FB3C8;
-}
-
-[data-theme="dark"] .book-input {
-    background: #0B141C;
-    border: 1px solid #1F2A36;
-    color: #E6EDF3;
-}
-
-[data-theme="dark"] .book-input::placeholder {
-    color: #6B7C8F;
-}
-
-[data-theme="dark"] .book-input:focus {
-    border-color: #8B0000;
-    box-shadow: 0 0 0 2px rgba(139, 0, 0, 0.3);
-}
-
-[data-theme="dark"] select.book-input {
-    background: #0B141C;
-    color: #E6EDF3;
-}
-
-[data-theme="dark"] .book-btn-primary {
-    background: #8B0000;
-    color: #fff;
-}
-
-[data-theme="dark"] .book-btn-primary:hover {
-    background: #a30000;
-}
-
-[data-theme="dark"] .book-btn-secondary {
-    background: #1A2633;
-    color: #C9D6E2;
-}
-
-[data-theme="dark"] .book-btn-secondary:hover {
-    background: #243344;
-}
-
-[data-theme="dark"] .book-divider {
-    border-color: rgba(255, 255, 255, 0.08);
-}
-
-[data-theme="dark"] .book-muted {
-    color: #7F8C98;
-}
-
-[data-theme="dark"] #mainContent .btn-secondary-custom {
-    background: #161b22;
-    border-color: rgba(255, 255, 255, 0.12);
-    color: #e5e7eb;
-}
-
-[data-theme="dark"] #mainContent .btn-secondary-custom:hover {
-    background: #1f2937;
-    border-color: rgba(252, 165, 165, 0.35);
-    color: #fca5a5;
-}
-
-[data-theme="dark"] #clearSlotSelectionBtn {
-    background: linear-gradient(180deg, #161b22, #111827) !important;
-    border-color: rgba(252, 165, 165, 0.28) !important;
-    color: #fecaca !important;
-}
-
-.calendar-shell-no-card>* {
-    width: 100%;
-}
-
-body.layout-no-sidebar #mainContent,
-body.layout-no-sidebar #siteFooter {
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-    width: 100% !important;
-}
-
-[data-theme="dark"] #clearSlotSelectionBtn {
-    background: #161b22 !important;
-    border-color: rgba(252, 165, 165, 0.25) !important;
-    color: #fecaca !important;
-}
-
-[data-theme="dark"] #clearSlotSelectionBtn:hover {
-    background: #1f2937 !important;
-}
-
-#slotPlaceholder.slot-placeholder-empty {
-    min-height: 260px !important;
-}
-
 .time-panel.is-empty {
     min-height: auto !important;
 }
 
-[data-theme="dark"] #slotPlaceholder {
-    background: var(--surface) !important;
-    border-color: rgba(255, 255, 255, 0.10) !important;
-    color: var(--text-3) !important;
-}
-
-[data-theme="dark"] #slotPlaceholder p:first-child {
-    color: #cbd5e1 !important;
-}
-
-[data-theme="dark"] #slotPlaceholder p:last-child {
-    color: #94a3b8 !important;
-}
-
-[data-theme="dark"] #slotPlaceholder>div:first-child {
-    background: rgba(139, 0, 0, 0.22) !important;
-    color: #fca5a5 !important;
-}
-
-#mainContent .time-panel.is-empty {
-    height: auto !important;
-    min-height: 0 !important;
-    align-self: start !important;
-}
-
-#mainContent .time-panel.is-empty #slotPlaceholder {
-    min-height: 240px !important;
-    height: 240px !important;
-    flex: 0 0 auto !important;
+#mainContent .reserved-slot-grid .slot-chip,
+#mainContent .reserved-slot-grid .slot-chip:hover,
+#mainContent .reserved-slot-grid .slot-chip:focus,
+#mainContent .reserved-slot-grid .slot-chip.selected {
+    box-shadow: none !important;
 }
 
 #mainContent #slotContainer,
-#mainContent #slotPlaceholder,
 #mainContent #slotGrid,
 #mainContent #dateBanner,
 #mainContent .slot-chip {
@@ -608,95 +152,22 @@ body.layout-no-sidebar #siteFooter {
     }
 }
 
-[data-theme="dark"] #mainContent #slotPlaceholder {
-    background: var(--surface) !important;
-    border: 1px dashed rgba(255, 255, 255, .14) !important;
-    color: #94a3b8 !important;
-}
-
-[data-theme="dark"] #mainContent #slotPlaceholder .empty-icon {
-    background: rgba(139, 0, 0, 0.24) !important;
-    color: #fca5a5 !important;
-}
-
-[data-theme="dark"] #mainContent #slotPlaceholder .empty-title {
-    color: #cbd5e1 !important;
-}
-
-[data-theme="dark"] #mainContent #slotPlaceholder .empty-subtitle {
-    color: #94a3b8 !important;
-}
-
 #mainContent .time-panel::before {
     display: none !important;
 }
 
-#mainContent #slotPlaceholder,
 #mainContent #slotContainer {
     width: 100%;
-}
-
-#mainContent .time-panel.is-empty {
-    display: flex !important;
-    flex-direction: column !important;
-}
-
-#mainContent .time-panel.is-empty #slotPlaceholder {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    height: 320px !important;
-    min-height: 320px !important;
-    margin-top: 1rem !important;
-    transform: none !important;
-    opacity: 1 !important;
-}
-
-#mainContent .time-panel::before {
-    display: none !important;
-}
-
-#mainContent #slotPlaceholder {
-    width: 100% !important;
-    height: 260px !important;
-    min-height: 260px !important;
-    margin-top: 1rem !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    transform: none !important;
-    opacity: 1 !important;
-}
-
-#mainContent #slotPlaceholder.hidden {
-    display: none !important;
 }
 
 #mainContent #slotContainer.hidden {
     display: none !important;
 }
 
-#mainContent #slotPlaceholder.hidden {
-    display: none !important;
-}
-
-#mainContent .time-panel:has(#slotContainer:not(.hidden)) #slotPlaceholder {
-    display: none !important;
-}
-
-#mainContent .time-panel.is-empty #slotPlaceholder:not(.hidden) {
-    display: flex !important;
-}
-
-[data-theme="dark"] #mainContent #slotGrid .slot-chip,
-[data-theme="dark"] #mainContent #slotGrid button,
-[data-theme="dark"] #mainContent #slotGrid [class*="bg-white"],
-[data-theme="dark"] #mainContent #slotGrid [class*="bg-gray"],
 [data-theme="dark"] #mainContent #slotGrid .animate-pulse,
 [data-theme="dark"] #mainContent #slotGrid .skeleton {
     background: var(--card) !important;
     border-color: var(--border) !important;
-    color: var(--text-1) !important;
 }
 
 [data-theme="dark"] #mainContent #slotGrid .animate-pulse *,
@@ -812,163 +283,6 @@ body.layout-no-sidebar #siteFooter {
     border-color: rgba(255, 255, 255, .14) !important;
 }
 
-.signature-methods-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 1rem;
-    align-items: stretch;
-}
-
-.signature-methods-grid .file-upload-zone {
-    min-height: 280px;
-    height: 100%;
-}
-
-.signature-draw-card {
-    border: 1px solid #e8e2dd;
-    border-radius: 18px;
-    background: linear-gradient(180deg, #fffefe 0%, #fff8f7 100%);
-    padding: 1rem;
-    height: 100%;
-}
-
-.signature-draw-title {
-    text-align: center;
-    color: #8B0000;
-    font-size: 0.95rem;
-    font-weight: 900;
-    margin-bottom: 0.85rem;
-}
-
-.signature-pad-wrap {
-    position: relative;
-    border: 2px dashed #d9d9d9;
-    border-radius: 18px;
-    overflow: hidden;
-    background: #ffffff;
-}
-
-.signature-pad-canvas {
-    width: 100%;
-    height: 170px;
-    display: block;
-    background: #ffffff;
-    cursor: crosshair;
-    touch-action: none;
-}
-
-.signature-pad-footer {
-    display: flex;
-    flex-direction: column;
-    gap: 0.85rem;
-    margin-top: 0.85rem;
-}
-
-.signature-pad-help {
-    font-size: 0.75rem;
-    color: #9e9690;
-}
-
-.signature-pad-actions {
-    display: flex;
-    gap: 0.55rem;
-    flex-wrap: wrap;
-}
-
-[data-theme="dark"] #mainContent .signature-draw-card {
-    background: var(--card) !important;
-    border-color: var(--border) !important;
-}
-
-[data-theme="dark"] #mainContent .signature-draw-title {
-    color: #fca5a5 !important;
-}
-
-[data-theme="dark"] #mainContent .signature-pad-wrap {
-    border-color: rgba(255, 255, 255, 0.16) !important;
-    background: #ffffff !important;
-}
-
-[data-theme="dark"] #mainContent .signature-pad-help {
-    color: var(--text-3) !important;
-}
-
-.signature-methods-grid {
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
-    gap: 1.5rem !important;
-    align-items: stretch !important;
-    width: 100% !important;
-    max-width: none !important;
-    padding: 1rem !important;
-    border: 1px dashed rgba(255, 255, 255, 0.10) !important;
-    border-radius: 22px !important;
-    box-sizing: border-box !important;
-}
-
-.signature-methods-grid .file-upload-zone {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 100% !important;
-    min-height: 360px !important;
-    height: 100% !important;
-    padding: 2rem !important;
-    box-sizing: border-box !important;
-    border-radius: 18px !important;
-}
-
-.signature-draw-card {
-    width: 100% !important;
-    min-height: 360px !important;
-    height: 100% !important;
-    padding: 1.35rem 1.45rem !important;
-    box-sizing: border-box !important;
-    display: flex !important;
-    flex-direction: column !important;
-    border-radius: 18px !important;
-}
-
-.signature-draw-title {
-    margin-bottom: 1rem !important;
-    text-align: center !important;
-}
-
-.signature-pad-wrap {
-    flex: 1 1 auto !important;
-    min-height: 250px !important;
-    height: 250px !important;
-}
-
-.signature-pad-canvas {
-    width: 100% !important;
-    height: 100% !important;
-    min-height: 250px !important;
-    display: block !important;
-}
-
-.signature-pad-footer {
-    margin-top: 1rem !important;
-    flex: 0 0 auto !important;
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 0.9rem !important;
-    justify-content: flex-start !important;
-}
-
-.signature-pad-help {
-    text-align: center !important;
-}
-
-.signature-pad-actions {
-    display: grid !important;
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-    align-items: center !important;
-    gap: 0.65rem !important;
-    width: 100% !important;
-}
-
 #mainContent .book-card>div:last-child {
     padding: 1.5rem 1.75rem 1.35rem !important;
 }
@@ -984,62 +298,9 @@ body.layout-no-sidebar #siteFooter {
     width: 100% !important;
 }
 
-#mainContent .signature-methods-grid {
-    min-height: 360px !important;
-}
-
-#mainContent .signature-methods-grid .file-upload-zone {
-    min-height: 340px !important;
-}
-
-#mainContent .signature-draw-card {
-    min-height: 340px !important;
-}
-
-#mainContent .signature-pad-wrap {
-    height: 210px !important;
-    min-height: 210px !important;
-}
-
-#mainContent .signature-pad-canvas {
-    height: 100% !important;
-    min-height: 210px !important;
-}
-
 @media (max-width: 768px) {
     #mainContent .book-card>div:last-child {
         padding: 1rem !important;
-    }
-
-    #mainContent .signature-methods-grid {
-        grid-template-columns: 1fr !important;
-        gap: 1rem !important;
-        padding: 0.85rem !important;
-        min-height: auto !important;
-    }
-
-    #mainContent .signature-methods-grid .file-upload-zone,
-    #mainContent .signature-draw-card {
-        width: 100% !important;
-        height: auto !important;
-        min-height: 300px !important;
-    }
-
-    #mainContent .signature-pad-wrap {
-        height: 210px !important;
-        min-height: 210px !important;
-    }
-
-    #mainContent .signature-pad-canvas {
-        height: 100% !important;
-        min-height: 210px !important;
-    }
-
-    #mainContent .signature-pad-actions {
-        display: grid !important;
-        grid-template-columns: 1fr 1fr !important;
-        gap: 0.5rem !important;
-        width: 100% !important;
     }
 }
 

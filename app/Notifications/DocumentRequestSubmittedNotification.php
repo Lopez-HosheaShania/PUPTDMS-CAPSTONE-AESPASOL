@@ -35,6 +35,7 @@ class DocumentRequestSubmittedNotification extends Notification
             'url' => $this->resolveTargetUrl($notifiable),
             'icon' => 'fa-file-lines',
             'event' => 'document.request.submitted',
+            'recipient_role' => optional($notifiable->role)->slug,
         ];
     }
 

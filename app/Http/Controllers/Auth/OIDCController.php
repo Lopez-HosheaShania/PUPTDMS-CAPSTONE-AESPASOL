@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Helpers\AuditLogger;
 use App\Http\Controllers\Controller;
 use App\Models\ExternalAdminAccess;
+use App\Models\ExternalAdminProfile;
 use App\Models\Faculty;
 use App\Models\MedicalHistory;
 use App\Models\Patient;
@@ -12,6 +13,7 @@ use App\Models\Role;
 use App\Models\User;
 use App\Services\FacultyApiService;
 use App\Services\ConcurrentSessionService;
+use App\Services\CmsApiService;
 use App\Services\StudentApiService;
 use Illuminate\Http\Client\Response;
 use Illuminate\Http\Request;
@@ -49,7 +51,6 @@ class OIDCController extends Controller
         $clientId     = config('services.oidc.client_id');
         $redirectUri  = config('services.oidc.redirect');
         $scope        = config('services.oidc.scope', 'openid profile email');
-        $forceReauth  = $request->boolean('reauth');
 
         if (!$clientId || !$redirectUri) {
             return redirect()->route('login')
@@ -70,7 +71,7 @@ class OIDCController extends Controller
             'scope'         => $scope,
             'state'         => $state,
             'prompt'        => 'login',
-            'max_age'       => $forceReauth ? 0 : null,
+            'max_age'       => 0,
         ]);
 
         if ($loginUrl) {
@@ -80,19 +81,17 @@ class OIDCController extends Controller
             $fullUrl = $authorizeUrl . '?' . $query;
         }
 
-        Log::info('OIDC redirect URL', ['url' => $fullUrl]);
+        Log::info('OIDC sign-in redirect started');
 
         return redirect()->away($fullUrl);
     }
 
     public function callback(Request $request)
     {
-        Log::info('OIDC Callback Debug', [
-            'incoming_state' => $request->get('state'),
-            'session_state'  => session('oidc_state'),
-            'session_id'     => session()->getId(),
-            'full_url'       => $request->fullUrl(),
-            'all_params'     => $request->all(),
+        Log::info('OIDC callback received', [
+            'has_code' => $request->filled('code'),
+            'has_state' => $request->filled('state'),
+            'has_error' => $request->filled('error'),
         ]);
 
         if ($request->has('error')) {
@@ -123,12 +122,6 @@ class OIDCController extends Controller
         parse_str($rawQuery, $rawParams);
         $code = $rawParams['code'] ?? $request->get('code');
 
-        Log::info('OIDC code comparison', [
-            'raw_code'     => $rawParams['code'] ?? 'not found',
-            'request_code' => $request->get('code'),
-            'match'        => ($rawParams['code'] ?? '') === $request->get('code'),
-        ]);
-
         if (!$code) {
             return redirect()->route('login')
                 ->with('error', 'Authorization code missing.');
@@ -143,28 +136,14 @@ class OIDCController extends Controller
                 'code'          => $code,
             ]);
 
-        Log::info('OIDC token request', [
-            'token_url' => config('services.oidc.token_url'),
-            'payload'   => [
-                'client_id'         => config('services.oidc.client_id'),
-                'code'              => $code,
-                'has_client_secret' => !empty(config('services.oidc.client_secret')),
-            ],
+        Log::info('OIDC token exchange completed', [
             'response_status' => $tokenResponse->status(),
-            'response_body'   => $tokenResponse->body(),
         ]);
 
         if (!$tokenResponse->successful()) {
-            $tokenError = $tokenResponse->json();
-
             return redirect()->route('login')->with(
                 'error',
-                'Token exchange failed: ' . (
-                    $tokenError['error_description']
-                    ?? $tokenError['error']
-                    ?? $tokenResponse->body()
-                    ?? 'Unknown error'
-                )
+                'Unable to complete sign-in. Please try again.'
             );
         }
 
@@ -186,20 +165,12 @@ class OIDCController extends Controller
 
         Log::info('OIDC profile response', [
             'status' => $profileResponse->status(),
-            'body'   => $profileResponse->body(),
         ]);
 
         if (!$profileResponse->successful()) {
-            $profileError = $profileResponse->json();
-
             return redirect()->route('login')->with(
                 'error',
-                'Failed to fetch user profile: ' . (
-                    $profileError['error_description']
-                    ?? $profileError['error']
-                    ?? $profileResponse->body()
-                    ?? 'Unknown error'
-                )
+                'Unable to retrieve your sign-in profile. Please try again.'
             );
         }
 
@@ -216,16 +187,6 @@ class OIDCController extends Controller
         $fullName  = trim(implode(' ', $nameParts));
         $name      = $profile['name'] ?? ($fullName !== '' ? $fullName : $email);
 
-        Log::info('OIDC PROFILE DEBUG', [
-            'profile'      => $profile,
-            'ssoUserId'    => $ssoUserId,
-            'email'        => $email,
-            'name'         => $name,
-            'first_name'   => $firstName,
-            'middle_name'  => $middleName,
-            'last_name'    => $lastName,
-            'suffix_name'  => $suffixName,
-        ]);
 
         if (!$email) {
             return redirect()->route('login')
@@ -243,35 +204,16 @@ class OIDCController extends Controller
         $roleSlug = null;
 
         foreach ($incomingRoles as $incomingRole) {
-            $incomingRole = strtolower((string) $incomingRole);
-
-            if (str_contains($incomingRole, 'dentist')) {
+            if (str_contains(strtolower((string) $incomingRole), 'dentist')) {
                 $roleSlug = 'dentist';
                 break;
             }
-
-            if (str_contains($incomingRole, 'admin')) {
-                $roleSlug = 'admin';
-            }
         }
 
-        if (!$roleSlug) {
-            $roleSlug = 'patient';
-        }
-
-        $assignedAccess = ExternalAdminAccess::where('email', $email)
-            ->orWhere('external_admin_id', (string) $ssoUserId)
+        $assignedAccess = ExternalAdminAccess::forIdentity($email, (string) $ssoUserId)
             ->first();
 
-        $facultyAccess = Faculty::with(['user.role', 'profile'])
-            ->whereHas('user', function ($query) use ($email, $ssoUserId) {
-                $query->where('email', $email);
-
-                if ($ssoUserId) {
-                    $query->orWhere('sso_user_id', $ssoUserId);
-                }
-            })
-            ->first();
+        $facultyAccess = null;
 
         if ($assignedAccess) {
             if (($assignedAccess->cms_status ?? 'inactive') !== 'active') {
@@ -280,16 +222,49 @@ class OIDCController extends Controller
 
             if (!empty($assignedAccess->cms_role)) {
                 $roleSlug = $assignedAccess->cms_role;
+            } else {
+                $roleSlug = 'admin';
             }
-        } elseif ($facultyAccess && $facultyAccess->user) {
-            if (($facultyAccess->user->status ?? 'inactive') !== 'active') {
-                return $this->renderInactiveAccessPage();
+        } else {
+            $hasOidcAdminRole = false;
+            foreach ($incomingRoles as $incomingRole) {
+                if (str_contains(strtolower((string) $incomingRole), 'admin')) {
+                    $hasOidcAdminRole = true;
+                    break;
+                }
             }
 
-            if (!empty($facultyAccess->user->role?->slug)) {
-                $roleSlug = $facultyAccess->user->role->slug;
-                $roleId = $this->resolveLocalRoleId($roleSlug);
+            if ($hasOidcAdminRole) {
+                Log::warning('OIDC admin role denied - not in external_admin_accesses', [
+                    'email' => $email,
+                    'sso_user_id' => $ssoUserId,
+                    'incoming_roles' => $incomingRoles,
+                ]);
             }
+
+            $facultyAccess = Faculty::with(['user.role', 'profile'])
+                ->whereHas('user', function ($query) use ($email, $ssoUserId) {
+                    $query->where('email', $email);
+
+                    if ($ssoUserId) {
+                        $query->orWhere('sso_user_id', $ssoUserId);
+                    }
+                })
+                ->first();
+
+            if ($facultyAccess && $facultyAccess->user) {
+                if (($facultyAccess->user->status ?? 'inactive') !== 'active') {
+                    return $this->renderInactiveAccessPage();
+                }
+
+                if (!empty($facultyAccess->user->role?->slug)) {
+                    $roleSlug = $facultyAccess->user->role->slug;
+                }
+            }
+        }
+
+        if (!$roleSlug) {
+            $roleSlug = 'patient';
         }
 
         $roleId = $this->resolveLocalRoleId($roleSlug);
@@ -370,7 +345,6 @@ class OIDCController extends Controller
         $user->refresh_token = $refreshToken;
         $user->last_login_at = now();
         $user->save();
-        // I-reload para makuha yung actual role na naka-set sa DB
         $user->refresh();
         $actualRoleSlug = optional($user->role)->slug ?? $roleSlug;
 
@@ -398,7 +372,8 @@ class OIDCController extends Controller
                 $studentData,
                 $patient,
                 $assignedAccess,
-                $facultyAccess
+                $facultyAccess,
+                $incomingRoles
             );
         }
 
@@ -420,6 +395,8 @@ class OIDCController extends Controller
         Auth::guard('web')->login($user);
         $request->session()->regenerate();
         $request->session()->put('oidc_id_token', $idToken);
+        $request->session()->put('oidc_access_token', $accessToken);
+        $request->session()->put('auth_jwt_token', $jwt);
         session()->save();
         $this->concurrentSessionService->syncCurrentSessionMetadata($request);
 
@@ -481,9 +458,9 @@ class OIDCController extends Controller
             return $redirect;
         }
 
-        if ($actualRoleSlug === 'dentist') {
+        if ($clinicalLandingRoute = $this->clinicalLandingRoute($user)) {
             session([
-                'role'          => 'dentist',
+                'role'          => $actualRoleSlug,
                 'dentist_id'    => $user->id,
                 'dentist_name'  => $user->name ?: $name ?: $email,
                 'dentist_email' => $user->email,
@@ -491,9 +468,9 @@ class OIDCController extends Controller
 
             session()->save();
 
-            AuditLogger::log('login', 'authentication', 'Dentist logged in via OIDC');
+            AuditLogger::log('login', 'authentication', "Clinical user ({$actualRoleSlug}) logged in via OIDC");
 
-            $redirect = redirect()->route('dentist.dentist.dashboard')
+            $redirect = redirect()->route($clinicalLandingRoute)
                 ->with('login_as', $user->name ?: $name ?: $email)
                 ->with('show_terms_modal', true);
 
@@ -513,6 +490,33 @@ class OIDCController extends Controller
             ->with('error', 'Your account role is not allowed to log in.');
     }
 
+    private function clinicalLandingRoute(User $user): ?string
+    {
+        foreach (
+            [
+                'access_dentist_dashboard' => 'dentist.dentist.dashboard',
+                'view_appointments' => 'dentist.dentist.appointments',
+                'manage_walk_in_patients' => 'dentist.walk-in.index',
+                'manage_existing_records' => 'dentist.existing-record.index',
+                'view_clinic_schedule' => 'dentist.dentist.clinic_schedule',
+                'view_patient_profiles' => 'dentist.dentist.patients',
+                'view_document_requests' => 'dentist.dentist.documentrequests',
+                'view_inventory' => 'dentist.dentist.inventory',
+                'add_inventory' => 'dentist.dentist.inventory',
+                'update_inventory' => 'dentist.dentist.inventory',
+                'delete_inventory' => 'dentist.dentist.inventory',
+                'view_reports' => 'dentist.dentist.report',
+                'create_report_files' => 'dentist.dentist.report',
+            ] as $permission => $route
+        ) {
+            if ($user->hasPermission($permission)) {
+                return $route;
+            }
+        }
+
+        return null;
+    }
+
     protected function syncPatientRecord(
         User $user,
         ?string $name,
@@ -521,24 +525,70 @@ class OIDCController extends Controller
         array $studentData,
         ?Patient $patient,
         ?ExternalAdminAccess $assignedAccess,
-        ?Faculty $facultyAccess
+        ?Faculty $facultyAccess,
+        array $incomingRoles = []
     ): Patient {
-        $phone = $this->extractStudentPhone($studentData);
-        $facultyCode = null;
-        $studentNo = $this->extractStudentNumber($studentData) ?: $patient?->student_no;
-        $programCode = $this->extractStudentProgramCode($studentData) ?: $patient?->course_code;
-        $programName = $this->extractStudentProgramName($studentData) ?: $patient?->course_name;
-        $yearLevel = $studentData['yearLevel'] ?? $studentData['year_level'] ?? $patient?->year_level;
-        $section = $studentData['section'] ?? $patient?->section;
+        $patient?->loadMissing(['information', 'studentInformation', 'facultyInformation']);
+
+        $information = $patient?->information;
+
+        $phone =
+            $this->extractStudentPhone($studentData)
+            ?: (string) ($information?->phone ?? '');
+
+        $facultyCode =
+            $patient?->faculty_code;
+
+        $studentNo =
+            $this->extractStudentNumber($studentData)
+            ?: $patient?->student_no;
+
+        $programCode =
+            $this->extractStudentProgramCode($studentData)
+            ?: $patient?->course_code;
+
+        $programName =
+            $this->extractStudentProgramName($studentData)
+            ?: $patient?->course_name;
+
+        $yearLevel =
+            $studentData['yearLevel']
+            ?? $studentData['year_level']
+            ?? $patient?->year_level;
+
+        $section =
+            $studentData['section']
+            ?? $patient?->section;
+
 
         $personalInfo = [];
         $studentAddresses = [];
-        $birthdate = null;
-        $gender = null;
-        $placeOfBirth = null;
-        $heightM = null;
-        $weightKg = null;
-        $address = $patient?->address;
+
+        $birthdate =
+            $information?->birthdate
+            ? $information->birthdate->format('Y-m-d')
+            : null;
+
+        $gender =
+            $information?->gender;
+
+        $placeOfBirth =
+            $information?->place_of_birth;
+
+        $heightM =
+            $information?->height_m !== null
+            ? (float) $information->height_m
+            : null;
+
+        $weightKg =
+            $information?->weight_kg !== null
+            ? (float) $information->weight_kg
+            : null;
+
+
+        $address =
+            $information?->address
+            ?? $patient?->getRawOriginal('address');
 
         try {
             if (!empty($studentNo)) {
@@ -559,54 +609,79 @@ class OIDCController extends Controller
             ]);
         }
 
+ 
+
+        $resolvedStudentAddress =
+            $this->formatStudentAddress(
+                $studentAddresses
+            );
+
+        if (filled($resolvedStudentAddress)) {
+            $address = $resolvedStudentAddress;
+        }
+
         $birthdate = $this->normalizeDate(
             $personalInfo['dateOfBirth']
                 ?? $personalInfo['birthdate']
                 ?? $studentData['birthdate']
                 ?? $studentData['dateOfBirth']
-                ?? null
+                ?? $birthdate
         );
         $gender = $this->normalizeGenderLabel(
             $personalInfo['gender']['name']
                 ?? $personalInfo['gender']
                 ?? $studentData['gender']
-                ?? null
+                ?? $gender
         );
-        $placeOfBirth = $this->cleanStringValue($personalInfo['placeOfBirth'] ?? $personalInfo['place_of_birth'] ?? null);
-        $heightM = $this->normalizeNullableFloat($personalInfo['heightM'] ?? $personalInfo['height_m'] ?? null);
-        $weightKg = $this->normalizeNullableFloat($personalInfo['weightKg'] ?? $personalInfo['weight_kg'] ?? null);
-        $address = $this->formatStudentAddress($studentAddresses) ?: $address;
+        $placeOfBirth = $this->cleanStringValue(
+            $personalInfo['placeOfBirth']
+                ?? $personalInfo['place_of_birth']
+                ?? $placeOfBirth
+        );
+        $heightM = $this->normalizeNullableFloat(
+            $personalInfo['heightM']
+                ?? $personalInfo['height_m']
+                ?? $heightM
+        );
 
-        if ($assignedAccess) {
+        $weightKg = $this->normalizeNullableFloat(
+            $personalInfo['weightKg']
+                ?? $personalInfo['weight_kg']
+                ?? $weightKg
+        );
+
+        $hasFacultyProfile = false;
+
+        $cmsProfile = null;
+        $cmsApi = app(CmsApiService::class);
+
+        if ($cmsApi->isConfigured()) {
             try {
-                $baseUrl = rtrim((string) env('OCMS_EXTERNAL_API_URL'), '/');
-                $apiKey = (string) env('OCMS_EXTERNAL_API_KEY');
+                $cmsProfile = $cmsApi->findByEmail($email);
+                if ($cmsProfile !== null) {
+                    $birthdate = $this->normalizeDate($cmsProfile['birthday'] ?? $birthdate);
+                    $gender = $this->normalizeGenderLabel($cmsProfile['gender'] ?: $gender);
+                    $phone = $cmsProfile['contact_number'] ?: $phone;
+                    $address = $cmsProfile['address'] ?: $address;
 
-                $response = Http::timeout(15)
-                    ->acceptJson()
-                    ->withHeaders([
-                        'X-External-Api-Key' => $apiKey,
-                    ])
-                    ->get($baseUrl . '/external/admins/' . urlencode((string) $assignedAccess->external_admin_id));
-
-                if ($response->successful()) {
-                    $payload = $response->json();
-                    $admin = is_array($payload['data'] ?? null) ? $payload['data'] : [];
-
-                    $birthdate = $this->normalizeDate($admin['birthday'] ?? $birthdate);
-                    $gender = $this->normalizeGenderLabel($admin['gender'] ?? $gender);
-                    $phone = $admin['emergency_contact_no'] ?? $phone;
-                } else {
-                    $gender = $this->normalizeGenderLabel($assignedAccess->gender ?? $gender);
-                    $phone = $assignedAccess->contact_number ?? $phone;
+                    // Repair only an existing assignment's identity; a directory match grants no access.
+                    if ($assignedAccess?->profile && $assignedAccess->external_admin_id !== $cmsProfile['admin_id']
+                        && ! ExternalAdminProfile::whereKeyNot($assignedAccess->profile->id)
+                            ->where('external_admin_id', $cmsProfile['admin_id'])->exists()) {
+                        $assignedAccess->profile->update(['external_admin_id' => $cmsProfile['admin_id']]);
+                    }
                 }
             } catch (\Throwable $e) {
-                Log::error('Admin API fetch failed', [
-                    'email' => $email,
-                    'error' => $e->getMessage(),
-                ]);
+                Log::warning('CMS profile sync unavailable', ['exception' => get_class($e)]);
             }
-        } elseif ($facultyAccess && $facultyAccess->user) {
+        }
+
+        if ($cmsProfile === null && $assignedAccess) {
+            $gender = $this->normalizeGenderLabel($assignedAccess->gender ?: $gender);
+            $phone = $assignedAccess->contact_number ?: $phone;
+        }
+
+        if (! $assignedAccess && $facultyAccess && $facultyAccess->user) {
             try {
                 $localFacultyBirthdate = $facultyAccess->profile?->birthday
                     ?? $facultyAccess->user?->birthdate;
@@ -637,6 +712,7 @@ class OIDCController extends Controller
                 });
 
                 if ($matchedFaculty) {
+                    $hasFacultyProfile = true;
                     $birthdate = $this->normalizeDate(
                         $matchedFaculty['birthday']
                             ?? $matchedFaculty['birthdate']
@@ -648,7 +724,7 @@ class OIDCController extends Controller
                     );
                     $gender = $this->normalizeGenderLabel($matchedFaculty['profile']['gender'] ?? $gender);
                     $phone = $matchedFaculty['contact_number'] ?? $phone;
-                    $facultyCode = $matchedFaculty['faculty_code'] ?? null;
+                    $facultyCode = $matchedFaculty['faculty_code'] ?? $facultyCode;
                 }
             } catch (\Throwable $e) {
                 Log::error('Faculty API fetch failed', [
@@ -675,6 +751,7 @@ class OIDCController extends Controller
                 });
 
                 if ($matchedFaculty) {
+                    $hasFacultyProfile = true;
                     $birthdate = $this->normalizeDate(
                         $matchedFaculty['birthday']
                             ?? $matchedFaculty['birthdate']
@@ -713,38 +790,106 @@ class OIDCController extends Controller
             'address' => $address,
         ]);
 
+        $existingClassification = strtolower(trim((string) (
+            $patient?->classification ?? ''
+        )));
+
+        $classification = 'dependent_alumni';
+        // OIDC categories describe the patient; local roles still control access.
+        $incomingRoles = array_map(
+            fn ($role) => strtolower(trim((string) $role)),
+            $incomingRoles
+        );
+
+        if (
+            $facultyAccess ||
+            $hasFacultyProfile ||
+            filled($facultyCode) ||
+            in_array('faculty', $incomingRoles, true)
+        ) {
+            $classification = 'faculty';
+        } elseif (filled($studentNo) || $studentData !== [] || in_array('student', $incomingRoles, true)) {
+            $classification = 'student';
+        } elseif ($assignedAccess || ($cmsProfile !== null && in_array(
+            $existingClassification, ['', 'patient', 'dependent', 'dependent_alumni', 'administrative'], true
+        ))) {
+            $classification = 'administrative';
+        } elseif (
+            in_array(
+                $existingClassification,
+                [
+                    'student',
+                    'faculty',
+                    'administrative',
+                    'alumni',
+                    'dependent',
+                    'guest',
+                    'dependent_alumni',
+                ],
+                true
+            )
+        ) {
+            $classification = $existingClassification;
+        }
+
         $user->phone = $phone ?: $user->phone;
         $user->birthdate = $birthdate ?: $user->birthdate;
         $user->gender = $gender ?: $user->gender;
         $user->save();
 
-        $supportsExtendedStudentFields = Schema::hasColumns('patients', [
-            'place_of_birth',
-            'height_m',
-            'weight_kg',
-        ]);
-
         if ($patient) {
             $patient->user_id = $patient->user_id ?: $user->id;
             $patient->name = $user->name ?: $name ?: $email;
             $patient->email = $user->email;
-            $patient->phone = $phone ?: $patient->phone;
-            $patient->birthdate = $birthdate ?: $patient->birthdate;
-            $patient->gender = $gender ?: $patient->gender;
-            if ($supportsExtendedStudentFields) {
-                $patient->place_of_birth = $placeOfBirth ?: $patient->place_of_birth;
-                $patient->height_m = $heightM ?? $patient->height_m;
-                $patient->weight_kg = $weightKg ?? $patient->weight_kg;
+            $patient->phone =
+                $phone
+                ?: $information?->phone;
+
+            $patient->birthdate =
+                $birthdate
+                ?: $information?->birthdate;
+
+            $patient->gender =
+                $gender
+                ?: $information?->gender;
+
+            $patient->faculty_code =
+                $facultyCode
+                ?: $patient->faculty_code;
+
+            $patient->student_no =
+                $studentNo
+                ?: $patient->student_no;
+
+            $patient->course_code =
+                $programCode
+                ?: $patient->course_code;
+
+            $patient->course_name =
+                $programName
+                ?: $patient->course_name;
+
+            $patient->year_level =
+                $yearLevel
+                ?? $patient->year_level;
+
+            $patient->section =
+                $section
+                ?: $patient->section;
+
+            $patient->classification = $classification;
+
+            $patient->is_pwd =
+                $information?->is_pwd
+                ?? false;
+
+            $patient->is_senior =
+                $information?->is_senior
+                ?? false;
+
+            if (filled($address)) {
+                $patient->address = $address;
             }
-            $patient->faculty_code = $facultyCode ?: $patient->faculty_code;
-            $patient->student_no = $studentNo ?: $patient->student_no;
-            $patient->course_code = $programCode ?: $patient->course_code;
-            $patient->course_name = $programName ?: $patient->course_name;
-            $patient->year_level = $yearLevel ?: $patient->year_level;
-            $patient->section = $section ?: $patient->section;
-            $patient->is_pwd = $patient->is_pwd ?? false;
-            $patient->is_senior = $patient->is_senior ?? false;
-            $patient->address = $address ?: $patient->address;
 
             if (empty($patient->password)) {
                 $patient->password = Hash::make(Str::random(16));
@@ -765,6 +910,7 @@ class OIDCController extends Controller
             'gender' => $gender,
             'password' => Hash::make(Str::random(16)),
             'faculty_code' => $facultyCode,
+            'classification' => $classification,
             'student_no' => $studentNo,
             'course_code' => $programCode,
             'course_name' => $programName,
@@ -773,13 +919,11 @@ class OIDCController extends Controller
             'is_pwd' => false,
             'is_senior' => false,
             'address' => $address,
-        ];
 
-        if ($supportsExtendedStudentFields) {
-            $patientPayload['place_of_birth'] = $placeOfBirth;
-            $patientPayload['height_m'] = $heightM;
-            $patientPayload['weight_kg'] = $weightKg;
-        }
+            'place_of_birth' => $placeOfBirth,
+            'height_m' => $heightM,
+            'weight_kg' => $weightKg,
+        ];
 
         $patient = Patient::create($patientPayload);
 
@@ -976,17 +1120,46 @@ class OIDCController extends Controller
     protected function syncStudentMedicalHistory(Patient $patient, array $personalInfo): void
     {
         $emergencyPerson = $this->cleanStringValue(
-            $personalInfo['emergencyContactName'] ?? $personalInfo['emergency_contact_name'] ?? null
+            $personalInfo['emergencyContactName']
+                ?? $personalInfo['emergency_contact_name']
+                ?? data_get($personalInfo, 'emergencyContact.name')
+                ?? data_get($personalInfo, 'emergency_contact.name')
+                ?? data_get($personalInfo, 'emergency_contact.contact_name')
+                ?? data_get($personalInfo, 'emergencyContact.contactName')
+                ?? null
         );
         $emergencyNumber = $this->cleanStringValue(
-            $personalInfo['emergencyContactNumber'] ?? $personalInfo['emergency_contact_number'] ?? null
+            $personalInfo['emergencyContactNumber']
+                ?? $personalInfo['emergency_contact_number']
+                ?? data_get($personalInfo, 'emergencyContact.number')
+                ?? data_get($personalInfo, 'emergencyContact.contactNumber')
+                ?? data_get($personalInfo, 'emergency_contact.number')
+                ?? data_get($personalInfo, 'emergency_contact.contact_number')
+                ?? null
+        );
+        $emergencyRelation = $this->cleanStringValue(
+            $personalInfo['emergencyContactRelationship']
+                ?? $personalInfo['emergency_contact_relationship']
+                ?? $personalInfo['emergencyContactRelation']
+                ?? $personalInfo['emergency_contact_relation']
+                ?? data_get($personalInfo, 'emergencyContact.relationship')
+                ?? data_get($personalInfo, 'emergencyContact.relation')
+                ?? data_get($personalInfo, 'emergency_contact.relationship')
+                ?? data_get($personalInfo, 'emergency_contact.relation')
+                ?? data_get($personalInfo, 'emergency_contact.relationship_name')
+                ?? data_get($personalInfo, 'emergencyContact.relationshipName')
+                ?? data_get($personalInfo, 'emergencyContactRelationship.name')
+                ?? data_get($personalInfo, 'emergency_contact_relationship.name')
+                ?? null
         );
 
-        if (! $emergencyPerson && ! $emergencyNumber) {
+        if (! $emergencyPerson && ! $emergencyNumber && ! $emergencyRelation) {
             return;
         }
 
         $medicalHistory = MedicalHistory::firstOrNew(['patient_id' => $patient->id]);
+        $currentRelation = strtolower(trim((string) ($medicalHistory->emergency_relation ?? '')));
+        $hasPlaceholderRelation = in_array($currentRelation, ['', 'not specified', '(not specified)', 'n/a', 'na'], true);
 
         if ($emergencyPerson && empty($medicalHistory->emergency_person)) {
             $medicalHistory->emergency_person = $emergencyPerson;
@@ -994,6 +1167,10 @@ class OIDCController extends Controller
 
         if ($emergencyNumber && empty($medicalHistory->emergency_number)) {
             $medicalHistory->emergency_number = $emergencyNumber;
+        }
+
+        if ($emergencyRelation && $hasPlaceholderRelation) {
+            $medicalHistory->emergency_relation = $emergencyRelation;
         }
 
         if (! $medicalHistory->exists && empty($medicalHistory->emergency_relation)) {

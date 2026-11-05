@@ -3,13 +3,19 @@
 namespace Tests\Feature;
 
 use App\Support\BrowserDetection;
+use App\Models\AuditLog;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\ConcurrentSessionService;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
+use Tymon\JWTAuth\Facades\JWTAuth;
+use Tymon\JWTAuth\Exceptions\TokenBlacklistedException;
 use Tests\TestCase;
 
 class ConcurrentSessionFeatureTest extends TestCase
@@ -70,8 +76,8 @@ class ConcurrentSessionFeatureTest extends TestCase
         $targetUser = $this->makeUser('revoked-user@example.com', 'dentist');
 
         $permission = Permission::create([
-            'name' => 'Manage Users',
-            'slug' => 'manage_users',
+            'name' => 'Disable Users',
+            'slug' => 'disable_users',
             'module' => 'Users',
         ]);
 
@@ -94,6 +100,250 @@ class ConcurrentSessionFeatureTest extends TestCase
         $this->assertSame('inactive', $targetUser->status);
         $this->assertDatabaseMissing('sessions', ['id' => 'dentist-session-1']);
         $this->assertDatabaseMissing('sessions', ['id' => 'dentist-session-2']);
+    }
+
+    public function test_idle_expiry_is_recorded_in_recent_session_history(): void
+    {
+        $patient = $this->makeUser('idle-patient@example.com', 'patient');
+
+        $this->actingAs($patient)
+            ->withSession([
+                'role' => 'patient',
+                'patient_id' => $patient->id,
+                'patient_name' => $patient->name,
+                'last_activity_at' => now()->subMinutes(10)->timestamp,
+                'session_idle_locked' => true,
+            ])
+            ->postJson(route('session.expire'))
+            ->assertOk()
+            ->assertJson(['expired' => true]);
+
+        $this->assertAuditLogHas([
+            'actor_id' => $patient->id,
+            'actor_role' => 'patient',
+            'action' => 'logout',
+            'module' => 'authentication',
+            'description' => 'User was signed out due to inactivity.',
+        ]);
+    }
+
+    public function test_standard_logout_records_a_single_logout_activity_entry(): void
+    {
+        $dentist = $this->makeUser('logout-dentist@example.com', 'dentist');
+
+        $this->actingAs($dentist)
+            ->withSession($this->sessionStateFor($dentist))
+            ->post(route('logout'))
+            ->assertRedirect(route('login', ['logged_out' => 1, 'reason' => 'manual']));
+
+        $this->assertGuest();
+        $this->assertSame(1, $this->logoutCountFor($dentist));
+        $this->assertAuditLogHas([
+            'actor_id' => $dentist->id,
+            'actor_role' => 'dentist',
+            'action' => 'logout',
+            'module' => 'authentication',
+            'description' => 'Clinical user (dentist) logged out',
+        ]);
+    }
+
+    public function test_logout_revokes_the_idp_token_and_local_jwt_then_redirects_to_landing(): void
+    {
+        config(['services.oidc.logout_url' => 'https://idp.example.test/api/v1/auth/logout',
+            'services.oidc.client_id' => 'clinic-client', 'jwt.blacklist_enabled' => true]);
+        Http::fake(['https://idp.example.test/api/v1/auth/logout' => Http::response('', 302,
+            ['Location' => 'https://idp.example.test/login'])]);
+        $dentist = $this->makeUser('revoke-tokens@example.com', 'dentist');
+        $dentist->update(['access_token' => 'stored-idp-token', 'refresh_token' => 'stored-refresh-token']);
+        $jwt = JWTAuth::fromUser($dentist);
+
+        $this->actingAs($dentist)->withSession(array_merge($this->sessionStateFor($dentist), [
+            'oidc_access_token' => 'session-idp-token', 'auth_jwt_token' => $jwt, 'oidc_id_token' => 'id-token',
+        ]))->post(route('logout'))
+            ->assertRedirect(route('login', ['logged_out' => 1, 'reason' => 'manual']))
+            ->assertHeader('Cache-Control', 'no-store, private')
+            ->assertCookieExpired('jwt_token')
+            ->assertSessionMissing('oidc_access_token')->assertSessionMissing('auth_jwt_token');
+
+        Http::assertSent(fn ($request) => $request->method() === 'POST'
+            && $request->hasHeader('Authorization', 'Bearer session-idp-token')
+            && $request['client_id'] === 'clinic-client');
+        Http::assertSentCount(1);
+        $this->assertGuest();
+        $this->assertNull($dentist->fresh()->access_token);
+        $this->assertNull($dentist->fresh()->refresh_token);
+        $this->expectException(TokenBlacklistedException::class);
+        JWTAuth::setToken($jwt)->getPayload();
+    }
+
+    public function test_logged_out_session_cannot_be_reused_by_another_browser(): void
+    {
+        $dentist = $this->makeUser('session-replay@example.com', 'dentist');
+        $this->actingAs($dentist)->withSession(array_merge($this->sessionStateFor($dentist), [
+            Auth::guard('web')->getName() => $dentist->id,
+        ]));
+        session()->save();
+        $oldSessionId = session()->getId();
+
+        Auth::forgetGuards();
+        $this->withCookie(config('session.cookie'), $oldSessionId)
+            ->get('/dashboard')->assertRedirect(route('dentist.dentist.dashboard'));
+
+        $this->withCookie(config('session.cookie'), $oldSessionId)
+            ->post(route('logout'))->assertRedirect();
+        $this->assertDatabaseMissing('sessions', ['id' => $oldSessionId]);
+
+        Auth::forgetGuards();
+        $this->withCookie(config('session.cookie'), $oldSessionId)
+            ->get('/dashboard')->assertRedirect(route('login'));
+        $this->assertGuest();
+    }
+
+    public function test_logout_also_blocks_refresh_of_an_expired_jwt(): void
+    {
+        $dentist = $this->makeUser('expired-jwt-logout@example.com', 'dentist');
+        $this->travel(-2)->hours();
+        $jwt = JWTAuth::fromUser($dentist);
+        $this->travelBack();
+
+        $this->actingAs($dentist)->withSession(['auth_jwt_token' => $jwt])
+            ->post(route('logout'))->assertRedirect();
+
+        $this->expectException(TokenBlacklistedException::class);
+        JWTAuth::setToken($jwt)->refresh();
+    }
+
+    public function test_provider_failure_still_ends_the_local_session_and_reports_incomplete_sso_logout(): void
+    {
+        config(['services.oidc.logout_url' => 'https://idp.example.test/api/v1/auth/logout',
+            'services.oidc.client_id' => 'clinic-client']);
+        Http::fake(['*' => Http::response([], 503)]);
+        $dentist = $this->makeUser('idp-unavailable-logout@example.com', 'dentist');
+        $dentist->update(['access_token' => 'idp-token']);
+        $this->actingAs($dentist)->withSession($this->sessionStateFor($dentist))
+            ->post(route('logout'))->assertRedirect()->assertSessionHas('error');
+        $this->assertGuest();
+        $this->assertNull($dentist->fresh()->access_token);
+    }
+
+    public function test_oidc_sign_in_always_requests_fresh_credentials(): void
+    {
+        config(['services.idp.login_url' => 'https://idp.example.test/login',
+            'services.oidc.client_id' => 'clinic-client',
+            'services.oidc.redirect' => 'https://clinic.example.test/auth/oidc/callback']);
+        $response = $this->get(route('oidc.redirect'))->assertRedirect();
+        parse_str(parse_url($response->headers->get('Location'), PHP_URL_QUERY), $query);
+        $this->assertSame('login', $query['prompt']);
+        $this->assertSame('0', $query['max_age']);
+        $this->assertNotEmpty($query['state']);
+    }
+
+    public function test_session_history_includes_sign_in_and_sign_out_entries_in_chronological_order(): void
+    {
+        $dentist = $this->makeUser('history-dentist@example.com', 'dentist');
+
+        $this->insertAuditLog($dentist, 'login', 'authentication', 'Clinical user (dentist) logged in via OIDC', '2026-09-03 09:00:00');
+
+        Carbon::setTestNow('2026-09-03 09:05:00');
+        $this->actingAs($dentist)
+            ->withSession($this->sessionStateFor($dentist))
+            ->post(route('logout'))
+            ->assertRedirect();
+
+        $this->insertAuditLog($dentist, 'login', 'authentication', 'Clinical user (dentist) logged in via OIDC', '2026-09-03 09:10:00');
+
+        $this->actingAs($dentist)->withSession($this->sessionStateFor($dentist));
+
+        $history = app(ConcurrentSessionService::class)->recentSessionHistoryForUser($dentist, 8);
+        $actions = $history->pluck('action')->values();
+
+        $this->assertGreaterThanOrEqual(2, $actions->filter(fn(string $action) => $action === 'login')->count());
+        $this->assertTrue($actions->contains('logout'));
+
+        Carbon::setTestNow();
+    }
+
+    public function test_single_logout_action_does_not_create_duplicate_logout_entries(): void
+    {
+        $dentist = $this->makeUser('no-duplicate-dentist@example.com', 'dentist');
+
+        $this->actingAs($dentist)
+            ->withSession($this->sessionStateFor($dentist))
+            ->post(route('logout'))
+            ->assertRedirect();
+
+        $this->assertSame(1, $this->logoutCountFor($dentist));
+    }
+
+    public function test_logout_recording_works_for_core_and_custom_roles(): void
+    {
+        $dentist = $this->makeUser('core-dentist@example.com', 'dentist');
+        $intern = $this->makeUser('intern@example.com', 'dental_intern');
+
+        $this->actingAs($dentist)
+            ->withSession($this->sessionStateFor($dentist))
+            ->post(route('logout'))
+            ->assertRedirect();
+
+        $this->actingAs($intern)
+            ->withSession($this->sessionStateFor($intern))
+            ->post(route('logout'))
+            ->assertRedirect();
+
+        $this->assertAuditLogHas([
+            'actor_id' => $dentist->id,
+            'actor_role' => 'dentist',
+            'action' => 'logout',
+            'description' => 'Clinical user (dentist) logged out',
+        ]);
+
+        $this->assertAuditLogHas([
+            'actor_id' => $intern->id,
+            'actor_role' => 'dental_intern',
+            'action' => 'logout',
+            'description' => 'Clinical user (dental_intern) logged out',
+        ]);
+    }
+
+    public function test_current_session_logout_preserves_existing_behavior_and_records_logout_history(): void
+    {
+        $dentist = $this->makeUser('current-session-dentist@example.com', 'dentist');
+
+        $this->actingAs($dentist)
+            ->withSession($this->sessionStateFor($dentist))
+            ->delete(route('security.sessions.destroy-current'))
+            ->assertRedirect(route('login', [
+                'logged_out' => 1,
+                'reason' => 'manual',
+            ]));
+
+        $this->assertGuest();
+        $this->assertSame(1, $this->logoutCountFor($dentist));
+    }
+
+    public function test_log_out_all_devices_revokes_sessions_and_records_only_one_logout_entry_for_the_current_user(): void
+    {
+        $dentist = $this->makeUser('all-devices-dentist@example.com', 'dentist');
+
+        $this->insertSession('all-devices-1', $dentist->id, now()->subMinutes(4)->timestamp);
+        $this->insertSession('all-devices-2', $dentist->id, now()->subMinutes(2)->timestamp);
+
+        $this->actingAs($dentist)
+            ->withSession($this->sessionStateFor($dentist))
+            ->delete(route('security.sessions.destroy-all'))
+            ->assertRedirect(route('login', [
+                'logged_out' => 1,
+                'reason' => 'manual',
+            ]));
+
+        $this->assertGuest();
+        $this->assertSame(0, DB::table('sessions')->where('user_id', $dentist->id)->count());
+        $this->assertSame(1, $this->logoutCountFor($dentist));
+        $this->assertAuditLogHas([
+            'actor_id' => $dentist->id,
+            'action' => 'sessions_revoked',
+            'module' => 'authentication',
+        ]);
     }
 
     public function test_session_display_prefers_stored_browser_name_when_available(): void
@@ -123,12 +373,7 @@ class ConcurrentSessionFeatureTest extends TestCase
             'HTTP_USER_AGENT' => 'Mozilla/5.0 Chrome/138.0.0.0 Safari/537.36',
         ]);
 
-        $request->setLaravelSession(new class {
-            public function get($key, $default = null)
-            {
-                return $default;
-            }
-        });
+        $request->setLaravelSession(app('session.store'));
 
         $this->assertSame('Brave', BrowserDetection::detectFromRequest($request));
     }
@@ -139,6 +384,15 @@ class ConcurrentSessionFeatureTest extends TestCase
             'Brave',
             BrowserDetection::detectFromClientHints('"Brave";v="138", "Chromium";v="138", "Not=A?Brand";v="99"')
         );
+    }
+
+    public function test_reduced_android_user_agent_does_not_display_k_as_the_device_name(): void
+    {
+        $userAgent = 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 '
+            . '(KHTML, like Gecko) Chrome/138.0.0.0 Mobile Safari/537.36';
+
+        $this->assertSame('Android Phone', BrowserDetection::detectDeviceName($userAgent));
+        $this->assertSame('Android Phone', BrowserDetection::deviceNameForDisplay('K', $userAgent));
     }
 
     private function makeUser(string $email, string $roleSlug): User
@@ -174,5 +428,82 @@ class ConcurrentSessionFeatureTest extends TestCase
             'payload' => base64_encode('payload'),
             'last_activity' => $lastActivity,
         ]);
+    }
+
+    private function logoutCountFor(User $user): int
+    {
+        return AuditLog::whereHas('actorSnapshot', fn ($actor) => $actor->where('actor_id', $user->id))
+            ->where('action', 'logout')
+            ->count();
+    }
+
+    private function assertAuditLogHas(array $attributes): void
+    {
+        $query = AuditLog::query();
+        foreach ($attributes as $field => $value) {
+            if (in_array($field, AuditLog::ACTOR_FIELDS, true)) {
+                $query->whereHas('actorSnapshot', fn ($actor) => $actor->where($field, $value));
+            } elseif ($field === 'description') {
+                $query->withDescription($value);
+            } else {
+                $query->where($field, $value);
+            }
+        }
+        $this->assertTrue($query->exists(), 'Expected audit event and its actor snapshot were not found.');
+    }
+
+    private function insertAuditLog(
+        User $user,
+        string $action,
+        string $module,
+        string $description,
+        string $createdAt
+    ): void {
+        AuditLog::query()->create([
+            'actor_id' => $user->id,
+            'actor_name' => $user->name,
+            'actor_role' => (string) optional($user->role)->slug,
+            'actor_identifier' => $user->id,
+            'action' => $action,
+            'module' => $module,
+            'description' => $description,
+            'ip_address' => '127.0.0.1',
+            'user_agent' => 'Mozilla/5.0 PHPUnit',
+            'browser_name' => 'Chrome',
+            'device_type' => 'desktop',
+            'device_name' => 'Windows PC',
+            'os_name' => 'Windows',
+            'created_at' => Carbon::parse($createdAt),
+            'updated_at' => Carbon::parse($createdAt),
+        ]);
+    }
+
+    private function sessionStateFor(User $user): array
+    {
+        $roleSlug = (string) optional($user->role)->slug;
+
+        return match ($roleSlug) {
+            'patient' => [
+                'role' => 'patient',
+                'patient_id' => $user->id,
+                'patient_name' => $user->name,
+                'email' => $user->email,
+            ],
+            'admin', 'super_admin' => [
+                'role' => $roleSlug,
+                'admin_logged_in' => true,
+                'admin_id' => $user->id,
+                'admin_name' => $user->name,
+                'admin_email' => $user->email,
+                'email' => $user->email,
+            ],
+            default => [
+                'role' => $roleSlug,
+                'dentist_id' => $user->id,
+                'dentist_name' => $user->name,
+                'dentist_email' => $user->email,
+                'email' => $user->email,
+            ],
+        };
     }
 }

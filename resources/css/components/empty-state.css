@@ -276,8 +276,16 @@
 @media (max-width: 767px) {
 
     #mainContent .empty-state {
-        min-height: 340px !important;
-        padding: 56px 18px 64px !important;
+        width: 100% !important;
+        min-height: 190px !important;
+        height: auto !important;
+
+        padding: 24px 14px !important;
+
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
     }
 
     #mainContent :is(.empty-state-icon,
@@ -287,10 +295,13 @@
         .document-empty-icon,
         .empty-icon-box,
         .appointment-filter-empty-icon) {
-        width: 74px !important;
-        height: 74px !important;
-        border-radius: 26px !important;
-        margin-bottom: 22px !important;
+        width: 50px !important;
+        height: 50px !important;
+        min-width: 50px !important;
+
+        border-radius: 15px !important;
+
+        margin: 0 auto 12px !important;
     }
 
     #mainContent :is(.empty-state-icon,
@@ -300,23 +311,53 @@
         .document-empty-icon,
         .empty-icon-box,
         .appointment-filter-empty-icon) i {
-        font-size: 30px !important;
+        font-size: 20px !important;
     }
 
     #mainContent .empty-state-title {
-        font-size: 18px !important;
-        line-height: 1.18 !important;
-        max-width: 220px !important;
-        margin-left: auto !important;
-        margin-right: auto !important;
+        max-width: 230px !important;
+
+        margin: 0 auto !important;
+
+        font-size: .9rem !important;
+        line-height: 1.2 !important;
     }
 
     #mainContent .empty-state-sub {
-        font-size: 14px !important;
-        line-height: 1.45 !important;
-        max-width: 235px !important;
-        margin-left: auto !important;
-        margin-right: auto !important;
+        max-width: 245px !important;
+
+        margin: 6px auto 0 !important;
+
+        font-size: .72rem !important;
+        line-height: 1.4 !important;
+    }
+
+    #mainContent .empty-state-btn,
+    #mainContent .empty-state .ui-btn {
+        min-height: 30px !important;
+
+        margin-top: 12px !important;
+        padding: 0 11px !important;
+
+        font-size: .65rem !important;
+    }
+
+    #mainContent .empty-state.empty-state-compact {
+        min-height: 150px !important;
+        height: auto !important;
+        padding: 18px 12px !important;
+    }
+
+    #mainContent .empty-state.empty-state-compact .empty-state-icon {
+        width: 44px !important;
+        height: 44px !important;
+        min-width: 44px !important;
+        border-radius: 13px !important;
+        margin-bottom: 10px !important;
+    }
+
+    #mainContent .empty-state.empty-state-compact .empty-state-icon i {
+        font-size: 18px !important;
     }
 }
 

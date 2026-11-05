@@ -26,13 +26,13 @@ class AppointmentCancelledNotification extends Notification
 
     public function toArray(object $notifiable): array
     {
-        return $this->notificationData();
+        return $this->notificationData($notifiable);
     }
 
     public function toBroadcast(object $notifiable): BroadcastMessage
     {
         return new BroadcastMessage(array_merge(
-            $this->notificationData(),
+            $this->notificationData($notifiable),
             [
                 'created_at_label' => 'Just now',
                 'state' => 'unread',
@@ -40,7 +40,7 @@ class AppointmentCancelledNotification extends Notification
         ));
     }
 
-    private function notificationData(): array
+    private function notificationData(object $notifiable): array
     {
         $message = sprintf(
             'Your appointment on %s at %s was cancelled by %s.',
@@ -65,6 +65,7 @@ class AppointmentCancelledNotification extends Notification
             'status' => $this->appointment->status,
             'reason' => $this->reason,
             'event' => 'appointment.cancelled',
+            'recipient_role' => optional($notifiable->role)->slug,
         ];
     }
 

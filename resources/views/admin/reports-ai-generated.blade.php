@@ -4,9 +4,31 @@
 
 @section('title', 'AI Generated Report')
 
-@section('content')
+@section('styles')
+    @vite('resources/css/pages/admin/ai-generated-report.css')
+@endsection
 
-    <main id="mainContent" class="admin-page-shell page-enter mode-list">
+@section('content')
+    @php
+        $riskLevel = data_get($aiReport, 'risk_level', 'Low');
+        $riskExplanation = data_get(
+            $aiReport,
+            'risk_explanation',
+            'Operational risk details are currently unavailable for this report.',
+        );
+        $riskClass = match ($riskLevel) {
+            'High' => 'air-status-card--red',
+            'Moderate' => 'air-status-card--amber',
+            default => 'air-status-card--green',
+        };
+        $badgeClass = match ($riskLevel) {
+            'High' => 'air-badge--red',
+            'Moderate' => 'air-badge--amber',
+            default => 'air-badge--green',
+        };
+    @endphp
+
+    <main id="mainContent" class="app-page-shell page-enter mode-list">
         <div class="w-full">
 
             <div class="page-banner">
@@ -24,13 +46,16 @@
                                 <i class="fa-solid fa-brain"></i>
                             </div>
                             <div>
-                                <h1 class="air-banner-heading">AI generated overall report</h1>
+                                <div class="air-report-title-row">
+                                    <h1 class="air-banner-heading">Administrative AI Generated Overall Report</h1>
+                                    <span class="air-advisory-badge">AI-Generated &bull; Advisory Only</span>
+                                </div>
                                 <p class="air-banner-sub">{{ $aiReport['period'] }} · Monthly analysis</p>
                             </div>
                         </div>
 
                         <div class="air-banner-actions">
-                            <a href="{{ route('admin.reports') }}" class="ui-btn ui-btn-secondary">
+                            <a href="{{ route(request()->routeIs('dentist.*') ? 'dentist.reports' : 'admin.reports') }}" class="ui-btn ui-btn-secondary">
 
                                 <i class="fa-solid fa-arrow-left"></i>
                                 Back to reports
@@ -47,6 +72,12 @@
             </div>
 
             <section id="aiReportScreenArea" class="air-screen">
+                <div class="air-advisory-notice">
+                    <p class="air-advisory-note">This report contains AI-generated summaries and interpretations intended to assist administrative review. Please verify all figures and findings against the underlying clinic records before making operational or administrative decisions.</p>
+                    @if (($aiReport['generation_source'] ?? null) !== 'ai')
+                        <p class="air-analysis-unavailable" role="status">AI-generated analysis is currently unavailable. Please refer to the verified clinic statistics shown in this report.</p>
+                    @endif
+                </div>
 
                 <div class="air-status-strip">
                     <div class="air-status-card air-status-card--red">
@@ -60,26 +91,15 @@
                         <span class="air-status-label">Generated at</span>
                         <span class="air-status-value air-status-value--sm">{{ $aiReport['generated_at'] }}</span>
                         <span class="air-status-sub">
-                            <i class="fa-solid fa-wand-magic-sparkles"></i> AI-generated insight
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                            {{ $aiReport['generation_source'] === 'ai' ? 'AI-generated insight' : 'AI analysis unavailable' }}
                         </span>
                     </div>
-                    @php
-                        $riskClass = match ($aiReport['risk_level']) {
-                            'High' => 'air-status-card--red',
-                            'Moderate' => 'air-status-card--amber',
-                            default => 'air-status-card--green',
-                        };
-                        $badgeClass = match ($aiReport['risk_level']) {
-                            'High' => 'air-badge--red',
-                            'Moderate' => 'air-badge--amber',
-                            default => 'air-badge--green',
-                        };
-                    @endphp
                     <div class="air-status-card {{ $riskClass }}">
                         <span class="air-status-label">Operational risk</span>
                         <span class="air-status-value air-status-value--inline">
-                            {{ $aiReport['risk_level'] }}
-                            <span class="air-badge {{ $badgeClass }}">{{ $aiReport['risk_level'] }}</span>
+                            {{ $riskLevel }}
+                            <span class="air-badge {{ $badgeClass }}">{{ $riskLevel }}</span>
                         </span>
                         <span class="air-status-sub">
                             <i class="fa-solid fa-shield-halved"></i> System assessment
@@ -95,7 +115,7 @@
                             </div>
                             <div>
                                 <h2 class="card-title">Executive summary</h2>
-                                <p class="card-subtitle">Automatically generated overview based on system statistics</p>
+                                <p class="card-subtitle">AI-generated advisory overview based on system statistics</p>
                             </div>
                         </div>
                     </div>
@@ -130,6 +150,19 @@
 
                 <div class="air-two-col">
                     <div class="card">
+                        @php
+                            $screenTreatmentsRecorded =
+                                data_get($aiReport, 'print_metrics.treatments_recorded') ??
+                                data_get($aiReport, 'metrics.treatments_recorded') ??
+                                data_get($aiReport, 'treatments.total_treatments', '—');
+                            $screenTreatmentBreakdown = collect(
+                                data_get(
+                                    $aiReport,
+                                    'print_metrics.treatment_breakdown',
+                                    data_get($aiReport, 'treatments.breakdown', []),
+                                ),
+                            );
+                        @endphp
                         <div class="card-header">
                             <div class="card-header-left">
                                 <div class="card-header-icon">
@@ -142,6 +175,31 @@
                             </div>
                         </div>
                         <div class="card-body">
+                            <table class="air-report-metrics-table">
+                                <thead>
+                                    <tr>
+                                        <th>Treatment metric</th>
+                                        <th>Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Treatments recorded</td>
+                                        <td>{{ $screenTreatmentsRecorded }}</td>
+                                    </tr>
+                                    @foreach ($screenTreatmentBreakdown as $case)
+                                        <tr>
+                                            <td>{{ data_get($case, 'name', 'Other') }}</td>
+                                            <td>{{ data_get($case, 'count', 0) }} /
+                                                {{ rtrim(rtrim(number_format((float) data_get($case, 'pct', 0), 1), '0'), '.') }}%</td>
+                                        </tr>
+                                    @endforeach
+                                    <tr>
+                                        <td>Period covered</td>
+                                        <td>{{ $aiReport['period'] }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                             <div class="air-findings-list">
                                 @foreach ($aiReport['treatment_analysis'] as $item)
                                     <div class="air-finding-item">
@@ -191,7 +249,7 @@
                                 </div>
                                 <div>
                                     <h2 class="card-title">Document request analysis</h2>
-                                    <p class="card-subtitle">Document request status and processing interpretation</p>
+                                    <p class="card-subtitle">System-generated summary of document request records</p>
                                 </div>
                             </div>
                         </div>
@@ -226,8 +284,8 @@
                                 <i class="fa-solid fa-shield-halved"></i>
                             </div>
                             <div class="air-risk-text">
-                                <strong>{{ $aiReport['risk_level'] }} risk</strong>
-                                <p>{{ $aiReport['risk_explanation'] }}</p>
+                                <strong>{{ $riskLevel }} risk</strong>
+                                <p>{{ $riskExplanation }}</p>
                             </div>
                         </div>
                     </div>
@@ -275,102 +333,20 @@
     </main>
 
     @php
-        $printFindings = $aiReport['key_findings'] ?? [];
-        $printFindingsText = trim(implode(' ', array_filter($printFindings)));
-        $printTreatmentText = trim(implode(' ', array_filter($aiReport['treatment_analysis'] ?? [])));
-        $printInventoryText = trim(implode(' ', array_filter($aiReport['inventory_analysis'] ?? [])));
-
-        $extractNumber = function ($patterns, $default = '—') use (
-            $printFindingsText,
-            $printTreatmentText,
-            $printInventoryText,
-        ) {
-            $haystack = trim($printFindingsText . ' ' . $printTreatmentText . ' ' . $printInventoryText);
-            foreach ((array) $patterns as $pattern) {
-                if (preg_match($pattern, $haystack, $matches)) {
-                    return $matches[1];
-                }
-            }
-            return $default;
-        };
-
-        $totalPatients =
-            data_get($aiReport, 'print_metrics.total_patients') ??
-            (data_get($aiReport, 'metrics.total_patients') ??
-                $extractNumber(['/Total patients:\s*(\d+)/i', '/(\d+)\s+total\s+patients?/i']));
-        $newPatients =
-            data_get($aiReport, 'print_metrics.new_patients') ??
-            (data_get($aiReport, 'metrics.new_patients') ??
-                $extractNumber(['/new patients?:\s*(\d+)/i', '/(\d+)\s+new\s+patients?/i', '/with\s+(\d+)\s+new/i']));
-        $totalAppointments =
-            data_get($aiReport, 'print_metrics.total_appointments') ??
-            (data_get($aiReport, 'metrics.total_appointments') ??
-                $extractNumber([
-                    '/appointments?\s+(?:totaled|totalled)\s+(\d+)/i',
-                    '/(\d+)\s+total\s+appointments?/i',
-                    '/activity\s+included\s+(\d+)\s+total\s+appointments?/i',
-                ]));
-        $cancelledAppointments =
-            data_get($aiReport, 'print_metrics.cancelled_appointments') ??
-            (data_get($aiReport, 'metrics.cancelled_appointments') ??
-                $extractNumber(['/(\d+)\s+cancellations?/i', '/(\d+)\s+cancelled/i']));
-        $completionRate =
-            data_get($aiReport, 'print_metrics.completion_rate') ??
-            (data_get($aiReport, 'metrics.completion_rate') ??
-                $extractNumber(
-                    ['/completion\s+rate\s+(?:was\s+)?(\d+(?:\.\d+)?)%/i', '/(\d+(?:\.\d+)?)%\s+completion\s+rate/i'],
-                    '0',
-                ));
-        $cancellationRate =
-            data_get($aiReport, 'print_metrics.cancellation_rate') ??
-            (data_get($aiReport, 'metrics.cancellation_rate') ??
-                $extractNumber(
-                    [
-                        '/cancellation\s+rate\s+(?:was\s+)?(\d+(?:\.\d+)?)%/i',
-                        '/(\d+(?:\.\d+)?)%\s+cancellation\s+rate/i',
-                    ],
-                    '0',
-                ));
-        $treatmentsRecorded =
-            data_get($aiReport, 'print_metrics.treatments_recorded') ??
-            (data_get($aiReport, 'metrics.treatments_recorded') ??
-                $extractNumber(
-                    [
-                        '/Total\s+treatments?\s+recorded\s+(?:were\s+)?(\d+)/i',
-                        '/(\d+)\s+treatments?\s+(?:were\s+)?(?:recorded|performed)/i',
-                    ],
-                    str_contains(strtolower($printTreatmentText . ' ' . $printFindingsText), 'no treatments')
-                        ? '0'
-                        : '—',
-                ));
-        $dominantTreatment =
-            data_get($aiReport, 'print_metrics.dominant_treatment') ??
-            (data_get($aiReport, 'metrics.dominant_treatment') ??
-                (data_get($aiReport, 'top_treatment') ?? 'None identified'));
-        $lowStockCount =
-            data_get($aiReport, 'print_metrics.low_stock_count') ??
-            (data_get($aiReport, 'metrics.low_stock_count') ??
-                $extractNumber(
-                    [
-                        '/Inventory\s+showed\s+(\d+)\s+low-stock/i',
-                        '/(\d+)\s+low-stock\s+items?/i',
-                        '/(\d+)\s+item\/s\s+below/i',
-                    ],
-                    '0',
-                ));
-        $criticalStockCount =
-            data_get($aiReport, 'print_metrics.critical_stock_count') ??
-            (data_get($aiReport, 'metrics.critical_stock_count') ??
-                $extractNumber(
-                    [
-                        '/and\s+(\d+)\s+critical-stock/i',
-                        '/(\d+)\s+critical-stock\s+items?/i',
-                        '/(\d+)\s+item\/s\s+are\s+considered\s+critical/i',
-                    ],
-                    '0',
-                ));
+        $totalPatients = data_get($aiReport, 'print_metrics.total_patients') ?? data_get($aiReport, 'metrics.total_patients') ?? 'Unavailable';
+        $newPatients = data_get($aiReport, 'print_metrics.new_patients') ?? data_get($aiReport, 'metrics.new_patients') ?? 'Unavailable';
+        $totalAppointments = data_get($aiReport, 'print_metrics.total_appointments') ?? data_get($aiReport, 'metrics.total_appointments') ?? 'Unavailable';
+        $cancelledAppointments = data_get($aiReport, 'print_metrics.cancelled_appointments') ?? data_get($aiReport, 'metrics.cancelled_appointments') ?? 'Unavailable';
+        $completionRate = data_get($aiReport, 'print_metrics.completion_rate') ?? data_get($aiReport, 'metrics.completion_rate') ?? 'Unavailable';
+        $cancellationRate = data_get($aiReport, 'print_metrics.cancellation_rate') ?? data_get($aiReport, 'metrics.cancellation_rate') ?? 'Unavailable';
+        $treatmentsRecorded = data_get($aiReport, 'print_metrics.treatments_recorded') ?? data_get($aiReport, 'metrics.treatments_recorded') ?? 'Unavailable';
+        $lowStockCount = data_get($aiReport, 'print_metrics.low_stock_count') ?? data_get($aiReport, 'metrics.low_stock_count') ?? 'Unavailable';
+        $criticalStockCount = data_get($aiReport, 'print_metrics.critical_stock_count') ?? data_get($aiReport, 'metrics.critical_stock_count') ?? 'Unavailable';
+        $treatmentBreakdown = collect(data_get($aiReport, 'print_metrics.treatment_breakdown', []));
 
         $documentRequestAnalysis = $aiReport['document_request_analysis'] ?? [];
+        $hasDocumentRequestAnalysis = !empty($documentRequestAnalysis);
+        $totalReportPages = $hasDocumentRequestAnalysis ? 4 : 3;
 
         $docTotal = data_get($aiReport, 'print_metrics.document_requests_total', 0);
         $docPending = data_get($aiReport, 'print_metrics.document_requests_pending', 0);
@@ -418,9 +394,16 @@
     <section id="aiFullPrintDocument" class="air-print-doc">
 
         <div class="air-print-page" data-print-page="1">
+            <div class="air-advisory-notice">
+                <p class="air-advisory-note">This report contains AI-generated summaries and interpretations intended to assist administrative review. Please verify all figures and findings against the underlying clinic records before making operational or administrative decisions.</p>
+                @if (($aiReport['generation_source'] ?? null) !== 'ai')
+                    <p class="air-analysis-unavailable" role="status">AI-generated analysis is currently unavailable. Please refer to the verified clinic statistics shown in this report.</p>
+                @endif
+            </div>
             <div class="air-print-fixed-header">
                 <strong>AI Generated Overall Report</strong>
                 <span>· {{ $aiReport['period'] }} · Summary and metrics</span>
+                <span class="air-advisory-badge">AI-Generated &bull; Advisory Only</span>
             </div>
 
             <div class="air-print-meta-grid">
@@ -434,7 +417,7 @@
                 </div>
                 <div class="air-print-meta-card">
                     <span>Operational risk level</span>
-                    <strong>{{ $aiReport['risk_level'] }}</strong>
+                    <strong>{{ $riskLevel }}</strong>
                 </div>
             </div>
 
@@ -500,10 +483,13 @@
                             <td>Treatments recorded</td>
                             <td>{{ $treatmentsRecorded }}</td>
                         </tr>
-                        <tr>
-                            <td>Dominant treatment category</td>
-                            <td>{{ $dominantTreatment }}</td>
-                        </tr>
+                        @foreach ($treatmentBreakdown as $case)
+                            <tr>
+                                <td>{{ data_get($case, 'name', 'Other') }}</td>
+                                <td>{{ data_get($case, 'count', 0) }} /
+                                    {{ rtrim(rtrim(number_format((float) data_get($case, 'pct', 0), 1), '0'), '.') }}%</td>
+                            </tr>
+                        @endforeach
                         <tr>
                             <td>Period covered</td>
                             <td>{{ $aiReport['period'] }}</td>
@@ -550,7 +536,25 @@
                     <p class="air-print-body-text">{{ implode(' ', $aiReport['inventory_analysis']) }}</p>
                 @endif
             </section>
-            @if (!empty($documentRequestAnalysis))
+            <div class="air-print-fixed-footer">
+                <div class="air-print-footer-left">
+                    <strong>This document contains personal-identifiable information subject to Data Privacy.</strong>
+                    <span>Please keep this document protected and in a safe place.</span>
+                </div>
+
+                <div class="air-print-footer-right">
+                    This is system-generated, signature is not required.
+                </div>
+            </div>
+        </div>
+
+        <div class="air-print-page" data-print-page="3">
+            <div class="air-print-fixed-header">
+                <strong>AI Generated Overall Report</strong>
+                <span>· {{ $aiReport['period'] }} · {{ $hasDocumentRequestAnalysis ? 'Document requests and risk' : 'Risk and recommendations' }}</span>
+            </div>
+
+            @if ($hasDocumentRequestAnalysis)
                 <section class="air-print-section">
                     <div class="air-print-section-title"><span>05</span>
                         <h2>Document request analysis</h2>
@@ -595,46 +599,41 @@
 
                     <p class="air-print-body-text">{{ implode(' ', $documentRequestAnalysis) }}</p>
                 </section>
+
+                <section class="air-print-section">
+                    <div class="air-print-section-title"><span>06</span>
+                        <h2>Risk interpretation</h2>
+                    </div>
+                    <div class="air-print-risk-box">
+                        <strong>{{ $riskLevel }} risk</strong>
+                        <p>{{ $riskExplanation }}</p>
+                    </div>
+                </section>
+            @else
+                <section class="air-print-section">
+                    <div class="air-print-section-title"><span>06</span>
+                        <h2>Risk interpretation</h2>
+                    </div>
+                    <div class="air-print-risk-box">
+                        <strong>{{ $riskLevel }} risk</strong>
+                        <p>{{ $riskExplanation }}</p>
+                    </div>
+                </section>
+
+                <section class="air-print-section">
+                    <div class="air-print-section-title"><span>07</span>
+                        <h2>Recommendations</h2>
+                    </div>
+                    <div class="air-print-rec-list">
+                        @foreach ($aiReport['recommendations'] as $index => $recommendation)
+                            <div class="air-print-rec-card">
+                                <strong>{{ $recommendationTitles[$index] ?? 'Recommendation' }}</strong>
+                                <p>{{ $recommendation }}</p>
+                            </div>
+                        @endforeach
+                    </div>
+                </section>
             @endif
-
-            <div class="air-print-footer">
-                <div class="air-print-footer-left">
-                    <strong>This document contains personal-identifiable information subject to Data Privacy.</strong>
-                    <span>Please keep this document protected and in a safe place.</span>
-                </div>
-                <span class="air-print-footer-right">This is system-generated, signature is not required.</span>
-            </div>
-        </div>
-
-        <div class="air-print-page" data-print-page="3">
-            <div class="air-print-fixed-header">
-                <strong>AI Generated Overall Report</strong>
-                <span>· {{ $aiReport['period'] }} · Risk and recommendations</span>
-            </div>
-
-            <section class="air-print-section">
-                <div class="air-print-section-title"><span>06</span>
-                    <h2>Risk interpretation</h2>
-                </div>
-                <div class="air-print-risk-box">
-                    <strong>{{ $aiReport['risk_level'] }} risk</strong>
-                    <p>{{ $aiReport['risk_explanation'] }}</p>
-                </div>
-            </section>
-
-            <section class="air-print-section">
-                <div class="air-print-section-title"><span>07</span>
-                    <h2>Recommendations</h2>
-                </div>
-                <div class="air-print-rec-list">
-                    @foreach ($aiReport['recommendations'] as $index => $recommendation)
-                        <div class="air-print-rec-card">
-                            <strong>{{ $recommendationTitles[$index] ?? 'Recommendation' }}</strong>
-                            <p>{{ $recommendation }}</p>
-                        </div>
-                    @endforeach
-                </div>
-            </section>
 
             <div class="air-print-fixed-footer">
                 <div class="air-print-footer-left">
@@ -647,12 +646,46 @@
                 </div>
             </div>
         </div>
+
+        @if ($hasDocumentRequestAnalysis)
+            <div class="air-print-page" data-print-page="4">
+                <div class="air-print-fixed-header">
+                    <strong>AI Generated Overall Report</strong>
+                    <span>· {{ $aiReport['period'] }} · Recommendations</span>
+                </div>
+
+                <section class="air-print-section">
+                    <div class="air-print-section-title"><span>07</span>
+                        <h2>Recommendations</h2>
+                    </div>
+                    <div class="air-print-rec-list">
+                        @foreach ($aiReport['recommendations'] as $index => $recommendation)
+                            <div class="air-print-rec-card">
+                                <strong>{{ $recommendationTitles[$index] ?? 'Recommendation' }}</strong>
+                                <p>{{ $recommendation }}</p>
+                            </div>
+                        @endforeach
+                    </div>
+                </section>
+
+                <div class="air-print-fixed-footer">
+                    <div class="air-print-footer-left">
+                        <strong>This document contains personal-identifiable information subject to Data Privacy.</strong>
+                        <span>Please keep this document protected and in a safe place.</span>
+                    </div>
+
+                    <div class="air-print-footer-right">
+                        This is system-generated, signature is not required.
+                    </div>
+                </div>
+            </div>
+        @endif
     </section>
 
     <div id="printReportModal" class="ui-modal" aria-hidden="true">
 
         <div class="ui-modal-card modal-xl air-modal" role="dialog" aria-modal="true"
-            aria-labelledby="printReportTitle" onclick="event.stopPropagation()">
+            aria-labelledby="printReportTitle" data-ui-click="action-22499e15f3ee">
 
             <div class="air-modal-preview modal-preview-body" data-global-preview-zoom data-preview-min="0.5"
                 data-preview-max="2" data-preview-step="0.1">
@@ -699,6 +732,14 @@
                                 <div class="air-modal-print-hero">
                                     <h1>PUP Taguig Dental Management System</h1>
                                     <p>Administrative AI Generated Overall Report</p>
+                                    <span class="air-advisory-badge">AI-Generated &bull; Advisory Only</span>
+                                </div>
+
+                                <div class="air-advisory-notice">
+                                    <p class="air-advisory-note">This report contains AI-generated summaries and interpretations intended to assist administrative review. Please verify all figures and findings against the underlying clinic records before making operational or administrative decisions.</p>
+                                    @if (($aiReport['generation_source'] ?? null) !== 'ai')
+                                        <p class="air-analysis-unavailable" role="status">AI-generated analysis is currently unavailable. Please refer to the verified clinic statistics shown in this report.</p>
+                                    @endif
                                 </div>
 
                                 <div class="air-modal-print-meta-grid">
@@ -712,7 +753,7 @@
                                     </div>
                                     <div class="air-modal-print-meta-card">
                                         <span>Operational risk level</span>
-                                        <strong>{{ $aiReport['risk_level'] }}</strong>
+                                        <strong>{{ $riskLevel }}</strong>
                                     </div>
                                 </div>
 
@@ -746,48 +787,6 @@
                                     </ul>
                                 </section>
 
-                                @if (!empty($documentRequestAnalysis))
-                                    <section class="air-modal-print-section">
-                                        <div class="air-modal-print-section-title">
-                                            <span>05</span>
-                                            <h2>Document request analysis</h2>
-                                        </div>
-
-                                        <table class="air-modal-print-table">
-                                            <tbody>
-                                                <tr>
-                                                    <th>Document request metric</th>
-                                                    <th>Value</th>
-                                                </tr>
-                                                <tr>
-                                                    <td>Total requests</td>
-                                                    <td>{{ $docTotal }}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Pending requests</td>
-                                                    <td>{{ $docPending }} / {{ $docPendingRateLabel }}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Approved requests</td>
-                                                    <td>{{ $docApproved }} / {{ $docApprovalRateLabel }}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Rejected requests</td>
-                                                    <td>{{ $docRejected }} / {{ $docRejectionRateLabel }}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Most requested document</td>
-                                                    <td>{{ $docMostRequested }} — {{ $docMostRequestedCount }} request/s
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-
-                                        <p class="air-modal-print-body-text">{{ implode(' ', $documentRequestAnalysis) }}
-                                        </p>
-                                    </section>
-                                @endif
-
                                 <div class="air-modal-print-footer">
                                     <div>
                                         <strong>This document contains personal-identifiable information subject to Data
@@ -820,10 +819,13 @@
                                                 <td>Treatments recorded</td>
                                                 <td>{{ $treatmentsRecorded }}</td>
                                             </tr>
-                                            <tr>
-                                                <td>Dominant treatment category</td>
-                                                <td>{{ $dominantTreatment }}</td>
-                                            </tr>
+                                            @foreach ($treatmentBreakdown as $case)
+                                                <tr>
+                                                    <td>{{ data_get($case, 'name', 'Other') }}</td>
+                                                    <td>{{ data_get($case, 'count', 0) }} /
+                                                        {{ rtrim(rtrim(number_format((float) data_get($case, 'pct', 0), 1), '0'), '.') }}%</td>
+                                                </tr>
+                                            @endforeach
                                             <tr>
                                                 <td>Period covered</td>
                                                 <td>{{ $aiReport['period'] }}</td>
@@ -865,11 +867,11 @@
                                         </tbody>
                                     </table>
 
-                                    @if (!empty($aiReport['inventory_analysis']))
-                                        <p class="air-modal-print-body-text">
-                                            {{ implode(' ', $aiReport['inventory_analysis']) }}
-                                        </p>
-                                    @endif
+                                @if (!empty($aiReport['inventory_analysis']))
+                                    <p class="air-modal-print-body-text">
+                                        {{ implode(' ', $aiReport['inventory_analysis']) }}
+                                    </p>
+                                @endif
                                 </section>
 
                                 <div class="air-modal-print-footer">
@@ -885,36 +887,90 @@
                             <div class="air-modal-print-sheet" data-modal-preview-page="3">
                                 <div class="air-modal-print-page-heading">
                                     <strong>AI Generated Overall Report</strong>
-                                    <span> · {{ $aiReport['period'] }} · Risk and recommendations</span>
+                                    <span> · {{ $aiReport['period'] }} · {{ $hasDocumentRequestAnalysis ? 'Document requests and risk' : 'Risk and recommendations' }}</span>
                                 </div>
 
-                                <section class="air-modal-print-section">
-                                    <div class="air-modal-print-section-title">
-                                        <span>06</span>
-                                        <h2>Risk interpretation</h2>
-                                    </div>
+                                @if ($hasDocumentRequestAnalysis)
+                                    <section class="air-modal-print-section">
+                                        <div class="air-modal-print-section-title">
+                                            <span>05</span>
+                                            <h2>Document request analysis</h2>
+                                        </div>
 
-                                    <div class="air-modal-print-risk-box">
-                                        <strong>{{ $aiReport['risk_level'] }} risk</strong>
-                                        <p>{{ $aiReport['risk_explanation'] }}</p>
-                                    </div>
-                                </section>
+                                        <table class="air-modal-print-table">
+                                            <tbody>
+                                                <tr>
+                                                    <th>Document request metric</th>
+                                                    <th>Value</th>
+                                                </tr>
+                                                <tr>
+                                                    <td>Total requests</td>
+                                                    <td>{{ $docTotal }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Pending requests</td>
+                                                    <td>{{ $docPending }} / {{ $docPendingRateLabel }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Approved requests</td>
+                                                    <td>{{ $docApproved }} / {{ $docApprovalRateLabel }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Rejected requests</td>
+                                                    <td>{{ $docRejected }} / {{ $docRejectionRateLabel }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Most requested document</td>
+                                                    <td>{{ $docMostRequested }} — {{ $docMostRequestedCount }} request/s
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
 
-                                <section class="air-modal-print-section">
-                                    <div class="air-modal-print-section-title">
-                                        <span>07</span>
-                                        <h2>Recommendations</h2>
-                                    </div>
+                                        <p class="air-modal-print-body-text">{{ implode(' ', $documentRequestAnalysis) }}
+                                        </p>
+                                    </section>
 
-                                    <div class="air-modal-print-rec-list">
-                                        @foreach ($aiReport['recommendations'] as $index => $recommendation)
-                                            <div class="air-modal-print-rec-card">
-                                                <strong>{{ $recommendationTitles[$index] ?? 'Recommendation' }}</strong>
-                                                <p>{{ $recommendation }}</p>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                </section>
+                                    <section class="air-modal-print-section">
+                                        <div class="air-modal-print-section-title">
+                                            <span>06</span>
+                                            <h2>Risk interpretation</h2>
+                                        </div>
+
+                                        <div class="air-modal-print-risk-box">
+                                            <strong>{{ $riskLevel }} risk</strong>
+                                            <p>{{ $riskExplanation }}</p>
+                                        </div>
+                                    </section>
+                                @else
+                                    <section class="air-modal-print-section">
+                                        <div class="air-modal-print-section-title">
+                                            <span>06</span>
+                                            <h2>Risk interpretation</h2>
+                                        </div>
+
+                                        <div class="air-modal-print-risk-box">
+                                            <strong>{{ $riskLevel }} risk</strong>
+                                            <p>{{ $riskExplanation }}</p>
+                                        </div>
+                                    </section>
+
+                                    <section class="air-modal-print-section">
+                                        <div class="air-modal-print-section-title">
+                                            <span>07</span>
+                                            <h2>Recommendations</h2>
+                                        </div>
+
+                                        <div class="air-modal-print-rec-list">
+                                            @foreach ($aiReport['recommendations'] as $index => $recommendation)
+                                                <div class="air-modal-print-rec-card">
+                                                    <strong>{{ $recommendationTitles[$index] ?? 'Recommendation' }}</strong>
+                                                    <p>{{ $recommendation }}</p>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </section>
+                                @endif
 
                                 <div class="air-modal-print-footer">
                                     <div>
@@ -925,6 +981,41 @@
                                     <em>This is system-generated, signature is not required.</em>
                                 </div>
                             </div>
+
+                            @if ($hasDocumentRequestAnalysis)
+                                <div class="air-modal-print-sheet" data-modal-preview-page="4">
+                                    <div class="air-modal-print-page-heading">
+                                        <strong>AI Generated Overall Report</strong>
+                                        <span> · {{ $aiReport['period'] }} · Recommendations</span>
+                                    </div>
+
+                                    <section class="air-modal-print-section">
+                                        <div class="air-modal-print-section-title">
+                                            <span>07</span>
+                                            <h2>Recommendations</h2>
+                                        </div>
+
+                                        <div class="air-modal-print-rec-list">
+                                            @foreach ($aiReport['recommendations'] as $index => $recommendation)
+                                                <div class="air-modal-print-rec-card">
+                                                    <strong>{{ $recommendationTitles[$index] ?? 'Recommendation' }}</strong>
+                                                    <p>{{ $recommendation }}</p>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </section>
+
+                                    <div class="air-modal-print-footer">
+                                        <div>
+                                            <strong>This document contains personal-identifiable information subject to
+                                                Data
+                                                Privacy.</strong>
+                                            <span>Please keep this document protected and in a safe place.</span>
+                                        </div>
+                                        <em>This is system-generated, signature is not required.</em>
+                                    </div>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -1000,7 +1091,7 @@
 
                             <p class="modal-helper-text">
                                 <i class="fa-solid fa-circle-info"></i>
-                                Available report pages: 1 to 3
+                                Available report pages: 1 to {{ $totalReportPages }}
                             </p>
 
                             <div id="customPageRangeError" class="global-field-error" data-error-for="customPageRange"
@@ -1063,11 +1154,10 @@
 
 @endsection
 
-@push('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/html2canvas-pro@1.5.8/dist/html2canvas-pro.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+@section('scripts')
+    @vite('resources/js/reports/pdf-tools.js')
 
-    <script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         document.addEventListener('DOMContentLoaded', function() {
             const modal = document.getElementById('printReportModal');
             const openButton = document.getElementById('openPrintReportModal');
@@ -1144,7 +1234,7 @@
                 if (!selected || selected.size === 0) {
                     window.showFormInputValidationMessage?.(
                         customPageRange,
-                        'Please enter a valid page range from 1 to 3.'
+                        `Please enter a valid page range from 1 to ${pages.length}.`
                     );
 
                     window.focusGlobalInvalidField?.(
@@ -1188,6 +1278,12 @@
             }
 
             async function savePreviewAsPdf() {
+                try {
+                    await window.loadReportPdfTools?.();
+                } catch (error) {
+                    window.showToast?.({ type: 'error', title: 'PDF export unavailable', message: 'Please retry loading the PDF tools.' });
+                    return;
+                }
                 const canvasRenderer = window.html2canvas || window.html2canvasPro;
 
                 if (!canvasRenderer || !window.jspdf) {
@@ -1283,6 +1379,7 @@
                             removeContainer: true,
                             onclone: function(clonedDocument) {
                                 const style = clonedDocument.createElement('style');
+                                style.nonce = document.querySelector('meta[name="csp-nonce"]')?.content || '';
 
                                 style.textContent = `
                         html,
@@ -1442,4 +1539,4 @@
             updatePreviewSettings();
         });
     </script>
-@endpush
+@endsection

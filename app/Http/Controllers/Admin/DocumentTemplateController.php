@@ -10,6 +10,32 @@ use App\Services\DocumentTemplateRenderer;
 
 class DocumentTemplateController extends Controller
 {
+    private function routeName(string $action): string
+    {
+        if (request()->routeIs('dentist.document-template*')) {
+            return match ($action) {
+                'index' => 'dentist.document-template',
+                'show' => 'dentist.document-template.show',
+                'archive' => 'dentist.document-template.archive',
+                'activate' => 'dentist.document-template.activate',
+                'default' => 'dentist.document-template.default',
+            };
+        }
+
+        return match ($action) {
+            'index' => 'admin.document-template',
+            'show' => 'admin.document-template.show',
+            'archive' => 'admin.document-template.archive',
+            'activate' => 'admin.document-template.activate',
+            'default' => 'admin.document-template.default',
+        };
+    }
+
+    private function resolveLayoutRole(): string
+    {
+        return request()->routeIs('dentist.document-template*') ? 'dentist' : 'admin';
+    }
+
     private function templateStats(): array
     {
         $allowedStatuses = ['active', 'archived'];
@@ -38,17 +64,6 @@ class DocumentTemplateController extends Controller
 
     public function index(Request $request)
     {
-        if (!session('admin_logged_in')) {
-            if ($request->expectsJson() || $request->ajax()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Unauthorized',
-                ], 403);
-            }
-
-            return redirect('/admin/login');
-        }
-
         $allowedStatuses = [
             'active',
             'archived',
@@ -191,7 +206,9 @@ class DocumentTemplateController extends Controller
 
 
         $templates = $query
+            ->orderByRaw("CASE WHEN status = 'archived' THEN 1 ELSE 0 END")
             ->latest()
+            ->orderByDesc('id')
             ->paginate(
                 $perPage
             )
@@ -210,7 +227,16 @@ class DocumentTemplateController extends Controller
                     compact(
                         'templates',
                         'stats'
-                    )
+                    ) + [
+                        'layoutRole' => $this->resolveLayoutRole(),
+                        'routeNames' => [
+                            'index' => $this->routeName('index'),
+                            'show' => $this->routeName('show'),
+                            'archive' => $this->routeName('archive'),
+                            'activate' => $this->routeName('activate'),
+                            'default' => $this->routeName('default'),
+                        ],
+                    ]
                 )->render(),
 
                 'pagination' => [
@@ -245,16 +271,21 @@ class DocumentTemplateController extends Controller
             compact(
                 'templates',
                 'stats'
-            )
+            ) + [
+                'layoutRole' => $this->resolveLayoutRole(),
+                'routeNames' => [
+                    'index' => $this->routeName('index'),
+                    'show' => $this->routeName('show'),
+                    'archive' => $this->routeName('archive'),
+                    'activate' => $this->routeName('activate'),
+                    'default' => $this->routeName('default'),
+                ],
+            ]
         );
     }
 
     public function show($id)
     {
-        if (!session('admin_logged_in')) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-
         $template = DocumentTemplate::findOrFail($id);
         $renderer = app(DocumentTemplateRenderer::class);
 
@@ -279,14 +310,6 @@ class DocumentTemplateController extends Controller
 
     public function archive(Request $request, $id)
     {
-        if (!session('admin_logged_in')) {
-            if ($request->expectsJson() || $request->ajax()) {
-                return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
-            }
-
-            return redirect('/admin/login');
-        }
-
         $template = DocumentTemplate::findOrFail($id);
 
         $template->update([
@@ -307,20 +330,12 @@ class DocumentTemplateController extends Controller
         }
 
         return redirect()
-            ->route('admin.document-template')
+            ->route($this->routeName('index'))
             ->with('success', 'Template archived successfully.');
     }
 
     public function activate(Request $request, $id)
     {
-        if (!session('admin_logged_in')) {
-            if ($request->expectsJson() || $request->ajax()) {
-                return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
-            }
-
-            return redirect('/admin/login');
-        }
-
         $template = DocumentTemplate::findOrFail($id);
 
         $template->update([
@@ -340,16 +355,12 @@ class DocumentTemplateController extends Controller
         }
 
         return redirect()
-            ->route('admin.document-template')
+            ->route($this->routeName('index'))
             ->with('success', 'Template activated successfully.');
     }
 
     public function setDefault($id)
     {
-        if (!session('admin_logged_in')) {
-            return redirect('/admin/login');
-        }
-
         $template = DocumentTemplate::findOrFail($id);
 
         DB::transaction(function () use ($template) {
@@ -364,7 +375,7 @@ class DocumentTemplateController extends Controller
         });
 
         return redirect()
-            ->route('admin.document-template')
+            ->route($this->routeName('index'))
             ->with('success', 'Default template updated successfully.');
     }
 }

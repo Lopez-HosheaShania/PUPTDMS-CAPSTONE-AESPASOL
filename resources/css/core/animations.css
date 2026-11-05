@@ -70,8 +70,8 @@
 .greeting-banner {
     background:
         radial-gradient(circle at top left, rgba(255, 215, 0, 0.10), transparent 28%),
-        linear-gradient(270deg, #8B0000, #660000, #9f1d1d, #5A0000) !important;
-    background-size: 260% 260% !important;
+        linear-gradient(270deg, #8B0000, #660000, #9f1d1d, #5A0000);
+    background-size: 260% 260%;
     animation: greetingGradientFlow 13s ease infinite;
 }
 
@@ -246,6 +246,39 @@
     display: inline-block;
 }
 
+@keyframes contentFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes contentFadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+}
+
+.content-fade-in {
+    animation: contentFadeIn .22s ease both;
+}
+
+.content-fade-out {
+    animation: contentFadeOut .18s ease both;
+    pointer-events: none;
+}
+
 @keyframes fadeSlideUp {
     from {
         opacity: 0;
@@ -280,24 +313,6 @@
     50% {
         box-shadow: 0 0 0 8px rgba(192, 57, 43, 0);
     }
-}
-
-@keyframes pageEnter {
-    from {
-        opacity: 0;
-        transform: translateY(18px) scale(.985);
-        filter: blur(8px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-        filter: blur(0);
-    }
-}
-
-.page-enter {
-    animation: pageEnter .55s cubic-bezier(.22, 1, .36, 1) both;
 }
 
 @keyframes modalSlideUp {
@@ -376,10 +391,6 @@
     }
 }
 
-.toast-item.toast-exit {
-    animation: toastOut .35s ease forwards;
-}
-
 @keyframes modalExit {
     from {
         opacity: 1;
@@ -394,30 +405,6 @@
 
 .patient-record-modal-inner {
     animation: modalEnter 0.35s ease-out forwards;
-}
-
-@keyframes errorSlide {
-    from {
-        opacity: 0;
-        transform: translateY(-3px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes globalFieldErrorIn {
-    from {
-        opacity: 0;
-        transform: translateY(-3px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
 }
 
 @keyframes errorShake {
@@ -444,33 +431,35 @@
     }
 }
 
-@keyframes toastIn {
+@keyframes globalFieldErrorExit {
     from {
-        opacity: 0;
-        transform: translateX(60px) scale(.95);
+        opacity: 1;
+        transform: translateY(0);
     }
 
     to {
-        opacity: 1;
-        transform: translateX(0) scale(1);
+        opacity: 0;
+        transform: translateY(-6px);
     }
 }
 
-.toast-item.leaving {
-    animation: toastOut .25s ease forwards;
+@keyframes toastIn {
+    from {
+        transform: translateX(120px);
+    }
+
+    to {
+        transform: translateX(0);
+    }
 }
 
 @keyframes toastOut {
     from {
-        opacity: 1;
         transform: translateX(0);
-        max-height: 100px;
     }
 
     to {
-        opacity: 0;
-        transform: translateX(60px);
-        max-height: 0;
+        transform: translateX(120px);
     }
 }
 
@@ -685,31 +674,32 @@
     }
 }
 
-@keyframes appointmentAccordionExpand {
+@keyframes globalAccordionExpand {
     from {
         opacity: 0;
         transform: translateY(-8px);
-        max-height: 0;
     }
 
     to {
         opacity: 1;
         transform: translateY(0);
-        max-height: 1600px;
     }
 }
 
-@keyframes appointmentAccordionCollapse {
+.slide-down-fade-in {
+    animation:
+        globalAccordionExpand .26s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+@keyframes globalAccordionCollapse {
     from {
         opacity: 1;
         transform: translateY(0);
-        max-height: 1600px;
     }
 
     to {
         opacity: 0;
         transform: translateY(-8px);
-        max-height: 0;
     }
 }
 
@@ -870,30 +860,6 @@
     }
 }
 
-@keyframes apptTabPop {
-    0% {
-        transform: scale(.96);
-    }
-
-    60% {
-        transform: scale(1.035);
-    }
-
-    100% {
-        transform: scale(1);
-    }
-}
-
-.appt-tab.appt-active::after {
-    animation: apptShine .65s ease;
-}
-
-@keyframes apptShine {
-    to {
-        transform: translateX(120%) skewX(-20deg);
-    }
-}
-
 @keyframes apptModalDesktopIn {
     from {
         opacity: 0;
@@ -958,119 +924,6 @@
     to {
         transform: translateX(135%) skewX(-18deg);
     }
-}
-
-@keyframes authFadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes authTextShimmer {
-    0% {
-        background-position: 200% center;
-    }
-
-    100% {
-        background-position: 0% center;
-    }
-}
-
-@keyframes authPulseGlow {
-    0% {
-        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
-    }
-
-    70% {
-        box-shadow: 0 0 0 12px rgba(255, 255, 255, 0);
-    }
-
-    100% {
-        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
-    }
-}
-
-.auth-container .login-nav {
-    animation: authFadeInUp 0.8s ease-out;
-}
-
-.auth-container .hero-content>.hero-logos {
-    opacity: 0;
-    animation: authFadeInUp 0.8s ease-out forwards;
-    animation-delay: 0.1s;
-}
-
-.auth-container .hero-content>.eyebrow {
-    opacity: 0;
-    animation: authFadeInUp 0.8s ease-out forwards;
-    animation-delay: 0.3s;
-}
-
-.auth-container .hero-content>.hero-title {
-    opacity: 0;
-    animation: authFadeInUp 0.8s ease-out forwards;
-    animation-delay: 0.5s;
-}
-
-.auth-container .hero-content>.hero-desc {
-    opacity: 0;
-    animation: authFadeInUp 0.8s ease-out forwards;
-    animation-delay: 0.7s;
-}
-
-.auth-container .hero-content>.hero-features {
-    opacity: 0;
-    animation: authFadeInUp 0.8s ease-out forwards;
-    animation-delay: 0.9s;
-}
-
-.auth-container .hero-content>#login {
-    opacity: 0;
-    animation: authFadeInUp 0.8s ease-out forwards;
-    animation-delay: 1.1s;
-}
-
-.auth-container .btn-sso {
-    animation: authPulseGlow 2.5s infinite;
-}
-
-.auth-container .hero-title {
-    animation: authTextShimmer 4s linear infinite;
-}
-
-.auth-container .reveal {
-    opacity: 0;
-    transform: translateY(35px) scale(0.98);
-    transition:
-        opacity 0.8s cubic-bezier(0.2, 0.8, 0.2, 1),
-        transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-.auth-container .reveal.visible {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-}
-
-.auth-container .reveal-d1 {
-    transition-delay: 0.1s;
-}
-
-.auth-container .reveal-d2 {
-    transition-delay: 0.2s;
-}
-
-.auth-container .reveal-d3 {
-    transition-delay: 0.3s;
-}
-
-.auth-container .reveal-d4 {
-    transition-delay: 0.4s;
 }
 
 @keyframes confirmBackdropFade {
@@ -1162,6 +1015,226 @@
 
 }
 
+@keyframes upcomingCarouselOutLeft {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateX(-34px);
+    }
+}
+
+@keyframes upcomingCarouselOutRight {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateX(34px);
+    }
+}
+
+@keyframes upcomingCarouselInRight {
+    from {
+        opacity: 0;
+        transform: translateX(34px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes upcomingCarouselInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-34px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.upcoming-carousel-out-left {
+    animation:
+        upcomingCarouselOutLeft .18s cubic-bezier(.4, 0, 1, 1) both;
+
+    pointer-events: none;
+    will-change: transform, opacity;
+}
+
+.upcoming-carousel-out-right {
+    animation:
+        upcomingCarouselOutRight .18s cubic-bezier(.4, 0, 1, 1) both;
+
+    pointer-events: none;
+    will-change: transform, opacity;
+}
+
+.upcoming-carousel-in-right {
+    animation:
+        upcomingCarouselInRight .28s cubic-bezier(.22, 1, .36, 1) both;
+
+    will-change: transform, opacity;
+}
+
+.upcoming-carousel-in-left {
+    animation:
+        upcomingCarouselInLeft .28s cubic-bezier(.22, 1, .36, 1) both;
+
+    will-change: transform, opacity;
+}
+
+.global-carousel-out-left {
+    animation:
+        upcomingCarouselOutLeft .18s cubic-bezier(.4, 0, 1, 1) both;
+
+    pointer-events: none;
+
+    will-change:
+        transform,
+        opacity;
+}
+
+.global-carousel-out-right {
+    animation:
+        upcomingCarouselOutRight .18s cubic-bezier(.4, 0, 1, 1) both;
+
+    pointer-events: none;
+
+    will-change:
+        transform,
+        opacity;
+}
+
+.global-carousel-in-right {
+    animation:
+        upcomingCarouselInRight .28s cubic-bezier(.22, 1, .36, 1) both;
+
+    will-change:
+        transform,
+        opacity;
+}
+
+.global-carousel-in-left {
+    animation:
+        upcomingCarouselInLeft .28s cubic-bezier(.22, 1, .36, 1) both;
+
+    will-change:
+        transform,
+        opacity;
+}
+
+
+@keyframes authLandingCampusEnter {
+    from {
+        opacity: 0;
+        transform: translateY(18px) scale(.975);
+        filter: blur(7px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
+}
+
+@keyframes authLandingFloatTop {
+
+    0%,
+    100% {
+        transform: translate3d(0, 0, 0);
+    }
+
+    50% {
+        transform: translate3d(0, -8px, 0);
+    }
+}
+
+@keyframes authLandingFloatBottom {
+
+    0%,
+    100% {
+        transform: translate3d(0, 0, 0);
+    }
+
+    50% {
+        transform: translate3d(0, 7px, 0);
+    }
+}
+
+@keyframes authLandingAmbientGlow {
+
+    0%,
+    100% {
+        box-shadow:
+            0 24px 60px color-mix(in srgb, var(--text-1) 10%, transparent),
+            0 0 0 0 color-mix(in srgb, var(--crimson) 0%, transparent);
+    }
+
+    50% {
+        box-shadow:
+            0 28px 68px color-mix(in srgb, var(--text-1) 12%, transparent),
+            0 0 0 5px color-mix(in srgb, var(--crimson) 5%, transparent);
+    }
+}
+
+.auth-landing-campus-card-animated {
+    animation:
+        authLandingCampusEnter .7s cubic-bezier(.22, 1, .36, 1) both,
+        authLandingAmbientGlow 5.8s ease-in-out .8s infinite;
+}
+
+.auth-landing-float-top {
+    animation: authLandingFloatTop 4.2s ease-in-out infinite;
+}
+
+.auth-landing-float-bottom {
+    animation: authLandingFloatBottom 4.8s ease-in-out .35s infinite;
+}
+
+@keyframes globalLiveInsertIn {
+    from {
+        opacity: 0;
+        transform:
+            translateY(-10px) scale(.992);
+    }
+
+    to {
+        opacity: 1;
+        transform:
+            translateY(0) scale(1);
+    }
+}
+
+.global-live-insert {
+    animation:
+        globalLiveInsertIn .42s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+@keyframes global-loading-pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: .8;
+    }
+
+    50% {
+        transform: scale(1.06);
+        opacity: 1;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
 
     .page-enter,
@@ -1169,17 +1242,30 @@
     .stat-soft-rise,
     .fade-up,
     .fade-in,
+    .content-fade-in,
+    .content-fade-out,
+    .slide-down-fade-in,
     .spin,
-    .dot-pulse {
-        animation: none !important;
+    .dot-pulse,
+    .upcoming-carousel-out-left,
+    .upcoming-carousel-out-right,
+    .upcoming-carousel-in-left,
+    .upcoming-carousel-in-right,
+    .global-carousel-out-left,
+    .global-carousel-out-right,
+    .global-carousel-in-left,
+    .global-carousel-in-right,
+    .global-live-insert,
+    .global-loading-logo {
+        animation: none;
     }
 
     .page-enter,
     .fade-up,
     .fade-in {
-        transform: none !important;
-        filter: none !important;
-        opacity: 1 !important;
+        transform: none;
+        filter: none;
+        opacity: 1;
     }
 
     .modal-overlay,
@@ -1189,15 +1275,15 @@
     .patient-doc-modal-box,
     .doc-success-overlay,
     .doc-success-card {
-        animation: none !important;
-        transition: none !important;
+        animation: none;
+        transition: none;
     }
 
     .modal-overlay .modal-box-inner,
     .ui-modal-card,
     .patient-doc-modal-box,
     .doc-success-card {
-        filter: none !important;
+        filter: none;
     }
 
     .role-modal,
@@ -1206,50 +1292,30 @@
     #patientPickerOverlay,
     #vaOverlay .va-panel,
     #patientPickerOverlay .va-panel {
-        animation: none !important;
-        transition: none !important;
-        filter: none !important;
+        animation: none;
+        transition: none;
+        filter: none;
     }
 
     .global-refresh-notice,
     .global-refresh-icon,
     .global-refresh-icon i,
     .global-refresh-btn {
-        animation: none !important;
-        transition: none !important;
-        transform: none !important;
-        filter: none !important;
+        animation: none;
+        transition: none;
+        transform: none;
+        filter: none;
     }
 
     .chat-action-btn,
     .chat-action-btn::before {
-        animation: none !important;
-        transition: none !important;
+        animation: none;
+        transition: none;
     }
 
-    .auth-container .login-nav,
-    .auth-container .hero-content>.hero-logos,
-    .auth-container .hero-content>.eyebrow,
-    .auth-container .hero-content>.hero-title,
-    .auth-container .hero-content>.hero-desc,
-    .auth-container .hero-content>.hero-features,
-    .auth-container .hero-content>#login,
-    .auth-container .btn-sso,
-    .auth-container .hero-title,
-    .auth-container .reveal {
-        animation: none !important;
-        transition: none !important;
-    }
-
-    .auth-container .hero-content>.hero-logos,
-    .auth-container .hero-content>.eyebrow,
-    .auth-container .hero-content>.hero-title,
-    .auth-container .hero-content>.hero-desc,
-    .auth-container .hero-content>.hero-features,
-    .auth-container .hero-content>#login,
-    .auth-container .reveal {
-        opacity: 1 !important;
-        transform: none !important;
+    .auth-landing-campus-slide {
+        transition: opacity .01ms;
+        transform: none;
     }
 
     .book-appointment-btn::before,
@@ -1264,6 +1330,28 @@
     .appt-panel-fade,
     .appt-section-reveal,
     .appt-tab.appt-active::after {
-        animation: none !important;
+        animation: none;
+    }
+}
+
+.chatbot-panel.show:not(.closing) {
+    animation: modalEnter .34s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+.asw-menu.asw-menu {
+    animation: modalEnter .34s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .chatbot-panel.show:not(.closing),
+    .asw-menu.asw-menu {
+        animation: none;
+    }
+}
+
+@media (max-width: 640px) {
+    .chatbot-panel.show:not(.closing) {
+        animation: none;
     }
 }

@@ -8,9 +8,6 @@
 @section('description', 'An unexpected issue stopped the system from completing the action.')
 @section('notice_text', 'Try again after a moment. If the problem continues, contact the system administrator.')
 
-@section('primary_label', 'Return Home')
-@section('primary_url', url('/'))
-
 @section('notice_icon')
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round"

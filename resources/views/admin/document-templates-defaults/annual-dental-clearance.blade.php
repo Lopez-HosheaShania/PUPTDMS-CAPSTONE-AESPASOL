@@ -287,7 +287,7 @@
         <div class="signature-area">
             <div class="signature-block">
                 <div class="sig-line-row">
-                    <span class="sig-line"></span>
+                    <span class="sig-line">{{dentist_name}}</span>
                     <span class="sig-title">D.M.D.</span>
                 </div>
 

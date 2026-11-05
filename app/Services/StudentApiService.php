@@ -11,6 +11,7 @@ use Illuminate\Support\Str;
 class StudentApiService
 {
     private const DIRECTORY_CACHE_KEY = 'ogos_student_directory_cache';
+    private const FULL_DIRECTORY_CACHE_KEY = 'ogos_student_complete_directory_v1';
 
     protected string $baseUrl;
     protected string $tokenUrl;
@@ -195,19 +196,98 @@ class StudentApiService
         }
     }
 
-    public function getStudentByEmail(string $email): array
+    public function getAllStudents(int $pageSize = 80, int $maxPages = 100): array
     {
+        $pageSize = max(1, min($pageSize, 80));
+        $maxPages = max(1, min($maxPages, 100));
+        $cachedStudents = Cache::get(self::FULL_DIRECTORY_CACHE_KEY);
+
+        if (is_array($cachedStudents) && $cachedStudents !== []) {
+            return $cachedStudents;
+        }
+
         try {
             $token = $this->getAccessToken();
+            $url = $this->baseUrl.$this->studentSearchPath;
+            $students = [];
+            $lastPageWasFull = false;
 
+            for ($page = 1; $page <= $maxPages; $page++) {
+                $response = Http::acceptJson()
+                    ->withToken($token)
+                    ->timeout(20)
+                    ->get($url, [
+                        'page' => $page,
+                        'page_size' => $pageSize,
+                    ]);
+
+                if (! $response->successful()) {
+                    throw new Exception(sprintf(
+                        'Student directory page %d failed with status %d.',
+                        $page,
+                        $response->status()
+                    ));
+                }
+
+                $payload = $response->json();
+                if (! is_array($payload)) {
+                    throw new Exception("Student directory page {$page} returned an invalid payload.");
+                }
+
+                $pageStudents = $this->extractStudentList($payload);
+
+                Log::info('Student API directory page loaded', [
+                    'page' => $page,
+                    'count' => count($pageStudents),
+                ]);
+
+                if ($pageStudents === []) {
+                    $lastPageWasFull = false;
+                    break;
+                }
+
+                array_push($students, ...$pageStudents);
+                $lastPageWasFull = count($pageStudents) >= $pageSize;
+
+                if (! $lastPageWasFull) {
+                    break;
+                }
+            }
+
+            if ($lastPageWasFull) {
+                throw new Exception('Student directory pagination exceeded its safety limit.');
+            }
+
+            if ($students === []) {
+                throw new Exception('Student API returned an empty directory.');
+            }
+
+            $this->cacheStudentDirectory($students);
+            Cache::put(self::FULL_DIRECTORY_CACHE_KEY, $students, now()->addHour());
+
+            return $students;
+        } catch (\Throwable $exception) {
+            $fallbackStudents = $this->fallbackStudentDirectory(null, PHP_INT_MAX);
+
+            if ($fallbackStudents !== []) {
+                Log::warning('Complete student directory is using the cached fallback.', [
+                    'count' => count($fallbackStudents),
+                    'message' => $exception->getMessage(),
+                ]);
+
+                return $fallbackStudents;
+            }
+
+            throw $exception;
+        }
+    }
+
+    public function getStudentByEmail(string $email, bool $allowCachedFallback = true): array
+    {
+        try {
             $url = $this->baseUrl . '/integrations/students/profile';
 
-            $response = Http::acceptJson()
-                ->withToken($token)
-                ->timeout(15)
-                ->get($url, [
-                    'email' => $email,
-                ]);
+            $response = $this->getStudentInformation($url, ['email' => $email]);
 
             if (! $response->successful()) {
                 Log::error('Student fetch by email failed', [
@@ -230,6 +310,10 @@ class StudentApiService
 
             return $payload;
         } catch (\Throwable $e) {
+            if (! $allowCachedFallback) {
+                throw $e;
+            }
+
             $student = $this->findStudentByEmailFromFallbacks($email);
 
             if ($student !== null) {
@@ -245,11 +329,9 @@ class StudentApiService
         }
     }
 
-    public function getPersonalInfoByStudentNumber(string $studentNumber): array
+    public function getPersonalInfoByStudentNumber(string $studentNumber, bool $allowCachedFallback = true): array
     {
         try {
-            $token = $this->getAccessToken();
-
             $url = $this->baseUrl . '/integrations/students/' . urlencode($studentNumber) . '/personal-info';
 
             Log::info('DEBUG Personal Info Request', [
@@ -257,10 +339,7 @@ class StudentApiService
                 'url' => $url,
             ]);
 
-            $response = Http::acceptJson()
-                ->withToken($token)
-                ->timeout(15)
-                ->get($url);
+            $response = $this->getStudentInformation($url);
 
             Log::info('DEBUG Personal Info Response', [
                 'student_number' => $studentNumber,
@@ -278,6 +357,10 @@ class StudentApiService
 
             return $payload;
         } catch (\Throwable $e) {
+            if (! $allowCachedFallback) {
+                throw $e;
+            }
+
             $cachedPayload = Cache::get($this->personalInfoCacheKey($studentNumber));
 
             if (is_array($cachedPayload)) {
@@ -291,6 +374,62 @@ class StudentApiService
 
             throw $e;
         }
+    }
+
+    private function getStudentInformation(string $url, array $query = []): \Illuminate\Http\Client\Response
+    {
+        $response = Http::acceptJson()->withToken($this->getAccessToken())
+            ->timeout(15)->get($url, $query);
+
+        if ($response->status() === 401) {
+            Cache::forget('ogos_student_api_access_token');
+            $response = Http::acceptJson()->withToken($this->getAccessToken())
+                ->timeout(15)->get($url, $query);
+        }
+
+        return $response;
+    }
+
+    public function getPersonalInformationCompletion(string $studentNumber, array $profile = []): ?float
+    {
+        $payload = $this->getPersonalInfoByStudentNumber($studentNumber, false);
+        $info = $payload['data'] ?? null;
+
+        if (! is_array($info) || $info === []) {
+            return null;
+        }
+
+        foreach (['personalInformationCompletion', 'personal_information_completion', 'completionPercentage', 'completion_percentage', 'profileCompletion', 'profile_completion'] as $field) {
+            if (array_key_exists($field, $info)) {
+                $value = $info[$field];
+
+                return is_numeric($value) && (float) $value >= 0 && (float) $value <= 100
+                    ? (float) $value : null;
+            }
+        }
+
+        foreach (['isProfileComplete', 'is_profile_complete'] as $field) {
+            if (array_key_exists($field, $info)) {
+                return is_bool($info[$field]) ? ($info[$field] ? 100.0 : 0.0) : null;
+            }
+        }
+
+        $required = [
+            $profile['name'] ?? null,
+            $info['dateOfBirth'] ?? $info['birthdate'] ?? null,
+            data_get($info, 'gender.name') ?? $info['gender'] ?? null,
+            $profile['phone'] ?? null,
+            $profile['email'] ?? null,
+            $info['emergencyContactName'] ?? $info['emergency_contact_name']
+                ?? data_get($info, 'emergencyContact.name') ?? data_get($info, 'emergency_contact.name'),
+            $info['emergencyContactNumber'] ?? $info['emergency_contact_number']
+                ?? data_get($info, 'emergencyContact.number') ?? data_get($info, 'emergencyContact.contactNumber')
+                ?? data_get($info, 'emergency_contact.number') ?? data_get($info, 'emergency_contact.contact_number'),
+        ];
+
+        $completed = collect($required)->filter(fn ($value) => is_scalar($value) && filled($value))->count();
+
+        return round(($completed / count($required)) * 100, 2);
     }
 
     public function getAddressesByStudentNumber(string $studentNumber): array
@@ -356,12 +495,32 @@ class StudentApiService
             ?? data_get($student, 'full_name')
             ?? data_get($student, 'fullName');
 
-        if (! $name) {
-            $first = data_get($student, 'first_name') ?? data_get($student, 'firstName');
-            $middle = data_get($student, 'middle_name') ?? data_get($student, 'middleName');
-            $last = data_get($student, 'last_name') ?? data_get($student, 'lastName');
+        $first = data_get($student, 'first_name') ?? data_get($student, 'firstName');
+        $middle = data_get($student, 'middle_name') ?? data_get($student, 'middleName');
+        $last = data_get($student, 'last_name') ?? data_get($student, 'lastName');
+        $suffix = data_get($student, 'suffix_name')
+            ?? data_get($student, 'suffixName')
+            ?? data_get($student, 'name_suffix')
+            ?? data_get($student, 'nameSuffix')
+            ?? data_get($student, 'suffix')
+            ?? data_get($student, 'profile.suffix_name')
+            ?? data_get($student, 'profile.suffixName')
+            ?? data_get($student, 'profile.name_suffix')
+            ?? data_get($student, 'profile.nameSuffix');
 
-            $name = trim(collect([$first, $middle, $last])->filter()->implode(' '));
+        $suffix = trim((string) $suffix);
+
+        if (preg_match('/^(ii|iii|iv|v|vi|vii|viii|ix|x)\\.?$/i', $suffix)) {
+            $suffix = strtoupper($suffix);
+        }
+
+        if (! $name) {
+            $name = trim(collect([$first, $middle, $last, $suffix])->filter()->implode(' '));
+        } elseif ($suffix !== '' && !preg_match(
+            '/(?:^|\\s)' . preg_quote($suffix, '/') . '\\.?$/iu',
+            $name
+        )) {
+            $name = trim($name . ' ' . $suffix);
         }
 
         $email = data_get($student, 'email')
@@ -465,6 +624,14 @@ class StudentApiService
             'student_number' => $studentNumber,
 
             'name' => $name,
+
+            'first_name' => $first,
+
+            'middle_name' => $middle,
+
+            'last_name' => $last,
+
+            'suffix_name' => $suffix !== '' ? $suffix : null,
 
             'email' =>
             strtolower($email),

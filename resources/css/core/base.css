@@ -1,12 +1,21 @@
-* {
-    scrollbar-width: thin;
-    scrollbar-color: #bdbdbd transparent;
-}
-
 *,
 *::before,
 *::after {
     box-sizing: border-box;
+}
+
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border-radius: 10px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-thumb-hover);
 }
 
 *::-webkit-scrollbar {
@@ -16,15 +25,6 @@
 
 *::-webkit-scrollbar-track {
     background: transparent;
-}
-
-*::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 10px;
-}
-
-*::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
 }
 
 body.role-patient {
@@ -40,75 +40,72 @@ body.role-dentist {
 
 body.layout-no-sidebar #mainContent,
 body.layout-no-sidebar #siteFooter {
-    margin-left: 0 !important;
     width: 100% !important;
+    max-width: 100% !important;
+
+    margin-left: 0 !important;
+    margin-right: 0 !important;
 }
 
 body.layout-no-sidebar #mainContent {
     padding-left: 0;
 }
 
-body.role-patient.layout-no-sidebar #mainContent {
+body.layout-no-sidebar:has(#sidebar) #mainContent,
+body.role-patient.layout-no-sidebar #mainContent,
+body.role-dentist.layout-no-sidebar #mainContent,
+body.role-admin.layout-no-sidebar #mainContent {
     margin-left: 0 !important;
+    margin-right: 0 !important;
+
+    width: 100% !important;
+    max-width: 100% !important;
 }
 
+html,
 body {
-    font-family: 'Inter', sans-serif;
-    background: #f4f4f4;
-    overflow-x: hidden;
+    font-family:
+        var(--font-family-base);
 }
 
-[data-theme="dark"] * {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+html,
+body,
+#mainContent,
+#sidebar,
+#siteFooter {
+    transition:
+        background-color .28s ease,
+        color .28s ease,
+        border-color .28s ease;
 }
 
-[data-theme="dark"] *::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.18);
+.dashboard-loading-status {
+    width: 100%;
+    margin: 0 0 12px;
 }
 
-[data-theme="dark"] *::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.30);
+#mainContent.app-page-shell {
+    width: 100%;
+    min-width: 0;
+    min-height: 100dvh;
+
+    flex: 1 1 auto;
+
+    padding:
+        calc(var(--header-h) + 16px) 12px 20px;
+
+    margin-top: 0 !important;
+
+    background: var(--page-bg);
+    color: var(--page-text);
+
+    box-sizing: border-box;
 }
 
 [data-theme="dark"] body,
 .dark body {
     background-color: var(--page-bg) !important;
     color: var(--page-text) !important;
-}
-
-@media (max-width: 640px) {
-
-    body.role-patient {
-        --fab-base-bottom: calc(92px + env(safe-area-inset-bottom));
-    }
-}
-
-@media (max-width: 767px) {
-
-    #mainContent {
-        padding-left: 12px !important;
-        padding-right: 12px !important;
-    }
-}
-
-@media (max-width: 768px) {
-
-    #mainContent h1 {
-        font-size: 1.4rem !important;
-    }
-}
-
-@media (max-width: 1023px) and (min-width: 768px) {
-
-    body.role-admin:not(.layout-no-sidebar) #mainContent,
-    body.role-admin:not(.layout-no-sidebar) #siteFooter,
-    body.role-dentist:not(.layout-no-sidebar) #mainContent,
-    body.role-dentist:not(.layout-no-sidebar) #siteFooter,
-    body.role-patient:not(.layout-no-sidebar) #mainContent,
-    body.role-patient:not(.layout-no-sidebar) #siteFooter {
-        margin-left: 220px;
-    }
 }
 
 [data-theme="dark"] #mainContent,
@@ -125,4 +122,44 @@ body {
 [data-theme="dark"] .bg-white,
 .dark .bg-white {
     background-color: var(--card) !important;
+}
+
+@media (max-width: 640px) {
+
+    body.role-patient {
+        --fab-base-bottom: calc(92px + env(safe-area-inset-bottom));
+    }
+}
+
+@media (max-width: 767px) {
+    #mainContent.app-page-shell {
+        padding:
+            calc(var(--header-h, 72px) + 12px) 12px 20px;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1279px) {
+    #mainContent.app-page-shell {
+        padding:
+            calc(var(--header-h, 72px) + 16px) 20px 24px;
+    }
+}
+
+@media (min-width: 1280px) {
+    #mainContent.app-page-shell {
+        padding:
+            calc(var(--header-h, 72px) + 16px) 24px 32px;
+    }
+}
+
+@media (max-width: 1023px) and (min-width: 768px) {
+
+    body.role-admin:not(.layout-no-sidebar) #mainContent,
+    body.role-admin:not(.layout-no-sidebar) #siteFooter,
+    body.role-dentist:not(.layout-no-sidebar) #mainContent,
+    body.role-dentist:not(.layout-no-sidebar) #siteFooter,
+    body.role-patient:not(.layout-no-sidebar) #mainContent,
+    body.role-patient:not(.layout-no-sidebar) #siteFooter {
+        margin-left: var(--sidebar-w);
+    }
 }

@@ -17,74 +17,26 @@ use App\Notifications\AppointmentCancelledNotification;
 use App\Notifications\AppointmentRescheduledNotification;
 use App\Models\ServiceType;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Schema;
 
 
 class DentistAppointmentController extends Controller
 {
-    private function syncOverdueAppointmentsToCancelled(): void
-    {
-        $now = Carbon::now();
-
-        $gracePeriodMinutes = 60;
-
-        $cutoff = $now->copy()->subMinutes($gracePeriodMinutes);
-
-        $updatePayload = [
-            'status' => 'cancelled',
-            'updated_at' => $now,
-        ];
-
-        if (Schema::hasColumn('appointments', 'cancellation_reason')) {
-            $updatePayload['cancellation_reason'] = DB::raw(
-                "COALESCE(
-                NULLIF(cancellation_reason, ''),
-                'Appointment was not started within the 1-hour grace period.'
-            )"
-            );
-        }
-
-        Appointment::query()
-            ->whereIn('status', ['upcoming', 'rescheduled'])
-            ->where(function ($query) use ($cutoff) {
-                $query
-                    ->whereDate(
-                        'appointment_date',
-                        '<',
-                        $cutoff->toDateString()
-                    )
-                    ->orWhere(function ($sameDay) use ($cutoff) {
-                        $sameDay
-                            ->whereDate(
-                                'appointment_date',
-                                $cutoff->toDateString()
-                            )
-                            ->whereTime(
-                                'appointment_time',
-                                '<',
-                                $cutoff->format('H:i:s')
-                            );
-                    });
-            })
-            ->update($updatePayload);
-    }
-
     public function index(Request $request)
     {
+        $user = Auth::user();
 
         $activeRole = session('impersonated_role') ?: session('role');
 
-        if ($activeRole !== 'dentist') {
+        if (!optional(Auth::user())->canAccessClinicalArea($activeRole)) {
             return redirect('/login');
         }
 
-        $this->syncOverdueAppointmentsToCancelled();
-
         $today = Carbon::today()->toDateString();
 
-        $upcomingAppointments = Appointment::with(['patient', 'procedure', 'followUpAppointments'])
+        Appointment::cancelElapsedScheduledAppointments();
+
+        $upcomingAppointments = Appointment::with(['patient', 'procedure', 'followUpAppointments', 'reservedBookingPeriod'])
             ->whereIn('status', ['upcoming', 'rescheduled'])
             ->whereDate('appointment_date', '>=', $today)
             ->orderBy('appointment_date', 'asc')
@@ -93,27 +45,21 @@ class DentistAppointmentController extends Controller
 
         $appointments = $upcomingAppointments;
 
-        $pastAppointments = Appointment::with(['patient', 'procedure', 'followUpAppointments'])
-            ->where(function ($q) use ($today) {
-                $q->whereIn('status', ['completed', 'cancelled'])
-                    ->orWhere(function ($sub) use ($today) {
-                        $sub->whereDate('appointment_date', '<', $today)
-                            ->whereIn('status', ['upcoming', 'rescheduled']);
-                    });
-            })
+        $pastAppointments = Appointment::with(['patient', 'procedure', 'followUpAppointments', 'reservedBookingPeriod'])
+            ->whereIn('status', ['completed', 'cancelled',])
             ->orderBy('appointment_date', 'desc')
             ->orderBy('appointment_time', 'desc')
             ->get();
 
         $notifications = collect($notifications ?? []);
 
-        $appointmentCountsPerDay = Appointment::whereIn('status', ['upcoming', 'rescheduled'])
+        $appointmentCountsPerDay = Appointment::withoutGlobalScope('clinical_patients')->whereIn('status', ['upcoming', 'rescheduled'])
             ->selectRaw('appointment_date, COUNT(*) as count')
             ->groupBy('appointment_date')
             ->pluck('count', 'appointment_date')
             ->toArray();
 
-        $appointmentCountsPerSlot = Appointment::whereIn('status', ['upcoming', 'rescheduled'])
+        $appointmentCountsPerSlot = Appointment::withoutGlobalScope('clinical_patients')->whereIn('status', ['upcoming', 'rescheduled'])
             ->selectRaw('appointment_date, appointment_time, COUNT(*) as count')
             ->groupBy('appointment_date', 'appointment_time')
             ->get()
@@ -134,7 +80,7 @@ class DentistAppointmentController extends Controller
                     return [
                         'name' => $appointment->patient->name ?? 'Unknown',
                         'time' => \Carbon\Carbon::parse($appointment->appointment_time)->format('h:i A'),
-                        'service' => $appointment->service_type,
+                        'service' => $appointment->service_type_name,
                     ];
                 })->toArray();
             })
@@ -150,7 +96,7 @@ class DentistAppointmentController extends Controller
             ->map(fn($d) => Carbon::parse($d)->toDateString())
             ->toArray();
 
-        $philippineHolidays = PhilippineHolidays::range(0, 1);
+        $philippineHolidays = PhilippineHolidays::recordsRange(0, 1);
 
         $defaultServiceTypes = ServiceType::where('is_default', true)
             ->where('is_active_for_booking', true)
@@ -180,15 +126,21 @@ class DentistAppointmentController extends Controller
         return view('shared.appointments', [
             'layoutRole' => 'dentist',
             'pageTitle' => 'Appointments',
-            'pageShellClass' => 'dentist-page-shell',
+            'pageShellClass' => 'app-page-shell',
 
             'isDentistView' => true,
 
-            'canStartProcedure' => true,
-            'canRescheduleAppointment' => true,
-            'canCancelAppointment' => true,
-            'canViewTreatmentRecord' => true,
-            'canScheduleFollowUp' => true,
+            'canStartProcedure' => $user?->hasPermission('create_procedure_records') ?? false,
+            'canRescheduleAppointment' => $user?->hasPermission('reschedule_appointments') ?? false,
+            'canCancelAppointment' => $user?->hasPermission('cancel_appointments') ?? false,
+            'canViewTreatmentRecord' => $user?->hasAnyPermission([
+                'view_appointments',
+                'reschedule_appointments',
+                'cancel_appointments',
+                'create_follow_up_appointments',
+                'create_procedure_records',
+            ]) ?? false,
+            'canScheduleFollowUp' => false,
 
             'patientProfileRouteName' => 'dentist.dentist.patient.profile',
 
@@ -211,13 +163,18 @@ class DentistAppointmentController extends Controller
 
     public function patientProfile(Appointment $appointment)
     {
-        $activeRole = session('impersonated_role') ?: session('role');
+        if (Auth::user()?->hasAnyRole(['admin', 'super_admin'])) {
+            $patient = $appointment->patient;
+            abort_unless($patient, 404);
 
-        if ($activeRole !== 'dentist') {
-            return redirect('/login');
+            return app(\App\Http\Controllers\Admin\AdminPatientController::class)->show($patient, 'dentist');
         }
 
-        $this->syncOverdueAppointmentsToCancelled();
+        $activeRole = session('impersonated_role') ?: session('role');
+
+        if (!optional(Auth::user())->canAccessClinicalArea($activeRole)) {
+            return redirect('/login');
+        }
 
         $appointment->load('patient');
         $patient = $appointment->patient;
@@ -246,29 +203,48 @@ class DentistAppointmentController extends Controller
 
         $today = Carbon::today()->toDateString();
 
-        $futureVisits = Appointment::with(['procedure', 'followUpAppointments', 'dentist'])
+        Appointment::cancelElapsedScheduledAppointments();
+
+        $futureVisits = Appointment::with([
+            'procedure',
+            'followUpAppointments',
+            'dentist',
+        ])
             ->where('patient_id', $patient->id)
-            ->whereIn('status', ['upcoming', 'rescheduled'])
+            ->whereDate('appointment_date', '>=', $today)
+            ->whereIn('status', [
+                'upcoming',
+                'rescheduled',
+            ])
             ->orderBy('appointment_date', 'asc')
             ->orderBy('appointment_time', 'asc')
             ->get();
 
-        $pastVisits = Appointment::with(['procedure', 'followUpAppointments', 'dentist'])
+        $pastVisits = Appointment::with([
+            'procedure',
+            'followUpAppointments',
+            'dentist',
+        ])
             ->where('patient_id', $patient->id)
-            ->where(function ($q) use ($today) {
-                $q->whereIn('status', ['completed', 'cancelled'])
-                    ->orWhereDate('appointment_date', '<', $today);
-            })
+            ->whereIn('status', [
+                'completed',
+                'cancelled',
+            ])
             ->orderBy('appointment_date', 'desc')
             ->orderBy('appointment_time', 'desc')
             ->get();
 
-        $lastVisit = $pastVisits->first();
+        $completedVisits = $pastVisits
+            ->where('status', 'completed')
+            ->values();
+
+        $lastVisit = $completedVisits->first();
+
         $nextAppointment = $futureVisits->first();
-        $totalVisits = $pastVisits->count() + $futureVisits->count();
+
+        $totalVisits = $completedVisits->count();
 
         $notifications = collect([]);
-
 
         return view('patient.shared-profile', [
             'patient' => $patient,
@@ -284,17 +260,15 @@ class DentistAppointmentController extends Controller
         ]);
     }
 
-    public function start($id)
+    public function start(Request $request, $id)
     {
         $activeRole = session('impersonated_role') ?: session('role');
 
-        if ($activeRole !== 'dentist') {
+        if (!optional(Auth::user())->canAccessClinicalArea($activeRole)) {
             return redirect('/login');
         }
 
-        $this->syncOverdueAppointmentsToCancelled();
-
-        $appointment = Appointment::with('patient')->findOrFail($id);
+        $appointment = Appointment::with(['patient', 'reservedBookingPeriod'])->findOrFail($id);
 
         if (!$appointment->patient) {
             return redirect()
@@ -308,13 +282,35 @@ class DentistAppointmentController extends Controller
                 ->with('error', 'Only upcoming or rescheduled appointments can be started.');
         }
 
+        if (
+            empty($appointment->appointment_date) ||
+            !Carbon::parse($appointment->appointment_date)->isToday()
+        ) {
+            return redirect()
+                ->route('dentist.dentist.appointments')
+                ->with(
+                    'error',
+                    'The procedure can only be started on the scheduled appointment date.'
+                );
+        }
+
+        if ($appointment->reserved_booking_period_id && ! $appointment->reservedProcedureWindowIsOpen()) {
+            return redirect()
+                ->route('dentist.dentist.appointments')
+                ->with('error', 'Reserved appointments can be started anytime from the beginning until the end of their reserved period.');
+        }
+
         AuditLogger::log(
             'view',
             'dentist_appointments',
             'Dentist started an appointment procedure'
         );
 
-        return redirect()->route('dentist.odontogram', $appointment->id);
+        return redirect()->route('dentist.odontogram', [
+            'appointment' => $appointment->id,
+            'from' => $request->query('from', 'appointments'),
+            'start_procedure' => $request->query('start_procedure'),
+        ]);
     }
 
     public function cancel(Request $request, $id)
@@ -330,6 +326,7 @@ class DentistAppointmentController extends Controller
         $appointment->update([
             'status' => 'cancelled',
             'cancellation_reason' => $request->reason,
+            'reserved_booking_period_slot_id' => null,
         ]);
 
         $patientUser = optional($appointment->patient)->user;
@@ -339,13 +336,20 @@ class DentistAppointmentController extends Controller
         }
 
         if ($patientUser) {
-            $patientUser->notify(
-                new AppointmentCancelledNotification(
-                    $appointment,
-                    $cancelledBy,
-                    $request->reason
-                )
-            );
+            try {
+                $patientUser->notify(
+                    new AppointmentCancelledNotification(
+                        $appointment,
+                        $cancelledBy,
+                        $request->reason
+                    )
+                );
+            } catch (\Throwable $e) {
+                \Log::error('Appointment cancellation notification failed.', [
+                    'appointment_id' => $appointment->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
         }
 
         try {
@@ -374,7 +378,6 @@ class DentistAppointmentController extends Controller
         $request->validate([
             'new_appointment_date' => 'required|date|after:today',
             'new_appointment_time' => 'required',
-            'service_type' => 'required|string',
         ]);
 
         if (Carbon::parse($request->new_appointment_date)->isToday()) {
@@ -384,11 +387,26 @@ class DentistAppointmentController extends Controller
             ], 422);
         }
 
+        if (PhilippineHolidays::isBlockedForBooking($request->new_appointment_date)) {
+            return response()->json([
+                'success' => false,
+                'message' =>
+                'The clinic is closed on this Philippine holiday. Please choose another date.',
+            ], 422);
+        }
+
         $appointment = Appointment::with('patient.user')->findOrFail($id);
+
+        if ($appointment->reserved_booking_period_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Reserved appointments must stay within their assigned period and cannot be rescheduled individually.',
+            ], 422);
+        }
 
         $mysqlTime = Carbon::createFromFormat('g:i A', trim($request->new_appointment_time))->format('H:i:s');
 
-        $slotTaken = Appointment::where('appointment_date', $request->new_appointment_date)
+        $slotTaken = Appointment::withoutGlobalScope('clinical_patients')->where('appointment_date', $request->new_appointment_date)
             ->where('appointment_time', $mysqlTime)
             ->where('id', '!=', $appointment->id)
             ->whereIn('status', ['upcoming', 'rescheduled'])
@@ -407,7 +425,6 @@ class DentistAppointmentController extends Controller
         $appointment->update([
             'appointment_date' => $request->new_appointment_date,
             'appointment_time' => $mysqlTime,
-            'service_type' => $request->service_type,
             'status' => 'rescheduled',
         ]);
 
@@ -420,12 +437,19 @@ class DentistAppointmentController extends Controller
         $rescheduledBy = Auth::user()?->name ?? 'the dentist';
 
         if ($patientUser) {
-            $patientUser->notify(
-                new AppointmentRescheduledNotification(
-                    $appointment,
-                    $rescheduledBy
-                )
-            );
+            try {
+                $patientUser->notify(
+                    new AppointmentRescheduledNotification(
+                        $appointment,
+                        $rescheduledBy
+                    )
+                );
+            } catch (\Throwable $e) {
+                \Log::error('Appointment reschedule notification failed.', [
+                    'appointment_id' => $appointment->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
         }
 
         try {
@@ -464,7 +488,7 @@ class DentistAppointmentController extends Controller
         $request->validate([
             'followup_appointment_date' => 'required|date|after:today',
             'followup_appointment_time' => 'required',
-            'followup_reason' => 'required|string|max:1000',
+            'followup_reason' => 'nullable|string|max:1000',
         ]);
 
         if (Carbon::parse($request->followup_appointment_date)->isToday()) {
@@ -474,11 +498,19 @@ class DentistAppointmentController extends Controller
             ], 422);
         }
 
+        if (PhilippineHolidays::isBlockedForBooking($request->followup_appointment_date)) {
+            return response()->json([
+                'success' => false,
+                'message' =>
+                'The clinic is closed on this Philippine holiday. Please choose another date.',
+            ], 422);
+        }
+
         $originalAppointment = Appointment::with('patient')->findOrFail($id);
 
         $mysqlTime = Carbon::createFromFormat('g:i A', trim($request->followup_appointment_time))->format('H:i:s');
 
-        $slotTaken = Appointment::where('appointment_date', $request->followup_appointment_date)
+        $slotTaken = Appointment::withoutGlobalScope('clinical_patients')->where('appointment_date', $request->followup_appointment_date)
             ->where('appointment_time', $mysqlTime)
             ->whereIn('status', ['upcoming', 'rescheduled'])
             ->exists();
@@ -492,14 +524,17 @@ class DentistAppointmentController extends Controller
 
         $followUpAppointment = Appointment::create([
             'patient_id' => $originalAppointment->patient_id,
-            'dentist_id' => auth()->id(),
-            'service_type' => 'Follow-up',
+            'dentist_id' => app(\App\Services\AssignedDentistService::class)
+                ->requireForPatient($originalAppointment->patient_id, Auth::user())->id,
+            'service_type_id' => $originalAppointment->service_type_id,
+            'service_type' => $originalAppointment->service_type_name
+                ?? $originalAppointment->service_type,
             'appointment_date' => $request->followup_appointment_date,
             'appointment_time' => $mysqlTime,
             'status' => 'upcoming',
             'is_follow_up' => true,
             'follow_up_for_appointment_id' => $originalAppointment->id,
-            'follow_up_reason' => $request->followup_reason,
+            'follow_up_reason' => $request->filled('followup_reason') ? trim($request->followup_reason) : null,
             'follow_up_reminder_sent_at' => null,
             'follow_up_today_reminder_sent_at' => null,
             'follow_up_one_day_reminder_sent_at' => null,
@@ -513,7 +548,37 @@ class DentistAppointmentController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Follow-up appointment scheduled successfully.',
+
+            'message' =>
+            'Follow-up appointment scheduled successfully.',
+
+            'appointment' => [
+                'id' => $followUpAppointment->id,
+
+                'patient_name' =>
+                $originalAppointment->patient?->name
+                    ?? 'Unknown Patient',
+
+                'service_type' => $followUpAppointment->service_type_name,
+
+                'appointment_date' =>
+                Carbon::parse(
+                    $request->followup_appointment_date
+                )->format('F j, Y'),
+
+                'appointment_time' =>
+                Carbon::createFromFormat(
+                    'H:i:s',
+                    $mysqlTime
+                )->format('g:i A'),
+
+                'status' =>
+                ucfirst(
+                    $followUpAppointment->status
+                ),
+
+                'follow_up_reason' => $followUpAppointment->follow_up_reason,
+            ],
         ]);
     }
 }

@@ -28,6 +28,7 @@ class DocumentRequestApprovedNotification extends Notification
             'document_request_id' => $this->documentRequest->id,
             'status' => $this->documentRequest->status,
             'event' => 'document.request.approved',
+            'recipient_role' => optional($notifiable->role)->slug,
         ];
     }
 

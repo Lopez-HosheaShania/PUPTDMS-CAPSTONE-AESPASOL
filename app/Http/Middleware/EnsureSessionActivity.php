@@ -17,19 +17,18 @@ class EnsureSessionActivity
             return $next($request);
         }
 
-        $timeoutSeconds = max(
-            0,
-            (int) env(
-                'SESSION_IDLE_TIMEOUT_SECONDS',
-                600
-            )
-        );
+        if (!Auth::check()) {
+            $request->session()->forget([
+                'last_activity_at',
+                'session_idle_locked',
+            ]);
 
-        if ($timeoutSeconds <= 0) {
             return $next($request);
         }
 
-        if (!Auth::check()) {
+        $timeoutSeconds = $this->idleTimeoutSeconds($request);
+
+        if ($timeoutSeconds <= 0) {
             $request->session()->forget([
                 'last_activity_at',
                 'session_idle_locked',
@@ -100,46 +99,49 @@ class EnsureSessionActivity
                 $request->ajax()
             ) {
                 return response()->json([
+                    'active' => false,
                     'expired' => true,
+                    'reason' => 'idle',
                     'message' =>
                     'Your session has expired due to inactivity.',
                 ], 401);
             }
 
-            if ($alreadyLocked || $hasTimedOut) {
-
-                $request->session()->put(
-                    'session_idle_locked',
+            if ($request->isMethod('GET')) {
+                $request->attributes->set(
+                    'session_idle_expired',
                     true
                 );
 
-                if (
-                    $request->expectsJson() ||
-                    $request->ajax()
-                ) {
-                    return response()->json([
-                        'expired' => true,
-                        'message' =>
-                        'Your session has expired due to inactivity.',
-                    ], 401);
-                }
-
-                if ($request->isMethod('GET')) {
-
-                    $request->attributes->set(
-                        'session_idle_expired',
-                        true
-                    );
-
-                    return $next($request);
-                }
-
-                return response()->json([
-                    'expired' => true,
-                ], 401);
+                return $next($request);
             }
+
+            return response()->json([
+                'active' => false,
+                'expired' => true,
+                'reason' => 'idle',
+                'message' =>
+                'Your session has expired due to inactivity.',
+            ], 401);
         }
 
         return $next($request);
+    }
+
+    private function idleTimeoutSeconds(
+        Request $request
+    ): int {
+        $user =
+            $request->user();
+
+        if (!$user) {
+            return 0;
+        }
+
+        return $user->idleTimeoutSeconds(
+            optional(
+                $user->role
+            )->slug
+        );
     }
 }

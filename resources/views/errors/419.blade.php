@@ -13,8 +13,8 @@
 
 @section('notice_text', 'Refresh the page or sign in again, then repeat the action.')
 
-@section('primary_label', 'Return Home')
-@section('primary_url', url('/'))
+@section('primary_label', 'Sign In Again')
+@section('primary_url', route('login'))
 
 @section('notice_icon')
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

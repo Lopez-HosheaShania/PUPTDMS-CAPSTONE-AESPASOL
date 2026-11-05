@@ -41,6 +41,7 @@ class AppointmentBookedNotification extends Notification
             'appointment_month' => $this->formatMonthForPayload(),
             'event' => 'appointment.booked',
             'dedupe_key' => 'appointment.booked.' . $this->appointment->id,
+            'recipient_role' => optional($notifiable->role)->slug,
         ];
     }
 
@@ -64,6 +65,7 @@ class AppointmentBookedNotification extends Notification
             'created_at_label' => 'Just now',
             'state' => 'unread',
             'dedupe_key' => 'appointment.booked.' . $this->appointment->id,
+            'recipient_role' => optional($notifiable->role)->slug,
         ]);
     }
 
