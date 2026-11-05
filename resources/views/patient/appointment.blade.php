@@ -851,28 +851,22 @@
         }
 
         function apptShowFuture() {
-            const futurePanel =
-                document.getElementById('apptFuturePanel');
+            const futurePanel = document.getElementById('apptFuturePanel');
+            const pastPanel = document.getElementById('apptPastPanel');
+            const tabs = document.getElementById('apptListTabs');
 
-            const pastPanel =
-                document.getElementById('apptPastPanel');
+            if (!futurePanel || !pastPanel) return;
 
-            const tabs =
-                document.getElementById('apptListTabs');
+            futurePanel.hidden = false;
+            pastPanel.hidden = false;
 
-            if (!futurePanel || !pastPanel) {
-                return;
-            }
-
-            futurePanel.style.display = '';
+            futurePanel.style.display = 'block';
             pastPanel.style.display = 'none';
 
-            document
-                .getElementById('apptFutureTab')
+            document.getElementById('apptFutureTab')
                 ?.classList.add('appt-active');
 
-            document
-                .getElementById('apptPastTab')
+            document.getElementById('apptPastTab')
                 ?.classList.remove('appt-active');
 
             tabs?.classList.remove('is-past');
@@ -881,28 +875,22 @@
         }
 
         function apptShowPast() {
-            const futurePanel =
-                document.getElementById('apptFuturePanel');
+            const futurePanel = document.getElementById('apptFuturePanel');
+            const pastPanel = document.getElementById('apptPastPanel');
+            const tabs = document.getElementById('apptListTabs');
 
-            const pastPanel =
-                document.getElementById('apptPastPanel');
+            if (!futurePanel || !pastPanel) return;
 
-            const tabs =
-                document.getElementById('apptListTabs');
-
-            if (!futurePanel || !pastPanel) {
-                return;
-            }
+            futurePanel.hidden = false;
+            pastPanel.hidden = false;
 
             futurePanel.style.display = 'none';
-            pastPanel.style.display = '';
+            pastPanel.style.display = 'block';
 
-            document
-                .getElementById('apptPastTab')
+            document.getElementById('apptPastTab')
                 ?.classList.add('appt-active');
 
-            document
-                .getElementById('apptFutureTab')
+            document.getElementById('apptFutureTab')
                 ?.classList.remove('appt-active');
 
             tabs?.classList.add('is-past');
