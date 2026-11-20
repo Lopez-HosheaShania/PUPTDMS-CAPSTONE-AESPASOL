@@ -27,6 +27,7 @@ class ClinicalAccessService
         }
 
         $column = $query->getModel() instanceof Patient ? 'patients.id' : $query->getModel()->qualifyColumn('patient_id');
+        $isCurrentDentist = $currentDentistId === (int) $user->id;
         $intake = $query->getModel() instanceof Patient
             && request()->routeIs('dentist.walk-in.*', 'dentist.odontogram.existing-appointment.*', 'dentist.odontogram.discard', 'dentist.dentist.patient.profile', 'shared.existing-record.*')
             && ($user->hasPermission('manage_walk_in_patients') || $user->hasPermission('manage_appointments') || $user->hasPermission('create_procedure_records') || $user->hasPermission('create_medical_records'));
@@ -45,9 +46,11 @@ class ClinicalAccessService
                                 ->orWhereIn($column, DB::table('document_requests')->select('patient_id')->where('assigned_dentist_id', $user->id));
                         });
                 });
-            if ($intake) {
-                // Authorized intake can establish a first care relationship. Existing
-                // clinical assignments must still be handed over by an administrator.
+            if ($intake || $isCurrentDentist) {
+                // Authorized intake may establish a first care relationship. The
+                // explicitly assigned current clinic dentist also inherits legacy
+                // records that predate dentist/care attribution. Once a handover
+                // assigns a patient, that assignment excludes this fallback.
                 $q->orWhere(function ($q) use ($column) {
                     $q->whereNotIn($column, DB::table('patient_care_assignments')->select('patient_id'))
                         ->whereNotIn($column, DB::table('appointments')->select('patient_id')->whereNotNull('dentist_id'))
