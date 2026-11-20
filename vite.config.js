@@ -35,6 +35,7 @@ export default defineConfig({
                 'resources/css/pages/dentist/dentist-shared.css',
                 'resources/css/pages/dentist/dentist-walk-in.css',
                 'resources/css/pages/dentist/odontogram.css',
+                'resources/js/odontogram/treatment-colors.js',
 
                 // Patient
                 'resources/css/pages/patient/about-us.css',

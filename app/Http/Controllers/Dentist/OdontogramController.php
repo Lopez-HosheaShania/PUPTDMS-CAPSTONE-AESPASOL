@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Dentist;
 use App\Http\Requests\UpdateSavedOdontogramRequest;
 use App\Services\OdontogramRevisionService;
 use App\Services\ProcedureTimingService;
+use App\Helpers\AuditLogger;
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\AppointmentProcedure;
@@ -2191,9 +2192,70 @@ class OdontogramController extends Controller
             $user,
             &$result
         ) {
-            $this->persistExistingAppointmentPatientHistory($patient, $draft);
+            $existingAppointmentId = Appointment::withoutGlobalScope('clinical_patients')
+                ->where('patient_id', $patient->id)
+                ->whereDate('appointment_date', $appointmentPayload['appointment_date'])
+                ->whereTime('appointment_time', $appointmentPayload['appointment_time'])
+                ->value('id');
 
-            $appointment = Appointment::create($appointmentPayload);
+            if ($existingAppointmentId) {
+                // Follow the same lock order used by ProcedureTimingService before locking
+                // the appointment row, so a concurrently edited visit cannot be overwritten.
+                \App\Models\User::whereKey($appointmentPayload['dentist_id'])
+                    ->lockForUpdate()
+                    ->first();
+                Patient::whereKey($patient->id)->lockForUpdate()->firstOrFail();
+
+                $appointment = Appointment::withoutGlobalScope('clinical_patients')
+                    ->whereKey($existingAppointmentId)
+                    ->lockForUpdate()
+                    ->first();
+
+                if (! $appointment) {
+                    $appointment = Appointment::create($appointmentPayload);
+                } elseif ($appointment->status !== 'cancelled') {
+                    throw new HttpResponseException(response()->json([
+                        'message' => 'An appointment already exists for this patient at that date and time. Open the existing appointment instead of adding another.',
+                    ], 409));
+                } else {
+                    $appointment->load(['procedure.timing']);
+
+                    $hasExistingRevision = \App\Models\OdontogramRevision::query()
+                        ->where('appointment_id', $appointment->id)
+                        ->exists();
+
+                    if ($appointment->procedure?->procedure_completed_at || $hasExistingRevision) {
+                        throw new HttpResponseException(response()->json([
+                            'message' => 'This cancelled appointment already has a saved clinical record. Review the existing record instead of saving another one.',
+                        ], 409));
+                    }
+
+                    if ($appointment->procedure) {
+                        foreach (['oral_examination', 'diagnosis', 'prescriptions', 'inventory_notes'] as $field) {
+                            if (! array_key_exists($field, $validated) && $appointment->procedure->{$field} !== null) {
+                                $validated[$field] = $appointment->procedure->{$field};
+                            }
+                        }
+                    }
+
+                    $previousCancellationReason = trim((string) $appointment->cancellation_reason);
+                    $appointment->fill([
+                        ...$appointmentPayload,
+                        'cancellation_reason' => null,
+                    ]);
+                    $appointment->save();
+
+                    AuditLogger::log(
+                        'cancelled_appointment_completed_from_existing',
+                        'Clinical Records',
+                        "Cancelled appointment #{$appointment->id} was recorded as completed through Add Existing. Previous cancellation reason: " . ($previousCancellationReason !== '' ? $previousCancellationReason : 'Not provided') . '.'
+                    );
+                }
+            } else {
+                $appointment = Appointment::create($appointmentPayload);
+            }
+
+            $this->persistExistingAppointmentPatientHistory($patient, $draft);
 
             $result = $this->persistProcedureSnapshot(
                 $appointment,

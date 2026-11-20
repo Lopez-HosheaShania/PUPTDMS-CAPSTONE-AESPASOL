@@ -46,6 +46,9 @@ return Application::configure(basePath: dirname(__DIR__))
             EncryptCookies::class,
             AddQueuedCookiesToResponse::class,
             StartSession::class,
+        ], replace: [
+            \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class =>
+                \App\Http\Middleware\HttpOnlyXsrfToken::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

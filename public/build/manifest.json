@@ -110,7 +110,7 @@
     "isDynamicEntry": true
   },
   "resources/css/app.css": {
-    "file": "assets/app-DeM0cYVh.css",
+    "file": "assets/app-CS1F872W.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -236,7 +236,7 @@
     ]
   },
   "resources/css/pages/dentist/daily-treatment.css": {
-    "file": "assets/daily-treatment-B6nx8k88.css",
+    "file": "assets/daily-treatment-DtpIbokj.css",
     "src": "resources/css/pages/dentist/daily-treatment.css",
     "isEntry": true,
     "name": "daily-treatment",
@@ -245,7 +245,7 @@
     ]
   },
   "resources/css/pages/dentist/dental-services.css": {
-    "file": "assets/dental-services-CJb8YqVH.css",
+    "file": "assets/dental-services-CrQokLEp.css",
     "src": "resources/css/pages/dentist/dental-services.css",
     "isEntry": true,
     "name": "dental-services",
@@ -425,7 +425,7 @@
     ]
   },
   "resources/css/pages/shared/inventory.css": {
-    "file": "assets/inventory-DU4ivRRy.css",
+    "file": "assets/inventory-CA40hUuF.css",
     "src": "resources/css/pages/shared/inventory.css",
     "isEntry": true,
     "name": "inventory",
@@ -470,7 +470,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-C0MnoOtH.js",
+    "file": "assets/app-DSfPS5x-.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -528,12 +528,13 @@
     "isDynamicEntry": true
   },
   "resources/js/odontogram/odontogram-preview.js": {
-    "file": "assets/odontogram-preview-CV46aJfD.js",
+    "file": "assets/odontogram-preview-BqoL17bS.js",
     "name": "odontogram-preview",
     "src": "resources/js/odontogram/odontogram-preview.js",
     "isDynamicEntry": true,
     "imports": [
-      "_preload-helper-I4rgV-VL.js"
+      "_preload-helper-I4rgV-VL.js",
+      "resources/js/odontogram/treatment-colors.js"
     ],
     "dynamicImports": [
       "resources/js/odontogram/odontogram-primary-stacked-three.js"
@@ -545,13 +546,20 @@
     "src": "resources/js/odontogram/odontogram-primary-stacked-three.js",
     "isDynamicEntry": true
   },
+  "resources/js/odontogram/treatment-colors.js": {
+    "file": "assets/treatment-colors-Dz7HRjmV.js",
+    "name": "treatment-colors",
+    "src": "resources/js/odontogram/treatment-colors.js",
+    "isEntry": true
+  },
   "resources/js/records/patient-record-modal.js": {
-    "file": "assets/patient-record-modal-BXW4gl_Y.js",
+    "file": "assets/patient-record-modal-DNE8D3qh.js",
     "name": "patient-record-modal",
     "src": "resources/js/records/patient-record-modal.js",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/odontogram/odontogram-preview.js",
+      "resources/js/odontogram/treatment-colors.js",
       "_preload-helper-I4rgV-VL.js"
     ]
   },
@@ -594,7 +602,7 @@
     ]
   },
   "resources/js/security.js": {
-    "file": "assets/security-RDuG0h5V.js",
+    "file": "assets/security-B9UxnCEB.js",
     "name": "security",
     "src": "resources/js/security.js",
     "isEntry": true
