@@ -13,7 +13,7 @@ return new class extends Migration
         Schema::create('retention_policies', function (Blueprint $table) {
             $table->id();
             $table->string('category')->unique();
-            $table->unsignedInteger('duration')->default(1);
+            $table->unsignedInteger('duration')->default(10);
             $table->string('unit')->default('years');
             $table->string('start_event')->default('reviewed_lifecycle_date');
             $table->string('status')->default('provisional');
@@ -47,14 +47,14 @@ return new class extends Migration
         foreach (array_keys(config('retention.categories')) as $category) {
             DB::transaction(function () use ($category) {
                 $id = DB::table('retention_policies')->insertGetId([
-                    'category' => $category, 'duration' => 1, 'unit' => 'years',
+                    'category' => $category, 'duration' => 10, 'unit' => 'years',
                     'start_event' => 'reviewed_lifecycle_date', 'status' => 'provisional',
                     'archive_enabled' => false, 'disposal_enabled' => false,
                     'version' => 1, 'created_at' => now(), 'updated_at' => now(),
                 ]);
                 AuditLogger::log('retention_policy_created', 'data_retention', json_encode([
                     'policy_id' => $id, 'category' => $category, 'previous' => null,
-                    'updated' => ['duration' => 1, 'unit' => 'years', 'status' => 'provisional', 'version' => 1],
+                    'updated' => ['duration' => 10, 'unit' => 'years', 'status' => 'provisional', 'version' => 1],
                     'outcome' => 'success', 'source' => 'initial_configuration',
                 ], JSON_THROW_ON_ERROR));
             });

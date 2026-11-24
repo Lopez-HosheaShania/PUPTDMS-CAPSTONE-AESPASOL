@@ -90,8 +90,8 @@
             @else
                 <x-page-banner title="Dental Records" class="mt-2 mb-6" actions-class="admin-banner-actions">
                     <x-slot:actions>
-                        <x-button :href="route($routePrefix . '.reports.ai-generated')" variant="primary" icon="fa-solid fa-chart-column">
-                            View AI Reports
+                        <x-button :href="route($routePrefix . '.reports')" variant="primary" icon="fa-solid fa-chart-column">
+                            View Reports & Analytics
                         </x-button>
                     </x-slot:actions>
                 </x-page-banner>
@@ -473,15 +473,15 @@
 
                         <div class="quick-actions-list">
                             @if (!$isDentistView)
-                                <a href="{{ route($routePrefix . '.reports.ai-generated') }}"
+                                <a href="{{ route($routePrefix . '.reports') }}"
                                     class="quick-action quick-action-card">
                                     <span class="quick-action-icon">
                                         <i class="fa-solid fa-chart-column"></i>
                                     </span>
 
                                     <span class="quick-action-copy">
-                                        <span class="quick-action-title">AI Reports</span>
-                                        <span class="quick-action-sub">View AI-generated analytics and summaries</span>
+                                        <span class="quick-action-title">Analytics</span>
+                                        <span class="quick-action-sub">View clinic statistics and summaries</span>
                                     </span>
 
                                     <i class="fa-solid fa-chevron-right quick-action-arrow"></i>

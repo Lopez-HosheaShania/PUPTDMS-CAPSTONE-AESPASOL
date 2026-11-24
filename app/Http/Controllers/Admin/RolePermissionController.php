@@ -179,8 +179,6 @@ class RolePermissionController extends Controller
 
         ['name' => 'View Reports', 'slug' => 'view_reports', 'module' => 'Reports'],
         ['name' => 'Create Report Files', 'slug' => 'create_report_files', 'module' => 'Reports'],
-        ['name' => 'View AI Reports', 'slug' => 'view_ai_reports', 'module' => 'Reports'],
-        ['name' => 'Create AI Generative Reports', 'slug' => 'create_ai_generative_reports', 'module' => 'Reports'],
 
         ['name' => 'View Inventory', 'slug' => 'view_inventory', 'module' => 'Inventory'],
         ['name' => 'Add Inventory', 'slug' => 'add_inventory', 'module' => 'Inventory'],
@@ -256,8 +254,6 @@ class RolePermissionController extends Controller
             'create_service_type',
             'delete_service_type',
             'update_default_service_type',
-            'view_ai_reports',
-            'create_ai_generative_reports',
             'view_inventory',
             'add_inventory',
             'update_inventory',

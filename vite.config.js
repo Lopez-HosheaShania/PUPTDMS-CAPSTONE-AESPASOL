@@ -19,7 +19,6 @@ export default defineConfig({
                 // Admin
                 'resources/css/pages/admin/admin-dashboard.css',
                 'resources/css/pages/admin/admin-shared.css',
-                'resources/css/pages/admin/ai-generated-report.css',
                 'resources/css/pages/admin/dentist-continuity.css',
                 'resources/css/pages/admin/document-templates.css',
                 'resources/css/pages/admin/role-permissions.css',

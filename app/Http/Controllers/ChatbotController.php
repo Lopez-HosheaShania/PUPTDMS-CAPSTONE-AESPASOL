@@ -1253,8 +1253,6 @@ PROMPT;
             'transition',
             'successor',
             'report files',
-            'ai report',
-            'ai reports',
             'settings',
             'block date',
             'stock',

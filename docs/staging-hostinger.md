@@ -241,7 +241,7 @@ Important integration notes for this project:
 - The identity provider/Auth0 app must allow the staging callback URL.
 - `FLSS_*`, `OGOS_*`, and `OCMS_*` should use test endpoints or safe credentials if available.
 - `OPENAI_API_KEY` can be reused only if the team accepts staging usage costs.
-- `OPENAI_CHATBOT_MODEL`, `OPENAI_SIGNATURE_MODEL`, and `OPENAI_REPORT_MODEL` can be set separately in staging if you want lower-cost test models.
+- `OPENAI_CHATBOT_MODEL` and `OPENAI_SIGNATURE_MODEL` can be set separately in staging if you want lower-cost test models.
 - `MAIL_*` should use a test mailbox or safe mail service so staging does not email real users by accident.
 - `JWT_SECRET` should be separate from production when possible.
 

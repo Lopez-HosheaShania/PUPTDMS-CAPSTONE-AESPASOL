@@ -12,9 +12,5 @@ return [
             'enabled' => env('AI_SIGNATURE_ENABLED', true),
             'provider' => 'openai',
         ],
-        'reports' => [
-            'enabled' => env('AI_REPORTS_ENABLED', true),
-            'provider' => 'openai',
-        ],
     ],
 ];

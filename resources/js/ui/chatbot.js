@@ -1210,9 +1210,9 @@ if (chatbotRoot) {
             ],
 
             '/admin/reports': [
-                ['AI Reports', 'What are AI-assisted reports?'],
-                ['Generate', 'How can I generate an AI-assisted report?'],
-                ['Download', 'How can I download an AI-generated report?']
+                ['Reports', 'How can I review clinic statistics?'],
+                ['Files', 'Where can I find generated report files?'],
+                ['Download', 'How can I download a clinic report?']
             ],
 
             '/admin/user-management': [
@@ -1350,9 +1350,9 @@ if (chatbotRoot) {
             ],
 
             '/dentist/reports': [
-                ['AI Reports', 'What are AI-assisted reports?'],
-                ['Generate', 'How can I generate an AI-assisted report?'],
-                ['Download', 'How can I download an AI-generated report?']
+                ['Reports', 'How can I review clinic statistics?'],
+                ['Files', 'Where can I find generated report files?'],
+                ['Download', 'How can I download a clinic report?']
             ],
 
             '/dentist/user-management': [

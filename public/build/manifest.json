@@ -145,15 +145,6 @@
       "admin-shared.css"
     ]
   },
-  "resources/css/pages/admin/ai-generated-report.css": {
-    "file": "assets/ai-generated-report-3uBn5LtI.css",
-    "src": "resources/css/pages/admin/ai-generated-report.css",
-    "isEntry": true,
-    "name": "ai-generated-report",
-    "names": [
-      "ai-generated-report.css"
-    ]
-  },
   "resources/css/pages/admin/dentist-continuity.css": {
     "file": "assets/dentist-continuity-Ccmai75u.css",
     "src": "resources/css/pages/admin/dentist-continuity.css",
@@ -470,7 +461,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-DSfPS5x-.js",
+    "file": "assets/app-BU4T4Zgv.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,

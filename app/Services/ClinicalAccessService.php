@@ -31,7 +31,7 @@ class ClinicalAccessService
         $intake = $query->getModel() instanceof Patient
             && request()->routeIs('dentist.walk-in.*', 'dentist.odontogram.existing-appointment.*', 'dentist.odontogram.discard', 'dentist.dentist.patient.profile', 'shared.existing-record.*')
             && ($user->hasPermission('manage_walk_in_patients') || $user->hasPermission('manage_appointments') || $user->hasPermission('create_procedure_records') || $user->hasPermission('create_medical_records'));
-        $query->where(function ($q) use ($user, $column, $intake) {
+        $query->where(function ($q) use ($user, $column, $intake, $isCurrentDentist) {
             $q->whereIn($column, DB::table('patient_care_assignments')->select('patient_id')->where('dentist_id', $user->id))
                 ->orWhereIn($column, DB::table('appointments')->select('patient_id')->where('dentist_id', $user->id)
                     ->whereIn('status', ['pending', 'confirmed', 'upcoming', 'rescheduled']))

@@ -361,16 +361,8 @@ Route::prefix('admin')
             ->middleware('permission:create_report_files')->name('admin.reports.cancellation-breakdown');
 
         Route::get('/reports', [AdminReportController::class, 'index'])
-            ->middleware('permission:view_reports,view_ai_reports,create_ai_generative_reports')
+            ->middleware('permission:view_reports')
             ->name('admin.reports');
-
-        Route::get('/reports/ai-generated', [AdminReportController::class, 'aiGenerated'])
-            ->middleware('permission:view_ai_reports')
-            ->name('admin.reports.ai-generated');
-
-        Route::get('/reports/ai-generated/download', [AdminReportController::class, 'downloadAiGenerated'])
-            ->middleware('permission:create_ai_generative_reports')
-            ->name('admin.reports.ai-generated.download');
 
         /*
         |--------------------------------------------------------------------------
@@ -1303,16 +1295,8 @@ Route::prefix('dentist')->middleware(['auth'])->group(function () {
         ->middleware('permission:create_report_files')
         ->name('dentist.report-files');
     Route::get('/reports', [AdminReportController::class, 'index'])
-        ->middleware('permission:view_reports,view_ai_reports,create_ai_generative_reports')
+        ->middleware('permission:view_reports')
         ->name('dentist.reports');
-
-    Route::get('/reports/ai-generated', [AdminReportController::class, 'aiGenerated'])
-        ->middleware('permission:view_ai_reports')
-        ->name('dentist.reports.ai-generated');
-
-    Route::get('/reports/ai-generated/download', [AdminReportController::class, 'downloadAiGenerated'])
-        ->middleware('permission:create_ai_generative_reports')
-        ->name('dentist.reports.ai-generated.download');
 
     Route::get('/role-permissions', [RolePermissionController::class, 'index'])
         ->middleware('permission:view_roles_permissions,create_custom_roles,update_role_permissions,delete_custom_roles')

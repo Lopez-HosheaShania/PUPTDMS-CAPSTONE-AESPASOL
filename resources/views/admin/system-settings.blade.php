@@ -260,28 +260,6 @@
 />
                                             </div>
 
-                                            <div class="setting-row">
-                                                <div class="setting-row-info">
-                                                    <div class="setting-row-label">
-                                                        AI Report Narratives
-                                                    </div>
-
-                                                    <div class="setting-row-desc">
-                                                        If unavailable, reports will still
-                                                        generate using the built-in fallback narrative
-                                                    </div>
-                                                </div>
-
-                                                <x-switch
-    name="ai_reports_enabled"
-    value="1"
-    unchecked-value="0"
-    :checked="old(
-        'ai_reports_enabled',
-        $settings['ai_reports_enabled']->value ?? '1'
-    ) === '1'"
-/>
-                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -1041,7 +1019,6 @@
             ai_mode: 'normal',
             ai_chatbot_enabled: '1',
             ai_signature_enabled: '1',
-            ai_reports_enabled: '1',
 
             notif_new_appointment: '1',
             notif_cancellation: '1',

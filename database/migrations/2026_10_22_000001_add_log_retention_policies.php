@@ -15,7 +15,7 @@ return new class extends Migration
                     return;
                 }
 
-                $defaults = ['duration' => 1, 'unit' => 'years',
+                $defaults = ['duration' => 10, 'unit' => 'years',
                     'start_event' => 'reviewed_lifecycle_date', 'status' => 'provisional',
                     'archive_enabled' => false, 'disposal_enabled' => false, 'version' => 1];
                 $id = DB::table('retention_policies')->insertGetId(array_merge($defaults, [
