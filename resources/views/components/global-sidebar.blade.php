@@ -80,10 +80,10 @@
                     ],
                     [
                         'route' => 'admin.reports',
-                        'permission' => 'view_ai_reports',
-                        'active' => ['admin.reports', 'admin.reports.ai-generated'],
-                        'icon' => 'fa-wand-magic-sparkles',
-                        'label' => 'AI Reports',
+                        'permission' => 'view_reports',
+                        'active' => ['admin.reports'],
+                        'icon' => 'fa-chart-line',
+                        'label' => 'Analytics',
                     ],
                 ],
             ],
@@ -416,10 +416,10 @@
                     ],
                     [
                         'route' => 'dentist.reports',
-                        'permission' => 'view_ai_reports',
+                        'permission' => 'view_reports',
                         'active' => ['dentist.reports*'],
-                        'icon' => 'fa-wand-magic-sparkles',
-                        'label' => 'AI Reports',
+                        'icon' => 'fa-chart-line',
+                        'label' => 'Analytics',
                     ],
                     [
                         'route' => 'dentist.document-template',
@@ -511,7 +511,7 @@
                 'label' => 'Resource Management',
                 'sublabel' => 'Inventory & analytics',
                 'icon' => 'fa-boxes-stacked',
-                'item_labels' => ['Inventory', 'Reports', 'AI Reports'],
+                'item_labels' => ['Inventory', 'Reports', 'Analytics'],
             ],
             [
                 'section' => 'System Administration',
@@ -564,7 +564,7 @@
                 'label' => 'Resource Management',
                 'sublabel' => 'Inventory & analytics',
                 'icon' => 'fa-boxes-stacked',
-                'item_labels' => ['Inventory', 'Reports', 'AI Reports'],
+                'item_labels' => ['Inventory', 'Reports', 'Analytics'],
             ],
             [
                 'section' => 'System Administration',

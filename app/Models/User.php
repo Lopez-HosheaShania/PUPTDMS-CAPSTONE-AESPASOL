@@ -67,7 +67,7 @@ class User extends Authenticatable implements JWTSubject
         'create_medical_records' => ['manage_appointments', 'manage_walk_in_patients', 'manage_existing_records', 'manage_dental_records'],
         'create_odontograms' => ['manage_appointments', 'manage_walk_in_patients', 'manage_existing_records', 'manage_dental_records'],
         'update_odontograms' => ['manage_appointments', 'manage_walk_in_patients', 'manage_existing_records', 'manage_dental_records'],
-        'view_reports' => ['manage_reports', 'create_report_files', 'create_ai_generative_reports'],
+        'view_reports' => ['manage_reports', 'create_report_files'],
         'view_roles_permissions' => [
             'manage_user_roles',
             'create_custom_roles',
@@ -153,7 +153,6 @@ class User extends Authenticatable implements JWTSubject
         'manage_document_templates',
         'view_reports',
         'create_report_files',
-        'create_ai_generative_reports',
         'view_inventory',
         'add_inventory',
         'update_inventory',

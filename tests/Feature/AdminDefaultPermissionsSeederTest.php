@@ -81,8 +81,8 @@ class AdminDefaultPermissionsSeederTest extends TestCase
         $this->assertSame(1, Permission::where('slug', 'view_roles_permissions')->count());
         $this->assertSame(1, Permission::where('slug', 'view_cms_integration')->count());
         $this->assertSame(1, Permission::where('slug', 'view_faculty_integration')->count());
-        $this->assertSame(1, Permission::where('slug', 'view_ai_reports')->count());
-        $this->assertSame(1, Permission::where('slug', 'create_ai_generative_reports')->count());
+        $this->assertSame(0, Permission::where('slug', 'view_ai_reports')->count());
+        $this->assertSame(0, Permission::where('slug', 'create_ai_generative_reports')->count());
 
         $this->assertTrue(
             $adminRole->permissions()->where('slug', 'unrelated_admin_permission')->exists(),

@@ -61,8 +61,6 @@ final class DefaultRolePermissions
         ['name' => 'Manage Reports', 'slug' => 'manage_reports', 'module' => 'Reports'],
         ['name' => 'View Reports', 'slug' => 'view_reports', 'module' => 'Reports'],
         ['name' => 'Create Report Files', 'slug' => 'create_report_files', 'module' => 'Reports'],
-        ['name' => 'View AI Reports', 'slug' => 'view_ai_reports', 'module' => 'Reports'],
-        ['name' => 'Create AI Generative Reports', 'slug' => 'create_ai_generative_reports', 'module' => 'Reports'],
 
         ['name' => 'Manage Inventory', 'slug' => 'manage_inventory', 'module' => 'Inventory'],
         ['name' => 'View Inventory', 'slug' => 'view_inventory', 'module' => 'Inventory'],
@@ -151,8 +149,6 @@ final class DefaultRolePermissions
             'update_default_service_type',
             'view_reports',
             'create_report_files',
-            'view_ai_reports',
-            'create_ai_generative_reports',
             'view_inventory',
             'add_inventory',
             'update_inventory',

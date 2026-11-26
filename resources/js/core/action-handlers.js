@@ -42,7 +42,7 @@ export const actionHandlers = Object.freeze({
     'action-297be29dcc37': function (event) {
         filterPatients()
     },
-    // resources/views/admin/reports-ai-generated.blade.php
+    // Shared report modal click isolation.
     'action-22499e15f3ee': function (event) {
         event.stopPropagation()
     },

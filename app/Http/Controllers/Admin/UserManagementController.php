@@ -262,15 +262,10 @@ class UserManagementController extends Controller
 
                 $patient->user_id = $user->id;
                 $patient->save();
-            } else {
-                Patient::where('user_id', $user->id)->delete();
-
-                AuditLogger::log(
-                    'update',
-                    'user',
-                    "Removed linked patient record for user #{$user->id}"
-                );
             }
+            // Keep any linked patient record when the account changes roles.
+            // Clinical history (including immutable odontogram revisions) references
+            // the patient row and must remain available independently of account role.
         });
 
         if ($roleChanged) {
@@ -403,7 +398,9 @@ class UserManagementController extends Controller
         $this->concurrentSessionService->revokeAllSessions($user, null, 'account_deleted');
 
         DB::transaction(function () use ($user) {
-            Patient::where('user_id', $user->id)->delete();
+            // Detach the patient first so the users FK cannot cascade-delete a
+            // patient row that is still referenced by clinical history.
+            $user->patient()->update(['user_id' => null]);
             $user->delete(); // or ->forceDelete() if you don't use soft deletes
         });
 

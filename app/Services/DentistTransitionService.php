@@ -231,6 +231,14 @@ class DentistTransitionService
         $patientIds = DB::table('appointments')->where('dentist_id', $transition->dentist_id)->pluck('patient_id')
             ->merge($documents->pluck('patient_id'))
             ->merge(DB::table('patient_care_assignments')->where('dentist_id', $transition->dentist_id)->pluck('patient_id'))
+            // The current clinic dentist can see legacy patients without an owner.
+            // Include that same set in the reviewed handover so activation assigns
+            // them to the successor instead of leaving them behind as implicit access.
+            ->merge(DB::table('patients')
+                ->whereNotIn('id', DB::table('patient_care_assignments')->select('patient_id'))
+                ->whereNotIn('id', DB::table('appointments')->whereNotNull('dentist_id')->select('patient_id'))
+                ->whereNotIn('id', DB::table('document_requests')->whereNotNull('assigned_dentist_id')->select('patient_id'))
+                ->select('id')->pluck('id'))
             ->unique()->filter()
             ->diff(DB::table('patient_care_assignments')->where('dentist_id', '!=', $transition->dentist_id)->pluck('patient_id'));
 

@@ -52,7 +52,6 @@ return [
         'api_key' => env('OPENAI_API_KEY'),
         'chatbot_model' => env('OPENAI_CHATBOT_MODEL', 'gpt-5.5'),
         'signature_model' => env('OPENAI_SIGNATURE_MODEL', 'gpt-5.5'),
-        'report_model' => env('OPENAI_REPORT_MODEL', 'gpt-5.5'),
     ],
 
     'signature_ai' => [
