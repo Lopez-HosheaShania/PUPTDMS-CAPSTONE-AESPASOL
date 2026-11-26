@@ -2473,6 +2473,13 @@ class WalkInController extends Controller
                 ],
             ]);
         } catch (\Throwable $e) {
+            if ($e instanceof ValidationException) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->validator->errors()->first(),
+                ], 422);
+            }
+
             Log::error(
                 'Walk-in external patient resolution failed',
                 [
@@ -2998,6 +3005,13 @@ class WalkInController extends Controller
                 ],
             ]);
         } catch (\Throwable $e) {
+            if ($e instanceof ValidationException) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->validator->errors()->first(),
+                ], 422);
+            }
+
             Log::error('Walk-in guest creation failed', [
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
@@ -3889,7 +3903,10 @@ class WalkInController extends Controller
         array $data,
         string $type
     ): Patient {
-        $patient = Patient::with([
+        // Identity reconciliation must see records hidden by the dentist's
+        // clinical-access scope, otherwise an external record can be inserted
+        // again with an email that already exists in patients.
+        $patient = Patient::withoutGlobalScope('clinical_patients')->with([
             'medicalHistory',
             'information',
         ])
@@ -3914,7 +3931,7 @@ class WalkInController extends Controller
             ! $patient &&
             $normalizedEmail !== ''
         ) {
-            $patient = Patient::with([
+            $patient = Patient::withoutGlobalScope('clinical_patients')->with([
                 'medicalHistory',
                 'information',
             ])
@@ -3929,7 +3946,7 @@ class WalkInController extends Controller
             ! $patient &&
             $studentNumber !== ''
         ) {
-            $patient = Patient::with([
+            $patient = Patient::withoutGlobalScope('clinical_patients')->with([
                 'medicalHistory',
                 'information',
                 'studentInformation',
@@ -3951,7 +3968,7 @@ class WalkInController extends Controller
             ! $patient &&
             $facultyCode !== ''
         ) {
-            $patient = Patient::with([
+            $patient = Patient::withoutGlobalScope('clinical_patients')->with([
                 'medicalHistory',
                 'information',
                 'studentInformation',
@@ -3970,6 +3987,14 @@ class WalkInController extends Controller
         }
 
         if ($patient) {
+            // Deduplication does not grant this dentist access to another
+            // dentist's clinical record or care assignment.
+            if (! Patient::query()->whereKey($patient->id)->exists()) {
+                throw ValidationException::withMessages([
+                    'patient_id' => 'This patient record is outside your current walk-in access. Ask the clinic administrator to review its dentist assignment before continuing.',
+                ]);
+            }
+
             $patient =
                 $this->resolveWalkInSourcePatient(
                     $patient
