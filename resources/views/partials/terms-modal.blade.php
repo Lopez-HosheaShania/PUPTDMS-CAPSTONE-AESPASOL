@@ -7,10 +7,6 @@
         <header class="modal-hd">
             <div class="modal-heading">
 
-                <div class="modal-icon" aria-hidden="true">
-                    <i class="fa-solid fa-file-shield"></i>
-                </div>
-
                 <div class="modal-copy">
                     <h2 id="termsModalTitle" class="modal-title">
                         Terms and Conditions

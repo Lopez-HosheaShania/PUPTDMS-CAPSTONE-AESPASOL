@@ -117,16 +117,7 @@
             @if ($isDentistView)
                 <div class="dentist-hero page-title-row mb-6">
                     <div class="dentist-hero-content">
-                        <div class="dentist-hero-icon">
-                            <i class="fa-solid fa-chart-line"></i>
-                        </div>
-
                         <div class="min-w-0">
-                            <div class="dentist-hero-eyebrow">
-                                <i class="fa-solid fa-tooth"></i>
-                                Clinic Insights
-                            </div>
-
                             <h2 class="dentist-hero-title">
                                 Reports &amp; Analytics
                             </h2>
@@ -135,7 +126,7 @@
 
                     <div class="report-hero-actions">
                         @if (\App\Services\ReportSignatory::canManage(auth()->user()))
-                            <x-button type="button" variant="primary" icon="fa-solid fa-signature"
+                            <x-button type="button" variant="secondary" icon="fa-solid fa-signature"
                                 data-open-modal="reportSignatoryModal" aria-haspopup="dialog"
                                 aria-controls="reportSignatoryModal">
                                 Report signatory
@@ -152,7 +143,7 @@
                 <x-page-banner title="Reports & Analytics" class="mb-7" actions-class="report-hero-actions">
                     <x-slot:actions>
                         @if (\App\Services\ReportSignatory::canManage(auth()->user()))
-                            <x-button type="button" variant="primary" icon="fa-solid fa-signature"
+                            <x-button type="button" variant="secondary" icon="fa-solid fa-signature"
                                 data-open-modal="reportSignatoryModal" aria-haspopup="dialog"
                                 aria-controls="reportSignatoryModal">
                                 Report signatory
@@ -172,10 +163,6 @@
                 <div class="card">
                     <div class="card-header">
                         <div class="card-header-left">
-                            <span class="card-header-icon">
-                                <i class="fa-solid fa-chart-line"></i>
-                            </span>
-
                             <div>
                                 <h2 class="card-title">Patient Growth</h2>
                                 <p class="card-subtitle">
@@ -214,10 +201,6 @@
                 <div class="card">
                     <div class="card-header">
                         <div class="card-header-left">
-                            <span class="card-header-icon">
-                                <i class="fa-solid fa-chart-pie"></i>
-                            </span>
-
                             <div>
                                 <h2 class="card-title">Treatment Distribution</h2>
                                 <p class="card-subtitle">
@@ -264,10 +247,6 @@
                 <div class="card">
                     <div class="card-header">
                         <div class="card-header-left">
-                            <span class="card-header-icon">
-                                <i class="fa-solid fa-calendar-check"></i>
-                            </span>
-
                             <div>
                                 <h2 class="card-title">Appointment Status Overview</h2>
                                 <p class="card-subtitle">
@@ -324,10 +303,6 @@
                 <div class="card">
                     <div class="card-header">
                         <div class="card-header-left">
-                            <span class="card-header-icon">
-                                <i class="fa-solid fa-file-signature"></i>
-                            </span>
-
                             <div>
                                 <h2 class="card-title">Document Request Status</h2>
                                 <p class="card-subtitle">
@@ -422,7 +397,6 @@
                 <div class="card">
                     <div class="card-header">
                         <div class="card-header-left">
-                            <div class="card-header-icon"><i class="fa-solid fa-box-open"></i></div>
                             <div>
                                 <h2 class="card-title">Dental Supplies Usage</h2>
                                 <p class="card-subtitle">
@@ -479,7 +453,6 @@
                 <div class="card report-movement-card">
                     <div class="card-header">
                         <div class="card-header-left">
-                            <div class="card-header-icon"><i class="fa-solid fa-truck-ramp-box"></i></div>
                             <div>
                                 <h2 class="card-title">Stock movement & reorder forecast</h2>
                                 <p class="card-subtitle">Estimated movement, daily consumption, days remaining,
@@ -656,10 +629,6 @@
                 <div class="card">
                     <div class="card-header">
                         <div class="card-header-left">
-                            <span class="card-header-icon">
-                                <i class="fa-solid fa-chart-bar"></i>
-                            </span>
-
                             <div>
                                 <h2 class="card-title">Treatments per Month</h2>
                                 <p class="card-subtitle">
@@ -687,11 +656,6 @@
             @endif
 
             @if ($isDentistView)
-                <div class="analytics-section-label">
-                    <i class="fa-solid fa-chart-line"></i>
-                    Clinic Performance Overview
-                </div>
-
                 <div class="stat-grid">
 
                     <a href="{{ route('dentist.dentist.patients') }}" class="stat-card s-crimson stat-card-link">
@@ -821,18 +785,9 @@
                     </a>
                 </div>
 
-                <div class="analytics-section-label">
-                    <i class="fa-solid fa-chart-column"></i>
-                    Patient and Clinic Insights
-                </div>
-
                 <div class="card mb-6">
                     <div class="card-header">
                         <div class="card-header-left">
-                            <span class="card-header-icon">
-                                <i class="fa-solid fa-chart-simple"></i>
-                            </span>
-
                             <div>
                                 <h3 class="card-title">Monthly Clinic Overview</h3>
                                 <p class="card-subtitle">
@@ -863,10 +818,6 @@
                     <div class="card lg:col-span-1">
                         <div class="card-header">
                             <div class="card-header-left">
-                                <span class="card-header-icon">
-                                    <i class="fa-solid fa-chart-column"></i>
-                                </span>
-
                                 <div>
                                     <h3 class="card-title">GAD Report</h3>
                                     <p class="card-subtitle">
@@ -902,10 +853,6 @@
                     <div class="card lg:col-span-1">
                         <div class="card-header">
                             <div class="card-header-left">
-                                <span class="card-header-icon">
-                                    <i class="fa-solid fa-chart-line"></i>
-                                </span>
-
                                 <div>
                                     <h3 class="card-title">Weekly Cases</h3>
                                     <p class="card-subtitle">
@@ -941,10 +888,6 @@
                     <div class="card">
                         <div class="card-header">
                             <div class="card-header-left">
-                                <span class="card-header-icon">
-                                    <i class="fa-solid fa-user-group"></i>
-                                </span>
-
                                 <div>
                                     <h3 class="card-title">
                                         Returning vs New Patients
@@ -969,10 +912,6 @@
                     <div class="card">
                         <div class="card-header">
                             <div class="card-header-left">
-                                <span class="card-header-icon">
-                                    <i class="fa-solid fa-star"></i>
-                                </span>
-
                                 <div>
                                     <h3 class="card-title">
                                         Top Dental Services
@@ -1013,10 +952,6 @@
                     <section class="card quick-actions-card">
                         <div class="card-header">
                             <div class="card-header-left">
-                                <span class="card-header-icon">
-                                    <i class="fa-solid fa-bolt"></i>
-                                </span>
-
                                 <div>
                                     <h2 class="card-title">Quick Reports</h2>
                                     <p class="card-subtitle">
@@ -1063,10 +998,6 @@
                 <section class="card mb-8">
                     <div class="card-header">
                         <div class="card-header-left">
-                            <span class="card-header-icon">
-                                <i class="fa-solid fa-file-signature"></i>
-                            </span>
-
                             <div>
                                 <h2 class="card-title">Printable Forms</h2>
                                 <p class="card-subtitle">
@@ -1106,10 +1037,6 @@
                                     @foreach ($documentTemplates as $template)
                                         <article class="printable-template-item" data-printable-item>
                                             <div class="printable-template-main">
-                                                <span class="printable-template-icon">
-                                                    <i class="fa-solid fa-file-medical"></i>
-                                                </span>
-
                                                 <div class="printable-template-copy">
                                                     <h3 class="printable-template-title">
                                                         {{ $template->name }}
@@ -1137,7 +1064,6 @@
 
                                             <x-button :href="route('dentist.dentist.report.templates.print', $template->id)" variant="primary" size="sm"
                                                 icon="fa-solid fa-print" target="_blank" rel="noopener"
-                                                data-tooltip="Print form" data-tooltip-tone="view"
                                                 aria-label="Print {{ $template->name }}">
                                                 <span class="printable-print-label">
                                                     Print
@@ -1156,10 +1082,6 @@
                 <div class="card mb-8">
                     <div class="card-header">
                         <div class="card-header-left">
-                            <span class="card-header-icon">
-                                <i class="fa-solid fa-boxes-stacked"></i>
-                            </span>
-
                             <div>
                                 <h3 class="card-title">
                                     Inventory Analytics
@@ -1184,18 +1106,10 @@
 
                             <div class="inventory-chart-panel">
                                 <div class="report-panel-heading">
-                                    <span class="card-header-icon">
-                                        <i class="fa-solid fa-capsules"></i>
-                                    </span>
-
                                     <div>
                                         <h3 class="card-title">
                                             Medicine Stock
                                         </h3>
-
-                                        <p class="card-subtitle">
-                                            Available medicine inventory
-                                        </p>
                                     </div>
                                 </div>
 
@@ -1210,18 +1124,10 @@
 
                             <div class="report-inventory-panel">
                                 <div class="report-panel-heading">
-                                    <span class="card-header-icon">
-                                        <i class="fa-solid fa-box-open"></i>
-                                    </span>
-
                                     <div>
                                         <h3 class="card-title">
                                             Medical Supplies
                                         </h3>
-
-                                        <p class="card-subtitle">
-                                            Available dental and clinic supplies
-                                        </p>
                                     </div>
                                 </div>
 
@@ -1236,18 +1142,10 @@
 
                             <div class="low-stock-alert-card">
                                 <div class="report-panel-heading">
-                                    <span class="card-header-icon">
-                                        <i class="fa-solid fa-triangle-exclamation"></i>
-                                    </span>
-
                                     <div>
                                         <h3 class="card-title">
                                             Low Stock Alerts
                                         </h3>
-
-                                        <p class="card-subtitle">
-                                            Items that may require restocking
-                                        </p>
                                     </div>
                                 </div>
 
@@ -3733,9 +3631,11 @@
                 reportForm?.addEventListener('change', hideReportBanner);
 
                 downloadButton?.addEventListener('click', async function() {
-                    if (reportType.selectedOptions?.[0]?.dataset?.documentType === 'monthly_report'
-                        && !window.MonthlyDentalReportForm?.ready()) {
-                        showReportBanner('Load and review the monthly counts for the selected dates before downloading.');
+                    if (reportType.selectedOptions?.[0]?.dataset?.documentType === 'monthly_report' &&
+                        !window.MonthlyDentalReportForm?.ready()) {
+                        showReportBanner(
+                            'Load and review the monthly counts for the selected dates before downloading.'
+                            );
                         return;
                     }
                     const validation =

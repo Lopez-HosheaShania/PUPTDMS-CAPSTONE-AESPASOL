@@ -154,52 +154,45 @@ function initAccessibilitySheetGesture() {
 
 function fixSiennaPosition() {
     const isMobile = window.matchMedia('(max-width: 640px)').matches;
-    const isPatient = document.body.classList.contains('role-patient');
 
-    const navCandidates = Array.from(
-        document.querySelectorAll(
-            [
-                '.patient-mobile-nav',
-                '.mobile-bottom-nav',
-                '.bottom-nav',
-                '#mobileBottomNav',
-                '[data-mobile-bottom-nav]'
-            ].join(',')
-        )
-    );
+    const nav = document.getElementById('mobileBottomNav');
 
-    const visibleBottomNav = navCandidates
-        .map(nav => {
-            const rect = nav.getBoundingClientRect();
-            const style = window.getComputedStyle(nav);
-
-            return {
-                rect,
-                visible:
-                    style.display !== 'none' &&
-                    style.visibility !== 'hidden' &&
-                    rect.width > 0 &&
-                    rect.height > 0 &&
-                    rect.bottom > window.innerHeight * 0.7
-            };
-        })
-        .filter(item => item.visible)
-        .sort((first, second) => second.rect.top - first.rect.top)[0];
-
-    const right = isMobile ? 18 : 22;
+    const right = isMobile ? 14 : 22;
     const fabSize = isMobile ? 40 : 46;
     const gap = 14;
 
     let navClearance = 0;
+    let navOverlap = false;
 
-    if (isPatient && isMobile) {
-        navClearance = visibleBottomNav
-            ? Math.max(0, window.innerHeight - visibleBottomNav.rect.top)
-            : 92;
+    if (nav) {
+        const rect = nav.getBoundingClientRect();
+        const style = window.getComputedStyle(nav);
+
+        const isVisible =
+            style.display !== 'none' &&
+            style.visibility !== 'hidden' &&
+            rect.width > 0 &&
+            rect.height > 0 &&
+            rect.top < window.innerHeight &&
+            rect.bottom > window.innerHeight * 0.7;
+
+        const fabLeft = window.innerWidth - right - fabSize;
+        const fabRight = window.innerWidth - right;
+
+        if (isVisible) {
+            navClearance = Math.max(
+                0,
+                window.innerHeight - rect.top
+            );
+
+            navOverlap =
+                fabLeft < rect.right + gap &&
+                fabRight > rect.left - gap;
+        }
     }
 
-    const assistiveGroupBottom = isPatient && isMobile
-        ? navClearance + 10
+    const assistiveGroupBottom = navOverlap
+        ? Math.max(24, navClearance + 12)
         : 24;
 
     const backTopBottom =
@@ -212,9 +205,12 @@ function fixSiennaPosition() {
         '--float-right-final': `${right}px`,
         '--patient-nav-height': `${navClearance}px`,
         '--fab-final-size': `${fabSize}px`,
+
         '--accessibility-bottom': `${assistiveGroupBottom}px`,
         '--accessibility-bottom-final': `${assistiveGroupBottom}px`,
+
         '--chatbot-bottom-final': `${assistiveGroupBottom}px`,
+
         '--back-top-bottom': `${backTopBottom}px`,
         '--back-top-bottom-final': `${backTopBottom}px`
     };
@@ -260,9 +256,28 @@ function scheduleSiennaPosition() {
         });
 }
 
-window.addEventListener('load', scheduleSiennaPosition);
-window.addEventListener('resize', scheduleSiennaPosition, { passive: true });
-window.addEventListener('orientationchange', scheduleSiennaPosition, { passive: true });
+window.addEventListener(
+    'load',
+    scheduleSiennaPosition
+);
+
+window.addEventListener(
+    'resize',
+    scheduleSiennaPosition,
+    { passive: true }
+);
+
+window.addEventListener(
+    'orientationchange',
+    scheduleSiennaPosition,
+    { passive: true }
+);
+
+window.visualViewport?.addEventListener(
+    'resize',
+    scheduleSiennaPosition,
+    { passive: true }
+);
 
 function syncAssistiveFloatingState() {
     const group = document.getElementById('assistiveFabGroup');
@@ -293,5 +308,15 @@ document.addEventListener(
         initAccessibilitySheetGesture();
         syncAssistiveFloatingState();
         scheduleSiennaPosition();
+
+        const nav = document.getElementById('mobileBottomNav');
+
+        if (nav && typeof ResizeObserver !== 'undefined') {
+            const navObserver = new ResizeObserver(
+                scheduleSiennaPosition
+            );
+
+            navObserver.observe(nav);
+        }
     }
 );

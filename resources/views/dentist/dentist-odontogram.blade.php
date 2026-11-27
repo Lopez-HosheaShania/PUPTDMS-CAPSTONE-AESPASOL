@@ -933,11 +933,6 @@
         theme="success" :show-close="false">
         <x-slot:header>
             <div class="modal-heading">
-
-                <div class="modal-icon">
-                    <i id="finishProcedureModalIcon" class="fa-solid fa-clipboard-check"></i>
-                </div>
-
                 <div class="modal-copy">
                     <h2 id="finishProcedureModalTitle" class="modal-title">
                         Procedure Completed!
@@ -950,8 +945,6 @@
         </x-slot:header>
 
         <div class="global-confirm-alert">
-            <i class="fa-solid fa-circle-check"></i>
-
             <div>
                 <strong id="finishProcedureModalAlertTitle">
                     Procedure status

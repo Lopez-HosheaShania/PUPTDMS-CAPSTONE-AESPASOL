@@ -146,7 +146,7 @@
                 Cancel
             </x-button>
 
-            <x-button type="submit" variant="primary" icon="fa-solid fa-floppy-disk">
+            <x-button type="submit" variant="primary">
                 <span data-signatory-save-label>
                     Save
                 </span>

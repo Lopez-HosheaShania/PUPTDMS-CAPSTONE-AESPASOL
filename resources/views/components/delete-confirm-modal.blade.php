@@ -19,10 +19,6 @@
 
             <div class="modal-heading">
 
-                <div class="modal-icon">
-                    <i class="fa-solid fa-trash-can"></i>
-                </div>
-
                 <div class="modal-copy">
 
                     <h3 id="{{ $id }}Title" class="modal-title">

@@ -71,16 +71,7 @@
             @if ($isDentistView)
                 <div class="dentist-hero mb-6">
                     <div class="dentist-hero-content">
-                        <div class="dentist-hero-icon">
-                            <i class="fa-solid fa-notes-medical"></i>
-                        </div>
-
                         <div class="min-w-0">
-                            <div class="dentist-hero-eyebrow">
-                                <i class="fa-solid fa-tooth"></i>
-                                Clinical Operations
-                            </div>
-
                             <h2 class="dentist-hero-title">
                                 Dental Records
                             </h2>
@@ -509,7 +500,6 @@
         </div>
     </main>
 
-
     <x-filter-drawer id="filterModal" title="Filter Records" close-id="dentalRecordFilterCloseBtn"
         close-callback="action-b977f72cb77d" clear-id="dentalRecordFilterClearBtn" clear-callback="action-46ebb44a144d"
         clear-label="Clear Filters" cancel-id="dentalRecordFilterCancelBtn" cancel-callback="action-b977f72cb77d"
@@ -638,10 +628,6 @@
                         <i class="fa-solid fa-notes-medical"></i>
                     </div>
                     <div class="appointment-modal-header-copy">
-                        <span class="appointment-modal-eyebrow">
-                            Patient Clinical Record
-                        </span>
-
                         <h3 id="dentalRecordDetailsModalTitle" class="appointment-modal-title">
                             Dental Record Details
                         </h3>

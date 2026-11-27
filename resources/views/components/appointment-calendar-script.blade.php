@@ -2269,7 +2269,6 @@
                         </button>
 
                         <button type="button" data-calendar-filter="earliest" aria-pressed="false">
-                            <i class="fa-solid fa-bolt"></i>
                             Earliest Date
                         </button>
 

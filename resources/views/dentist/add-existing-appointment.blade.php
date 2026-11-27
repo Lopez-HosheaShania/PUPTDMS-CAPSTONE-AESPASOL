@@ -49,7 +49,6 @@
                             <div class="step-content hidden">
                                 <div class="booking-step-shell">
                                     <div class="booking-step-header">
-                                        <p class="booking-step-eyebrow">Step 1 of 5</p>
                                         <h2 class="booking-step-title">
                                             Select Date &amp; Time
                                         </h2>
@@ -134,7 +133,6 @@
                             <div class="step-content hidden">
                                 <div class="booking-step-shell">
                                     <div class="booking-step-header">
-                                        <p class="booking-step-eyebrow">Step 4 of 5</p>
                                         <h2 class="booking-step-title">Medical History</h2>
                                         <p class="booking-step-subtitle">
                                             Encode the same emergency and medical information used in standard
@@ -158,10 +156,6 @@
                                     <div id="summarySection">
 
                                         <div class="booking-step-header">
-                                            <p class="booking-step-eyebrow">
-                                                Step 5 of 5
-                                            </p>
-
                                             <h2 class="booking-step-title">
                                                 Review Before Odontogram
                                             </h2>
@@ -178,14 +172,9 @@
 
                                     </div>
 
-
                                     <div id="confirmationSection" class="hidden">
 
                                         <div class="booking-step-header">
-
-                                            <p class="booking-step-eyebrow">
-                                                Step 5 of 5
-                                            </p>
 
                                             <h2 class="booking-step-title">
                                                 Final Confirmation
@@ -198,7 +187,6 @@
                                             </p>
 
                                         </div>
-
 
                                         <div class="booking-step-body">
 

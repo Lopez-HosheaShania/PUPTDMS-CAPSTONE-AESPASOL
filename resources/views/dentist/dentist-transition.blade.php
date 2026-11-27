@@ -364,14 +364,7 @@
             <div class="w-full">
                 <section class="dentist-hero mb-5">
                     <div class="dentist-hero-content">
-                        <div class="dentist-hero-icon">
-                            <i class="fa-solid fa-users-gear"></i>
-                        </div>
                         <div class="min-w-0">
-                            <div class="dentist-hero-eyebrow">
-                                <i class="fa-solid fa-arrows-rotate"></i>
-                                Continuity
-                            </div>
                             <h1 class="dentist-hero-title">My Transitions</h1>
                         </div>
                     </div>

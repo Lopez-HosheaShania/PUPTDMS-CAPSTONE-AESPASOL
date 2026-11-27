@@ -427,16 +427,12 @@ $timeLabel .= ' – ' . $apptTime->copy()->addHour()->format('g:i A');
 
         <div class="appt-visit-meta">
             <span class="global-info-pill">
-                <i class="fa-regular fa-clock"></i>
-
                 <span>
                     {{ $timeLabel }}
                 </span>
             </span>
 
             <span class="global-info-pill">
-                <i class="fa-solid fa-user-doctor"></i>
-
                 <span>
                     {{ $dentistName }}
                 </span>

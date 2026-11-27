@@ -100,41 +100,35 @@
                             <p id="rotatingSubtitle" class="greeting-subtitle"></p>
                         </div>
 
+
                         <div class="greeting-banner-actions">
                             <div class="greeting-clinic-status-group">
 
                                 <div class="greeting-status-meta">
-                                    <div class="greeting-status-eyebrow">
-                                        <i class="fa-solid fa-circle-plus"></i>
+                                    <span class="greeting-status-eyebrow">
                                         Clinic Status
-                                    </div>
+                                    </span>
 
-                                    <div class="greeting-status-text">
-                                        The Dentist is currently
-                                    </div>
+                                    <span id="greetingStatusText" class="greeting-status-text">
+                                        {{ ($clinicStatus ?? 'in') === 'in' ? 'Dentist is available' : 'Dentist is unavailable' }}
+                                    </span>
                                 </div>
 
-                                <div class="status-btn-wrap">
-                                    <div class="status-icon-badge">
-                                        <i class="fa-solid fa-stethoscope"></i>
-                                    </div>
+                                <div class="greeting-status-controls">
+                                    <span id="statusLabel"
+                                        class="status-pill {{ ($clinicStatus ?? 'in') === 'in' ? 'status-active' : 'status-cancelled' }}">
+                                        {{ strtoupper($clinicStatus ?? 'in') }}
+                                    </span>
 
-                                    <x-button id="statusBtn" type="button" :variant="($clinicStatus ?? 'in') === 'in' ? 'success' : 'danger'" size="sm"
-                                        data-ui-click="action-bf29fd6dc371"
-                                        data-tooltip="{{ ($clinicStatus ?? 'in') === 'in' ? 'Clinic is open' : 'Clinic is closed' }}"
-                                        data-tooltip-tone="{{ ($clinicStatus ?? 'in') === 'in' ? 'start' : 'cancel' }}">
-                                        <span id="statusDot"
-                                            class="status-dot {{ ($clinicStatus ?? 'in') === 'in' ? 'status-active' : 'status-cancelled' }}"
-                                            aria-hidden="true"></span>
-
-                                        <span id="statusLabel">
-                                            {{ strtoupper($clinicStatus ?? 'in') }}
-                                        </span>
+                                    <x-button id="statusBtn" type="button" variant="ghost-light" size="sm"
+                                        data-ui-click="action-bf29fd6dc371">
+                                        Change Status
                                     </x-button>
                                 </div>
 
                             </div>
                         </div>
+
                     </div>
                 </div>
             </div>
@@ -303,10 +297,6 @@
         <x-slot:header>
             <div class="modal-heading">
 
-                <span id="statusModalIcon" class="modal-icon">
-                    <i class="fa-solid fa-door-closed"></i>
-                </span>
-
                 <div class="modal-copy">
 
                     <h2 id="statusModalTitle" class="modal-title">
@@ -323,8 +313,6 @@
         </x-slot:header>
 
         <div id="statusModalAlert" class="global-confirm-alert">
-            <i id="statusModalAlertIcon" class="fa-solid fa-circle-exclamation"></i>
-
             <div>
                 <strong id="statusModalAlertTitle">
                     Mark clinic as OUT?
@@ -344,8 +332,7 @@
                 Cancel
             </x-button>
 
-            <x-button id="confirmStatusBtn" type="button" variant="warning" icon="fa-solid fa-check"
-                data-ui-click="action-96d2131d8000">
+            <x-button id="confirmStatusBtn" type="button" variant="warning" data-ui-click="action-96d2131d8000">
                 Confirm
             </x-button>
 
@@ -763,10 +750,10 @@ ${isToday ? 'is-today' : ''}
 ${
 hasAppointments
 ? `
-                                                                                                                                                                                                                                                                                                        <span class="upcoming-date-badge">
-                                                                                                                                                                                                                                                                                                        ${count}
-                                                                                                                                                                                                                                                                                                        </span>
-                                                                                                                                                                                                                                                                                                        `
+                                                                                                                                                                                                                                                                                                                                        <span class="upcoming-date-badge">
+                                                                                                                                                                                                                                                                                                                                        ${count}
+                                                                                                                                                                                                                                                                                                                                        </span>
+                                                                                                                                                                                                                                                                                                                                        `
 : ''
 }
 
@@ -823,19 +810,19 @@ ${buildAvatar(
             ${buildAppointmentTypeIcons(appt)}
 
             ${appt.is_reserved ? `
-                                            <span class="status-pill status-today shrink-0"
-                                                data-tooltip="${escHtml(
-                                                    appt.reserved_title
-                                                        ? `Reserved: ${appt.reserved_title}`
-                                                        : 'Reserved appointment'
-                                                )}"
-                                                data-tooltip-tone="neutral"
-                                                aria-label="Reserved appointment"
-                                                tabindex="0">
-                                                <i class="fa-solid fa-calendar-check"></i>
-                                                <span>Reserved</span>
-                                            </span>
-                                        ` : ''}
+                                                                            <span class="status-pill status-today shrink-0"
+                                                                                data-tooltip="${escHtml(
+                                                                                    appt.reserved_title
+                                                                                        ? `Reserved: ${appt.reserved_title}`
+                                                                                        : 'Reserved appointment'
+                                                                                )}"
+                                                                                data-tooltip-tone="neutral"
+                                                                                aria-label="Reserved appointment"
+                                                                                tabindex="0">
+                                                                                <i class="fa-solid fa-calendar-check"></i>
+                                                                                <span>Reserved</span>
+                                                                            </span>
+                                                                        ` : ''}
 
         </div>
 
@@ -924,9 +911,6 @@ day: 'numeric'
 <header class="card-header card-header-inline">
 
 <div class="card-header-left">
-<div class="card-header-icon">
-<i class="fa-regular fa-calendar-days"></i>
-</div>
 
 <div>
 <h3 class="card-title">
@@ -945,10 +929,7 @@ ${rangeLabel}
 <button
 type="button"
 class="ui-btn ui-btn-secondary ui-btn-sm"
-data-ui-click="action-f32ebdbeb64d"
-data-tooltip="Return to today"
->
-<i class="fa-solid fa-calendar-day"></i>
+data-ui-click="action-f32ebdbeb64d">
 Today
 </button>
 
@@ -962,9 +943,7 @@ Today
 type="button"
 class="ui-action-btn ui-action-view"
 data-ui-click="action-98407bd7ef94"
-aria-label="Previous 7 days"
-data-tooltip="Previous 7 days"
->
+aria-label="Previous 7 days">
 <i class="fa-solid fa-chevron-left"></i>
 </button>
 
@@ -979,9 +958,7 @@ ${dateButtons}
 type="button"
 class="ui-action-btn ui-action-view"
 data-ui-click="action-e972125b107b"
-aria-label="Next 7 days"
-data-tooltip="Next 7 days"
->
+aria-label="Next 7 days">
 <i class="fa-solid fa-chevron-right"></i>
 </button>
 
@@ -1000,10 +977,9 @@ ${items}
 
 <a
 href="{{ route('dentist.dentist.appointments') }}"
-class="card-link upcoming-view-all"
+class="ui-btn ui-btn-secondary ui-btn-sm"
 >
 View all appointments
-<i class="fa-solid fa-arrow-right"></i>
 </a>
 
 </div>
@@ -1291,10 +1267,6 @@ View all appointments
 <header class="card-header">
 
     <div class="card-header-left">
-
-        <span class="card-header-icon">
-            <i class="fa-solid fa-chart-simple"></i>
-        </span>
 
         <div>
             <h3 class="card-title">
@@ -1662,10 +1634,6 @@ View all appointments
 
         <div class="card-header-left">
 
-            <span class="card-header-icon">
-                <i class="fa-solid fa-stethoscope"></i>
-            </span>
-
             <div>
                 <h3 class="card-title">
                     Today's Treatment Progress
@@ -1878,14 +1846,11 @@ ${clinicStatusLabel}
         ui-btn
         ui-btn-secondary
         ui-btn-sm
-        dashboard-status-action
-    "
-    aria-label="Change clinic status"
->
-    <i class="fa-solid fa-arrows-rotate"></i>
+        dashboard-status-action"
+    aria-label="Change clinic status">
 
     <span>
-        Change Status
+        Change
     </span>
 </button>
 
@@ -1928,21 +1893,19 @@ ${isLow ? '<i class="fa-solid fa-triangle-exclamation"></i>' : ''}
                 }).join('');
 
                 tableHtml = `
-<div class="table-body-surface table-scroll inventory-dashboard-table-scroll">
-<table class="data-table inventory-dashboard-table">
-<thead>
-<tr class="table-column-header">
-<th>Item</th>
-<th class="table-cell-center">Stock</th>
-<th class="table-cell-center">Used</th>
-<th class="table-cell-center">Balance</th>
-</tr>
-</thead>
-<tbody>
-${rows}
-</tbody>
-</table>
-</div>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th class="table-cell-center">Stock</th>
+                <th class="table-cell-center">Used</th>
+                <th class="table-cell-center">Balance</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${rows}
+        </tbody>
+    </table>
 `;
             } else {
                 tableHtml = `
@@ -1966,10 +1929,6 @@ Medical supply records will appear here once inventory items are available.
 
     <div class="card-header-left">
 
-        <span class="card-header-icon">
-            <i class="fa-solid fa-boxes-stacked"></i>
-        </span>
-
         <div>
             <h3 class="card-title">
                 Medical Supplies
@@ -1984,10 +1943,9 @@ Medical supply records will appear here once inventory items are available.
 
     <a
         href="{{ route('dentist.dentist.inventory') }}"
-        class="card-link"
+        class="ui-btn ui-btn-secondary ui-btn-sm"
     >
         View All
-        <i class="fa-solid fa-arrow-right"></i>
     </a>
 
 </header>
@@ -2030,21 +1988,19 @@ ${isLow ? '<i class="fa-solid fa-triangle-exclamation"></i>' : ''}
                 }).join('');
 
                 tableHtml = `
-<div class="table-body-surface table-scroll inventory-dashboard-table-scroll">
-<table class="data-table inventory-dashboard-table">
-<thead>
-<tr class="table-column-header">
-<th>Medicine</th>
-<th class="table-cell-center">Form</th>
-<th class="table-cell-center">Stock</th>
-<th class="table-cell-center">Balance</th>
-</tr>
-</thead>
-<tbody>
-${rows}
-</tbody>
-</table>
-</div>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Medicine</th>
+                <th class="table-cell-center">Form</th>
+                <th class="table-cell-center">Stock</th>
+                <th class="table-cell-center">Balance</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${rows}
+        </tbody>
+    </table>
 `;
             } else {
                 tableHtml = `
@@ -2063,14 +2019,10 @@ Medicine inventory records will appear here once items are available.
             }
 
             const html = `
-<article class="card inventory-dashboard-card">
+<article class="card">
 <header class="card-header card-header-inline">
 
     <div class="card-header-left">
-
-        <span class="card-header-icon">
-            <i class="fa-solid fa-pills"></i>
-        </span>
 
         <div>
             <h3 class="card-title">
@@ -2086,16 +2038,14 @@ Medicine inventory records will appear here once items are available.
 
     <a
         href="{{ route('dentist.dentist.inventory') }}"
-        class="card-link"
+        class="ui-btn ui-btn-secondary ui-btn-sm"
     >
         View All
-        <i class="fa-solid fa-arrow-right"></i>
     </a>
 
 </header>
 <div class="card-body">${tableHtml}</div>
-</article>
-`;
+</article>`;
 
             renderDashboardContent('medicineSuppliesContainer', html);
         }
@@ -2199,41 +2149,20 @@ Medicine inventory records will appear here once items are available.
 
         let dentistIsIn = @json(($clinicStatus ?? 'in') === 'in');
 
+
         function openStatusModal() {
-            const modal =
-                document.getElementById(
-                    'statusModal'
-                );
+            const modal = document.getElementById('statusModal');
+            const title = document.getElementById('statusModalTitle');
+            const subtitle = document.getElementById('statusModalSubtitle');
+            const alertTitle = document.getElementById('statusModalAlertTitle');
+            const body = document.getElementById('statusModalBody');
+            const confirmBtn = document.getElementById('confirmStatusBtn');
 
-            const icon =
-                document.getElementById(
-                    'statusModalIcon'
-                );
-
-            const title =
-                document.getElementById(
-                    'statusModalTitle'
-                );
-
-            const subtitle =
-                document.getElementById(
-                    'statusModalSubtitle'
-                );
-
-            const alertTitle =
-                document.getElementById(
-                    'statusModalAlertTitle'
-                );
-
-            const body =
-                document.getElementById(
-                    'statusModalBody'
-                );
-
-            const confirmBtn =
-                document.getElementById(
-                    'confirmStatusBtn'
-                );
+            if (!modal || !title || !subtitle ||
+                !alertTitle || !body || !confirmBtn) {
+                console.error('Clinic status modal elements are missing.');
+                return;
+            }
 
             modal.classList.remove(
                 'modal-theme-warning',
@@ -2242,60 +2171,31 @@ Medicine inventory records will appear here once items are available.
             );
 
             if (dentistIsIn) {
-                modal.classList.add(
-                    'modal-theme-danger'
-                );
+                modal.classList.add('modal-theme-danger');
 
-                icon.innerHTML =
-                    '<i class="fa-solid fa-door-closed"></i>';
-
-                title.textContent =
-                    'Close the Clinic';
-
-                subtitle.textContent =
-                    'You are about to mark yourself as OUT.';
-
-                alertTitle.textContent =
-                    'Mark clinic as OUT?';
+                title.textContent = 'Close the Clinic';
+                alertTitle.textContent = 'Mark clinic as OUT?';
 
                 body.textContent =
-                    'Patients will not be able to book new appointments, but existing appointments will remain active. ';
+                    'Patients will not be able to book new appointments while the clinic is closed. Existing appointments will remain active unless separately cancelled.';
 
-                confirmBtn.className =
-                    'ui-btn ui-btn-danger';
-
-                confirmBtn.innerHTML =
-                    '<i class="fa-solid fa-door-closed"></i> Mark as OUT';
+                confirmBtn.className = 'ui-btn ui-btn-danger';
+                confirmBtn.textContent = 'Mark as OUT';
             } else {
-                modal.classList.add(
-                    'modal-theme-success'
-                );
+                modal.classList.add('modal-theme-success');
 
-                icon.innerHTML =
-                    '<i class="fa-solid fa-door-open"></i>';
-
-                title.textContent =
-                    'Open the Clinic?';
-
-                subtitle.textContent =
-                    'You are about to mark yourself as IN.';
-
-                alertTitle.textContent =
-                    'Mark clinic as IN?';
+                title.textContent = 'Open the Clinic';
+                subtitle.textContent = 'You are about to mark yourself as IN.';
+                alertTitle.textContent = 'Mark clinic as IN?';
 
                 body.textContent =
                     'Patients will be able to view your availability and book appointments again.';
 
-                confirmBtn.className =
-                    'ui-btn ui-btn-success';
-
-                confirmBtn.innerHTML =
-                    '<i class="fa-solid fa-door-open"></i> Mark as IN';
+                confirmBtn.className = 'ui-btn ui-btn-success';
+                confirmBtn.textContent = 'Mark as IN';
             }
 
-            window.openModal?.(
-                'statusModal'
-            );
+            window.openModal?.('statusModal');
         }
 
         function closeStatusModal() {
@@ -2309,7 +2209,7 @@ Medicine inventory records will appear here once items are available.
             const newStatus = dentistIsIn ? 'out' : 'in';
 
             confirmBtn.disabled = true;
-            confirmBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+            confirmBtn.textContent = 'Saving...';
 
             try {
                 const response = await fetch("{{ route('dentist.clinic-status.update') }}", {
@@ -2334,91 +2234,52 @@ Medicine inventory records will appear here once items are available.
 
                 dentistIsIn = data.status === 'in';
 
+
                 const btn = document.getElementById('statusBtn');
                 const label = document.getElementById('statusLabel');
-                const dot = document.getElementById('statusDot');
+                const greetingText = document.getElementById('greetingStatusText');
+
                 const kpiLabel = document.getElementById('statusKpiLabel');
                 const kpiIcon = document.getElementById('statusKpiIcon');
                 const statCard = document.getElementById('clinicStatusStatCard');
 
-                if (dentistIsIn) {
-                    btn.classList.remove(
-                        'ui-btn-danger'
+                if (label) {
+                    label.classList.remove(
+                        'status-active',
+                        'status-cancelled'
                     );
 
-                    btn.classList.add(
-                        'ui-btn-success'
+                    label.classList.add(
+                        dentistIsIn ? 'status-active' : 'status-cancelled'
                     );
 
-                    btn.dataset.tooltip =
-                        'Clinic is open';
+                    label.textContent = dentistIsIn ? 'IN' : 'OUT';
+                }
 
-                    btn.dataset.tooltipTone =
-                        'start';
+                if (greetingText) {
+                    greetingText.textContent = dentistIsIn ?
+                        'Dentist is available' :
+                        'Dentist is unavailable';
+                }
 
-                    label.textContent =
-                        'IN';
+                if (btn) {
+                    btn.dataset.tooltip = 'Change clinic availability';
+                    btn.dataset.tooltipTone = 'neutral';
+                }
 
-                    dot.className =
-                        'status-dot status-active';
+                if (kpiLabel) {
+                    kpiLabel.textContent = dentistIsIn ? 'Open' : 'Closed';
+                }
 
-                    if (kpiLabel) {
-                        kpiLabel.textContent = 'Open';
-                    }
+                if (kpiIcon) {
+                    kpiIcon.className = dentistIsIn ?
+                        'fa-solid fa-door-open' :
+                        'fa-solid fa-door-closed';
+                }
 
-                    if (kpiIcon) {
-                        kpiIcon.className =
-                            'fa-solid fa-door-open';
-                    }
-
-                    if (statCard) {
-                        statCard.classList.remove(
-                            's-cancelled'
-                        );
-
-                        statCard.classList.add(
-                            's-active'
-                        );
-                    }
-                } else {
-                    btn.classList.remove(
-                        'ui-btn-success'
-                    );
-
-                    btn.classList.add(
-                        'ui-btn-danger'
-                    );
-
-                    btn.dataset.tooltip =
-                        'Clinic is closed';
-
-                    btn.dataset.tooltipTone =
-                        'cancel';
-
-                    label.textContent =
-                        'OUT';
-
-                    dot.className =
-                        'status-dot status-cancelled';
-
-                    if (kpiLabel) {
-                        kpiLabel.textContent = 'Closed';
-                    }
-
-                    if (kpiIcon) {
-                        kpiIcon.className =
-                            'fa-solid fa-door-closed';
-                    }
-
-                    if (statCard) {
-                        statCard.classList.remove(
-                            's-active'
-                        );
-
-                        statCard.classList.add(
-                            's-cancelled'
-                        );
-                    }
+                if (statCard) {
+                    statCard.classList.toggle('s-active', dentistIsIn);
+                    statCard.classList.toggle('s-cancelled', !dentistIsIn);
                 }
 
                 closeStatusModal();
@@ -2437,18 +2298,13 @@ Medicine inventory records will appear here once items are available.
                 alert(error.message || "Something went wrong while updating clinic status.");
             } finally {
                 confirmBtn.disabled = false;
+
                 if (dentistIsIn) {
-                    confirmBtn.className =
-                        'ui-btn ui-btn-danger';
-
-                    confirmBtn.innerHTML =
-                        '<i class="fa-solid fa-door-closed"></i> Mark as OUT';
+                    confirmBtn.className = 'ui-btn ui-btn-danger';
+                    confirmBtn.textContent = 'Mark as OUT';
                 } else {
-                    confirmBtn.className =
-                        'ui-btn ui-btn-success';
-
-                    confirmBtn.innerHTML =
-                        '<i class="fa-solid fa-door-open"></i> Mark as IN';
+                    confirmBtn.className = 'ui-btn ui-btn-success';
+                    confirmBtn.textContent = 'Mark as IN';
                 }
             }
         }
@@ -2623,34 +2479,34 @@ data-tooltip-tone="view"
 ${
 canReschedule
 ? `
-                                                                                                                                                                                                                                                                                                        <button
-                                                                                                                                                                                                                                                                                                        type="button"
-                                                                                                                                                                                                                                                                                                        class="ui-action-btn ui-action-warning"
-                                                                                                                                                                                                                                                                                                        aria-label="Reschedule appointment"
-                                                                                                                                                                                                                                                                                                        data-tooltip="Reschedule appointment"
-                                                                                                                                                                                                                                                                                                        data-tooltip-tone="reschedule"
-                                                                                                                                                                                                                                                                                                        data-ui-click="action-9ac3a192f5ae" data-ui-click-arg-0="${window.uiAttribute(escJs(appt.id))}" data-ui-click-arg-1="${window.uiAttribute(safeName)}" data-ui-click-arg-2="${window.uiAttribute(safeSchedule)}" data-ui-click-arg-3="${window.uiAttribute(safeService)}" data-ui-click-arg-4="${window.uiAttribute(escJs(appt.rescheduleUrl || '#'))}"
-                                                                                                                                                                                                                                                                                                        >
-                                                                                                                                                                                                                                                                                                        <i class="fa-solid fa-rotate-right"></i>
-                                                                                                                                                                                                                                                                                                        </button>
-                                                                                                                                                                                                                                                                                                        `
+                                                                                                                                                                                                                                                                                                                                        <button
+                                                                                                                                                                                                                                                                                                                                        type="button"
+                                                                                                                                                                                                                                                                                                                                        class="ui-action-btn ui-action-warning"
+                                                                                                                                                                                                                                                                                                                                        aria-label="Reschedule appointment"
+                                                                                                                                                                                                                                                                                                                                        data-tooltip="Reschedule appointment"
+                                                                                                                                                                                                                                                                                                                                        data-tooltip-tone="reschedule"
+                                                                                                                                                                                                                                                                                                                                        data-ui-click="action-9ac3a192f5ae" data-ui-click-arg-0="${window.uiAttribute(escJs(appt.id))}" data-ui-click-arg-1="${window.uiAttribute(safeName)}" data-ui-click-arg-2="${window.uiAttribute(safeSchedule)}" data-ui-click-arg-3="${window.uiAttribute(safeService)}" data-ui-click-arg-4="${window.uiAttribute(escJs(appt.rescheduleUrl || '#'))}"
+                                                                                                                                                                                                                                                                                                                                        >
+                                                                                                                                                                                                                                                                                                                                        <i class="fa-solid fa-rotate-right"></i>
+                                                                                                                                                                                                                                                                                                                                        </button>
+                                                                                                                                                                                                                                                                                                                                        `
 : ''
 }
 
 ${
 canCancel
 ? `
-                                                                                                                                                                                                                                                                                                        <button
-                                                                                                                                                                                                                                                                                                        type="button"
-                                                                                                                                                                                                                                                                                                        class="ui-action-btn ui-action-delete"
-                                                                                                                                                                                                                                                                                                        aria-label="Cancel appointment"
-                                                                                                                                                                                                                                                                                                        data-tooltip="Cancel appointment"
-                                                                                                                                                                                                                                                                                                        data-tooltip-tone="cancel"
-                                                                                                                                                                                                                                                                                                        data-ui-click="action-74913bcfd525" data-ui-click-arg-0="${window.uiAttribute(escJs(appt.cancelUrl || '#'))}" data-ui-click-arg-1="${window.uiAttribute(safeName)}" data-ui-click-arg-2="${window.uiAttribute(safeSchedule)}"
-                                                                                                                                                                                                                                                                                                        >
-                                                                                                                                                                                                                                                                                                        <i class="fa-solid fa-ban"></i>
-                                                                                                                                                                                                                                                                                                        </button>
-                                                                                                                                                                                                                                                                                                        `
+                                                                                                                                                                                                                                                                                                                                        <button
+                                                                                                                                                                                                                                                                                                                                        type="button"
+                                                                                                                                                                                                                                                                                                                                        class="ui-action-btn ui-action-delete"
+                                                                                                                                                                                                                                                                                                                                        aria-label="Cancel appointment"
+                                                                                                                                                                                                                                                                                                                                        data-tooltip="Cancel appointment"
+                                                                                                                                                                                                                                                                                                                                        data-tooltip-tone="cancel"
+                                                                                                                                                                                                                                                                                                                                        data-ui-click="action-74913bcfd525" data-ui-click-arg-0="${window.uiAttribute(escJs(appt.cancelUrl || '#'))}" data-ui-click-arg-1="${window.uiAttribute(safeName)}" data-ui-click-arg-2="${window.uiAttribute(safeSchedule)}"
+                                                                                                                                                                                                                                                                                                                                        >
+                                                                                                                                                                                                                                                                                                                                        <i class="fa-solid fa-ban"></i>
+                                                                                                                                                                                                                                                                                                                                        </button>
+                                                                                                                                                                                                                                                                                                                                        `
 : ''
 }
 
@@ -2689,7 +2545,7 @@ dateStr
 
 <a
 href="{{ route('dentist.dentist.appointments') }}"
-class="card-link"
+class="ui-btn ui-btn-secondary ui-btn-sm"
 >
 View all
 </a>
@@ -2938,34 +2794,34 @@ data-tooltip-tone="view"
 ${
 canReschedule
 ? `
-                                                                                                                                                                                                                                                                                                        <button
-                                                                                                                                                                                                                                                                                                        type="button"
-                                                                                                                                                                                                                                                                                                        class="ui-action-btn ui-action-warning"
-                                                                                                                                                                                                                                                                                                        aria-label="Reschedule appointment"
-                                                                                                                                                                                                                                                                                                        data-tooltip="Reschedule appointment"
-                                                                                                                                                                                                                                                                                                        data-tooltip-tone="reschedule"
-                                                                                                                                                                                                                                                                                                        data-ui-click="action-c90ced68deff" data-ui-click-arg-0="${window.uiAttribute(escJs(appt.id))}" data-ui-click-arg-1="${window.uiAttribute(safeName)}" data-ui-click-arg-2="${window.uiAttribute(safeSchedule)}" data-ui-click-arg-3="${window.uiAttribute(safeService)}" data-ui-click-arg-4="${window.uiAttribute(escJs(appt.rescheduleUrl || '#'))}"
-                                                                                                                                                                                                                                                                                                        >
-                                                                                                                                                                                                                                                                                                        <i class="fa-solid fa-rotate-right"></i>
-                                                                                                                                                                                                                                                                                                        </button>
-                                                                                                                                                                                                                                                                                                        `
+                                                                                                                                                                                                                                                                                                                                        <button
+                                                                                                                                                                                                                                                                                                                                        type="button"
+                                                                                                                                                                                                                                                                                                                                        class="ui-action-btn ui-action-warning"
+                                                                                                                                                                                                                                                                                                                                        aria-label="Reschedule appointment"
+                                                                                                                                                                                                                                                                                                                                        data-tooltip="Reschedule appointment"
+                                                                                                                                                                                                                                                                                                                                        data-tooltip-tone="reschedule"
+                                                                                                                                                                                                                                                                                                                                        data-ui-click="action-c90ced68deff" data-ui-click-arg-0="${window.uiAttribute(escJs(appt.id))}" data-ui-click-arg-1="${window.uiAttribute(safeName)}" data-ui-click-arg-2="${window.uiAttribute(safeSchedule)}" data-ui-click-arg-3="${window.uiAttribute(safeService)}" data-ui-click-arg-4="${window.uiAttribute(escJs(appt.rescheduleUrl || '#'))}"
+                                                                                                                                                                                                                                                                                                                                        >
+                                                                                                                                                                                                                                                                                                                                        <i class="fa-solid fa-rotate-right"></i>
+                                                                                                                                                                                                                                                                                                                                        </button>
+                                                                                                                                                                                                                                                                                                                                        `
 : ''
 }
 
 ${
 canCancel
 ? `
-                                                                                                                                                                                                                                                                                                        <button
-                                                                                                                                                                                                                                                                                                        type="button"
-                                                                                                                                                                                                                                                                                                        class="ui-action-btn ui-action-delete"
-                                                                                                                                                                                                                                                                                                        aria-label="Cancel appointment"
-                                                                                                                                                                                                                                                                                                        data-tooltip="Cancel appointment"
-                                                                                                                                                                                                                                                                                                        data-tooltip-tone="cancel"
-                                                                                                                                                                                                                                                                                                        data-ui-click="action-69de2f9aeac1" data-ui-click-arg-0="${window.uiAttribute(escJs(appt.cancelUrl || '#'))}" data-ui-click-arg-1="${window.uiAttribute(safeName)}" data-ui-click-arg-2="${window.uiAttribute(safeSchedule)}"
-                                                                                                                                                                                                                                                                                                        >
-                                                                                                                                                                                                                                                                                                        <i class="fa-solid fa-ban"></i>
-                                                                                                                                                                                                                                                                                                        </button>
-                                                                                                                                                                                                                                                                                                        `
+                                                                                                                                                                                                                                                                                                                                        <button
+                                                                                                                                                                                                                                                                                                                                        type="button"
+                                                                                                                                                                                                                                                                                                                                        class="ui-action-btn ui-action-delete"
+                                                                                                                                                                                                                                                                                                                                        aria-label="Cancel appointment"
+                                                                                                                                                                                                                                                                                                                                        data-tooltip="Cancel appointment"
+                                                                                                                                                                                                                                                                                                                                        data-tooltip-tone="cancel"
+                                                                                                                                                                                                                                                                                                                                        data-ui-click="action-69de2f9aeac1" data-ui-click-arg-0="${window.uiAttribute(escJs(appt.cancelUrl || '#'))}" data-ui-click-arg-1="${window.uiAttribute(safeName)}" data-ui-click-arg-2="${window.uiAttribute(safeSchedule)}"
+                                                                                                                                                                                                                                                                                                                                        >
+                                                                                                                                                                                                                                                                                                                                        <i class="fa-solid fa-ban"></i>
+                                                                                                                                                                                                                                                                                                                                        </button>
+                                                                                                                                                                                                                                                                                                                                        `
 : ''
 }
 

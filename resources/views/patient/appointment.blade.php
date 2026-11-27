@@ -163,89 +163,48 @@
                             : 'In ' . $daysUntilRecommended . ' days');
             @endphp
             <section class="appt-section-reveal mb-5">
-                <div class="appt-summary-grid">
-                    <div class="appt-summary-card">
-                        <div class="appt-summary-content">
 
-                            <div class="appt-summary-icon">
-                                <i class="fa-regular fa-calendar-check"></i>
-                            </div>
+                <div class="stat-grid">
 
-                            <div class="appt-summary-copy">
-                                <p class="appt-summary-label">
-                                    Next Visit
-                                </p>
+                    <x-stat-card label="Next Visit" :value="$futureVisits->count()
+                        ? \Carbon\Carbon::parse($futureVisits->first()->appointment_date)->format('M d, Y')
+                        : 'Not scheduled yet'" tone="upcoming"
+                        value-class="stat-value-text whitespace-normal" />
 
-                                <h3 class="appt-summary-value">
-                                    {{ $futureVisits->count()
-                                        ? \Carbon\Carbon::parse($futureVisits->first()->appointment_date)->format('M d, Y')
-                                        : 'None' }}
-                                </h3>
-                            </div>
+                    <x-stat-card label="Total Visits" :value="$pastVisits->count()" tone="all" />
 
-                        </div>
-                    </div>
+                    <x-stat-card label="Last Visit" :value="$latestPastDate" tone="completed"
+                        value-class="stat-value-text whitespace-normal" />
 
-                    <div class="appt-summary-card">
-                        <div class="appt-summary-content">
-                            <div class="appt-summary-icon">
-                                <i class="fa-solid fa-tooth"></i>
-                            </div>
-                            <div class="appt-summary-copy">
-                                <p class="appt-summary-label">
-                                    Total Visits
-                                </p>
-                                <h3 class="appt-summary-value">
-                                    {{ $pastVisits->count() }}
-                                </h3>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="appt-summary-card">
-                        <div class="appt-summary-content">
-                            <div class="appt-summary-icon">
-                                <i class="fa-regular fa-clock"></i>
-                            </div>
-                            <div class="appt-summary-copy">
-                                <p class="appt-summary-label">
-                                    Last Visit
-                                </p>
-                                <h3 class="appt-summary-value">
-                                    {{ $latestPastDate }}
-                                </h3>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="appt-tip-card">
-
-                        <div class="appt-tip-content">
-
-                            <div class="appt-tip-icon">
-                                <i class="fa-solid fa-lightbulb"></i>
-                            </div>
-
-                            <div class="appt-tip-copy">
-                                <p class="appt-tip-title">
-                                    Dental Care Tip
-                                </p>
-
-                                <p class="appt-tip-text">
-                                    Regular check-ups are recommended every 6 months
-                                    to keep your oral health on track.
-                                </p>
-                            </div>
-
-                        </div>
-
-                        <x-button type="button" variant="secondary" size="sm" icon="fa-solid fa-calendar-plus"
-                            data-ui-click="action-9eb7d8dc0629">
-                            Schedule Check-Up
-                        </x-button>
-
-                    </div>
                 </div>
+
+                <div class="appt-tip-card">
+
+                    <div class="appt-tip-content">
+
+                        <div class="appt-tip-icon">
+                            <i class="fa-solid fa-lightbulb"></i>
+                        </div>
+
+                        <div class="appt-tip-copy">
+                            <p class="appt-tip-title">
+                                Dental Care Tip
+                            </p>
+
+                            <p class="appt-tip-text">
+                                Regular check-ups are recommended every 6 months
+                                to keep your oral health on track.
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <x-button type="button" variant="secondary" size="sm" data-ui-click="action-9eb7d8dc0629">
+                        Schedule Check-Up
+                    </x-button>
+
+                </div>
+
             </section>
 
             <section class="fade-up mb-6 sm:mb-8">
@@ -347,18 +306,15 @@
                 </div>
 
                 <div class="appt-quick-actions">
-                    <x-button href="{{ route('patient.book.appointment') }}" variant="secondary"
-                        icon="fa-solid fa-calendar-plus">
+                    <x-button href="{{ route('patient.book.appointment') }}" variant="secondary">
                         Rebook Appointment
                     </x-button>
 
-                    <x-button type="button" variant="secondary" icon="fa-solid fa-clock-rotate-left"
-                        data-ui-click="action-3581bd1ec7b5">
+                    <x-button type="button" variant="secondary" data-ui-click="action-3581bd1ec7b5">
                         View Past Visits
                     </x-button>
 
-                    <x-button type="button" variant="secondary" icon="fa-solid fa-calendar-days"
-                        data-ui-click="action-8d572863bc05">
+                    <x-button type="button" variant="secondary" data-ui-click="action-8d572863bc05">
                         Focus Calendar
                     </x-button>
                 </div>
@@ -520,12 +476,11 @@
                                     </div>
 
                                     <a href="{{ route('patient.book.appointment') }}" class="appt-recommended-btn">
-                                        <i class="fa-solid fa-calendar-plus"></i>
                                         Schedule Now
                                     </a>
 
                                     <button type="button" data-ui-click="action-8d572863bc05"
-                                        class="mt-2 w-full text-xs font-bold text-white/80 hover:text-white transition">
+                                        class="mt-2 w-full text-xs font-normal text-white/80 hover:text-white transition">
                                         Check available dates
                                     </button>
                                 </div>

@@ -52,7 +52,6 @@
             <button @if ($clearId) id="{{ $clearId }}" @endif type="button"
                 class="ui-btn ui-btn-secondary"
                 @if ($clearCallback) data-ui-click="{{ $clearCallback }}" @endif>
-                <i class="fa-regular fa-trash-can"></i>
                 <span>{{ $clearLabel }}</span>
             </button>
 

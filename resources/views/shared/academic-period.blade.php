@@ -135,16 +135,7 @@
             @if ($isDentistView)
                 <div class="dentist-hero mb-6">
                     <div class="dentist-hero-content">
-                        <div class="dentist-hero-icon">
-                            <i class="fa-solid fa-calendar-days"></i>
-                        </div>
-
                         <div class="min-w-0">
-                            <div class="dentist-hero-eyebrow">
-                                <i class="fa-solid fa-tooth"></i>
-                                Appointment Management
-                            </div>
-
                             <h2 class="dentist-hero-title">Academic Periods</h2>
                         </div>
                     </div>

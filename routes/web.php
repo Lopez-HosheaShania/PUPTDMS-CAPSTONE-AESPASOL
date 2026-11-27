@@ -43,6 +43,7 @@ use App\Http\Controllers\Security\SessionManagementController;
 use App\Models\Patient;
 use App\Models\Role;
 use App\Models\User;
+use App\Helpers\ClinicHours;
 use App\Services\StudentApiService;
 use App\Services\IdpHealthService;
 use Illuminate\Http\Request;
@@ -100,8 +101,14 @@ Route::get('/', fn() => redirect('/login'));
 
 // Patient Login
 Route::get('/login', function (IdpHealthService $idpHealthService) {
-    return view('auth.login', $idpHealthService->loginViewData());
+    return view('auth.login', array_merge(
+        $idpHealthService->loginViewData(),
+        [
+            'clinicHours' => ClinicHours::get(),
+        ]
+    ));
 })->name('login');
+
 Route::get('/backup-login', [BackupLoginController::class, 'show'])->name('backup.login');
 
 Route::get('/dashboard', function () {
@@ -829,8 +836,11 @@ Route::middleware(['role:patient'])->group(function () {
         ->middleware('permission:view_own_records')
         ->name('patient.record');
 
-    Route::get('/about-us', fn() => view('patient.about-us'))
-        ->name('patient.about.us');
+    Route::get('/about-us', function () {
+        return view('patient.about-us', [
+            'clinicHours' => ClinicHours::get(),
+        ]);
+    })->name('patient.about.us');
 
     // Clinic Schedule
     Route::get('/book-appointment/slots', [AppointmentController::class, 'slotsForDate'])

@@ -9,10 +9,6 @@
     <div class="booking-step-shell">
 
         <div class="booking-step-header">
-            <p class="booking-step-eyebrow">
-                Step 2 of 5
-            </p>
-
             <h2 class="booking-step-title">
                 {{ $title }}
             </h2>

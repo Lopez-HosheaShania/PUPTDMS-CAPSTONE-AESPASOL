@@ -70,7 +70,6 @@
                             <div class="step-content hidden">
                                 <div class="booking-step-shell">
                                     <div class="booking-step-header">
-                                        <p class="booking-step-eyebrow">Step 1 of 5</p>
                                         <h2 class="booking-step-title">Select Date &amp; Time</h2>
                                         <p class="booking-step-subtitle">
                                             Choose your preferred appointment date and available clinic time slot.
@@ -275,7 +274,6 @@
                             <div class="step-content hidden" id="step4">
                                 <div class="booking-step-shell">
                                     <div class="booking-step-header">
-                                        <p class="booking-step-eyebrow">Step 4 of 5</p>
                                         <h2 class="booking-step-title">Medical History</h2>
                                         <p class="booking-step-subtitle">
                                             Provide important medical information so the clinic can prepare safe and
@@ -301,7 +299,6 @@
                                 <div class="booking-step-shell">
                                     <div id="summarySection">
                                         <div class="booking-step-header">
-                                            <p class="booking-step-eyebrow">Step 5 of 5</p>
                                             <h2 class="booking-step-title">Review Your Information</h2>
                                             <p class="booking-step-subtitle">
                                                 Please review all the information you provided before proceeding to
@@ -315,7 +312,6 @@
 
                                     <div id="confirmationSection" class="hidden">
                                         <div class="booking-step-header">
-                                            <p class="booking-step-eyebrow">Step 5 of 5</p>
                                             <h2 class="booking-step-title">Final Confirmation</h2>
                                             <p class="booking-step-subtitle">
                                                 Confirm that the information is accurate and that you accept the clinic
@@ -2764,10 +2760,8 @@
                                                                         <div class="flex flex-wrap gap-2">
                                                                             <button
                                                                                 type="button"
-                                                                                class="ui-btn ui-btn-primary ui-btn-sm"
                                                                                 data-ui-click="action-9247f8a4a5d1"
                                                                             >
-                                                                                <i class="fa-solid fa-check"></i>
                                                                                 Save Changes
                                                                             </button>
 

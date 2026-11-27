@@ -37,11 +37,6 @@
                         <div class="step-content hidden">
                             <div class="booking-step-shell walkin-step1-layout" id="patientAccountSection">
                                 <div class="booking-step-header">
-                                    <p class="booking-step-eyebrow">
-                                        <i class="fa-solid fa-user-plus text-[11px] mr-1"></i>
-                                        Step 1 of 5
-                                    </p>
-
                                     <h2 class="booking-step-title">Patient account</h2>
 
                                     <p class="booking-step-subtitle">
@@ -52,16 +47,10 @@
 
                                 <div class="booking-step-body">
                                     <div class="booking-section-card" data-global-field data-walkin-patient-group>
-                                        <p class="booking-section-card-title">
-                                            <i class="fa-solid fa-user-magnifying-glass text-xs"></i>
-                                            Select or create patient
-                                            <span class="booking-section-card-title-line"></span>
-                                        </p>
-
                                         <div class="account-tabs">
                                             <button type="button" class="account-tab active" data-tab="existing">
                                                 <i class="fa-solid fa-database text-[13px]"></i>
-                                                Existing / Unified DB
+                                                Existing Patients
                                             </button>
 
                                             <button type="button" class="account-tab" data-tab="guest">
@@ -409,7 +398,6 @@
                                         <div class="selected-patient-box" id="selectedPatientBox" hidden>
 
                                             <span>
-                                                <i class="fa-solid fa-circle-check text-[11px] mr-1"></i>
                                                 Selected patient
                                             </span>
 
@@ -464,7 +452,6 @@
                         <div class="step-content hidden">
                             <div class="booking-step-shell">
                                 <div class="booking-step-header">
-                                    <p class="booking-step-eyebrow">Step 4 of 5</p>
                                     <h2 class="booking-step-title">Medical History</h2>
                                     <p class="booking-step-subtitle">
                                         Provide important medical information so the clinic can prepare safe and
@@ -489,7 +476,6 @@
                             <div class="booking-step-shell">
                                 <div id="summarySection">
                                     <div class="booking-step-header">
-                                        <p class="booking-step-eyebrow">Step 5 of 5</p>
                                         <h2 class="booking-step-title">Review Your Information</h2>
                                         <p class="booking-step-subtitle">
                                             Please review all the information you provided before proceeding to
@@ -503,7 +489,6 @@
 
                                 <div id="confirmationSection" class="hidden">
                                     <div class="booking-step-header">
-                                        <p class="booking-step-eyebrow">Step 5 of 5</p>
                                         <h2 class="booking-step-title">Final Confirmation</h2>
                                         <p class="booking-step-subtitle">
                                             Confirm that the information is accurate and that you accept the clinic
@@ -565,10 +550,6 @@
         <div class="booking-intro-checklist">
 
             <div class="booking-intro-item">
-                <div class="global-icon-box global-icon-box-sm">
-                    <i class="fa-solid fa-check"></i>
-                </div>
-
                 <p>
                     Select an existing patient or create a guest
                     record for today's walk-in visit.
@@ -576,10 +557,6 @@
             </div>
 
             <div class="booking-intro-item">
-                <div class="global-icon-box global-icon-box-sm">
-                    <i class="fa-solid fa-tooth"></i>
-                </div>
-
                 <p>
                     Choose the requested dental service and complete
                     the patient's dental and medical history.
@@ -587,10 +564,6 @@
             </div>
 
             <div class="booking-intro-item">
-                <div class="global-icon-box global-icon-box-sm">
-                    <i class="fa-solid fa-signature"></i>
-                </div>
-
                 <p>
                     Ask the patient to review the information and
                     provide a drawn signature.
@@ -598,10 +571,6 @@
             </div>
 
             <div class="booking-intro-item">
-                <div class="global-icon-box global-icon-box-sm">
-                    <i class="fa-solid fa-list-check"></i>
-                </div>
-
                 <p>
                     Verify the intake summary before starting the
                     dental procedure.
@@ -625,17 +594,15 @@
     </x-modal>
 
     <x-booking.confirmed-modal id="confirmModal" eyebrow="Walk-in Appointment" title="Appointment Confirmed"
-        subtitle="The walk-in intake has been saved successfully." header-icon="fa-check" section-icon="fa-stethoscope"
         section-eyebrow="Treatment Status" section-title="Ready to begin treatment"
-        section-message="The patient intake is complete and the dental procedure can now be started."
         detail-label="Intake Status" result-title="Recorded" message-title="Procedure details"
         message-id="confirmMessage">
         The walk-in appointment was recorded successfully.
 
         <x-slot:footer>
 
-            <x-button id="okBtn" type="button" variant="primary" icon="fa-solid fa-play">
-                Start Procedure
+            <x-button id="okBtn" type="button" variant="primary">
+                Proceed to Odontogram
             </x-button>
 
         </x-slot:footer>
@@ -3757,11 +3724,7 @@
 
             bookingWorkflow
                 ?.setNextButton({
-                    label: 'Review & Confirm',
-
-                    icon: 'fa-arrow-right',
-
-                    iconPosition: 'right',
+                    label: 'Confirm',
                 });
 
             summarySection
@@ -3815,10 +3778,6 @@
             bookingWorkflow
                 ?.setNextButton({
                     label: 'Start Procedure',
-
-                    icon: 'fa-play',
-
-                    iconPosition: 'left',
                 });
 
             confirmationSection
@@ -4482,8 +4441,6 @@
         </div>
 
         <div class="booking-signature-summary-status">
-            <i class="fa-solid fa-circle-check"></i>
-
             <span>
                 ${sigFile.name.startsWith(
                 'walk-in-signature-'
@@ -5082,10 +5039,6 @@ ${summaryCard(
             bookingWorkflow
                 ?.setNextButton({
                     label: 'Start Procedure',
-
-                    icon: 'fa-play',
-
-                    iconPosition: 'left',
                 });
         }
 
@@ -5374,15 +5327,6 @@ ${summaryCard(
                 </div>
             </div>
 
-        </div>
-
-        <div class="confirmed-modal-schedule-note">
-            <i class="fa-solid fa-circle-info"></i>
-
-            <span>
-                The walk-in intake has been saved.
-                Start the procedure when you are ready.
-            </span>
         </div>
     `;
                 }

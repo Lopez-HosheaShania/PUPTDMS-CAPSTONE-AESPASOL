@@ -368,9 +368,6 @@ fn($role) => strtolower($role->slug) === 'patient' || strtolower($role->name) ==
     <div class="ui-modal-card modal-lg modal-split-card">
         <div class="modal-hd">
             <div class="modal-heading">
-                <div class="modal-icon">
-                    <i class="fa-solid fa-user-pen"></i>
-                </div>
 
                 <div class="modal-copy">
                     <h3 class="modal-title">Edit User</h3>

@@ -24,16 +24,7 @@
 
             <section class="dentist-hero mb-5">
                 <div class="dentist-hero-content">
-                    <div class="dentist-hero-icon">
-                        <i class="fa-solid fa-chart-line"></i>
-                    </div>
-
                     <div class="min-w-0">
-                        <div class="dentist-hero-eyebrow">
-                            <i class="fa-solid fa-tooth"></i>
-                            Dental Services
-                        </div>
-
                         <h1 class="dentist-hero-title">Dental Services Record</h1>
                     </div>
                 </div>

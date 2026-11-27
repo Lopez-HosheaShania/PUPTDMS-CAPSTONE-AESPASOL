@@ -34,16 +34,7 @@
         @if ($isDentistView)
             <div class="dentist-hero mb-6">
                 <div class="dentist-hero-content">
-                    <div class="dentist-hero-icon">
-                        <i class="fa-solid fa-list-check"></i>
-                    </div>
-
                     <div class="min-w-0">
-                        <div class="dentist-hero-eyebrow">
-                            <i class="fa-solid fa-tooth"></i>
-                            Clinical Services
-                        </div>
-
                         <h2 class="dentist-hero-title">
                             Service Types
                         </h2>
@@ -170,7 +161,7 @@
                                     </div>
 
                                     <div class="flex justify-end">
-                                        <x-button type="submit" variant="primary" icon="fa-solid fa-floppy-disk">
+                                        <x-button type="submit" variant="primary">
                                             Save Service
                                         </x-button>
                                     </div>
@@ -181,7 +172,7 @@
                 @endif
                 <div class="min-w-0">
                     <div class="card">
-                        <x-card-header title="Existing Services" icon="fa-solid fa-list-check">
+                        <x-card-header title="Existing Services">
                             <x-slot:actions>
                                 <x-view-toggle id="serviceTypeViewToggle" class="service-type-view-toggle"
                                     storage-key="serviceTypeView" list-view="#serviceTypeListView"
@@ -215,10 +206,6 @@
 
                                             <td class="table-cell-main">
                                                 <div class="table-primary">
-                                                    <span class="service-table-icon" aria-hidden="true">
-                                                        <i class="fa-solid fa-tooth"></i>
-                                                    </span>
-
                                                     <span class="card-title">
                                                         {{ $service->name }}
                                                     </span>
@@ -382,10 +369,9 @@
             title="Delete Service Type" helper="This service type will be permanently removed." />
     @endif
 
-    <x-modal id="manageServiceModal" title="Manage Service Type" title-id="manageServiceTitle"
-        subtitle="Update service details and booking visibility" icon="fa-solid fa-pen" size="lg" theme="edit"
-        close-label="Close manage service modal" form-id="manageServiceForm" form-class="modal-card-form"
-        :close-attributes="[
+    <x-modal id="manageServiceModal" title="Manage Service Type" title-id="manageServiceTitle" icon="fa-solid fa-pen"
+        size="lg" theme="edit" close-label="Close manage service modal" form-id="manageServiceForm"
+        form-class="modal-card-form" :close-attributes="[
             'data-discard-close' => 'manageServiceModal',
         ]" :form-attributes="[
             'method' => 'POST',
@@ -555,11 +541,6 @@
             <div class="modal-profile-details modal-profile-details-single">
 
                 <div class="modal-profile-detail">
-
-                    <div class="modal-profile-detail-icon">
-                        <i class="fa-solid fa-hashtag"></i>
-                    </div>
-
                     <div>
                         <span class="modal-profile-label">
                             Service ID
@@ -579,25 +560,16 @@
         <div class="modal-form-section">
 
             <div class="modal-section-heading">
-
-                <div class="modal-section-icon">
-                    <i class="fa-solid fa-align-left"></i>
-                </div>
-
                 <div>
                     <h4>Description</h4>
-
                     <p>
                         Information shown for this service.
                     </p>
                 </div>
-
             </div>
 
             <div class="global-readonly-field">
-
                 <i class="fa-solid fa-file-lines"></i>
-
                 <span id="serviceDetailsDescription">
                     No description provided.
                 </span>
@@ -1027,10 +999,6 @@
 
                         <td class="table-cell-main">
                             <div class="table-primary">
-                                <span class="service-table-icon" aria-hidden="true">
-                                    <i class="fa-solid fa-tooth"></i>
-                                </span>
-
                                 <span class="card-title">
                                     ${escapeHtml(service.name)}
                                 </span>

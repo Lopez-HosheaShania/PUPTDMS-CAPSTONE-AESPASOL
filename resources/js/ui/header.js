@@ -5,21 +5,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const notifBtn = document.getElementById('notifBtn');
     const notifMenu = document.getElementById('notifMenu');
     const notifDropdown = document.getElementById('notifDropdown');
-    const notifTabs = notifMenu ? notifMenu.querySelectorAll('[data-notif-filter]') : [];
-    const notifFilterEmpty = notifMenu ? notifMenu.querySelector('.header-notif-filter-empty') : null;
-    const notifBadge = notifDropdown ? notifDropdown.querySelector('[data-notif-badge]') : null;
-    const unreadPill = notifMenu ? notifMenu.querySelector('[data-notif-unread-pill]') : null;
-    const totalPill = notifMenu ? notifMenu.querySelector('[data-notif-total-pill]') : null;
-    const markAllForm = notifMenu ? notifMenu.querySelector('[data-notif-mark-all-form]') : null;
-    const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
 
     const userBtn = document.getElementById('userBtn');
     const userMenu = document.getElementById('userMenu');
     const userDropdown = document.getElementById('userDropdown');
-
-    function getNotifItems() {
-        return notifMenu ? Array.from(notifMenu.querySelectorAll('[data-notif-item]')) : [];
-    }
 
     function setButtonState(button, isActive) {
         if (!button) return;
@@ -68,236 +57,23 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    function setNotifFilter(filter) {
-        if (!notifMenu) return;
-
-        notifTabs.forEach(function (button) {
-            const isActive = button.dataset.notifFilter === filter;
-            button.classList.toggle('is-active', isActive);
-            button.setAttribute('aria-selected', isActive ? 'true' : 'false');
-        });
-
-        let visibleCount = 0;
-
-        getNotifItems().forEach(function (item) {
-            const state = item.dataset.notifState || 'unread';
-            const isVisible = filter === 'all' || filter === state;
-
-            item.classList.toggle('hidden', !isVisible);
-
-            if (isVisible) {
-                visibleCount += 1;
-            }
-        });
-
-        if (notifFilterEmpty) {
-            notifFilterEmpty.hidden = getNotifItems().length === 0 || visibleCount > 0;
-        }
-    }
-
-    function getNotifCounts() {
-        let unread = 0;
-        let read = 0;
-
-        getNotifItems().forEach(function (item) {
-            if ((item.dataset.notifState || 'unread') === 'unread') {
-                unread += 1;
-            } else {
-                read += 1;
-            }
-        });
-
-        return {
-            unread,
-            read,
-            total: unread + read,
-        };
-    }
-
-    function updateNotifSummaryUi() {
-        const counts = getNotifCounts();
-
-        if (notifBadge) {
-            if (counts.unread > 0) {
-                notifBadge.textContent = counts.unread;
-                notifBadge.hidden = false;
-            } else {
-                notifBadge.hidden = true;
-            }
-        }
-
-        if (unreadPill) {
-            unreadPill.textContent = counts.unread + ' unread';
-        }
-
-        if (totalPill) {
-            totalPill.textContent = counts.total + ' total';
-        }
-
-        const allCount = notifMenu ? notifMenu.querySelector('[data-notif-tab-count="all"]') : null;
-        const unreadCount = notifMenu ? notifMenu.querySelector('[data-notif-tab-count="unread"]') : null;
-        const readCount = notifMenu ? notifMenu.querySelector('[data-notif-tab-count="read"]') : null;
-
-        if (allCount) allCount.textContent = counts.total;
-        if (unreadCount) unreadCount.textContent = counts.unread;
-        if (readCount) readCount.textContent = counts.read;
-
-        if (markAllForm) {
-            markAllForm.hidden = counts.unread === 0;
-        }
-
-        const activeFilterBtn = notifMenu ? notifMenu.querySelector('.header-notif-tab.is-active') : null;
-        const activeFilter = activeFilterBtn ? activeFilterBtn.dataset.notifFilter : 'all';
-        setNotifFilter(activeFilter || 'all');
-    }
-
-    function markItemAsRead(item) {
-        if (!item) return;
-
-        item.dataset.notifState = 'read';
-        item.classList.remove('is-unread');
-        item.classList.add('is-read');
-
-        const unreadDot = item.querySelector('.header-notif-unread-dot');
-        if (unreadDot) unreadDot.remove();
-
-        const markReadForm = item.querySelector('[data-notif-mark-read-form]');
-        if (markReadForm) markReadForm.remove();
-    }
-
-    async function submitNotifFormAjax(form) {
-        if (!form || !form.action) return false;
-
-        const formData = new FormData(form);
-        return submitNotifReadRequest(form.action, formData);
-    }
-
-    async function submitNotifReadRequest(url, body = null) {
-        if (!url) return false;
-
-        const headers = {
-            'X-Requested-With': 'XMLHttpRequest',
-            'Accept': 'application/json',
-        };
-
-        if (csrfTokenMeta && csrfTokenMeta.content) {
-            headers['X-CSRF-TOKEN'] = csrfTokenMeta.content;
-        }
-
-        const response = await fetch(url, {
-            method: 'POST',
-            credentials: 'same-origin',
-            headers,
-            body,
-        });
-
-        return response.ok;
-    }
-
-    function isPlainLeftClick(event) {
-        return event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
-    }
-
-    async function markItemAsReadBeforeOpen(link, event) {
-        const item = link.closest('[data-notif-item]');
-        const markReadUrl = item ? item.dataset.notifMarkReadUrl : null;
-
-        if (!item || !markReadUrl || (item.dataset.notifState || 'unread') !== 'unread') {
-            return;
-        }
-
-        if (!isPlainLeftClick(event)) {
-            return;
-        }
-
-        event.preventDefault();
-        event.stopPropagation();
-
-        const destination = link.getAttribute('href');
-
-        if (!destination) {
-            return;
-        }
-
-        try {
-            await submitNotifReadRequest(markReadUrl);
-            markItemAsRead(item);
-            updateNotifSummaryUi();
-        } catch (_err) {
-        } finally {
-            window.location.href = destination;
-        }
-    }
-
     if (notifBtn && notifMenu) {
         notifBtn.setAttribute('aria-expanded', 'false');
+
         notifBtn.addEventListener('click', function (e) {
             e.preventDefault();
             e.stopPropagation();
             e.stopImmediatePropagation();
+
             toggleMenu('notif');
+
+            if (notifMenu.classList.contains('show')) {
+                document.dispatchEvent(
+                    new CustomEvent('notifications:opened')
+                );
+            }
+
         }, true);
-
-        notifTabs.forEach(function (button) {
-            button.addEventListener('click', function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-                setNotifFilter(button.dataset.notifFilter || 'all');
-            });
-        });
-
-        notifMenu.addEventListener('submit', async function (e) {
-            const form = e.target;
-
-            if (!form.matches('[data-notif-mark-read-form], [data-notif-mark-all-form]')) {
-                return;
-            }
-
-            e.preventDefault();
-            e.stopPropagation();
-
-            const submitButton = form.querySelector('button[type="submit"]');
-            if (submitButton) {
-                submitButton.disabled = true;
-            }
-
-            try {
-                const success = await submitNotifFormAjax(form);
-
-                if (!success) {
-                    form.submit();
-                    return;
-                }
-
-                if (form.matches('[data-notif-mark-read-form]')) {
-                    markItemAsRead(form.closest('[data-notif-item]'));
-                } else if (form.matches('[data-notif-mark-all-form]')) {
-                    getNotifItems().forEach(function (item) {
-                        markItemAsRead(item);
-                    });
-                }
-
-                updateNotifSummaryUi();
-            } catch (_err) {
-                form.submit();
-            } finally {
-                if (submitButton) {
-                    submitButton.disabled = false;
-                }
-            }
-        });
-        notifMenu.addEventListener('click', function (e) {
-            const openLink = e.target.closest('[data-notif-open-link]');
-
-            if (!openLink || !notifMenu.contains(openLink)) {
-                return;
-            }
-
-            markItemAsReadBeforeOpen(openLink, e);
-        });
-
-        setNotifFilter('all');
-        updateNotifSummaryUi();
     }
 
     if (userBtn && userMenu) {

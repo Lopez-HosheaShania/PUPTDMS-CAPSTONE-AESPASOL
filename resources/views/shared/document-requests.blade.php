@@ -169,15 +169,7 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
             @if ($isDentist)
             <div class="dentist-hero">
                 <div class="dentist-hero-content">
-                    <div class="dentist-hero-icon">
-                        <i class="fa-solid fa-file-medical"></i>
-                    </div>
                     <div class="min-w-0">
-                        <div class="dentist-hero-eyebrow">
-                            <i class="fa-solid fa-tooth"></i>
-                            Document Management
-                        </div>
-
                         <h2 class="dentist-hero-title">
                             Document Requests
                         </h2>
@@ -255,7 +247,7 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
                     </table>
                 </div>
 
-                <div id="requestResponsiveListContainer" class="docreq-responsive-list" aria-live="polite"></div>
+                <div id="requestResponsiveListContainer" class="docreq-responsive-list table-list-view" aria-live="polite"></div>
             </div>
 
             <div id="requestGridView" class="table-grid-view" hidden>
@@ -403,10 +395,6 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
 
         <div class="modal-bd">
             <div class="global-info-profile">
-                <div class="global-info-profile-icon">
-                    <i class="fa-solid fa-user"></i>
-                </div>
-
                 <div class="global-info-profile-copy">
                     <span class="global-info-label">Patient</span>
 
@@ -418,10 +406,6 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
 
             <div class="global-info-grid global-info-grid-2">
                 <div class="global-info-item">
-                    <div class="global-info-icon">
-                        <i class="fa-regular fa-calendar"></i>
-                    </div>
-
                     <div class="global-info-copy">
                         <span class="global-info-label">Date &amp; Time</span>
                         <strong id="approveRequestDate" class="global-info-value">—</strong>
@@ -430,10 +414,6 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
                 </div>
 
                 <div class="global-info-item">
-                    <div class="global-info-icon">
-                        <i class="fa-regular fa-file-lines"></i>
-                    </div>
-
                     <div class="global-info-copy">
                         <span class="global-info-label">Document</span>
                         <strong id="approveRequestDocument" class="global-info-value">—</strong>
@@ -441,26 +421,10 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
                 </div>
 
                 <div class="global-info-item global-info-item-wide">
-                    <div class="global-info-icon">
-                        <i class="fa-solid fa-message"></i>
-                    </div>
-
                     <div class="global-info-copy">
                         <span class="global-info-label">Purpose</span>
                         <strong id="approveRequestPurpose" class="global-info-value">—</strong>
                     </div>
-                </div>
-            </div>
-
-            <div class="global-confirm-alert">
-                <i class="fa-solid fa-circle-info"></i>
-
-                <div>
-                    <p>Confirm this document request?</p>
-                    <span>
-                        The request will be marked as approved and queued
-                        for processing.
-                    </span>
                 </div>
             </div>
         </div>
@@ -470,7 +434,7 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
                 Cancel
             </x-button>
 
-            <x-button id="approveConfirmBtn" type="button" variant="success" icon="fa-solid fa-check">
+            <x-button id="approveConfirmBtn" type="button" variant="success">
                 Confirm Approval
             </x-button>
         </div>
@@ -508,9 +472,6 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
 
             <div class="modal-bd">
                 <div class="global-info-profile">
-                    <div class="global-info-profile-icon">
-                        <i class="fa-solid fa-user"></i>
-                    </div>
 
                     <div class="global-info-profile-copy">
                         <span class="global-info-label">Patient</span>
@@ -523,9 +484,6 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
 
                 <div class="global-info-grid global-info-grid-2">
                     <div class="global-info-item">
-                        <div class="global-info-icon">
-                            <i class="fa-regular fa-calendar"></i>
-                        </div>
 
                         <div class="global-info-copy">
                             <span class="global-info-label">Date &amp; Time</span>
@@ -535,9 +493,6 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
                     </div>
 
                     <div class="global-info-item">
-                        <div class="global-info-icon">
-                            <i class="fa-regular fa-file-lines"></i>
-                        </div>
 
                         <div class="global-info-copy">
                             <span class="global-info-label">Document</span>
@@ -545,10 +500,7 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
                         </div>
                     </div>
 
-                    <div class="global-info-item global-info-item-wide">
-                        <div class="global-info-icon">
-                            <i class="fa-solid fa-message"></i>
-                        </div>
+                    <div class="global-info-item global-info-item-wide">     
 
                         <div class="global-info-copy">
                             <span class="global-info-label">Purpose</span>
@@ -561,7 +513,7 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
                     <div class="global-label-row">
                         <label class="global-form-label" for="rejectNotes">
                             Reason for rejection
-                            <span>(optional)</span>
+                            <span class="field-optional">(Optional)</span>
                         </label>
 
                         <div id="rejectNotesCharCounter" class="char-counter">
@@ -569,23 +521,39 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
                         </div>
                     </div>
 
-                    <div class="global-textarea-field" data-clearable-field data-voice-field>
-                        <textarea id="rejectNotes" name="reason" class="form-input-custom global-form-textarea" rows="4"
-                            maxlength="150" data-char-limit="150" data-char-counter="#rejectNotesCharCounter"
-                            data-field-label="Reason for rejection" data-clearable-input
-                            placeholder="Provide a clear reason for rejecting the request…"></textarea>
+                    <div class="global-voice-row is-textarea">
+                        <div class="global-textarea-field global-voice-control"
+                            data-clearable-field data-voice-field>
 
-                        <button type="button" id="rejectNotesClearBtn"
-                            class="search-clear field-clear-btn field-clear-btn--textarea" data-field-clear
-                            aria-label="Clear rejection reason" title="Clear rejection reason">
+                            <textarea
+                                id="rejectNotes"
+                                name="reason"
+                                class="form-input-custom global-form-textarea"
+                                rows="4"
+                                maxlength="150"
+                                data-char-limit="150"
+                                data-char-counter="#rejectNotesCharCounter"
+                                data-field-label="Reason for rejection"
+                                data-clearable-input
+                                placeholder="Provide a clear reason for rejecting the request…"></textarea>
 
-                            <i class="fa-solid fa-xmark"></i>
-                        </button>
-                    </div>
+                            <button
+                                type="button"
+                                id="rejectNotesClearBtn"
+                                class="search-clear field-clear-btn field-clear-btn--textarea"
+                                data-field-clear
+                                aria-label="Clear rejection reason"
+                                title="Clear rejection reason">
 
-                    <div class="global-textarea-tools">
-                        <x-voice-input target="#rejectNotes" status-id="rejectNotesVoiceStatus"
-                            label="Voice input for rejection reason" title="Voice input" />
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+
+                        <x-voice-input
+                            target="#rejectNotes"
+                            status-id="rejectNotesVoiceStatus"
+                            label="Voice input for rejection reason"
+                            title="Voice input" />
                     </div>
 
                     <div class="global-field-error" data-error-for="rejectNotes" aria-hidden="true">
@@ -598,7 +566,7 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
                     Cancel
                 </x-button>
 
-                <x-button id="rejectConfirmBtn" type="submit" variant="danger" icon="fa-solid fa-ban">
+                <x-button id="rejectConfirmBtn" type="submit" variant="danger">
                     Confirm Rejection
                 </x-button>
             </div>
@@ -1026,15 +994,6 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
                     class="
                         skeleton-block
                         docreq-skeleton-table-document
-                    ">
-                </span>
-            </td>
-
-            <td>
-                <span
-                    class="
-                        skeleton-block
-                        docreq-skeleton-table-purpose
                     ">
                 </span>
             </td>
@@ -1780,8 +1739,8 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
                         </strong>
 
                         <div>
-                            <span class="global-info-pill">
-                                <i class="fa-regular fa-id-card"></i>
+                            <span class="global-info-subvalue">
+                                
                                 ${identifier}
                             </span>
                         </div>
@@ -1790,30 +1749,23 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
             </td>
 
             <td class="table-cell-main">
-                <div class="table-date">
-                    <i class="fa-regular fa-calendar"></i>
-                    ${esc(r.request_date)}
-                </div>
-
-                <div class="table-date">
-                    <i class="fa-regular fa-clock"></i>
-                    ${esc(r.request_time)}
-                </div>
+                <span class="global-info-copy">
+                    <strong class="global-info-value">${esc(r.request_date)}</strong>
+                    <span class="global-info-subvalue">${esc(r.request_time)}</span>
+                </span>
             </td>
 
             <td class="table-cell-main">
-                <strong>
-                    ${esc(r.document_type)}
-                </strong>
+                <span class="global-info-value">${esc(r.document_type)}</span>
             </td>
 
             <td class="table-cell-main">
-                ${esc(r.purpose)}
+                <span class="global-info-value">${esc(r.purpose)}</span>
             </td>
 
             <td>
-                <span class="status-badge ${badgeCls}">
-                    ${statusLabel}
+                <span class="status-pill ${badgeCls}">
+                    <span class="status-dot" aria-hidden="true"></span>${statusLabel}
                 </span>
             </td>
 
@@ -1825,234 +1777,94 @@ is_object($requests ?? null) && method_exists($requests, 'lastPage') ? $requests
     }
 
     function buildResponsiveListRecord(r) {
-        const badgeCls =
-            getStatusBadgeClass(r.status);
-
-        const statusLabel =
-            getStatusLabel(r.status);
-
-        const displayName =
-            getPatientDisplayName(
-                r.patient_name
-            );
-
-        const avatarHtml =
-            buildPatientAvatar(
-                r,
-                'sm'
-            );
-
-        const identifier =
-            r.sub_label
-                ? esc(r.sub_label)
-                : 'No ID set';
-
-        const isPending =
-            normalizeDocreqStatus(r.status) === 'pending';
+        const badgeCls = getStatusBadgeClass(r.status);
+        const statusLabel = getStatusLabel(r.status);
+        const displayName = getPatientDisplayName(r.patient_name);
+        const avatarHtml = buildPatientAvatar(r, 'sm');
+        const identifier = r.sub_label ? esc(r.sub_label) : 'No ID set';
+        const isPending = normalizeDocreqStatus(r.status) === 'pending';
 
         return `
-        <article
-            class="docreq-responsive-record"
+        <article class="table-record-card"
             id="row-m-${r.id}"
-            data-ui-click="action-3d5d881f4339" data-ui-click-arg-0="${window.uiAttribute(r.id)}"
-        >
-            <div class="docreq-responsive-record-head">
-                <div class="table-primary docreq-responsive-patient">
-                    ${avatarHtml}
-
-                    <div class="docreq-responsive-patient-copy">
-                        <strong data-patient-name>
-                            ${esc(displayName)}
-                        </strong>
-
-                        <span class="global-info-pill docreq-responsive-identifier">
-                            <i class="fa-regular fa-id-card"></i>
-                            ${identifier}
+            data-ui-click="action-3d5d881f4339" data-ui-click-arg-0="${window.uiAttribute(r.id)}">
+            <div class="table-record-card-layout">
+                <div class="table-record-content">
+                    <div class="table-record-header">
+                        <div class="table-primary">
+                            ${avatarHtml}
+                            <div class="global-info-copy">
+                                <strong class="table-record-title" data-patient-name>${esc(displayName)}</strong>
+                                <span class="global-info-subvalue">${identifier}</span>
+                            </div>
+                        </div>
+                        <span class="status-pill ${badgeCls}">
+                            <span class="status-dot" aria-hidden="true"></span>${statusLabel}
                         </span>
                     </div>
-                </div>
-
-                <span class="status-badge ${badgeCls}">
-                    ${statusLabel}
-                </span>
-            </div>
-
-            <div class="docreq-responsive-meta">
-                <div class="docreq-responsive-field">
-                    <span class="table-record-label">Document</span>
-                    <span class="table-record-value">
-                        ${esc(r.document_type)}
-                    </span>
-                </div>
-
-                <div class="docreq-responsive-field">
-                    <span class="table-record-label">Date Requested</span>
-                    <span class="table-record-value">
-                        <span class="table-date">
-                            <i class="fa-regular fa-calendar"></i>
-                            ${esc(r.request_date)}
-                        </span>
-                    </span>
-                </div>
-
-                <div class="docreq-responsive-field">
-                    <span class="table-record-label">Time</span>
-                    <span class="table-record-value">
-                        <span class="table-date">
-                            <i class="fa-regular fa-clock"></i>
-                            ${esc(r.request_time)}
-                        </span>
-                    </span>
-                </div>
-
-                <div class="docreq-responsive-field docreq-responsive-purpose">
-                    <span class="table-record-label">Purpose</span>
-                    <span class="table-record-value">
-                        ${esc(r.purpose)}
-                    </span>
-                </div>
-            </div>
-
-            ${isPending
-                ? `
-                    <div class="docreq-responsive-actions">
-                        ${buildRequestActions(r)}
+                    <div class="table-record-meta">
+                        <div class="table-record-row">
+                            <span class="table-record-value">
+                                <strong class="global-info-value">${esc(r.request_date)} · ${esc(r.request_time)}</strong>
+                            </span>
+                        </div>
+                        <div class="table-record-row">
+                            <span class="table-record-value">${esc(r.document_type)}</span>
+                        </div>
+                        <div class="table-record-row">
+                            <span class="table-record-label">Purpose</span>
+                            <span class="table-record-value">${esc(r.purpose)}</span>
+                        </div>
                     </div>
-                `
-                : ''
-            }
-        </article>
-    `;
+                </div>
+                ${isPending ? `<div class="table-record-actions">${buildRequestActions(r)}</div>` : ''}
+            </div>
+        </article>`;
     }
 
     function buildGridCard(r) {
-        const badgeCls =
-            getStatusBadgeClass(r.status);
-
-        const statusLabel =
-            getStatusLabel(r.status);
-
-        const displayName =
-            getPatientDisplayName(
-                r.patient_name
-            );
-
-        const avatarHtml =
-            buildPatientAvatar(
-                r,
-                'sm'
-            );
-
-        const identifier =
-            r.sub_label
-                ? esc(r.sub_label)
-                : 'No ID set';
-
-        const isPending =
-            normalizeDocreqStatus(r.status) === 'pending';
+        const badgeCls = getStatusBadgeClass(r.status);
+        const statusLabel = getStatusLabel(r.status);
+        const displayName = getPatientDisplayName(r.patient_name);
+        const avatarHtml = buildPatientAvatar(r, 'sm');
+        const identifier = r.sub_label ? esc(r.sub_label) : 'No ID set';
+        const isPending = normalizeDocreqStatus(r.status) === 'pending';
 
         return `
-        <article
-            class="table-record-card docreq-grid-card"
+        <article class="table-record-card"
             id="row-g-${r.id}"
-            data-ui-click="action-88c34ac00542" data-ui-click-arg-0="${window.uiAttribute(r.id)}"
-        >
+            data-ui-click="action-88c34ac00542" data-ui-click-arg-0="${window.uiAttribute(r.id)}">
             <div class="table-record-card-layout">
-
                 <div class="table-record-content">
-
-                    <div class="table-record-header docreq-grid-header">
-
-                        <div class="table-primary docreq-grid-patient">
+                    <div class="table-record-header">
+                        <div class="table-primary">
                             ${avatarHtml}
-
-                            <div class="docreq-grid-patient-copy">
-                                <div
-                                    class="table-record-title"
-                                    data-patient-name
-                                >
-                                    ${esc(displayName)}
-                                </div>
-
-                                <span class="global-info-pill docreq-grid-identifier">
-                                    <i class="fa-regular fa-id-card"></i>
-                                    ${identifier}
-                                </span>
+                            <div class="global-info-copy">
+                                <strong class="table-record-title" data-patient-name>${esc(displayName)}</strong>
+                                <span class="global-info-subvalue">${identifier}</span>
                             </div>
                         </div>
-
-                        <span class="status-badge ${badgeCls}">
-                            ${statusLabel}
+                        <span class="status-pill ${badgeCls}">
+                            <span class="status-dot" aria-hidden="true"></span>${statusLabel}
                         </span>
-
                     </div>
-
-                    <div class="table-record-meta docreq-grid-meta">
-
+                    <div class="table-record-meta">
                         <div class="table-record-row">
-                            <span class="table-record-label">
-                                Document
-                            </span>
-
                             <span class="table-record-value">
-                                ${esc(r.document_type)}
+                                <strong class="global-info-value">${esc(r.request_date)} · ${esc(r.request_time)}</strong>
                             </span>
                         </div>
-
                         <div class="table-record-row">
-                            <span class="table-record-label">
-                                Purpose
-                            </span>
-
-                            <span class="table-record-value">
-                                ${esc(r.purpose)}
-                            </span>
+                            <span class="table-record-value">${esc(r.document_type)}</span>
                         </div>
-
-                        <div class="docreq-grid-datetime">
-                            <div class="table-record-row docreq-grid-date-field">
-                                <span class="table-record-label">
-                                    Date Requested
-                                </span>
-
-                                <span class="table-record-value">
-                                    <span class="table-date">
-                                        <i class="fa-regular fa-calendar"></i>
-                                        ${esc(r.request_date)}
-                                    </span>
-                                </span>
-                            </div>
-
-                            <div class="table-record-row docreq-grid-time-field">
-                                <span class="table-record-label">
-                                    Time
-                                </span>
-
-                                <span class="table-record-value">
-                                    <span class="table-date">
-                                        <i class="fa-regular fa-clock"></i>
-                                        ${esc(r.request_time)}
-                                    </span>
-                                </span>
-                            </div>
+                        <div class="table-record-row">
+                            <span class="table-record-value">${esc(r.purpose)}</span>
                         </div>
-
                     </div>
-
                 </div>
-
-                ${isPending
-                ? `
-                        <div class="table-record-actions docreq-grid-actions">
-                            ${buildRequestActions(r)}
-                        </div>
-                    `
-                : ''
-            }
-
+                ${isPending ? `<div class="table-record-actions">${buildRequestActions(r)}</div>` : ''}
             </div>
-        </article>
-    `;
+        </article>`;
     }
 
     function renderDocreqEmptyState() {

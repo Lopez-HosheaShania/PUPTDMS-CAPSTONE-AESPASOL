@@ -453,9 +453,9 @@ progress.progress-bar::-moz-progress-bar {
 }
 
 .ui-btn-secondary {
-    background: var(--color-white);
-    color: var(--text-2);
-    border: 1px solid var(--gray-300);
+    background: var(--card);
+    color: var(--text-1);
+    border: 1px solid var(--border);
     font-weight: 700;
 }
 
@@ -467,7 +467,6 @@ progress.progress-bar::-moz-progress-bar {
     background: var(--alpha-white-10);
     color: var(--color-white);
     border: 1px solid var(--alpha-white-30);
-    box-shadow: none;
 }
 
 .ui-btn-ghost-light:hover {
@@ -493,7 +492,6 @@ progress.progress-bar::-moz-progress-bar {
     background: var(--blue-600);
     color: var(--color-white);
     border: 1px solid var(--blue-600);
-    box-shadow: 0 8px 18px var(--alpha-blue-600-22);
 }
 
 .ui-btn-edit:hover {
@@ -506,7 +504,6 @@ progress.progress-bar::-moz-progress-bar {
     background: var(--violet-600);
     color: var(--color-white);
     border: 1px solid var(--violet-600);
-    box-shadow: 0 8px 18px var(--alpha-violet-600-22);
 }
 
 .ui-btn-reset-password:hover {
@@ -519,7 +516,6 @@ progress.progress-bar::-moz-progress-bar {
     background: var(--emerald-600);
     color: var(--color-white);
     border: 1px solid var(--emerald-600);
-    box-shadow: 0 8px 18px var(--alpha-emerald-600-22);
 }
 
 .ui-btn-success:hover {
@@ -1211,6 +1207,33 @@ progress.progress-bar::-moz-progress-bar {
     flex: 0 1 auto;
 }
 
+.status-pill:has(> .pill-dot),
+.status-pill:has(> .status-dot) {
+    min-height: 24px;
+    padding: 2px 0;
+    gap: 7px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--text-1);
+    font-size: 11px;
+    font-weight: 650;
+    letter-spacing: 0;
+    line-height: 1.25;
+    white-space: normal;
+    text-align: left;
+}
+
+.status-pill>.pill-dot,
+.status-pill>.status-dot {
+    width: 8px;
+    height: 8px;
+    min-width: 8px;
+    min-height: 8px;
+    border-radius: 3px;
+    background: var(--status-solid, currentColor);
+}
+
 .status-badge::before {
     content: "";
 }
@@ -1574,7 +1597,6 @@ progress.progress-bar::-moz-progress-bar {
     padding: 0 var(--status-pill-padding-x);
 
     border-radius: 999px;
-    border: 1px solid var(--status-border, var(--status-default-border));
 
     background: var(--status-bg, var(--status-default-bg));
     color: var(--status-text, var(--status-default-text));
@@ -1592,7 +1614,6 @@ progress.progress-bar::-moz-progress-bar {
 .urgency-today {
     --status-bg: var(--status-today-bg);
     --status-text: var(--status-today-text);
-    --status-border: var(--status-today-border);
     --status-solid: var(--status-today-solid);
     --status-soft: var(--status-today-soft);
 }
@@ -1600,7 +1621,6 @@ progress.progress-bar::-moz-progress-bar {
 .urgency-tomorrow {
     --status-bg: var(--status-upcoming-bg);
     --status-text: var(--status-upcoming-text);
-    --status-border: var(--status-upcoming-border);
     --status-solid: var(--status-upcoming-solid);
     --status-soft: var(--status-upcoming-soft);
 }
@@ -1608,7 +1628,6 @@ progress.progress-bar::-moz-progress-bar {
 .urgency-upcoming {
     --status-bg: var(--status-upcoming-bg);
     --status-text: var(--status-upcoming-text);
-    --status-border: var(--status-upcoming-border);
     --status-solid: var(--status-upcoming-solid);
     --status-soft: var(--status-upcoming-soft);
 }
@@ -1616,7 +1635,6 @@ progress.progress-bar::-moz-progress-bar {
 .urgency-past {
     --status-bg: var(--status-default-bg);
     --status-text: var(--status-default-text);
-    --status-border: var(--status-default-border);
     --status-solid: var(--status-default-solid);
     --status-soft: var(--status-default-soft);
 }
@@ -1926,29 +1944,13 @@ progress.progress-bar::-moz-progress-bar {
     border: 1px solid var(--border);
 }
 
-[data-theme="dark"] .ui-btn-secondary,
-.dark .ui-btn-secondary {
-    background: var(--alpha-white-8);
-    border-color: var(--alpha-white-14);
-    color: var(--rose-white);
-    box-shadow:
-        inset 0 1px 0 var(--alpha-white-8),
-        0 10px 22px var(--alpha-black-22);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-}
-
 [data-theme="dark"] .ui-btn-secondary:hover,
 .dark .ui-btn-secondary:hover {
     background: var(--alpha-white-12);
     border-color: var(--alpha-red-300-26);
     color: var(--color-white);
     transform: translateY(-1px);
-    box-shadow:
-        inset 0 1px 0 var(--alpha-white-10),
-        0 14px 28px var(--alpha-black-30);
 }
-
 
 [data-theme="dark"] .ui-icon-btn.edit,
 .dark .ui-icon-btn.edit {
@@ -2140,7 +2142,7 @@ progress.progress-bar::-moz-progress-bar {
     border: 1px solid var(--border);
     border-radius: 15px;
 
-    background: var(--surface);
+    background: var(--card);
 
     transition:
         border-color .18s ease,
@@ -2209,8 +2211,8 @@ progress.progress-bar::-moz-progress-bar {
     display: block;
 
     color: var(--text-3);
-    font-size: 9.5px;
-    font-weight: 900;
+    font-size: .65rem;
+    font-weight: 800;
     line-height: 1.1;
 
     letter-spacing: .08em;
@@ -2221,7 +2223,7 @@ progress.progress-bar::-moz-progress-bar {
     display: block;
     margin-top: 4px;
     color: var(--text-2);
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
     line-height: 1.3;
     overflow-wrap: anywhere;
@@ -2251,7 +2253,7 @@ progress.progress-bar::-moz-progress-bar {
     border: 1px solid var(--alpha-crimson-12);
     border-radius: 16px;
 
-    background: var(--alpha-crimson-4_5);
+    background: var(--card);
 }
 
 .global-info-profile-icon {
@@ -2296,7 +2298,7 @@ progress.progress-bar::-moz-progress-bar {
 
     color: var(--text-1);
     font-size: 14px;
-    font-weight: 900;
+    font-weight: 800;
     line-height: 1.3;
 
     overflow: hidden;
@@ -3084,8 +3086,6 @@ progress.progress-bar::-moz-progress-bar {
             transparent);
 }
 
-[data-theme="dark"] .global-info-item,
-.dark .global-info-item,
 [data-theme="dark"] .global-info-pill,
 .dark .global-info-pill {
     background: var(--surface);
@@ -3099,9 +3099,7 @@ progress.progress-bar::-moz-progress-bar {
 }
 
 [data-theme="dark"] .global-info-value,
-[data-theme="dark"] .global-info-profile-name,
-.dark .global-info-value,
-.dark .global-info-profile-name {
+.dark .global-info-value {
     color: var(--text-1);
 }
 
@@ -3626,15 +3624,15 @@ progress.progress-bar::-moz-progress-bar {
 
 @media (min-width: 768px) and (max-width: 1180px) {
     .ui-action-group {
-        gap: 5px;
+        gap: 4px;
     }
 
     .ui-action-btn {
-        --ui-action-size: clamp(34px, 4vw, 36px);
+        --ui-action-size: 28px;
     }
 
     .ui-action-btn i {
-        font-size: 11px;
+        font-size: 10px;
     }
 
     .mobile-appt-card {

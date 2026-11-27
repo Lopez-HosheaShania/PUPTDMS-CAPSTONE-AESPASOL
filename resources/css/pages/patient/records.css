@@ -8,28 +8,6 @@
     box-shadow: 0 12px 36px rgba(0, 0, 0, 0.06);
 }
 
-.records-section-title {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 1.5rem;
-}
-
-.records-section-title span {
-    font-size: 0.72rem;
-    font-weight: 900;
-    letter-spacing: .14em;
-    text-transform: uppercase;
-    color: #8B0000;
-    white-space: nowrap;
-}
-
-.records-section-title div {
-    flex: 1;
-    height: 1px;
-    background: rgba(139, 0, 0, 0.1);
-}
-
 .rec-row {
     display: flex;
     align-items: stretch;

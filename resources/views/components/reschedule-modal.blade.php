@@ -5,11 +5,6 @@
         <div class="modal-hd">
 
             <div class="modal-heading">
-
-                <div class="modal-icon">
-                    <i class="fa-regular fa-calendar-check"></i>
-                </div>
-
                 <div class="modal-copy">
 
                     <h2 id="rescheduleModalTitle" class="modal-title">
@@ -44,9 +39,6 @@
             <div class="modal-bd modal-scroll-body">
                 <div class="modal-profile-card">
                     <div class="modal-profile-main">
-                        <div class="modal-profile-avatar">
-                            <i class="fa-solid fa-user"></i>
-                        </div>
 
                         <div class="modal-profile-main-copy">
                             <span class="modal-profile-eyebrow">
@@ -61,9 +53,6 @@
 
                     <div class="modal-profile-details">
                         <div class="modal-profile-detail">
-                            <span class="modal-profile-detail-icon">
-                                <i class="fa-regular fa-clock"></i>
-                            </span>
 
                             <div>
                                 <span class="modal-profile-label">
@@ -77,10 +66,6 @@
                         </div>
 
                         <div class="modal-profile-detail">
-                            <span class="modal-profile-detail-icon">
-                                <i class="fa-solid fa-tooth"></i>
-                            </span>
-
                             <div>
                                 <span class="modal-profile-label">
                                     Service Type
@@ -94,20 +79,10 @@
                     </div>
                 </div>
 
-                <div class="modal-section-heading">
-                    <span class="modal-section-icon">
-                        <i class="fa-regular fa-calendar"></i>
-                    </span>
-
-                    <div>
-                        <h4>New Date &amp; Time</h4>
-                    </div>
-                </div>
-
                 <div class="modal-form-grid-2 mb-2 sm:mb-3">
 
-                    <div class="cal-wrap modal-calendar-panel calendar-shell-no-card" data-global-field
-                        data-global-linked-input="#new_appointment_date" data-global-error-key="reschedule-date">
+                    <div data-global-field data-global-linked-input="#new_appointment_date"
+                        data-global-error-key="reschedule-date">
                         <div id="calGridWrapReschedule"></div>
                     </div>
 
@@ -115,16 +90,9 @@
                         data-global-linked-input="#new_appointment_time" data-global-error-key="reschedule-time">
 
                         <div class="appointment-time-heading">
-                            <span class="appointment-time-heading-icon">
-                                <i class="fa-regular fa-clock"></i>
-                            </span>
 
                             <div>
                                 <h4>Pick a Time Slot</h4>
-
-                                <p>
-                                    Choose a new appointment time for the selected date.
-                                </p>
                             </div>
                         </div>
 
@@ -191,10 +159,7 @@
                         <h4>
                             Reason for Rescheduling
                         </h4>
-
-                        <p>
-                            Optional — add a short explanation for this schedule change.
-                        </p>
+                        <span class="field-optional">(Optional)</span>
                     </div>
 
                 </div>

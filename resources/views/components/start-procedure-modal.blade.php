@@ -1,19 +1,16 @@
 @props([
     'id' => 'startProcedureModal',
     'title' => 'Start Procedure',
-    'subtitle' => 'Open the odontogram to begin this appointment.',
     'patient' => '—',
     'schedule' => '—',
     'service' => '—',
     'startUrl' => '',
 ])
 
-<x-modal :id="$id" :title="$title" :title-id="$id . 'Title'" :subtitle="$subtitle" icon="fa-solid fa-play" size="md"
+<x-modal :id="$id" :title="$title" :title-id="$id . 'Title'" size="md"
     theme="success" close-label="Close start procedure modal" data-start-procedure-modal
     data-start-url="{{ $startUrl }}">
     <div class="global-confirm-alert">
-        <i class="fa-solid fa-circle-play"></i>
-
         <div>
             <strong data-start-modal-heading>
                 Ready to start this appointment?
@@ -29,28 +26,17 @@
     <div class="confirmed-modal-details mt-4">
 
         <div class="confirmed-modal-details-header">
-            <div class="confirmed-modal-details-icon">
-                <i class="fa-solid fa-user"></i>
-            </div>
-
             <div>
                 <span class="confirmed-modal-details-eyebrow">
-                    Appointment
+                    Appointment Details
                 </span>
 
-                <strong class="confirmed-modal-details-title">
-                    Selected appointment details
-                </strong>
             </div>
         </div>
 
         <div class="confirmed-modal-schedule-grid">
 
             <div class="confirmed-modal-schedule-item">
-                <span class="confirmed-modal-schedule-icon">
-                    <i class="fa-solid fa-user"></i>
-                </span>
-
                 <div>
                     <span class="confirmed-modal-schedule-label">
                         Patient
@@ -63,10 +49,6 @@
             </div>
 
             <div class="confirmed-modal-schedule-item">
-                <span class="confirmed-modal-schedule-icon">
-                    <i class="fa-regular fa-calendar"></i>
-                </span>
-
                 <div>
                     <span class="confirmed-modal-schedule-label">
                         Schedule
@@ -79,10 +61,6 @@
             </div>
 
             <div class="confirmed-modal-schedule-item">
-                <span class="confirmed-modal-schedule-icon">
-                    <i class="fa-solid fa-tooth"></i>
-                </span>
-
                 <div>
                     <span class="confirmed-modal-schedule-label">
                         Service Type
@@ -103,7 +81,7 @@
             Cancel
         </x-button>
 
-        <x-button type="button" variant="success" icon="fa-solid fa-play" data-start-modal-confirm>
+        <x-button type="button" variant="success" data-start-modal-confirm>
             Proceed to Odontogram
         </x-button>
 

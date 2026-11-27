@@ -13,16 +13,6 @@
     }
 }
 
-#mainContent.inventory-page .status-pill.status-low-stock {
-    --status-bg: var(--status-rejected-bg);
-    --status-text: var(--status-rejected-text);
-    --status-border: var(--status-rejected-border);
-    --status-solid: var(--status-rejected-solid);
-    --status-soft: var(--status-rejected-soft);
-
-    animation: stockAlertPulse 1.8s ease-in-out infinite;
-}
-
 #mainContent.inventory-page .table-tag.table-tag-neutral>.fa-barcode {
     color: var(--status-all-solid);
 }
@@ -792,12 +782,6 @@
 
     #mainContent.inventory-page #inventoryGrid .inventory-grid-actions {
         padding: 8px 10px 10px;
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    #mainContent.inventory-page .status-pill.status-low-stock {
-        animation: none;
     }
 }
 
