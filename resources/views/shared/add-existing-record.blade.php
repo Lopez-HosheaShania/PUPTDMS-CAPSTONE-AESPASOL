@@ -49,24 +49,11 @@
             @else
                 <div class="dentist-hero page-title-row mb-6">
                     <div class="dentist-hero-content">
-
-                        <div class="dentist-hero-icon">
-                            <i class="fa-solid fa-folder-open"></i>
-                        </div>
-
                         <div class="min-w-0">
-
-                            <div class="dentist-hero-eyebrow">
-                                <i class="fa-solid fa-tooth"></i>
-                                Existing Records
-                            </div>
-
                             <h2 class="dentist-hero-title">
                                 Add Existing Record
                             </h2>
-
                         </div>
-
                     </div>
                 </div>
             @endif
@@ -957,7 +944,6 @@
                     type="button"
                     class="ui-btn ui-btn-primary ui-btn-sm"
                     data-existing-record-patient-index="${index}">
-                    <i class="fa-solid fa-file-circle-plus"></i>
                     <span>Add Existing Appointment</span>
                 </button>
             </div>

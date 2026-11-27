@@ -262,7 +262,7 @@
     min-width: 0;
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1rem;
 }
 
 .patient-summary-card.card {
@@ -396,7 +396,7 @@
 
 .patient-emergency-panel {
     padding: .9rem 1.25rem 1rem;
-    background: var(--status-cancelled-bg, #fff7f7);
+    background: var(---card);
     border-top: 1px solid var(--status-cancelled-border, #fee2e2);
 }
 
@@ -481,12 +481,6 @@
 [data-theme="dark"] .patient-summary-heading,
 .dark .patient-summary-heading {
     border-color: var(--border-dark, #30363d);
-}
-
-[data-theme="dark"] .patient-emergency-panel,
-.dark .patient-emergency-panel {
-    background: rgba(139, 0, 0, .12);
-    border-color: rgba(252, 165, 165, .16);
 }
 
 @media (max-width: 520px) {

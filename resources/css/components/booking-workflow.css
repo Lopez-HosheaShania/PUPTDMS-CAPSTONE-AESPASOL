@@ -157,15 +157,6 @@
     text-align: center;
 }
 
-.booking-page-eyebrow {
-    margin: 0 0 .4rem;
-    color: var(--crimson);
-    font-size: .72rem;
-    font-weight: 800;
-    letter-spacing: .14em;
-    text-transform: uppercase;
-}
-
 .booking-page-title {
     margin: 0;
     color: var(--crimson-dark);
@@ -271,15 +262,6 @@
     border-bottom: 1px solid var(--border);
 }
 
-.booking-step-eyebrow {
-    margin: 0;
-    color: var(--crimson);
-    font-size: .72rem;
-    font-weight: 900;
-    letter-spacing: .18em;
-    text-transform: uppercase;
-}
-
 .booking-step-title {
     margin: 0;
     color: var(--crimson-dark);
@@ -366,7 +348,7 @@
     flex-direction: column;
     border: 1px solid var(--border);
     border-radius: 20px;
-    background: var(--surface);
+    background: var(--card);
     container-type: inline-size;
 }
 
@@ -520,7 +502,6 @@
     color: #fecaca;
 }
 
-[data-theme="dark"] .booking-step-eyebrow,
 [data-theme="dark"] .booking-section-card-title {
     color: #fca5a5;
 }
@@ -532,10 +513,6 @@
 
 [data-theme="dark"] .booking-page-title {
     color: #fecaca;
-}
-
-[data-theme="dark"] .booking-page-eyebrow {
-    color: #fca5a5;
 }
 
 [data-theme="dark"] .booking-page-subtitle {
@@ -1964,11 +1941,6 @@
         padding-bottom: .75rem;
     }
 
-    .booking-step-eyebrow {
-        font-size: .6rem;
-        letter-spacing: .14em;
-    }
-
     .booking-step-title {
         font-size: clamp(1.25rem, 6vw, 1.45rem);
         line-height: 1.05;
@@ -1981,13 +1953,6 @@
 
     .booking-page-heading {
         padding: .45rem .5rem .15rem;
-    }
-
-    .booking-page-eyebrow {
-        margin-bottom: .25rem;
-
-        font-size: .6rem;
-        letter-spacing: .11em;
     }
 
     .booking-page-title {

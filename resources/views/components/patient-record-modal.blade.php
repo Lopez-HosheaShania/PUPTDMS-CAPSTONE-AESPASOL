@@ -10,22 +10,13 @@
                 </div>
 
                 <div class="appointment-modal-header-copy">
-                    <span class="appointment-modal-eyebrow">
-                        Dental Record
-                    </span>
-
                     <h3 id="recordModalTitle" class="appointment-modal-title">
                         <span id="m_service">—</span>
                     </h3>
 
                     <div class="record-modal-meta">
                         <span>
-                            <i class="fa-regular fa-calendar"></i>
                             <span id="m_date">—</span>
-                        </span>
-
-                        <span>
-                            <i class="fa-regular fa-clock"></i>
                             <span id="m_time">—</span>
                         </span>
                     </div>
@@ -42,7 +33,6 @@
             <div class="record-modal-summary record-modal-summary-three">
                 <div class="record-summary-card">
                     <span class="record-summary-label">
-                        <i class="fa-solid fa-shield-halved"></i>
                         Status
                     </span>
 
@@ -91,7 +81,6 @@
 
                 <div class="record-summary-card">
                     <span class="record-summary-label">
-                        <i class="fa-regular fa-hourglass-half"></i>
                         Duration
                     </span>
 
@@ -102,7 +91,6 @@
 
                 <div class="record-summary-card">
                     <span class="record-summary-label">
-                        <i class="fa-solid fa-calendar-plus"></i>
                         Follow-up Appointment
                     </span>
 
@@ -115,7 +103,6 @@
             <div class="record-modal-grid-two">
                 <div class="record-modal-section">
                     <div class="record-modal-section-title">
-                        <i class="fa-solid fa-clipboard-list"></i>
                         <span>Treatment</span>
                     </div>
 
@@ -128,7 +115,6 @@
 
                 <div class="record-modal-section">
                     <div class="record-modal-section-title">
-                        <i class="fa-solid fa-eye"></i>
                         <span>Oral Examination</span>
                     </div>
 
@@ -141,7 +127,6 @@
             <div class="record-modal-grid-two">
                 <div class="record-modal-section">
                     <div class="record-modal-section-title">
-                        <i class="fa-solid fa-circle-info"></i>
                         <span>Diagnosis</span>
                     </div>
 
@@ -152,7 +137,6 @@
 
                 <div class="record-modal-section">
                     <div class="record-modal-section-title">
-                        <i class="fa-solid fa-prescription-bottle-medical"></i>
                         <span>Prescription</span>
                     </div>
 
@@ -167,11 +151,7 @@
                 <div class="global-label-row">
 
                     <div class="record-modal-section-title global-label-main">
-                        <i class="fa-solid fa-tooth"></i>
-
-                        <span>
-                            Odontogram
-                        </span>
+                        <span>Odontogram</span>
                     </div>
 
                     <div class="global-label-meta">

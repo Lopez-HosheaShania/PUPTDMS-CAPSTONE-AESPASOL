@@ -16,14 +16,7 @@
             @if ($isDentistView)
                 <div class="dentist-hero mb-6">
                     <div class="dentist-hero-content">
-                        <div class="dentist-hero-icon">
-                            <i class="fa-solid fa-user-shield"></i>
-                        </div>
                         <div class="min-w-0">
-                            <div class="dentist-hero-eyebrow">
-                                <i class="fa-solid fa-tooth"></i>
-                                Clinical Operations
-                            </div>
                             <h1 class="dentist-hero-title">Assign CMS Access</h1>
                         </div>
                     </div>

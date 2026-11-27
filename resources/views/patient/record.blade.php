@@ -76,17 +76,8 @@
                     </div>
 
                     <div class="patient-hero-stats">
-                        <span class="patient-hero-stat">
-                            <i class="fa-solid fa-list-check"></i>
-
-                            {{ $totalRecords }}
-                            {{ $totalRecords === 1 ? 'Total Visit' : 'Total Visits' }}
-                        </span>
-
                         @if ($latestDate)
                             <span class="patient-hero-stat">
-                                <i class="fa-regular fa-calendar-check"></i>
-
                                 Latest: {{ $latestDate }}
                             </span>
                         @endif
@@ -99,14 +90,6 @@
 
                 <section id="visitHistorySection" class="card records-visits-card">
                     <div class="card-body">
-                        <div class="records-section-title">
-                            <span>
-                                <i class="fa-solid fa-clock-rotate-left mr-1"></i>
-                                Visit History
-                            </span>
-
-                            <div></div>
-                        </div>
 
                         @if ($totalRecords)
                             <x-pagination-bar id="recordsPagebarTop" info-id="recordsPageInfoTop"
@@ -149,14 +132,7 @@
                 </section>
 
                 <section id="documentRequestHistory" class="card document-history-card">
-                    <x-card-header title="Document Request History"
-                        subtitle="Track documents you requested from the dental clinic." icon="fa-solid fa-file-lines">
-                        <x-slot:actions>
-                            <span class="card-header-badge">
-                                {{ $documentRequestStats['total'] ?? 0 }}
-                                {{ ($documentRequestStats['total'] ?? 0) === 1 ? 'Request' : 'Requests' }}
-                            </span>
-                        </x-slot:actions>
+                    <x-card-header title="Document Request History">
                     </x-card-header>
 
                     <div class="card-body">
@@ -283,13 +259,11 @@
 
                                                 <div class="global-record-subline">
                                                     <span class="global-info-pill">
-                                                        <i class="fa-regular fa-calendar"></i>
                                                         {{ $requestDate ?: '—' }}
                                                     </span>
 
                                                     @if ($requestTime)
                                                         <span class="global-info-pill">
-                                                            <i class="fa-regular fa-clock"></i>
                                                             {{ $requestTime }}
                                                         </span>
                                                     @endif
@@ -297,8 +271,6 @@
                                             </div>
 
                                             <div class="document-request-purpose">
-                                                <i class="fa-solid fa-bullseye"></i>
-
                                                 <span class="document-request-purpose-label">
                                                     Purpose:
                                                 </span>

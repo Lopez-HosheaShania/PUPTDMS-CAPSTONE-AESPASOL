@@ -155,13 +155,13 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
                 @if ($isDentistProfile)
                 <x-button
                     href="{{ route('dentist.odontogram.existing-appointment.create', ['patient' => $patient->id]) }}"
-                    variant="secondary" icon="fa-solid fa-clock-rotate-left">
+                    variant="secondary">
                     Add Existing Appointment
                 </x-button>
                 @endif
 
                 @if ($canStartProcedure)
-                <x-button type="button" variant="success" icon="fa-solid fa-play" data-ui-click="action-0c1e6fd96db0">
+                <x-button type="button" variant="success" data-ui-click="action-0c1e6fd96db0">
                     Start Procedure
                 </x-button>
                 @endif
@@ -214,11 +214,6 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
                                 <span class="badge-role {{ $patientRoleClass }}">
                                     <i class="fa-solid {{ $patientRoleIcon }}"></i>
                                     <span>{{ $patientType }}</span>
-                                </span>
-
-                                <span class="status-pill status-active">
-                                    <span class="status-dot"></span>
-                                    <span>Profile Active</span>
                                 </span>
                             </div>
                         </div>
@@ -389,8 +384,7 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
 
                 <section class="card profile-section-card treatment-history-card">
                     <x-card-header title="Treatment History"
-                        subtitle="Review upcoming appointments and completed patient visits."
-                        icon="fa-solid fa-folder-open" class="treatment-history-header" />
+                        subtitle="" class="treatment-history-header" />
 
                     <div class="card-body treatment-history-body">
                         <div class="treatment-tabs" role="tablist" aria-label="Treatment history">
@@ -494,7 +488,7 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
                 @if ($canViewClinicalRecords)
                 <section class="card health-lifestyle-card mb-10">
                     <x-card-header title="Health & Lifestyle Information"
-                        subtitle="Patient dental, medical, and lifestyle records." icon="fa-solid fa-notes-medical">
+                        subtitle="">
                         <x-slot:actions>
                             <span class="status-pill status-completed">
                                 <span class="status-dot"></span>
@@ -508,7 +502,6 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
 
                             <div>
                                 <div class="section-card-title">
-                                    <i class="fa-solid fa-tooth"></i>
                                     <span>Dental History</span>
                                     <span class="section-card-title-line"></span>
                                 </div>
@@ -516,10 +509,6 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
                                 <div class="global-info-grid global-info-grid-2">
 
                                     <div class="global-info-item global-info-item-compact">
-                                        <span class="global-info-icon status-completed">
-                                            <i class="fa-regular fa-calendar-check"></i>
-                                        </span>
-
                                         <div class="global-info-copy">
                                             <span class="global-info-label">
                                                 Last Dental Visit
@@ -536,10 +525,6 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
                                     </div>
 
                                     <div class="global-info-item global-info-item-compact">
-                                        <span class="global-info-icon status-default">
-                                            <i class="fa-solid fa-user-doctor"></i>
-                                        </span>
-
                                         <div class="global-info-copy">
                                             <span class="global-info-label">
                                                 Previous Dentist
@@ -552,10 +537,6 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
                                     </div>
 
                                     <div class="global-info-item global-info-item-compact">
-                                        <span class="global-info-icon status-default">
-                                            <i class="fa-solid fa-tooth"></i>
-                                        </span>
-
                                         <div class="global-info-copy">
                                             <span class="global-info-label">
                                                 Extraction Date
@@ -570,10 +551,6 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
                                     </div>
 
                                     <div class="global-info-item global-info-item-compact">
-                                        <span class="global-info-icon status-default">
-                                            <i class="fa-solid fa-teeth-open"></i>
-                                        </span>
-
                                         <div class="global-info-copy">
                                             <span class="global-info-label">
                                                 Dentures Date
@@ -610,7 +587,6 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
 
                             <div>
                                 <div class="section-card-title">
-                                    <i class="fa-solid fa-notes-medical"></i>
                                     <span>Dental Symptoms & Habits</span>
                                     <span class="section-card-title-line"></span>
                                 </div>
@@ -654,7 +630,6 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
 
                             <div>
                                 <div class="section-card-title">
-                                    <i class="fa-solid fa-heart-pulse"></i>
                                     <span>Medical History</span>
                                     <span class="section-card-title-line"></span>
                                 </div>
@@ -689,10 +664,6 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
                                     @endphp
 
                                     <div class="global-info-item global-info-item-compact">
-                                        <span class="global-info-icon status-default">
-                                            <i class="fa-solid fa-stethoscope"></i>
-                                        </span>
-
                                         <div class="global-info-copy">
                                             <span class="global-info-label">
                                                 {{ str_replace(
@@ -715,10 +686,6 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
 
                                     @if (!$hasMedicalRecord)
                                     <div class="global-info-item global-info-item-compact">
-                                        <span class="global-info-icon status-default">
-                                            <i class="fa-solid fa-circle-info"></i>
-                                        </span>
-
                                         <div class="global-info-copy">
                                             <span class="global-info-label">
                                                 Medical History
@@ -735,7 +702,6 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
 
                             <div>
                                 <div class="section-card-title">
-                                    <i class="fa-solid fa-disease"></i>
                                     <span>Medical Conditions</span>
                                     <span class="section-card-title-line"></span>
                                 </div>
@@ -768,7 +734,6 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
 
                             <div>
                                 <div class="section-card-title">
-                                    <i class="fa-solid fa-teeth"></i>
                                     <span>Patient Odontogram</span>
                                     <span class="section-card-title-line"></span>
 
@@ -807,12 +772,6 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
                             </div>
 
                             <div>
-                                <div class="section-card-title">
-                                    <i class="fa-regular fa-comment-dots"></i>
-                                    <span>Additional Dental Concerns</span>
-                                    <span class="section-card-title-line"></span>
-                                </div>
-
                                 @php
                                 $concerns =
                                 optional($patient->dentalHistoryConcerns)
@@ -838,10 +797,6 @@ $odontogramMetaService = $odontogramMetaVisit?->service_type_name ?: 'Dental Tre
                                 </div>
                                 @else
                                 <div class="global-info-item global-info-item-compact">
-                                    <span class="global-info-icon status-default">
-                                        <i class="fa-regular fa-comment"></i>
-                                    </span>
-
                                     <div class="global-info-copy">
                                         <span class="global-info-label">
                                             Additional Dental Concerns

@@ -12,7 +12,6 @@
 .asw-widget {
     background: transparent !important;
     border: 0 !important;
-    box-shadow: none !important;
 }
 
 .asw-menu-btn {
@@ -28,7 +27,6 @@
     background: color-mix(in srgb, var(--crimson) 96%, transparent) !important;
     border: 3px solid rgba(255, 255, 255, .9) !important;
     outline: 5px solid color-mix(in srgb, var(--crimson) 55%, transparent) !important;
-    box-shadow: 0 18px 38px color-mix(in srgb, var(--crimson) 38%, transparent) !important;
     backdrop-filter: blur(16px) saturate(160%);
 }
 
@@ -67,7 +65,6 @@ body.filter-lock .asw-widget {
             color-mix(in srgb, var(--card) 85%, transparent),
             color-mix(in srgb, var(--crimson-light) 66%, transparent)) !important;
     border: 1px solid rgba(255, 255, 255, .62) !important;
-    box-shadow: 0 30px 80px rgba(15, 23, 42, .38), inset 0 1px 0 rgba(255, 255, 255, .65) !important;
     backdrop-filter: blur(30px) saturate(180%);
 }
 
@@ -85,9 +82,6 @@ body.filter-lock .asw-widget {
     backdrop-filter: blur(22px) saturate(180%);
     -webkit-backdrop-filter: blur(22px) saturate(180%);
     border-bottom: 1px solid rgba(255, 255, 255, .28) !important;
-    box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, .32),
-        0 10px 28px color-mix(in srgb, var(--crimson) 22%, transparent) !important;
 }
 
 .asw-menu .asw-menu-title {
@@ -121,7 +115,6 @@ body.filter-lock .asw-widget {
     border-radius: 20px !important;
     background: rgba(255, 255, 255, .72) !important;
     border: 1px solid rgba(255, 255, 255, .72) !important;
-    box-shadow: 0 12px 28px color-mix(in srgb, var(--crimson) 8%, transparent), inset 0 1px 0 rgba(255, 255, 255, .62) !important;
     backdrop-filter: blur(14px) saturate(150%);
 }
 
@@ -307,9 +300,6 @@ body.filter-lock .asw-widget {
     border: 1px solid color-mix(in srgb, var(--crimson) 20%, transparent) !important;
     color: var(--crimson-dark) !important;
     font-weight: 900;
-    box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, .75),
-        0 10px 24px color-mix(in srgb, var(--crimson) 12%, transparent) !important;
     backdrop-filter: blur(16px) saturate(160%);
     -webkit-backdrop-filter: blur(16px) saturate(160%);
 }
@@ -317,9 +307,6 @@ body.filter-lock .asw-widget {
 .asw-menu .asw-select:focus {
     outline: none !important;
     border-color: color-mix(in srgb, var(--crimson) 55%, transparent) !important;
-    box-shadow:
-        0 0 0 4px color-mix(in srgb, var(--crimson) 12%, transparent),
-        0 10px 24px color-mix(in srgb, var(--crimson) 16%, transparent) !important;
 }
 
 .asw-menu .asw-select option {
@@ -356,7 +343,6 @@ body.filter-lock .asw-widget {
 .asw-menu .asw-profile-btn:hover {
     transform: translateY(-2px);
     border-color: color-mix(in srgb, var(--crimson) 45%, transparent) !important;
-    box-shadow: 0 14px 28px color-mix(in srgb, var(--crimson) 18%, transparent) !important;
 }
 
 .asw-menu .asw-profile-icon {
@@ -387,7 +373,6 @@ body.filter-lock .asw-widget {
 .asw-menu input[type="checkbox"] {
     background: rgba(255, 255, 255, .78) !important;
     border: 1px solid rgba(255, 255, 255, .62) !important;
-    box-shadow: inset 0 1px 2px rgba(15, 23, 42, .12) !important;
     transition: all .22s ease-in-out;
 }
 
@@ -395,9 +380,6 @@ body.filter-lock .asw-widget {
 .asw-menu .asw-profile-btn.asw-selected,
 .asw-menu .asw-btn.asw-selected {
     border-color: rgba(255, 255, 255, .38) !important;
-    box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, .35),
-        0 14px 30px color-mix(in srgb, var(--crimson) 24%, transparent) !important;
     border: 2px solid var(--crimson) !important;
     background: color-mix(in srgb, var(--crimson) 15%, transparent) !important;
     position: relative;
@@ -427,9 +409,6 @@ body.filter-lock .asw-widget {
 
 .asw-menu .asw-select:hover {
     transform: translateY(-1px);
-    box-shadow:
-        0 0 0 4px color-mix(in srgb, var(--crimson) 8%, transparent),
-        0 12px 26px color-mix(in srgb, var(--crimson) 16%, transparent) !important;
 }
 
 [data-theme="dark"] .asw-menu .asw-menu-header,
@@ -490,7 +469,6 @@ body.filter-lock .asw-widget {
     border-radius: 999px !important;
     background: var(--asw-toggle-track-off) !important;
     border: 1px solid var(--asw-toggle-track-off-border) !important;
-    box-shadow: inset 0 1px 2px rgba(15, 23, 42, .16) !important;
     pointer-events: none;
     transition: background .22s ease, border-color .22s ease;
 }
@@ -504,7 +482,6 @@ body.filter-lock .asw-widget {
     height: 18px;
     border-radius: 50% !important;
     background: var(--asw-toggle-thumb) !important;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, .22) !important;
     transition: transform .22s ease;
 }
 
@@ -550,10 +527,6 @@ body.filter-lock .asw-widget {
 }
 
 .asw-menu-btn:hover {
-    box-shadow:
-        0 0 0 8px rgba(193, 18, 31, .12),
-        0 0 26px rgba(179, 16, 27, 0.55),
-        0 18px 38px color-mix(in srgb, var(--crimson) 38%, transparent) !important;
     filter: brightness(1.08) saturate(1.15) !important;
 }
 
@@ -588,9 +561,6 @@ body.filter-lock .asw-widget {
 .asw-menu .asw-btn,
 .asw-menu .asw-profile-btn {
     border-color: rgba(179, 0, 0, 0.12) !important;
-    box-shadow:
-        0 12px 30px rgba(163, 0, 0, 0.08),
-        inset 0 1px 0 rgba(255, 255, 255, 0.85) !important;
 }
 
 .asw-menu .asw-card-title,
@@ -609,7 +579,6 @@ body.filter-lock .asw-widget {
     background: #cfd0d0 !important;
     border: 2px solid #595a5a !important;
     border-radius: 999px !important;
-    box-shadow: inset 0 1px 3px rgba(15, 23, 42, 0.12) !important;
 }
 
 [data-theme="dark"] .asw-menu {
@@ -617,9 +586,6 @@ body.filter-lock .asw-widget {
         radial-gradient(circle at top left, rgba(120, 0, 0, 0.16), transparent 45%),
         linear-gradient(180deg, rgba(18, 20, 27, 0.98), rgba(10, 12, 18, 0.98)) !important;
     border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    box-shadow:
-        0 24px 70px rgba(0, 0, 0, 0.55),
-        inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
 }
 
 [data-theme="dark"] .asw-menu .asw-card,
@@ -628,9 +594,6 @@ body.filter-lock .asw-widget {
     background:
         linear-gradient(180deg, rgba(37, 38, 41, 0.96), rgba(26, 27, 29, 0.96)) !important;
     border: 1px solid rgba(255, 255, 255, 0.14) !important;
-    box-shadow:
-        0 10px 24px rgba(0, 0, 0, 0.28),
-        inset 0 1px 0 rgba(255, 255, 255, 0.03) !important;
 }
 
 [data-theme="dark"] .asw-menu .asw-card-title,
@@ -670,7 +633,6 @@ body.filter-lock .asw-widget {
     background: #334155 !important;
     border: 2px solid #475569 !important;
     border-radius: 999px !important;
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3) !important;
 }
 
 [data-theme="dark"] .asw-menu.asw-menu .asw-footer {
@@ -747,11 +709,12 @@ body.filter-lock .asw-widget {
 
 @media (max-width: 640px) {
     .asw-menu.asw-menu {
-        right: 60px;
+        right: calc(var(--float-right-final, 14px) + var(--fab-final-size, 40px) + 8px);
         bottom: var(--accessibility-bottom-final, 24px);
-        width: min(310px, calc(100vw - 72px));
+        width: min(310px,
+                calc(100vw - var(--float-right-final, 14px) - var(--fab-final-size, 40px) - 20px));
         max-width: calc(100vw - 72px);
-        max-height: calc(100dvh - 32px);
+        max-height: calc(100dvh - var(--accessibility-bottom-final, 24px) - 24px);
         border-radius: 20px !important;
     }
 

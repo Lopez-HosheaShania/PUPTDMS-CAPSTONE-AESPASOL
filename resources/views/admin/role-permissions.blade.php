@@ -421,10 +421,6 @@
             <div class="ui-modal-card modal-md">
                 <div class="modal-hd">
                     <div class="modal-heading">
-                        <div class="modal-icon">
-                            <i class="fa-solid fa-user-shield"></i>
-                        </div>
-
                         <div class="modal-copy">
                             <h3 class="modal-title">
                                 Create New Role
@@ -515,10 +511,6 @@
 
                 <div class="modal-heading">
 
-                    <div class="modal-icon">
-                        <i class="fa-solid fa-rotate-left"></i>
-                    </div>
-
                     <div class="modal-copy">
 
                         <h3 id="resetConfirmTitle" class="modal-title">
@@ -576,10 +568,6 @@
 
             <div class="modal-hd">
                 <div class="modal-heading">
-
-                    <div class="modal-icon">
-                        <i class="fa-solid fa-eye"></i>
-                    </div>
 
                     <div class="modal-copy">
                         <h3 class="modal-title">

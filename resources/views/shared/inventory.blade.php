@@ -44,16 +44,7 @@
                     <div class="dentist-hero">
                         <div class="dentist-hero-content w-full justify-between">
                             <div class="inventory-title-left">
-                                <div class="dentist-hero-icon">
-                                    <i class="fa-solid fa-boxes-stacked"></i>
-                                </div>
-
                                 <div class="min-w-0">
-                                    <div class="dentist-hero-eyebrow">
-                                        <i class="fa-solid fa-tooth"></i>
-                                        Inventory Management
-                                    </div>
-
                                     <h2 class="dentist-hero-title">
                                         Inventory
                                     </h2>
@@ -543,7 +534,7 @@
         </form>
     </div>
 
-    <div id="editModal" class="ui-modal modal-theme-primary inventory-form-modal" aria-hidden="true">
+    <div id="editModal" class="ui-modal modal-theme-edit inventory-form-modal" aria-hidden="true">
 
         <form id="editInventoryForm" class="ui-modal-card modal-lg modal-card-form" data-global-validation
             data-form-validation-rule="inventoryEdit" data-discard-form data-discard-title="Discard inventory changes?"
@@ -553,9 +544,6 @@
 
             <div class="modal-hd">
                 <div class="modal-heading">
-                    <div class="modal-icon">
-                        <i class="fa-solid fa-pen"></i>
-                    </div>
 
                     <div class="modal-copy">
                         <h3 class="modal-title">
@@ -757,7 +745,7 @@
                     Cancel
                 </x-button>
 
-                <x-button type="submit" variant="primary">
+                <x-button type="submit" variant="edit">
                     Save Changes
                 </x-button>
             </div>
@@ -2774,7 +2762,7 @@ aria-label="Delete inventory item"
                 const expirationDate =
                     formatInventoryDisplayDate(
                         item.expiration_date,
-                        item.formatted_expiration_date || '—'
+                        item.formatted_expiration_date || ''
                     );
 
                 const receivedDate =

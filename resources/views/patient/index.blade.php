@@ -246,21 +246,14 @@
                             </p>
 
                             <div class="mt-4 flex flex-wrap gap-2">
-                                <span
-                                    class="greeting-insight-chip inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/15 px-3 py-1.5 text-xs font-semibold text-white">
-                                    <i class="fa-solid fa-circle-info"></i>
-                                    {{ isset($upcomingAppointment) && $upcomingAppointment ? 'Appointment scheduled' : 'Ready to book' }}
-                                </span>
 
                                 <span
                                     class="greeting-insight-chip inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/15 px-3 py-1.5 text-xs font-semibold text-white">
-                                    <i class="fa-regular fa-calendar"></i>
                                     Next Visit: {{ $nextVisitText }}
                                 </span>
 
                                 <span
                                     class="greeting-insight-chip inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/15 px-3 py-1.5 text-xs font-semibold text-white">
-                                    <i class="fa-solid fa-tooth"></i>
                                     {{ $completedVisitCount > 0
                                         ? 'Last Visit: ' . ($latestCompletedVisitDate ?? 'Available')
                                         : 'No completed visit yet' }}
@@ -275,8 +268,7 @@
                                 Book Appointment
                             </x-button>
 
-                            <x-button href="{{ route('patient.record') }}" variant="ghost-light"
-                                icon="fa-solid fa-folder-open">
+                            <x-button href="{{ route('patient.record') }}" variant="ghost-light">
                                 View Records
                             </x-button>
                         </div>
@@ -548,6 +540,71 @@
                 </div>
             </div>
     </main>
+
+
+    <template id="dashboardRequestDocsTemplate">
+        <section class="card dashboard-service-card">
+            <div class="card-header">
+                <div class="card-header-left">
+                    <span class="card-header-icon">
+                        <i class="fa-solid fa-folder-open"></i>
+                    </span>
+
+                    <div class="min-w-0">
+                        <h2 class="card-title">Request Documents</h2>
+                        <p class="card-subtitle">
+                            Choose a clinic document to request.
+                        </p>
+                    </div>
+                </div>
+
+                <span class="card-header-badge">2 Services</span>
+            </div>
+
+            <div class="card-body dashboard-service-body">
+                <div class="flex flex-col gap-3 w-full">
+
+                    <div class="info-card flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div class="min-w-0 flex-1">
+                            <h3 class="card-title">
+                                Dental Health Record
+                            </h3>
+
+                            <p class="card-subtitle">
+                                Your dental history, diagnoses, treatments,
+                                and related medical information.
+                            </p>
+                        </div>
+
+                        <x-button type="button" variant="secondary" size="compact" class="w-full sm:w-auto shrink-0"
+                            data-doc-open="dentalHealthRecordModal" aria-label="Request Dental Health Record">
+                            Request
+                        </x-button>
+                    </div>
+
+                    <div class="info-card flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div class="min-w-0 flex-1">
+                            <h3 class="card-title">
+                                Dental Clearance
+                            </h3>
+
+                            <p class="card-subtitle">
+                                For school submission, annual compliance,
+                                and other official requirements.
+                            </p>
+                        </div>
+
+                        <x-button type="button" variant="secondary" size="compact" class="w-full sm:w-auto shrink-0"
+                            data-doc-open="dentalClearanceModal" aria-label="Request Dental Clearance">
+                            Request
+                        </x-button>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+    </template>
+
 
     <template id="dashboardRecordCardsTemplate">
         <div class="space-y-3">
@@ -1507,7 +1564,6 @@
                 'data-ui-click="action-1e919ba532ca" ' +
                 'class="ui-btn {{ collect($reservedBookingReminders ?? [])->isNotEmpty() ? 'ui-btn-secondary' : 'ui-btn-primary' }}">' +
 
-                '<i class="fa-solid fa-calendar-days"></i>' +
                 '<span>Check Available Dates</span>' +
 
                 '</button>' +
@@ -1531,7 +1587,6 @@
             if (pData.facultyCode && pData.facultyCode !== 'null') {
                 roleBadge =
                     '<span class="badge-role role-faculty">' +
-                    '<i class="fa-solid fa-user-tie"></i>' +
                     '<span>Faculty</span>' +
                     '</span>';
                 identityLabel = 'Faculty Code';
@@ -1540,7 +1595,6 @@
             } else if (pData.studentNo && pData.studentNo !== 'null') {
                 roleBadge =
                     '<span class="badge-role role-student">' +
-                    '<i class="fa-solid fa-user-graduate"></i>' +
                     '<span>Student</span>' +
                     '</span>';
                 identityLabel = 'Student No';
@@ -1549,7 +1603,6 @@
             } else {
                 roleBadge =
                     '<span class="badge-role role-patient">' +
-                    '<i class="fa-solid fa-user"></i>' +
                     '<span>Patient</span>' +
                     '</span>';
 
@@ -1589,7 +1642,6 @@
             var identityRow = identityLabel ?
                 '<div class="patient-profile-row">' +
                 '<span class="patient-profile-label">' +
-                '<i class="fa-regular fa-id-badge"></i>' +
                 '<span>' + window.escapeHtml(identityLabel) + '</span>' +
                 '</span>' +
                 '<span id="maskedIdentityValue" data-masked="true" class="patient-profile-value">' +
@@ -1638,9 +1690,6 @@
                 '<i class="fa-solid fa-user"></i>' +
                 '<span>Patient Profile</span>' +
                 '</span>' +
-                '<span class="patient-profile-topbar-label">' +
-                'Personal information' +
-                '</span>' +
                 '</div>' +
 
                 globalToggle +
@@ -1668,11 +1717,6 @@
 
                 '<div class="patient-profile-badges">' +
                 roleBadge +
-
-                '<span class="status-pill status-active">' +
-                '<span class="status-dot"></span>' +
-                '<span>Profile Active</span>' +
-                '</span>' +
 
                 '</div>' +
 
@@ -1741,7 +1785,6 @@
                 '<div class="patient-profile-row">' +
 
                 '<span class="patient-profile-label">' +
-                '<i class="fa-solid fa-phone"></i>' +
                 '<span>Contact</span>' +
                 '</span>' +
 
@@ -1754,7 +1797,6 @@
                 '<div class="patient-profile-row">' +
 
                 '<span class="patient-profile-label">' +
-                '<i class="fa-solid fa-envelope"></i>' +
                 '<span>Email</span>' +
                 '</span>' +
 
@@ -1771,7 +1813,6 @@
                 '<div class="patient-profile-section-heading">' +
 
                 '<div class="patient-profile-section-title">' +
-                '<i class="fa-solid fa-user-check"></i>' +
                 '<span>Profile Completion</span>' +
                 '</div>' +
 
@@ -1796,7 +1837,6 @@
                 '<div class="patient-profile-section patient-profile-activity">' +
 
                 '<div class="patient-profile-section-title">' +
-                '<i class="fa-solid fa-tooth"></i>' +
                 '<span>Dental Activity</span>' +
                 '</div>' +
 
@@ -1834,7 +1874,6 @@
                 '<div class="patient-profile-emergency">' +
 
                 '<div class="patient-profile-emergency-title">' +
-                '<i class="fa-solid fa-heart-pulse"></i>' +
                 '<span>Emergency Contact</span>' +
                 '</div>' +
 
@@ -1846,168 +1885,21 @@
             );
         }
 
-        function renderRequestDocs() {
-            var container =
-                document.getElementById(
-                    'requestDocsContainer'
-                );
 
-            if (!container) {
+        function renderRequestDocs() {
+            const container = document.getElementById('requestDocsContainer');
+            const template = document.getElementById('dashboardRequestDocsTemplate');
+
+            if (!container || !template) {
                 return;
             }
 
             window.swapSkeletonContent(
                 'requestDocsContainer',
-
-                '<section class="card dashboard-service-card">' +
-
-                '<div class="card-header">' +
-
-                '<div class="card-header-left">' +
-
-                '<span class="card-header-icon">' +
-                '<i class="fa-solid fa-folder-open"></i>' +
-                '</span>' +
-
-                '<div class="min-w-0">' +
-
-                '<h2 class="card-title">' +
-                'Request Documents' +
-                '</h2>' +
-
-                '<p class="card-subtitle">' +
-                'Choose a clinic document to request.' +
-                '</p>' +
-
-                '</div>' +
-
-                '</div>' +
-
-                '<span class="card-header-badge">' +
-                '2 Services' +
-                '</span>' +
-
-                '</div>' +
-
-                '<div class="card-body dashboard-service-body">' +
-
-                '<div class="quick-actions-list dashboard-document-actions">' +
-
-
-                '<button type="button" ' +
-                'data-doc-open="dentalHealthRecordModal" ' +
-                'class="quick-action quick-action-card dashboard-document-action">' +
-
-                '<span class="quick-action-icon">' +
-                '<i class="fa-solid fa-file-medical"></i>' +
-                '</span>' +
-
-                '<span class="quick-action-copy">' +
-
-                '<span class="dashboard-document-title-row">' +
-
-                '<span class="quick-action-title">' +
-                'Dental Health Record' +
-                '</span>' +
-
-                '<span class="status-pill status-cancelled">' +
-                '<span>Most Requested</span>' +
-                '</span>' +
-
-                '</span>' +
-
-                '<span class="quick-action-sub">' +
-                'Your dental history, diagnoses, treatments, and related medical information.' +
-                '</span>' +
-
-                '<span class="dashboard-document-meta">' +
-
-                '<span class="status-pill status-default">' +
-                '<span class="status-dot"></span>' +
-                '<span>Dental Records</span>' +
-                '</span>' +
-
-                '<span class="status-pill status-default">' +
-                '<span class="status-dot"></span>' +
-                '<span>Medical</span>' +
-                '</span>' +
-
-                '<span class="status-pill status-default">' +
-                '<span class="status-dot"></span>' +
-                '<span>Diagnosis</span>' +
-                '</span>' +
-
-                '</span>' +
-
-                '</span>' +
-
-                '<span class="quick-action-arrow">' +
-                '<i class="fa-solid fa-chevron-right"></i>' +
-                '</span>' +
-
-                '<i class="fa-solid fa-file-medical quick-action-bg-icon"></i>' +
-
-                '</button>' +
-
-
-                '<button type="button" ' +
-                'data-doc-open="dentalClearanceModal" ' +
-                'class="quick-action quick-action-card dashboard-document-action">' +
-
-                '<span class="quick-action-icon dashboard-document-icon-warning">' +
-                '<i class="fa-solid fa-file-circle-check"></i>' +
-                '</span>' +
-
-                '<span class="quick-action-copy">' +
-
-                '<span class="dashboard-document-title-row">' +
-
-                '<span class="quick-action-title">' +
-                'Dental Clearance' +
-                '</span>' +
-
-                '<span class="status-pill status-upcoming">' +
-                '<span>School Requirement</span>' +
-                '</span>' +
-
-                '</span>' +
-
-                '<span class="quick-action-sub">' +
-                'For school submission, annual compliance, and other official requirements.' +
-                '</span>' +
-
-                '<span class="dashboard-document-meta">' +
-
-                '<span class="status-pill status-default">' +
-                '<span class="status-dot"></span>' +
-                '<span>Clearance</span>' +
-                '</span>' +
-
-                '<span class="status-pill status-default">' +
-                '<span class="status-dot"></span>' +
-                '<span>Official Copy</span>' +
-                '</span>' +
-
-                '</span>' +
-
-                '</span>' +
-
-                '<span class="quick-action-arrow">' +
-                '<i class="fa-solid fa-chevron-right"></i>' +
-                '</span>' +
-
-                '<i class="fa-solid fa-file-circle-check quick-action-bg-icon"></i>' +
-
-                '</button>' +
-
-
-                '</div>' +
-
-                '</div>' +
-
-                '</section>'
+                template.innerHTML
             );
         }
+
 
         function openDashboardRecordModal(encodedRecord) {
             try {

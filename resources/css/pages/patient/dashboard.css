@@ -1,23 +1,6 @@
 body.role-patient #mainContent.patient-dashboard-page .dashboard-glass {
-    background: rgba(255, 255, 255, 0.72);
-    border: 1px solid rgba(229, 231, 235, 0.85);
-    box-shadow:
-        0 18px 38px rgba(15, 23, 42, 0.08),
-        inset 0 1px 0 rgba(255, 255, 255, 0.65);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-}
-
-[data-theme="dark"] body.role-patient #mainContent.patient-dashboard-page .dashboard-glass {
-    background:
-        linear-gradient(145deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.025)),
-        rgba(13, 17, 23, 0.76) !important;
-    border: 1px solid rgba(255, 255, 255, 0.10) !important;
-    box-shadow:
-        0 18px 38px rgba(0, 0, 0, 0.38),
-        inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
+    background: var(--card);
+    border: 1px solid var(--border);
 }
 
 .request-doc-section {
@@ -756,27 +739,6 @@ body.role-patient #mainContent.patient-dashboard-page * {
     }
 }
 
-@supports not ((backdrop-filter:blur(18px)) or (-webkit-backdrop-filter:blur(18px))) {
-
-    body.role-patient #mainContent.patient-dashboard-page .dashboard-glass,
-    [data-theme="dark"] body.role-patient #mainContent.patient-dashboard-page .dashboard-glass,
-    .upcoming-tooth-glass,
-    .glass-icon-red {
-
-        background: rgba(255, 255, 255, .95) !important;
-
-    }
-
-    [data-theme="dark"] body.role-patient #mainContent.patient-dashboard-page .dashboard-glass,
-    [data-theme="dark"] .upcoming-tooth-glass,
-    [data-theme="dark"] .glass-icon-red {
-
-        background: #161B22 !important;
-
-    }
-
-}
-
 .patient-profile-card {
     height: 100%;
     overflow: hidden;
@@ -825,13 +787,6 @@ body.role-patient #mainContent.patient-dashboard-page * {
     line-height: 1;
     letter-spacing: .14em;
     text-transform: uppercase;
-}
-
-.patient-profile-topbar-label {
-    color: #6B7280;
-
-    font-size: 11px;
-    font-weight: 600;
 }
 
 .patient-profile-identity {
@@ -1191,10 +1146,6 @@ body.role-patient #mainContent.patient-dashboard-page * {
 .patient-profile-emergency {
     margin-top: 0;
     padding: .65rem 1rem;
-
-    border-top: 1px solid #FECACA;
-
-    background: rgba(254, 242, 242, .65);
 }
 
 .patient-profile-emergency-title {
@@ -1297,10 +1248,6 @@ body.role-patient #mainContent.patient-dashboard-page * {
     border-bottom-color: var(--border-dark);
 }
 
-[data-theme="dark"] .patient-profile-topbar-label {
-    color: var(--text-muted);
-}
-
 [data-theme="dark"] .patient-profile-eyebrow {
     color: #FCA5A5;
 }
@@ -1324,11 +1271,6 @@ body.role-patient #mainContent.patient-dashboard-page * {
 [data-theme="dark"] .patient-profile-value,
 [data-theme="dark"] .patient-profile-emergency-number {
     color: var(--text-secondary);
-}
-
-[data-theme="dark"] .patient-profile-emergency {
-    background: var(--bg-panel-soft);
-    border-top-color: var(--border-dark);
 }
 
 [data-theme="dark"] .patient-profile-emergency-title {
@@ -1378,22 +1320,6 @@ body.role-patient #mainContent.patient-dashboard-page * {
     padding-inline: .5rem;
 
     font-size: .55rem;
-}
-
-.dashboard-document-meta {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: .35rem;
-
-    margin-top: .4rem;
-}
-
-.dashboard-document-action:hover .dashboard-document-meta .status-pill {
-    --status-bg: rgba(255, 255, 255, .14);
-    --status-border: rgba(255, 255, 255, .28);
-    --status-text: var(--text-on-brand);
-    --status-solid: var(--text-on-brand);
 }
 
 .dental-summary-overview {
@@ -1679,6 +1605,11 @@ body.role-patient #mainContent.patient-dashboard-page * {
 .dashboard-upcoming-empty-header .card-header-left {
     flex: 1 1 auto;
     min-width: 0;
+}
+
+#requestDocsContainer [data-doc-open].ui-btn-secondary:focus-visible {
+    outline: 2px solid var(--crimson);
+    outline-offset: 3px;
 }
 
 @media (max-width: 767px) {

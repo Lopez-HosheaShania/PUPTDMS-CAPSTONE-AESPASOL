@@ -41,54 +41,10 @@
             @if ($isDentistView)
                 <div class="dentist-hero page-title-row mb-6">
                     <div class="dentist-hero-content">
-                        <div class="dentist-hero-icon">
-                            <i class="fa-solid fa-users"></i>
-                        </div>
-
                         <div class="min-w-0">
-                            <div class="dentist-hero-eyebrow">
-                                <i class="fa-solid fa-tooth"></i>
-                                Patient Management
-                            </div>
-
                             <h2 class="dentist-hero-title">
                                 {{ $pageHeading }}
                             </h2>
-
-                            <div class="page-summary patient-hero-summary">
-                                <span class="summary-tag">
-                                    <span class="summary-tag-dot bg-gray-400"></span>
-                                    {{ $allCount }} total
-                                </span>
-
-                                @if ($todayCount > 0)
-                                    <span class="summary-tag">
-                                        <span class="summary-tag-dot bg-blue-500"></span>
-                                        {{ $todayCount }} today
-                                    </span>
-                                @endif
-
-                                @if ($upcomingCount > 0)
-                                    <span class="summary-tag">
-                                        <span class="summary-tag-dot bg-orange-500"></span>
-                                        {{ $upcomingCount }} upcoming
-                                    </span>
-                                @endif
-
-                                @if ($completedCount > 0)
-                                    <span class="summary-tag">
-                                        <span class="summary-tag-dot bg-green-500"></span>
-                                        {{ $completedCount }} completed
-                                    </span>
-                                @endif
-
-                                @if ($cancelledCount > 0)
-                                    <span class="summary-tag">
-                                        <span class="summary-tag-dot bg-red-500"></span>
-                                        {{ $cancelledCount }} cancelled
-                                    </span>
-                                @endif
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -99,8 +55,7 @@
             <div class="w-full">
                 <div class="relative">
 
-                    <div
-                        class="table-card patient-table-card rounded-2xl border border-gray-200 shadow-sm overflow-visible">
+                    <div class="table-card patient-table-card">
 
                         @php
                             $patientStatusOptions = [
@@ -199,11 +154,11 @@
                         <div class="table-scroll-wrapper">
                             <div class="table-scroll-inner">
 
-                                <div class="card-col-header">
+                                <div class="card-col-header table-list-header">
                                     <span>Patient</span>
-                                    <span>Date &amp; Time</span>
-                                    <span>Service &amp; Status</span>
-                                    <span></span>
+                                    <span>Appointment</span>
+                                    <span>Service</span>
+                                    <span>Status</span>
                                 </div>
 
                                 <div id="patientSkeleton" class="hidden px-3 md:px-6 pb-6 pt-4">
@@ -278,7 +233,7 @@
                                     </div>
                                 </div>
 
-                                <div id="patientContainer">
+                                <div id="patientContainer" class="table-record-grid table-list-view">
 
                                     @php
                                         $appointments = collect($appointments)
@@ -393,7 +348,6 @@
 
                                             $dateLabel = Carbon::parse($appt->appointment_date)->format('l, F j, Y');
 
-                                            $gridDayLabel = Carbon::parse($appt->appointment_date)->format('l');
                                             $gridDateLabel = Carbon::parse($appt->appointment_date)->format('F j, Y');
 
                                             $timeLabel = Carbon::parse($appt->appointment_time)->format('g:i A');
@@ -403,30 +357,6 @@
                                                     'Others')
                                                     : $appt->service_type_name;
 
-                                            $serviceLower = strtolower($serviceLabel);
-                                            $badgeClass = 'service-badge-default';
-
-                                            if (str_contains($serviceLower, 'surgery')) {
-                                                $badgeClass = 'service-badge-surgery';
-                                            } elseif (str_contains($serviceLower, 'check')) {
-                                                $badgeClass = 'service-badge-checkup';
-                                            } elseif (str_contains($serviceLower, 'whiten')) {
-                                                $badgeClass = 'service-badge-whitening';
-                                            } elseif (str_contains($serviceLower, 'extrac')) {
-                                                $badgeClass = 'service-badge-extraction';
-                                            }
-
-                                            $statusToneClass = $isCancelled
-                                                ? 'status-cancelled'
-                                                : ($isCompleted
-                                                    ? 'status-completed'
-                                                    : ($isRescheduled
-                                                        ? 'status-rescheduled'
-                                                        : ($isToday
-                                                            ? 'status-today'
-                                                            : ($isUpcoming
-                                                                ? 'status-upcoming'
-                                                                : 'status-default'))));
                                             $pillClass = $isCancelled
                                                 ? 'pill-cancelled'
                                                 : ($isCompleted
@@ -483,24 +413,24 @@
                                                 ? route($patientProfileRouteName, $patientId)
                                                 : null;
                                         @endphp
-                                        <div class="patient-card patient-item all {{ $tabClass }} block"
+                                        <div class="patient-card patient-item table-list-row table-record-card all {{ $tabClass }}"
                                             data-patient-id="{{ $patientId }}" data-status="{{ $status }}"
                                             data-date="{{ $appt->appointment_date }}"
-                                            data-time="{{ $appt->appointment_time ?? '00:00:00' }}">
-                                            <div class="accent-bar {{ $statusToneClass }}"></div>
+                                            data-time="{{ $appt->appointment_time ?? '00:00:00' }}"
+                                            data-service="{{ $serviceLabel }}" data-student-id="{{ $patientStudentNo }}"
+                                            @if ($patientProfileUrl) data-patient-href="{{ $patientProfileUrl }}"
+                                                role="link" tabindex="0"
+                                                aria-label="View patient profile for {{ $patientName }}" @endif>
 
                                             <div class="patient-list-card-body">
-                                                <div class="patient-list-main">
+                                                <div class="table-primary">
                                                     <span class="patient-avatar patient-avatar-md" data-patient-avatar
                                                         data-patient-name="{{ $patientName }}"
                                                         data-patient-url="{{ $patientImage }}"></span>
-                                                    <div class="patient-list-person">
-                                                        <div class="patient-list-name-row">
-
-                                                            <h3 class="patient-list-name" data-patient-name>
-                                                                {{ $patientName }}
-                                                            </h3>
-
+                                                    <div class="global-info-copy">
+                                                        <div class="global-info-group">
+                                                            <strong class="table-record-title"
+                                                                data-patient-name>{{ $patientName }}</strong>
                                                             @if ($isWalkInAppointment)
                                                                 <span class="appt-type-icon"
                                                                     data-tooltip="Walk-in appointment"
@@ -509,7 +439,6 @@
                                                                     <i class="fa-solid fa-person-walking"></i>
                                                                 </span>
                                                             @endif
-
                                                             @if ($isFollowUpAppointment)
                                                                 <span class="appt-type-icon"
                                                                     data-tooltip="Follow-up appointment"
@@ -518,187 +447,115 @@
                                                                     <i class="fa-solid fa-calendar-plus"></i>
                                                                 </span>
                                                             @endif
-
                                                         </div>
-
-                                                        <div class="patient-list-meta">
-                                                            <span class="global-info-pill">
-                                                                <i class="fa-regular fa-id-card"></i>
-                                                                {{ $patientStudentNo }}
-                                                            </span>
-
-                                                            <span class="global-info-pill"
-                                                                title="{{ $patientCourseFull }}">
-                                                                <i class="fa-solid fa-graduation-cap"></i>
-                                                                {{ $patientCourse }}
-                                                            </span>
-                                                        </div>
-
+                                                        <span class="global-info-subvalue"
+                                                            title="{{ $patientCourseFull }}">
+                                                            {{ $patientCourse }} · {{ $patientStudentNo }}
+                                                        </span>
                                                         <span class="patient-info hidden">
-                                                            {{ $patientCourseCode }}|
-                                                            {{ $patientYearLevel }}|
-                                                            {{ $patientSection }}|
-                                                            {{ $appt->appointment_date }}|
-                                                            {{ $patient?->department ?? '' }}|
+                                                            {{ $patientCourseCode }}|{{ $patientYearLevel }}|{{ $patientSection }}|
+                                                            {{ $appt->appointment_date }}|{{ $patient?->department ?? '' }}|
                                                             {{ optional($appt->created_at)->toDateTimeString() }}
                                                         </span>
                                                     </div>
                                                 </div>
-
-                                                <div class="patient-list-detail patient-list-date-block">
-                                                    <span
-                                                        class="patient-list-detail-icon global-info-icon {{ $statusToneClass }}">
-                                                        <i class="fa-regular fa-calendar"></i>
+                                                <div class="table-record-row">
+                                                    <span class="table-record-label">Appointment</span>
+                                                    <span class="table-record-value">
+                                                        <span class="global-info-copy">
+                                                            <strong
+                                                                class="global-info-value">{{ $gridDateLabel }}</strong>
+                                                            <small
+                                                                class="global-info-subvalue">{{ $timeLabel }}</small>
+                                                        </span>
+                                                        @if ($showDateUrgency)
+                                                            <span
+                                                                class="urgency-chip {{ $urgencyClass }}">{{ $urgencyLabel }}</span>
+                                                        @endif
                                                     </span>
-
-                                                    <div class="patient-list-detail-copy">
-                                                        <span class="patient-list-detail-label">
-                                                            Appointment
-                                                        </span>
-
-                                                        <strong class="patient-list-detail-value">
-                                                            {{ $dateLabel }}
-                                                        </strong>
-
-                                                        <small class="patient-list-detail-subvalue">
-                                                            {{ $timeLabel }}
-                                                        </small>
-                                                    </div>
                                                 </div>
-
-                                                <div
-                                                    class="patient-list-detail patient-list-service-block patient-service-block">
-                                                    <span
-                                                        class="patient-list-detail-icon global-info-icon {{ $statusToneClass }}">
-                                                        <i class="fa-solid fa-tooth"></i>
+                                                <div class="table-record-row">
+                                                    <span class="table-record-label">Service</span>
+                                                    <span class="table-record-value">{{ $serviceLabel }}</span>
+                                                </div>
+                                                <div class="table-record-row">
+                                                    <span class="table-record-label">Status</span>
+                                                    <span class="table-record-value">
+                                                        <span class="status-pill {{ $pillClass }}">
+                                                            <span class="pill-dot"
+                                                                aria-hidden="true"></span>{{ $pillText }}
+                                                        </span>
                                                     </span>
-
-                                                    <div class="patient-list-detail-copy">
-                                                        <span class="patient-list-detail-label global-info-label">
-                                                            Service
-                                                        </span>
-
-                                                        <strong class="patient-list-detail-value font-semibold">
-                                                            {{ $serviceLabel }}
-                                                        </strong>
-
-                                                        <span class="status-pill {{ $pillClass }} patient-list-status">
-                                                            <span class="pill-dot"></span>
-                                                            {{ $pillText }}
-                                                        </span>
-                                                    </div>
-                                                </div>
-
-                                                <div class="appt-actions-wrap ui-action-group ml-auto">
-                                                    @if ($patientProfileUrl)
-                                                        <x-action-button :href="$patientProfileUrl" variant="view"
-                                                            icon="fa-regular fa-user" label="View profile"
-                                                            tooltip="View profile" />
-                                                    @else
-                                                        <x-action-button type="button" variant="view"
-                                                            icon="fa-regular fa-user" label="No patient profile"
-                                                            tooltip="No patient profile" disabled />
-                                                    @endif
                                                 </div>
                                             </div>
 
-                                            <div class="patient-grid-card-body">
-                                                <div class="mobile-appt-card-head">
-                                                    <div class="min-w-0">
-                                                        <div class="flex items-center gap-2 flex-wrap mb-1">
-                                                            <p class="mobile-patient-name" data-patient-name>
-                                                                {{ $patientName }}
-                                                            </p>
-
-                                                            @if ($isWalkInAppointment)
-                                                                <span class="appt-type-icon"
-                                                                    data-tooltip="Walk-in appointment"
-                                                                    data-tooltip-tone="neutral"
-                                                                    aria-label="Walk-in appointment" tabindex="0">
-                                                                    <i class="fa-solid fa-person-walking"></i>
+                                            <div class="patient-grid-card-body table-record-card-layout">
+                                                <div class="table-record-content">
+                                                    <div class="table-record-header">
+                                                        <div class="table-primary">
+                                                            <span class="patient-avatar patient-avatar-md"
+                                                                data-patient-avatar
+                                                                data-patient-name="{{ $patientName }}"
+                                                                data-patient-url="{{ $patientImage }}"></span>
+                                                            <div class="global-info-copy">
+                                                                <div class="global-info-group">
+                                                                    <h3 class="table-record-title" data-patient-name>
+                                                                        {{ $patientName }}</h3>
+                                                                    @if ($isWalkInAppointment)
+                                                                        <span class="appt-type-icon"
+                                                                            data-tooltip="Walk-in appointment"
+                                                                            data-tooltip-tone="neutral"
+                                                                            aria-label="Walk-in appointment"
+                                                                            tabindex="0">
+                                                                            <i class="fa-solid fa-person-walking"></i>
+                                                                        </span>
+                                                                    @endif
+                                                                    @if ($isFollowUpAppointment)
+                                                                        <span class="appt-type-icon"
+                                                                            data-tooltip="Follow-up appointment"
+                                                                            data-tooltip-tone="neutral"
+                                                                            aria-label="Follow-up appointment"
+                                                                            tabindex="0">
+                                                                            <i class="fa-solid fa-calendar-plus"></i>
+                                                                        </span>
+                                                                    @endif
+                                                                </div>
+                                                                <span class="global-info-subvalue"
+                                                                    title="{{ $patientCourseFull }}">
+                                                                    {{ $patientCourse }} · {{ $patientStudentNo }}
                                                                 </span>
-                                                            @endif
+                                                            </div>
+                                                        </div>
+                                                        <span class="status-pill {{ $pillClass }}">
+                                                            <span class="pill-dot"
+                                                                aria-hidden="true"></span>{{ $pillText }}
+                                                        </span>
+                                                    </div>
 
-                                                            @if ($isFollowUpAppointment)
-                                                                <span class="appt-type-icon"
-                                                                    data-tooltip="Follow-up appointment"
-                                                                    data-tooltip-tone="neutral"
-                                                                    aria-label="Follow-up appointment" tabindex="0">
-                                                                    <i class="fa-solid fa-calendar-plus"></i>
-                                                                </span>
-                                                            @endif
+                                                    <div class="table-record-meta">
+                                                        <div class="table-record-row">
+                                                            <span class="table-record-value">
+                                                                <strong class="global-info-value">
+                                                                    {{ $gridDateLabel }} · {{ $timeLabel }}
+                                                                </strong>
+                                                            </span>
                                                         </div>
 
-                                                        <div class="global-info-group">
-                                                            <span class="global-info-pill">
-                                                                <i class="fa-regular fa-id-card"></i>
-                                                                {{ $patientStudentNo }}
-                                                            </span>
-
-                                                            <span class="global-info-pill"
-                                                                title="{{ $patientCourseFull }}">
-                                                                <i class="fa-solid fa-graduation-cap"></i>
-                                                                {{ $patientCourse }}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="flex items-center gap-2 flex-wrap justify-end">
-                                                        <div class="flex flex-col items-end gap-1">
-                                                            <span
-                                                                class="status-pill {{ $pillClass }} patient-grid-card-status">
-                                                                <span class="pill-dot"></span>
-                                                                {{ $pillText }}
-                                                            </span>
-
-                                                            @if ($showDateUrgency)
-                                                                <span class="urgency-chip {{ $urgencyClass }}">
-                                                                    {{ $urgencyLabel }}
+                                                        <div class="table-record-row">
+                                                            <span class="table-record-value">
+                                                                <span class="flex-1 min-w-0">
+                                                                    {{ $serviceLabel }}
                                                                 </span>
-                                                            @endif
+
+                                                                @if ($showDateUrgency)
+                                                                    <span class="urgency-chip {{ $urgencyClass }}">
+                                                                        {{ $urgencyLabel }}
+                                                                    </span>
+                                                                @endif
+                                                            </span>
                                                         </div>
                                                     </div>
-                                                </div>
 
-                                                <div class="appointment-grid-details">
-                                                    <div class="appointment-grid-detail appointment-grid-detail-wide">
-                                                        <span class="appointment-grid-detail-label">
-                                                            Appointment Date
-                                                        </span>
-                                                        <span class="global-info-value">
-                                                            {{ $gridDayLabel }}, {{ $gridDateLabel }}
-                                                        </span>
-                                                    </div>
-
-                                                    <div class="appointment-grid-detail">
-                                                        <span class="appointment-grid-detail-label">
-                                                            Schedule Time
-                                                        </span>
-                                                        <span class="time-chip">
-                                                            <i class="fa-regular fa-clock"></i>
-                                                            {{ $timeLabel }}
-                                                        </span>
-                                                    </div>
-
-                                                    <div class="appointment-grid-detail">
-                                                        <span class="appointment-grid-detail-label">
-                                                            Service Type
-                                                        </span>
-                                                        <span class="service-badge {{ $badgeClass }}">
-                                                            {{ $serviceLabel }}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                                <div class="mobile-appt-actions ui-action-group">
-                                                    @if ($patientProfileUrl)
-                                                        <x-action-button :href="$patientProfileUrl" variant="view"
-                                                            icon="fa-regular fa-user" label="View profile"
-                                                            tooltip="View profile" />
-                                                    @else
-                                                        <x-action-button type="button" variant="view"
-                                                            icon="fa-regular fa-user" label="No patient profile"
-                                                            tooltip="No patient profile" disabled />
-                                                    @endif
                                                 </div>
                                             </div>
                                         </div>
@@ -838,7 +695,7 @@
             'BSME',
             'BSBA - MM',
             'BSED
-                                - MATH',
+                                                            - MATH',
             'DOMT',
         ] as $course)
                     <label class="choice-chip">
@@ -1032,6 +889,22 @@
                     patientSkeleton.classList.add("hidden");
                     patientContainer.classList.remove("hidden");
                 }
+
+                patientContainer.addEventListener('click', function(event) {
+                    const row = event.target.closest('.patient-item[data-patient-href]');
+                    if (!row || !patientContainer.contains(row)) return;
+                    if (event.target.closest(
+                            'a, button, input, select, textarea, [role="button"], [data-ui-click]')) return;
+                    window.location.assign(row.dataset.patientHref);
+                });
+
+                patientContainer.addEventListener('keydown', function(event) {
+                    if (event.key !== 'Enter' && event.key !== ' ') return;
+                    const row = event.target.closest('.patient-item[data-patient-href]');
+                    if (!row || event.target !== row) return;
+                    event.preventDefault();
+                    window.location.assign(row.dataset.patientHref);
+                });
 
                 var allPatients = Array.from(patientContainer.querySelectorAll(".patient-item"));
                 var filterModal = document.getElementById("filterModal");
@@ -1622,7 +1495,7 @@
 
                 function getName(patient) {
                     var element = patient.querySelector(
-                        ".patient-list-name, .patient-grid-name"
+                        ".table-record-title[data-patient-name]"
                     );
 
                     return element ?
@@ -1631,51 +1504,11 @@
                 }
 
                 function getService(patient) {
-                    var serviceBlock = patient.querySelector(
-                        ".patient-service-block"
-                    );
-
-                    if (!serviceBlock) {
-                        var gridItems = patient.querySelectorAll(
-                            ".global-info-item"
-                        );
-
-                        for (var index = 0; index < gridItems.length; index++) {
-                            var label = gridItems[index].querySelector(
-                                ".global-info-label"
-                            );
-
-                            if (
-                                label &&
-                                label.textContent.trim().toLowerCase() ===
-                                "service"
-                            ) {
-                                return gridItems[index]
-                                    .querySelector("strong")
-                                    ?.textContent
-                                    ?.trim() || "";
-                            }
-                        }
-
-                        return "";
-                    }
-
-                    var serviceName =
-                        serviceBlock.querySelector(".font-semibold");
-
-                    return serviceName ?
-                        serviceName.textContent.trim() :
-                        "";
+                    return patient.getAttribute("data-service") || "";
                 }
 
                 function getIdText(patient) {
-                    var element = patient.querySelector(
-                        ".global-info-pill"
-                    );
-
-                    return element ?
-                        element.textContent.trim() :
-                        "";
+                    return patient.getAttribute("data-student-id") || "";
                 }
 
                 function matchesSearch(patient, keyword) {
@@ -1840,120 +1673,202 @@
 
                 var currentItems = allPatients.slice();
 
+
                 function renderPatientPagebars() {
-                    const totalItems =
-                        currentItems.length;
+                    const totalItems = currentItems.length;
 
-                    const lastPage =
-                        Math.max(
-                            1,
-                            Math.ceil(
-                                totalItems /
-                                PER_PAGE
-                            )
+                    const pageSize = Number.isFinite(PER_PAGE) && PER_PAGE > 0 ?
+                        Math.floor(PER_PAGE) :
+                        10;
+
+                    PER_PAGE = pageSize;
+
+                    const lastPage = Math.max(
+                        1,
+                        Math.ceil(totalItems / pageSize)
+                    );
+
+                    currentPage = Math.max(
+                        1,
+                        Math.min(currentPage, lastPage)
+                    );
+
+                    const from = totalItems ?
+                        (currentPage - 1) * pageSize + 1 :
+                        0;
+
+                    const to = totalItems ?
+                        Math.min(currentPage * pageSize, totalItems) :
+                        0;
+
+                    const itemLabel = totalItems === 1 ?
+                        'patient' :
+                        'patients';
+
+                    const pageInfo =
+                        `Showing ${from}–${to} of ${totalItems} ${itemLabel}`;
+
+                    [pageInfoTop, pageInfoBottom].forEach(element => {
+                        if (element) {
+                            element.textContent = pageInfo;
+                        }
+                    });
+
+                    const pages = [];
+
+                    for (let page = 1; page <= lastPage; page++) {
+                        if (
+                            page === 1 ||
+                            page === lastPage ||
+                            Math.abs(page - currentPage) <= 1
+                        ) {
+                            pages.push(page);
+                        }
+                    }
+
+                    let previousPrintedPage = 0;
+
+                    const pageButtons = pages.map(page => {
+                        const gap = page - previousPrintedPage > 1 ?
+                            `<span class="global-page-ellipsis"
+                    aria-hidden="true">…</span>` :
+                            '';
+
+                        previousPrintedPage = page;
+
+                        if (page === currentPage) {
+                            return gap + `
+                <span class="global-page-current"
+                    aria-current="page">
+                    ${page}
+                </span>
+            `;
+                        }
+
+                        return gap + `
+            <button type="button"
+                class="global-page-btn"
+                data-patient-page="${page}"
+                aria-label="Go to page ${page}">
+                ${page}
+            </button>
+        `;
+                    }).join('');
+
+                    const previousButton = currentPage > 1 ?
+                        `
+            <button type="button"
+                class="global-page-btn"
+                data-patient-page="${currentPage - 1}"
+                aria-label="Previous page">
+                &lsaquo;
+            </button>
+        ` :
+                        `
+            <span class="global-page-disabled"
+                aria-hidden="true">&lsaquo;</span>
+        `;
+
+                    const nextButton = currentPage < lastPage ?
+                        `
+            <button type="button"
+                class="global-page-btn"
+                data-patient-page="${currentPage + 1}"
+                aria-label="Next page">
+                &rsaquo;
+            </button>
+        ` :
+                        `
+            <span class="global-page-disabled"
+                aria-hidden="true">&rsaquo;</span>
+        `;
+
+                    const html = `
+        <div class="global-pagination">
+            ${previousButton}
+            ${pageButtons}
+            ${nextButton}
+        </div>
+    `;
+
+                    [paginationTop, paginationBottom].forEach(element => {
+                        if (element) {
+                            element.innerHTML = html;
+                        }
+                    });
+
+                    [
+                        'patientPaginationTopBar',
+                        'patientPaginationBottomBar'
+                    ].forEach(id => {
+                        const bar = document.getElementById(id);
+
+                        if (bar) {
+                            bar.hidden = false;
+                            bar.classList.remove('hidden');
+                        }
+                    });
+
+                    if (perPageInput) {
+                        perPageInput.value = String(pageSize);
+
+                        window.syncGlobalPageSizeSelect?.(
+                            perPageInput,
+                            pageSize
                         );
+                    }
 
-                    currentPage =
-                        Math.min(
-                            Math.max(
+                    if (!paginationTop && !paginationBottom) {
+                        console.warn(
+                            'Patient pagination containers were not found.'
+                        );
+                    }
+                }
+
+
+                [paginationTop, paginationBottom]
+                .filter(Boolean)
+                    .forEach(container => {
+                        container.addEventListener('click', function(event) {
+                            const button = event.target.closest(
+                                'button[data-patient-page]'
+                            );
+
+                            if (!button || !container.contains(button)) {
+                                return;
+                            }
+
+                            event.preventDefault();
+
+                            const page = Number(
+                                button.dataset.patientPage
+                            );
+
+                            const lastPage = Math.max(
                                 1,
-                                currentPage
-                            ),
-                            lastPage
-                        );
+                                Math.ceil(currentItems.length / PER_PAGE)
+                            );
 
-                    const from =
-                        totalItems > 0 ?
-                        (
-                            (
-                                currentPage - 1
-                            ) * PER_PAGE
-                        ) + 1 :
-                        null;
+                            if (
+                                !Number.isInteger(page) ||
+                                page < 1 ||
+                                page > lastPage ||
+                                page === currentPage
+                            ) {
+                                return;
+                            }
 
-                    const to =
-                        totalItems > 0 ?
-                        Math.min(
-                            currentPage *
-                            PER_PAGE,
-                            totalItems
-                        ) :
-                        null;
-
-                    window.renderGlobalPagination?.({
-                        currentPage,
-
-                        lastPage,
-
-                        total: totalItems,
-
-                        from,
-
-                        to,
-
-                        containers: [
-                            document.getElementById(
-                                'patientPaginationTop'
-                            ),
-                            document.getElementById(
-                                'patientPaginationBottom'
-                            ),
-                        ],
-
-                        bars: [
-                            document.getElementById(
-                                'patientPaginationTopBar'
-                            ),
-                            document.getElementById(
-                                'patientPaginationBottomBar'
-                            ),
-                        ],
-
-                        infoElements: [
-                            document.getElementById(
-                                'patientPageInfoTop'
-                            ),
-                            document.getElementById(
-                                'patientPageInfoBottom'
-                            ),
-                        ],
-
-                        itemLabel: totalItems === 1 ?
-                            'patient' : 'patients',
-
-                        onPageChange(page) {
                             currentPage = page;
 
                             updatePage();
 
-                            document
-                                .querySelector(
-                                    '.patient-table-card'
-                                )
+                            document.querySelector('.patient-table-card')
                                 ?.scrollIntoView({
                                     behavior: 'smooth',
-
-                                    block: 'start',
+                                    block: 'start'
                                 });
-                        },
+                        });
                     });
-
-                    const perPageInput =
-                        document.getElementById(
-                            'patientPerPage'
-                        );
-
-                    if (perPageInput) {
-                        perPageInput.value =
-                            String(PER_PAGE);
-
-                        window
-                            .syncGlobalPageSizeSelect?.(
-                                perPageInput,
-                                PER_PAGE
-                            );
-                    }
-                }
 
                 function getCurrentPatientStatus() {
                     if (
@@ -2145,6 +2060,17 @@
                     allPatients.forEach(function(patient) {
                         patient.classList.add("hidden");
                     });
+
+                    const orderedRows = [
+                        ...currentItems,
+                        ...allPatients.filter(patient => !currentItems.includes(patient))
+                    ];
+                    const fragment = document.createDocumentFragment();
+                    orderedRows.forEach(patient => fragment.appendChild(patient));
+                    patientContainer.insertBefore(
+                        fragment,
+                        patientContainer.querySelector('.empty-state-host')
+                    );
 
                     currentItems
                         .slice(startIndex, endIndex)

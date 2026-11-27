@@ -41,14 +41,10 @@
 
                 <div class="global-info-profile">
 
-                    <div class="global-info-profile-icon">
-                        <i class="fa-regular fa-user"></i>
-                    </div>
-
                     <div class="global-info-profile-copy">
 
                         <span class="global-info-label">
-                            Cancelling appointment for
+                            Patient
                         </span>
 
                         <strong id="cancelPatientName" class="global-info-profile-name">
@@ -62,14 +58,6 @@
                 <div class="global-info-grid">
 
                     <div class="global-info-item">
-
-                        <span
-                            class="
-                                global-info-icon
-                                status-cancelled
-                            ">
-                            <i class="fa-regular fa-calendar-xmark"></i>
-                        </span>
 
                         <div class="global-info-copy">
 
@@ -91,7 +79,7 @@
 
                     <div class="global-label-row">
                         <label class="global-form-label">
-                            Cancellation Reason
+                            Cancellation Reason <span class="required-mark">*</span>
                         </label>
                     </div>
 

@@ -10,16 +10,7 @@
     overflow: hidden;
     border: 1px solid var(--crimson-mid);
     border-radius: 20px;
-    background:
-        radial-gradient(circle at top left,
-            var(--crimson-light),
-            transparent 44%),
-        linear-gradient(90deg,
-            #FFFFFF,
-            var(--surface));
-    box-shadow:
-        0 14px 30px rgba(139, 0, 0, .07),
-        inset 0 1px 0 rgba(255, 255, 255, .85);
+    background: var(--surface);
 }
 
 .modal-profile-card-single {
@@ -71,9 +62,9 @@
 .modal-profile-eyebrow,
 .modal-profile-label {
     display: block;
-    color: #9CA3AF;
+    color: var(--text-3);
     font-size: 10px;
-    font-weight: 900;
+    font-weight: 700;
     line-height: 1.15;
 
     letter-spacing: .09em;
@@ -83,9 +74,9 @@
 .modal-profile-name {
     display: block;
     margin-top: 4px;
-    color: #1F2937;
+    color: var(--text-1);
     font-size: 15px;
-    font-weight: 900;
+    font-weight: 800;
     line-height: 1.3;
     white-space: normal;
     overflow: visible;
@@ -213,33 +204,26 @@
 .appointment-modal-header {
     --appointment-header-accent: var(--modal-accent, var(--crimson));
     --appointment-header-dark: var(--modal-accent-dark, var(--crimson-dark));
-    --appointment-header-soft:
-        var(--modal-accent-soft, var(--crimson-light));
+    --appointment-header-soft: var(--modal-accent-soft, var(--crimson-light));
 
     position: relative;
     isolation: isolate;
     overflow: hidden;
 
-    min-height: 96px;
-    padding: 1.15rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
 
-    background:
-        radial-gradient(circle at 12% 22%,
-            var(--appointment-header-soft),
-            transparent 38%),
-        linear-gradient(110deg,
-            color-mix(in srgb,
-                var(--appointment-header-accent) 10%,
-                #FFFFFF),
-            #FFFFFF 48%,
-            color-mix(in srgb,
-                var(--appointment-header-accent) 4%,
-                #FFFFFF));
+    min-height: 68px;
+    padding: .85rem 1.25rem;
 
-    border-bottom:
-        1px solid color-mix(in srgb,
-            var(--appointment-header-accent) 18%,
-            #E5E7EB);
+    background: var(--appointment-header-soft);
+
+    border-bottom: 1px solid color-mix(
+        in srgb,
+        var(--appointment-header-accent) 18%,
+        var(--border)
+    );
 }
 
 .appointment-modal-header-icon {
@@ -279,22 +263,6 @@
 
 .appointment-modal-header-copy {
     min-width: 0;
-}
-
-.appointment-modal-eyebrow {
-    display: block;
-    margin-bottom: 3px;
-
-    color:
-        color-mix(in srgb,
-            var(--appointment-header-accent) 56%,
-            #6B7280);
-
-    font-size: 10px;
-    font-weight: 900;
-    line-height: 1;
-    letter-spacing: .11em;
-    text-transform: uppercase;
 }
 
 .appointment-modal-title {
@@ -369,13 +337,9 @@
 
 .modal-x:hover {
     background: var(--crimson-light);
-    border-color: var(--crimson-mid);
-    color: var(--crimson);
+    border-color: var(--border);
+    color: var(--crimson-1);
     transform: translateY(-1px);
-    box-shadow:
-        0 8px 18px color-mix(in srgb,
-            var(--crimson) 8%,
-            transparent);
 }
 
 .modal-x:active {
@@ -986,14 +950,7 @@ body:has([id$="Modal"].opacity-100:not(.pointer-events-none)) .asw-menu {
     padding: 1rem;
     border: 1px solid var(--crimson-mid);
     border-radius: 18px;
-    background:
-        radial-gradient(circle at top left,
-            var(--crimson-light),
-            transparent 46%),
-        var(--card);
-    box-shadow:
-        0 12px 26px rgba(139, 0, 0, .06),
-        inset 0 1px 0 rgba(255, 255, 255, .72);
+    background: var(--card);
 }
 
 .confirmed-modal-details-header {
@@ -1029,10 +986,10 @@ body:has([id$="Modal"].opacity-100:not(.pointer-events-none)) .asw-menu {
     display: block;
     margin-bottom: 3px;
 
-    color: #9CA3AF;
+    color: var(--text-3);
 
     font-size: 9.5px;
-    font-weight: 900;
+    font-weight: 800;
     line-height: 1;
     letter-spacing: .1em;
     text-transform: uppercase;
@@ -1040,11 +997,9 @@ body:has([id$="Modal"].opacity-100:not(.pointer-events-none)) .asw-menu {
 
 .confirmed-modal-details-title {
     display: block;
-
     color: var(--text-1);
-
     font-size: .9rem;
-    font-weight: 850;
+    font-weight: 800;
     line-height: 1.3;
 }
 
@@ -1120,11 +1075,9 @@ body:has([id$="Modal"].opacity-100:not(.pointer-events-none)) .asw-menu {
 .confirmed-modal-schedule-value {
     display: block;
     margin-top: 4px;
-
     color: var(--text-1);
-
     font-size: .8rem;
-    font-weight: 850;
+    font-weight: 750;
     line-height: 1.3;
 
     overflow-wrap: anywhere;
@@ -1192,18 +1145,9 @@ body:has([id$="Modal"].opacity-100:not(.pointer-events-none)) .asw-menu {
     color: #FCA5A5;
 }
 
-[data-theme="dark"] .ui-modal .confirmed-modal-details-eyebrow,
-.dark .ui-modal .confirmed-modal-details-eyebrow,
 [data-theme="dark"] .ui-modal .confirmed-modal-schedule-label,
 .dark .ui-modal .confirmed-modal-schedule-label {
     color: var(--text-3);
-}
-
-[data-theme="dark"] .ui-modal .confirmed-modal-details-title,
-.dark .ui-modal .confirmed-modal-details-title,
-[data-theme="dark"] .ui-modal .confirmed-modal-schedule-value,
-.dark .ui-modal .confirmed-modal-schedule-value {
-    color: var(--text-1);
 }
 
 [data-theme="dark"] .ui-modal .confirmed-modal-schedule-item,
@@ -1296,23 +1240,6 @@ body:has([id$="Modal"].opacity-100:not(.pointer-events-none)) .asw-menu {
     --modal-accent-shadow: rgba(245, 158, 11, .20);
 }
 
-.ui-modal[class*="modal-theme-"] .modal-hd {
-    background:
-        radial-gradient(circle at top left,
-            color-mix(in srgb,
-                var(--modal-accent) 12%,
-                transparent),
-            transparent 44%),
-        linear-gradient(110deg,
-            var(--modal-accent-soft),
-            #ffffff 52%,
-            color-mix(in srgb,
-                var(--modal-accent) 4%,
-                #ffffff));
-
-    border-bottom-color: var(--modal-accent-border);
-}
-
 [data-theme="dark"] .modal-title,
 .dark .modal-title {
     color: var(--text-1);
@@ -1373,22 +1300,6 @@ body:has([id$="Modal"].opacity-100:not(.pointer-events-none)) .asw-menu {
     background: var(--surface);
     border-color: var(--border);
     color: var(--text-1);
-}
-
-[data-theme="dark"] .ui-modal .modal-profile-card,
-.dark .ui-modal .modal-profile-card {
-    background:
-        radial-gradient(circle at top left,
-            rgba(139, 0, 0, .18),
-            transparent 44%),
-        var(--card);
-
-    border-color:
-        rgba(252, 165, 165, .18);
-
-    box-shadow:
-        0 16px 36px rgba(0, 0, 0, .28),
-        inset 0 1px 0 rgba(255, 255, 255, .04);
 }
 
 [data-theme="dark"] .ui-modal .modal-profile-avatar,
@@ -1713,14 +1624,6 @@ body:has([id$="Modal"].opacity-100:not(.pointer-events-none)) .asw-menu {
     color: var(--text-1);
 }
 
-[data-theme="dark"] .ui-modal .appointment-modal-eyebrow,
-.dark .ui-modal .appointment-modal-eyebrow {
-    color:
-        color-mix(in srgb,
-            var(--appointment-header-accent) 58%,
-            #F8FAFC);
-}
-
 [data-theme="dark"] .ui-modal .appointment-modal-subtitle,
 .dark .ui-modal .appointment-modal-subtitle {
     color: var(--text-3);
@@ -1756,20 +1659,6 @@ body:has([id$="Modal"].opacity-100:not(.pointer-events-none)) .asw-menu {
 .dark .ui-modal .modal-ft {
     background: var(--surface);
     border-color: var(--border);
-}
-
-[data-theme="dark"] .modal-x,
-.dark .modal-x {
-    background: rgba(255, 255, 255, .06);
-    border-color: rgba(255, 255, 255, .10);
-    color: #CBD5E1;
-}
-
-[data-theme="dark"] .modal-x:hover,
-.dark .modal-x:hover {
-    background: rgba(252, 165, 165, .13);
-    border-color: rgba(252, 165, 165, .25);
-    color: #FCA5A5;
 }
 
 [data-theme="dark"] .ui-modal .form-label,
@@ -3057,12 +2946,10 @@ body.session-expired {
         border-radius: 24px;
     }
 
-
     body .ui-modal#appointmentConfirmedModal .appointment-modal-header {
-        min-height: 76px;
-        padding: .8rem 1rem;
+        min-height: 56px;
+        padding: .75rem 1rem;
     }
-
 
     body .ui-modal#appointmentConfirmedModal .appointment-modal-header-icon {
         width: 40px;
@@ -3070,43 +2957,35 @@ body.session-expired {
         min-width: 40px;
     }
 
-
     body .ui-modal#appointmentConfirmedModal .appointment-modal-title {
         font-size: 15px;
     }
-
 
     body .ui-modal#appointmentConfirmedModal .appointment-modal-subtitle {
         font-size: 11px;
     }
 
-
     body .ui-modal#appointmentConfirmedModal .modal-bd {
         padding: .7rem 1rem;
     }
-
 
     body .ui-modal#appointmentConfirmedModal .modal-profile-card {
         padding: .65rem;
         margin-bottom: .7rem;
     }
 
-
     body .ui-modal#appointmentConfirmedModal .confirmed-modal-details {
         padding: .7rem;
     }
-
 
     body .ui-modal#appointmentConfirmedModal .confirmed-modal-schedule-item {
         min-height: 50px;
         padding: .5rem .6rem;
     }
 
-
     body .ui-modal#appointmentConfirmedModal .modal-ft {
         padding: .6rem 1rem .8rem;
     }
-
 
     body .ui-modal#appointmentConfirmedModal .modal-ft button {
         min-height: 38px;

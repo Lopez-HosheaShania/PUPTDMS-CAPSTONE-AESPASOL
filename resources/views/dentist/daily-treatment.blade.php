@@ -15,16 +15,7 @@
 
             <section class="dentist-hero mb-5">
                 <div class="dentist-hero-content">
-                    <div class="dentist-hero-icon">
-                        <i class="fa-solid fa-notes-medical"></i>
-                    </div>
-
                     <div class="min-w-0">
-                        <div class="dentist-hero-eyebrow">
-                            <i class="fa-solid fa-tooth"></i>
-                            Daily Treatment
-                        </div>
-
                         <h1 class="dentist-hero-title">Daily Treatment Record</h1>
                     </div>
                 </div>

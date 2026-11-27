@@ -23,16 +23,7 @@
                     <div class="dentist-hero-content">
 
                         <div class="dentist-hero-left">
-
-                            <div class="dentist-hero-icon">
-                                <i class="fa-solid fa-shield-halved"></i>
-                            </div>
-
                             <div class="min-w-0">
-                                <div class="dentist-hero-eyebrow">
-                                    Account Security
-                                </div>
-
                                 <h1 class="dentist-hero-title">
                                     Account Sessions
                                 </h1>

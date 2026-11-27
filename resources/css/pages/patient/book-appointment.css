@@ -91,22 +91,6 @@ textarea {
         0 18px 38px rgba(0, 0, 0, 0.32) !important;
 }
 
-[data-theme="dark"] #mainContent .booking-step-title,
-[data-theme="dark"] #mainContent .text-\[\#660000\] {
-    color: #fecaca !important;
-}
-
-[data-theme="dark"] #mainContent .booking-step-eyebrow,
-[data-theme="dark"] #mainContent .text-\[\#8B0000\] {
-    color: #fca5a5 !important;
-}
-
-[data-theme="dark"] #mainContent .border-\[\#e8e2dd\],
-[data-theme="dark"] #mainContent .border-\[\#ece3de\],
-[data-theme="dark"] #mainContent .border-\[\#f1e8e3\] {
-    border-color: rgba(255, 255, 255, 0.10) !important;
-}
-
 .time-panel.is-empty {
     min-height: auto !important;
 }

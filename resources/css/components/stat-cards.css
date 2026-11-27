@@ -34,12 +34,10 @@
 
     border-radius: 999px;
 
-    color: var(--stat-accent);
+    color: var(text-1);
     background: rgba(255, 255, 255, .76);
 
-    border: 1px solid color-mix(in srgb,
-            var(--stat-accent) 14%,
-            #e9e4de);
+    border: 1px solid var(--border);
 
     font-size: .65rem;
 
@@ -55,22 +53,17 @@
 .stat-card-link:hover .stat-card-link-indicator {
     opacity: 1;
     transform: translate(2px, -2px);
-    background: rgba(255, 255, 255, .06);
-    box-shadow:
-        0 8px 18px color-mix(in srgb,
-            var(--stat-accent) 14%,
-            transparent);
+    background: var(--stat-accent);
+    color: var(--color-white);
 }
 
 [data-theme="dark"] .stat-card-link-indicator,
 .dark .stat-card-link-indicator {
-    background: rgba(255, 255, 255, .06);
+    background: var(--stat-soft);
     border-color:
         color-mix(in srgb,
             var(--stat-accent) 22%,
             rgba(255, 255, 255, .10));
-
-    color: var(--stat-accent);
 }
 
 .stat-card[data-filter="all"] {
@@ -107,8 +100,6 @@
         color-mix(in srgb,
             var(--stat-accent) 7%,
             var(--card));
-
-    box-shadow: none;
 }
 
 [data-theme="dark"] .stat-card:hover,
@@ -117,28 +108,20 @@
         color-mix(in srgb,
             var(--stat-accent) 12%,
             var(--card));
-
-    box-shadow: none;
 }
 
 .stat-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-
     width: 100%;
     min-width: 0;
-
     gap: 0;
-    margin-bottom: 24px;
+    margin-bottom: .75rem;
 
     overflow: hidden;
-
     border: 1px solid var(--border);
     border-radius: 16px;
-
     background: var(--card);
-
-    box-shadow: none;
 }
 
 .stat-card {
@@ -169,8 +152,6 @@
         color-mix(in srgb,
             var(--stat-accent) 5%,
             var(--card));
-
-    box-shadow: none;
 
     text-align: left;
 
@@ -452,8 +433,6 @@
         color-mix(in srgb,
             var(--stat-accent) 9%,
             var(--card));
-
-    box-shadow: none;
 }
 
 .stat-card::before {
@@ -557,8 +536,6 @@
             var(--card));
 
     border-color: var(--border);
-
-    box-shadow: none;
 }
 
 [data-theme="dark"] .stat-card.stat-active,

@@ -427,8 +427,8 @@
     width: 42px;
     height: 42px;
     border-radius: 14px;
-    background: var(--status-bg, var(--crimson-light, #fef2f2));
-    color: var(--status-solid, var(--crimson, #8B0000));
+    background: var(--card);
+    color: var(--crimson);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -692,12 +692,8 @@
 
 [data-theme="dark"] .card-header-icon,
 .dark .card-header-icon {
-    background: var(--status-bg, var(--crimson-soft));
-    border-color: var(--status-border, var(--crimson-mid));
+    border-color: var(--text-3);
     color: var(--status-solid, var(--status-cancelled-text));
-
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
 }
 
 [data-theme="dark"] .card-arrow-btn,
@@ -945,16 +941,7 @@
     border: 1px solid #f0eaea;
     border-radius: 16px;
 
-    background:
-        radial-gradient(circle at 100% 100%,
-            rgba(139, 0, 0, .055),
-            transparent 44%),
-        linear-gradient(145deg,
-            #ffffff,
-            #fdfafa);
-
-    box-shadow:
-        0 5px 16px rgba(15, 23, 42, .045);
+    background: var(--card);
 
     text-align: left;
     cursor: pointer;
@@ -968,18 +955,16 @@
 
 .quick-action-card::before {
     content: "";
-
     position: absolute;
-    z-index: -1;
+    z-index: 0;
     inset: 0;
+    pointer-events: none;
 
-    background:
-        linear-gradient(135deg,
-            var(--crimson, #8B0000),
-            #650000);
+    background: linear-gradient(135deg,
+            var(--crimson, #8B0000) 0%,
+            var(--crimson-dark, #5F0000) 100%);
 
     opacity: 0;
-
     transition: opacity .18s ease;
 }
 
@@ -995,15 +980,11 @@
     align-items: center;
     justify-content: center;
 
-    border: 1px solid rgba(139, 0, 0, .12);
+    border: 1px solid var(--border);
     border-radius: 14px;
 
-    background: var(--crimson-light, #fef2f2);
-    color: var(--crimson, #8B0000);
-
-    box-shadow:
-        0 7px 16px rgba(139, 0, 0, .08);
-
+    background: var(--card);
+    color: var(--crimson-1);
     transition:
         color .18s ease,
         background-color .18s ease,
@@ -1146,33 +1127,16 @@
     color: var(--text-3);
 }
 
-[data-theme="dark"] .quick-action-icon,
-.dark .quick-action-icon {
-    border-color:
-        color-mix(in srgb,
-            var(--crimson) 26%,
-            var(--border));
-
-    background:
-        color-mix(in srgb,
-            var(--crimson) 18%,
-            var(--surface));
-
-    color:
-        var(--status-cancelled-text, #FCA5A5);
-}
-
-[data-theme="dark"] .quick-action-icon i,
-.dark .quick-action-icon i {
-    color: currentColor;
-}
-
 [data-theme="dark"] .quick-action-bg-icon,
 .dark .quick-action-bg-icon {
-    color:
-        color-mix(in srgb,
-            var(--crimson) 18%,
-            transparent);
+    color: var(--color-white, #ffffff);
+    opacity: 0.14;
+}
+
+[data-theme="dark"] .quick-action-card:hover .quick-action-bg-icon,
+.dark .quick-action-card:hover .quick-action-bg-icon {
+    color: var(--color-white, #ffffff);
+    opacity: 0.12;
 }
 
 .card-header:has(> .global-select-compact) {
@@ -1320,7 +1284,7 @@
 }
 
 .appt-visit-day {
-    color: var(--crimson);
+    color: var(--text-1);
     font-size: 1.55rem;
     font-weight: 900;
     line-height: 1;
@@ -1357,7 +1321,7 @@
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     grid-template-rows: auto auto;
-
+    background: var(--card);
     align-items: center;
 
     column-gap: .65rem;
@@ -1452,7 +1416,7 @@
     justify-content: center;
     padding: .5rem;
     border-left: 1px solid var(--border);
-    background: var(--surface);
+    background: var(--card);
 }
 
 .appt-visit-card-upcoming {

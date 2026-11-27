@@ -1,5 +1,6 @@
 @php
     use App\Models\Role;
+    use App\Http\Controllers\NotificationController;
 
     $authUser = auth()->user();
 
@@ -10,159 +11,42 @@
 
     $role = $role ?? $actualRole;
 
-    $notificationRole = $isRolePreview ? $actualRole : $role;
-    $resolveNotificationUrl = function (array $payload, string $activeRole): string {
-        $fallbackUrl = data_get($payload, 'url') ?? (data_get($payload, 'action_url') ?? '#');
+    $notificationRole = $actualRole;
+    $notifications = collect();
 
-        $event = data_get($payload, 'event') ?? data_get($payload, 'type');
-
-        return match ($event) {
-            'appointment.booked', 'appointment.rescheduled' => match ($activeRole) {
-                'admin', 'super_admin' => Route::has('admin.admin.appointments')
-                    ? route('admin.admin.appointments')
-                    : $fallbackUrl,
-
-                'dentist' => Route::has('dentist.dentist.appointments')
-                    ? route('dentist.dentist.appointments')
-                    : $fallbackUrl,
-
-                'patient' => Route::has('patient.appointment.index')
-                    ? route('patient.appointment.index')
-                    : $fallbackUrl,
-
-                default => $fallbackUrl,
-            },
-
-            'appointment.cancelled' => match ($activeRole) {
-                'patient' => Route::has('patient.record')
-                    ? route('patient.record', [
-                        'appointment' => data_get($payload, 'appointment_id'),
-                    ])
-                    : $fallbackUrl,
-
-                'admin', 'super_admin' => Route::has('admin.admin.appointments')
-                    ? route('admin.admin.appointments')
-                    : $fallbackUrl,
-
-                'dentist' => Route::has('dentist.dentist.appointments')
-                    ? route('dentist.dentist.appointments')
-                    : $fallbackUrl,
-
-                default => $fallbackUrl,
-            },
-
-            'document.request.submitted', 'document_request_submitted' => match ($activeRole) {
-                'admin', 'super_admin' => Route::has('admin.document-requests.index')
-                    ? route('admin.document-requests.index')
-                    : $fallbackUrl,
-
-                'dentist' => Route::has('dentist.dentist.documentrequests')
-                    ? route('dentist.dentist.documentrequests')
-                    : $fallbackUrl,
-
-                default => $fallbackUrl,
-            },
-
-            'document.request.approved',
-            'document_request_approved',
-            'document.request.rejected',
-            'document_request_rejected'
-                => match ($activeRole) {
-                'patient' => Route::has('patient.record')
-                    ? route('patient.record', [
-                        'section' => 'document-requests',
-                    ])
-                    : $fallbackUrl,
-
-                default => $fallbackUrl,
-            },
-
-            default => $fallbackUrl,
-        };
-    };
-
-    $legacyNotifications = collect($notifications ?? []);
-    $databaseNotifications = collect();
+    $notifCount = 0;
+    $notifTotalCount = 0;
+    $notifReadCount = 0;
+    $notifNextCursor = null;
+    $notifHasMore = false;
 
     if ($authUser) {
-        $databaseNotifications = $authUser
-            ->currentRoleNotifications()
-            ->latest()
-            ->take(15)
-            ->get()
-            ->map(function ($notification) use ($resolveNotificationUrl, $notificationRole) {
-                $payload = $notification->data ?? [];
-                $title =
-                    data_get($payload, 'title') ??
-                    (data_get($payload, 'subject') ?? class_basename($notification->type));
-                $message =
-                    data_get($payload, 'message') ?? (data_get($payload, 'body') ?? data_get($payload, 'description'));
-                $event = (string) data_get($payload, 'event');
-                $expirationDate = data_get($payload, 'expiration_date');
+        $notificationPage = NotificationController::notificationQuery($authUser)
+            ->reorder()
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->cursorPaginate(5, ['*'], 'notification_cursor');
 
-                if (str_starts_with($event, 'inventory.expiration.') && $expirationDate) {
-                    $date = \Illuminate\Support\Carbon::parse($expirationDate);
-                    $message = str_replace($date->format('M d, Y'), $date->format('F d, Y'), (string) $message);
-                }
-                $isDentistContinuityNotification = str_ends_with(
-                    (string) $notification->type,
-                    'DentistTransitionNotification',
-                );
-
-                $actionUrl = $isDentistContinuityNotification
-                    ? '#'
-                    : $resolveNotificationUrl($payload, $notificationRole);
-
-                return [
-                    'id' => $notification->id,
-                    'title' => $title ?: 'Notification',
-                    'message' => $message,
-                    'url' => $actionUrl ?: '#',
-                    'state' => $notification->read_at ? 'read' : 'unread',
-                    'created_at' => $notification->created_at,
-                    'created_at_label' => optional($notification->created_at)->diffForHumans(),
-                    'icon' => data_get($payload, 'icon') ?? 'fa-bell',
-                    'event' => $event,
-                    'mark_read_url' => Route::has('notifications.mark-read')
-                        ? route('notifications.mark-read', ['notificationId' => $notification->id])
-                        : null,
-                ];
-            })
-            ->reject(fn($notification) => data_get($notification, 'event') === 'inventory.low_stock')
+        $notifications = $notificationPage
+            ->getCollection()
+            ->map(
+                fn($notification) => NotificationController::formatNotification(
+                    $notification,
+                    $notificationRole,
+                    $authUser,
+                ),
+            )
             ->values();
+
+        $counts = NotificationController::notificationCounts($authUser);
+
+        $notifCount = $counts['unread_count'];
+        $notifReadCount = $counts['read_count'];
+        $notifTotalCount = $counts['total_count'];
+
+        $notifNextCursor = $notificationPage->nextCursor()?->encode();
+        $notifHasMore = $notificationPage->hasMorePages();
     }
-
-    if ($databaseNotifications->isNotEmpty()) {
-        $notifications = $databaseNotifications->values();
-    } else {
-        $notifications = $legacyNotifications
-            ->map(function ($notification) {
-                $createdAt = $notification['created_at'] ?? null;
-
-                if (is_string($createdAt) && $createdAt !== '') {
-                    $createdAt = \Illuminate\Support\Carbon::parse($createdAt);
-                }
-
-                return [
-                    'id' => $notification['id'] ?? uniqid('notif_', true),
-                    'title' => $notification['title'] ?? 'Notification',
-                    'message' => $notification['message'] ?? null,
-                    'url' => $notification['url'] ?? '#',
-                    'state' => $notification['state'] ?? 'unread',
-                    'created_at' => $createdAt,
-                    'created_at_label' =>
-                        $notification['created_at_label'] ?? ($createdAt ? $createdAt->diffForHumans() : null),
-                    'icon' => $notification['icon'] ?? 'fa-bell',
-                    'mark_read_url' => $notification['mark_read_url'] ?? null,
-                ];
-            })
-            ->values();
-    }
-
-    $unreadNotifications = $notifications->where('state', 'unread')->values();
-    $readNotifications = $notifications->where('state', 'read')->values();
-    $notifCount = $unreadNotifications->count();
-    $notifTotalCount = $notifications->count();
 
     $showMobileMenu = $showMobileMenu ?? in_array($role, ['admin', 'super_admin', 'dentist'], true);
     $showSettings = $showSettings ?? in_array($role, ['admin', 'super_admin'], true);
@@ -238,127 +122,213 @@
     <div class="header-right">
         <div id="notifDropdown"
             @if (Route::has('notifications.poll')) data-notif-poll-url="{{ route('notifications.poll') }}" @endif>
-            <button class="hdr-icon-btn" id="notifBtn" type="button" aria-label="Notifications">
+            <button class="hdr-icon-btn" id="notifBtn" type="button" aria-label="Notifications"
+                aria-controls="notifMenu" aria-expanded="false">
+
                 <i class="fa-regular fa-bell"></i>
-                @if ($notifCount > 0)
-                    <span class="notif-badge" data-notif-badge>
-                        {{ $notifCount > 9 ? '9+' : $notifCount }}
-                    </span>
-                @endif
+
+                <span class="notif-badge" data-notif-badge @if ($notifCount === 0) hidden @endif>
+
+                    {{ $notifCount > 9 ? '9+' : $notifCount }}
+
+                </span>
+
             </button>
 
-            <div id="notifMenu" class="header-dropdown-menu header-notif-menu" aria-label="Notifications panel">
+            <div id="notifMenu" class="header-dropdown-menu header-notif-menu" aria-label="Notifications panel"
+                data-notif-next-cursor="{{ $notifNextCursor }}"
+                data-notif-has-more="{{ $notifHasMore ? 'true' : 'false' }}"
+                data-notif-unread-count="{{ $notifCount }}" data-notif-read-count="{{ $notifReadCount }}"
+                data-notif-total-count="{{ $notifTotalCount }}">
+
                 <div class="header-notif-head">
+
                     <div class="header-notif-head-copy">
+
                         <div class="header-notif-head-title">
-                            <i class="fa-solid fa-bell"></i>
-                            <span>Notifications</span>
+                            Notifications
                         </div>
+
                         <div class="header-notif-head-meta">
+
                             <span class="header-notif-pill" data-notif-unread-pill>
-                                {{ $notifCount > 9 ? '9+' : $notifCount }} unread
+                                {{ $notifCount }} unread
                             </span>
-                            <span class="header-notif-pill header-notif-pill-muted"
-                                data-notif-total-pill>{{ $notifTotalCount }} total</span>
+
+                            <span aria-hidden="true">·</span>
+
+                            <span class="header-notif-pill header-notif-pill-muted" data-notif-total-pill>
+                                {{ $notifTotalCount }} total
+                            </span>
+
                         </div>
+
                     </div>
 
                     @if (Route::has('notifications.mark-all-read'))
                         <form method="POST" action="{{ route('notifications.mark-all-read') }}"
-                            class="header-notif-actions" data-notif-mark-all-form {{ $notifCount > 0 ? '' : 'hidden' }}"
+                            class="header-notif-actions" data-notif-mark-all-form
                             @if ($notifCount === 0) hidden @endif>
+
                             @csrf
-                            <button type="submit" class="header-notif-mark-all">Mark all as read</button>
+
+                            <button type="submit" class="header-notif-mark-all">
+                                Mark all as read
+                            </button>
+
                         </form>
                     @endif
+
                 </div>
 
-                <div class="header-notif-tabs" role="tablist" aria-label="Notification filters">
-                    <button type="button" class="header-notif-tab is-active" data-notif-filter="all">
-                        <span>All</span>
-                        <span data-notif-tab-count="all">{{ $notifTotalCount }}</span>
+                <div class="header-notif-tabs" role="group" aria-label="Notification filters">
+
+                    <button type="button" class="header-notif-tab is-active" data-notif-filter="all"
+                        aria-pressed="true">
+                        All
                     </button>
-                    <button type="button" class="header-notif-tab" data-notif-filter="unread">
-                        <span>Unread</span>
-                        <span data-notif-tab-count="unread">{{ $notifCount }}</span>
+
+                    <button type="button" class="header-notif-tab" data-notif-filter="unread" aria-pressed="false">
+                        Unread
                     </button>
-                    <button type="button" class="header-notif-tab" data-notif-filter="read">
-                        <span>Read</span>
-                        <span data-notif-tab-count="read">{{ $readNotifications->count() }}</span>
+
+                    <button type="button" class="header-notif-tab" data-notif-filter="read" aria-pressed="false">
+                        Read
                     </button>
+
                 </div>
 
-                <div class="header-notif-body">
-                    @forelse($notifications as $n)
-                        <div class="header-notif-item {{ ($n['state'] ?? 'unread') === 'unread' ? 'is-unread' : 'is-read' }}"
-                            data-notif-state="{{ $n['state'] ?? 'unread' }}"
-                            data-notif-dedupe-key="{{ $n['id'] }}"
-                            @if (!empty($n['mark_read_url'])) data-notif-mark-read-url="{{ $n['mark_read_url'] }}" @endif
-                            data-notif-item>
-                            <div class="header-notif-item-icon">
-                                <i class="fa-solid {{ $n['icon'] ?? 'fa-bell' }}"></i>
-                            </div>
+                <div class="header-notif-body" id="notificationList" aria-busy="false">
+
+                    @forelse ($notifications as $n)
+                        @php
+                            $isUnread = $n['state'] === 'unread';
+
+                            $hasUrl = !empty($n['url']) && $n['url'] !== '#';
+
+                            $summary = $n['summary'] ?: $n['message'];
+
+                            $hasFullMessage = !empty($n['message']) && $summary !== $n['message'];
+                        @endphp
+
+                        <div class="header-notif-item {{ $isUnread ? 'is-unread' : 'is-read' }}" data-notif-item
+                            data-notif-state="{{ $n['state'] }}" data-notif-dedupe-key="{{ $n['id'] }}"
+                            data-notif-created-at="{{ $n['created_at'] }}"
+                            data-notif-mark-read-url="{{ $n['mark_read_url'] }}">
+
+                            @if ($isUnread)
+                                <span class="header-notif-unread-dot" aria-hidden="true"></span>
+                            @endif
 
                             <div class="header-notif-item-content">
+
                                 <div class="header-notif-item-top">
-                                    @if (!empty($n['url']) && $n['url'] !== '#')
-                                        <a href="{{ $n['url'] }}" data-notif-open-link
-                                            class="header-notif-item-title">{{ $n['title'] ?? 'Notification' }}</a>
+
+                                    @if ($hasUrl)
+                                        <a href="{{ $n['url'] }}" class="header-notif-item-title"
+                                            data-notif-open-link>
+
+                                            {{ $n['title'] }}
+
+                                        </a>
                                     @else
-                                        <span
-                                            class="header-notif-item-title">{{ $n['title'] ?? 'Notification' }}</span>
+                                        <span class="header-notif-item-title">
+                                            {{ $n['title'] }}
+                                        </span>
                                     @endif
 
                                     @if (!empty($n['created_at_label']))
-                                        <span class="header-notif-item-time">{{ $n['created_at_label'] }}</span>
+                                        <span class="header-notif-item-time">
+                                            {{ $n['created_at_label'] }}
+                                        </span>
                                     @endif
+
                                 </div>
 
-                                @if (!empty($n['message']))
-                                    <div class="header-notif-item-message">{{ $n['message'] }}</div>
+                                @if ($summary !== '')
+                                    <div class="header-notif-item-message">
+                                        {{ $summary }}
+                                    </div>
+                                @endif
+
+                                @if ($hasFullMessage)
+                                    <details class="mt-2">
+                                        <summary class="header-notif-link-action header-notif-link-action-secondary">
+                                            View details
+                                        </summary>
+
+                                        <div class="header-notif-item-message mt-2" data-notif-full-message>
+
+                                            {{ $n['message'] }}
+
+                                        </div>
+                                    </details>
                                 @endif
 
                                 <div class="header-notif-item-actions">
-                                    @if (!empty($n['url']) && $n['url'] !== '#')
+
+                                    @if ($hasUrl)
                                         <a href="{{ $n['url'] }}" class="header-notif-link-action"
-                                            data-notif-open-link>Open</a>
+                                            data-notif-open-link>
+                                            Open
+                                        </a>
                                     @endif
 
-                                    @if (($n['state'] ?? 'unread') === 'unread' && !empty($n['mark_read_url']))
+                                    @if ($isUnread && !empty($n['mark_read_url']))
                                         <form method="POST" action="{{ $n['mark_read_url'] }}"
                                             class="header-notif-action-form" data-notif-mark-read-form>
+
                                             @csrf
+
                                             <button type="submit"
                                                 class="header-notif-link-action header-notif-link-action-secondary">
                                                 Mark read
                                             </button>
+
                                         </form>
                                     @endif
+
                                 </div>
+
                             </div>
 
-                            @if (($n['state'] ?? 'unread') === 'unread')
-                                <span class="header-notif-unread-dot" aria-hidden="true"></span>
-                            @endif
                         </div>
+
                     @empty
+
                         <div class="header-notif-empty">
-                            <i class="fa-solid fa-bell-slash"></i>
                             <span>You're all caught up.</span>
                         </div>
                     @endforelse
 
                     <div class="header-notif-filter-empty" hidden>
-                        <i class="fa-solid fa-filter-circle-xmark"></i>
                         <span>No notifications match this filter.</span>
                     </div>
+
                 </div>
+
+                <div class="global-show-more-controls" data-notif-previous-controls
+                    @if (!$notifHasMore) hidden @endif>
+
+                    <x-button type="button" variant="secondary" class="w-full" data-notif-load-more
+                        aria-controls="notificationList">
+
+                        See previous notifications
+
+                    </x-button>
+
+                </div>
+
+                <p class="ui-muted-text text-center px-3 py-2" data-notif-status role="status" aria-live="polite"
+                    hidden>
+                </p>
+
             </div>
         </div>
 
         <div id="userDropdown">
-            <button class="header-user-btn" id="userBtn" type="button" aria-haspopup="menu" aria-controls="userMenu"
-                aria-expanded="false">
+            <button class="header-user-btn" id="userBtn" type="button" aria-haspopup="menu"
+                aria-controls="userMenu" aria-expanded="false">
                 <div class="avatar-wrapper">
                     <img src="{{ $avatarUrl }}" class="header-avatar" alt="Profile avatar">
                     <div class="mobile-chevron-badge">

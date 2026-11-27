@@ -7,40 +7,6 @@
     min-width: 0;
 }
 
-.dentist-hero-icon {
-    width: 54px;
-    height: 54px;
-    min-width: 54px;
-    border-radius: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex: 0 0 54px;
-    background: linear-gradient(135deg, var(--crimson), var(--red-700));
-    color: var(--text-on-brand);
-    box-shadow:
-        0 14px 26px var(--alpha-crimson-25),
-        inset 0 1px 0 var(--alpha-white-18);
-}
-
-.dentist-hero-icon i {
-    font-size: 20px;
-    line-height: 1;
-    color: currentColor;
-}
-
-.dentist-hero-eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    margin-bottom: 5px;
-    font-size: 10px;
-    font-weight: 900;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--crimson);
-}
-
 .dentist-hero-title {
     margin: 0;
     min-width: 0;
@@ -63,15 +29,10 @@
     justify-content: space-between;
     gap: 24px;
     background:
-        radial-gradient(circle at 10% 10%, var(--alpha-crimson-16), transparent 34%),
-        radial-gradient(circle at 90% 12%, var(--alpha-crimson-8), transparent 28%),
         linear-gradient(135deg,
             color-mix(in srgb, var(--card) 96%, transparent),
             color-mix(in srgb, var(--card) 92%, var(--red-50)));
     border: 1px solid var(--alpha-crimson-10);
-    box-shadow:
-        0 16px 38px var(--alpha-crimson-8),
-        inset 0 1px 0 var(--alpha-white-72);
 }
 
 .dentist-hero-actions {
@@ -88,15 +49,10 @@
 [data-theme="dark"] body.role-dentist #mainContent .dentist-hero,
 .dark body.role-dentist #mainContent .dentist-hero {
     background:
-        radial-gradient(circle at top left, var(--alpha-crimson-30), transparent 34%),
-        radial-gradient(circle at 88% 16%, var(--alpha-red-300-8), transparent 28%),
         linear-gradient(135deg,
             color-mix(in srgb, var(--page-bg) 86%, transparent),
             color-mix(in srgb, var(--surface) 76%, transparent));
     border: 1px solid var(--alpha-white-10);
-    box-shadow:
-        0 18px 38px var(--alpha-black-34),
-        inset 0 1px 0 var(--alpha-white-6);
     backdrop-filter: blur(18px) saturate(145%);
     -webkit-backdrop-filter: blur(18px) saturate(145%);
 }
@@ -105,32 +61,12 @@
 .dark .dentist-hero-title,
 [data-theme="dark"] body.role-dentist #mainContent .dentist-hero-title,
 .dark body.role-dentist #mainContent .dentist-hero-title {
-    background: linear-gradient(90deg,
-            var(--red-300) 0%,
-            var(--red-400) 45%,
-            var(--red-700) 100%);
+    background: var(--crimson-1);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
     color: transparent;
     text-shadow: none;
-}
-
-[data-theme="dark"] .dentist-hero-eyebrow,
-.dark .dentist-hero-eyebrow,
-[data-theme="dark"] body.role-dentist #mainContent .dentist-hero-eyebrow,
-.dark body.role-dentist #mainContent .dentist-hero-eyebrow {
-    color: var(--red-300);
-}
-
-[data-theme="dark"] body.role-dentist #mainContent .dentist-hero-icon,
-.dark body.role-dentist #mainContent .dentist-hero-icon {
-    background: linear-gradient(135deg, var(--crimson), var(--crimson-deeper-alt));
-    border: 1px solid var(--alpha-red-300-18);
-    box-shadow:
-        0 10px 26px var(--alpha-crimson-35),
-        0 0 18px var(--alpha-red-300-8),
-        inset 0 1px 0 var(--alpha-white-10);
 }
 
 [data-theme="dark"] body.role-dentist #mainContent .dentist-hero-date,
@@ -220,24 +156,6 @@
         display: flex;
         align-items: center;
         gap: 12px;
-    }
-
-    .dentist-hero-icon,
-    body.role-dentist #mainContent .dentist-hero-left .dentist-hero-icon {
-        width: 44px;
-        height: 44px;
-        min-width: 44px;
-        flex: 0 0 44px;
-        border-radius: 14px;
-    }
-
-    .dentist-hero-eyebrow,
-    body.role-dentist #mainContent .dentist-hero-eyebrow {
-        margin-bottom: 4px;
-        font-size: 9px;
-        line-height: 1.2;
-        letter-spacing: 0.08em;
-        white-space: normal;
     }
 
     .dentist-hero-title,

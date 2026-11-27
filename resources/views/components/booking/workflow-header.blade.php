@@ -2,7 +2,6 @@
     'backUrl',
     'backLabel',
     'formTarget',
-    'icon' => 'fa-regular fa-calendar-check',
     'title',
     'subtitle',
     'steps' => [],
@@ -13,7 +12,7 @@
 
     <div class="booking-page-topbar">
 
-        <x-button :href="$backUrl" variant="primary" size="sm" icon="fa-solid fa-arrow-left" data-discard-navigation
+        <x-button :href="$backUrl" variant="secondary" size="sm" data-discard-navigation
             data-discard-form-target="{{ $formTarget }}">
             {{ $backLabel }}
         </x-button>
@@ -41,11 +40,6 @@
     </div>
 
     <div class="booking-page-heading">
-
-        <p class="booking-page-eyebrow">
-            <i class="{{ $icon }}"></i>
-            PUP TAGUIG DENTAL CLINIC
-        </p>
 
         <h1 class="booking-page-title">
             {{ $title }}

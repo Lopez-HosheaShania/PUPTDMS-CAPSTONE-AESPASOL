@@ -4,7 +4,7 @@
 
     padding: 12px 20px;
 
-    background: var(--surface);
+    background: var(--card);
     color: var(--text-3);
 
     border-top: 1px solid var(--border);
@@ -57,22 +57,16 @@
 
 @media (hover: hover) and (pointer: fine) {
     .table-list-row:hover {
-        background:
-            color-mix(in srgb,
-                var(--surface) 72%,
+        background: color-mix(in srgb,
+                var(--crimson) 8%,
                 var(--card));
-
-        box-shadow: none;
     }
 }
 
 .table-list-row:focus-within {
-    background:
-        color-mix(in srgb,
-            var(--surface) 72%,
+    background: color-mix(in srgb,
+            var(--crimson) 8%,
             var(--card));
-
-    box-shadow: none;
 }
 
 .table-card {
@@ -158,6 +152,7 @@
 }
 
 .table-record-card {
+    box-sizing: border-box;
     position: relative;
 
     display: block;
@@ -183,16 +178,13 @@
         box-shadow .8s ease;
 }
 
-.table-record-card:hover {
+.table-record-card:not(.table-list-row):hover {
     background: var(--card);
 
     border-color:
         color-mix(in srgb,
             var(--text-3) 38%,
             var(--border));
-
-    box-shadow:
-        0 8px 22px var(--alpha-slate-900-6);
 
     transform: translateY(-1px);
 }
@@ -1103,11 +1095,11 @@
 }
 
 .table-record-grid {
+    box-sizing: border-box;
     width: 100%;
 
     display: grid;
-    grid-template-columns:
-        repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
 
     align-items: stretch;
 
@@ -1115,6 +1107,7 @@
 }
 
 .table-record-card-layout {
+    box-sizing: border-box;
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     grid-template-rows: minmax(0, 1fr) auto;
@@ -1158,9 +1151,10 @@
     font-weight: 700;
     line-height: 1.2;
 
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    overflow-wrap: anywhere;
 }
 
 .table-status,
@@ -1254,18 +1248,14 @@
 
 .table-record-row {
     min-width: 0;
-
     display: grid;
-    grid-template-columns:
-        78px minmax(0, 1fr);
-
+    grid-template-columns: 78px minmax(0, 1fr);
     align-items: center;
     gap: .75rem;
 }
 
 .table-record-label {
     min-width: 0;
-
     color: var(--table-text-muted);
     font-size: .62rem;
     font-weight: 750;
@@ -1277,17 +1267,61 @@
 
 .table-record-value {
     min-width: 0;
-
     display: flex;
     align-items: center;
     justify-content: flex-end;
-
     color: var(--table-text);
     font-size: .76rem;
     font-weight: 500;
     line-height: 1.35;
     text-align: right;
     white-space: nowrap;
+}
+
+/* Shared stacked card structure; all screen widths use the same alignment. */
+.table-record-card-layout .table-record-row {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: .25rem;
+    width: 100%;
+    min-width: 0;
+}
+
+.table-record-card-layout .table-record-label {
+    min-width: 0;
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.table-record-card-layout .table-record-value {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    text-align: left;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.table-record-card-layout .table-record-value .global-info-copy {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    min-width: 0;
+    max-width: 100%;
+    text-align: left;
+}
+
+.table-record-card-layout .table-record-value .global-info-value,
+.table-record-card-layout .table-record-value .global-info-subvalue {
+    max-width: 100%;
+    text-align: left;
+    white-space: normal;
+    overflow-wrap: anywhere;
 }
 
 .table-record-actions {
@@ -1670,13 +1704,10 @@
     .table-record-title {
         font-size: .7rem;
         line-height: 1.2;
-
         white-space: normal;
-        overflow: hidden;
-
-        display: -webkit-box;
-        -webkit-box-orient: vertical;
-        -webkit-line-clamp: 2;
+        overflow: visible;
+        text-overflow: clip;
+        overflow-wrap: anywhere;
     }
 
     .table-record-label {
@@ -1725,8 +1756,6 @@
     }
 
     .table-record-row {
-        grid-template-columns: 1fr;
-        align-items: start;
         gap: .15rem;
     }
 
@@ -1760,14 +1789,6 @@
         margin-top: 0;
     }
 
-    .table-record-value {
-        justify-content: flex-start;
-
-        text-align: left;
-        white-space: normal;
-
-        overflow-wrap: anywhere;
-    }
 
     .table-record-actions {
         grid-column: 1 / -1;
@@ -1837,11 +1858,119 @@
     }
 }
 
-@media (min-width: 768px) and (max-width: 1180px) {
-    .table-record-grid {
-        grid-template-columns:
-            repeat(2, minmax(0, 1fr));
+:is(#mainContent.shared-patient-page, #mainContent.shared-appointments-page, #mainContent.docreq-page) :is(.table-grid-view, .table-scroll-inner, .global-accordion-body):has(> .table-record-grid) {
+    container-type: inline-size;
+}
 
-        gap: 12px;
+:is(#mainContent.shared-patient-page, #mainContent.shared-appointments-page, #mainContent.docreq-page) .table-record-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+:is(#mainContent.shared-patient-page, #mainContent.shared-appointments-page, #mainContent.docreq-page) .table-record-grid>.table-record-card {
+    min-width: 0;
+    height: 100%;
+}
+
+:is(#mainContent.shared-patient-page, #mainContent.shared-appointments-page, #mainContent.docreq-page) .table-record-grid .table-record-card-layout {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: .75rem;
+    height: 100%;
+    width: 100%;
+    min-width: 0;
+    padding: 14px;
+}
+
+:is(#mainContent.shared-patient-page, #mainContent.shared-appointments-page, #mainContent.docreq-page) .table-record-grid .table-record-header {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: .5rem;
+}
+
+:is(#mainContent.shared-patient-page, #mainContent.shared-appointments-page, #mainContent.docreq-page) .table-record-grid .table-record-header .table-primary {
+    display: flex;
+    flex: 1 1 150px;
+    min-width: 0;
+    align-items: center;
+}
+
+:is(#mainContent.shared-patient-page, #mainContent.shared-appointments-page, #mainContent.docreq-page) .table-record-grid .table-primary>.global-info-copy,
+:is(#mainContent.shared-patient-page, #mainContent.shared-appointments-page, #mainContent.docreq-page) .table-record-grid .table-primary>.global-info-copy>.global-info-group {
+    min-width: 0;
+    max-width: 100%;
+}
+
+:is(#mainContent.shared-patient-page, #mainContent.shared-appointments-page, #mainContent.docreq-page) .table-record-grid .table-record-title {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-overflow: clip;
+}
+
+:is(#mainContent.shared-patient-page, #mainContent.shared-appointments-page, #mainContent.docreq-page) .table-record-grid .table-record-header>.status-pill {
+    flex: 0 0 auto;
+    max-width: 100%;
+    margin-left: auto;
+}
+
+:is(#mainContent.shared-patient-page, #mainContent.shared-appointments-page, #mainContent.docreq-page) .table-record-grid .table-record-meta {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    margin: 0;
+    padding-top: .65rem;
+    border-top: 1px solid var(--table-border-soft);
+}
+
+:is(#mainContent.shared-patient-page, #mainContent.shared-appointments-page, #mainContent.docreq-page) .table-record-grid .table-record-row {
+    display: block;
+    min-width: 0;
+}
+
+:is(#mainContent.shared-patient-page, #mainContent.shared-appointments-page, #mainContent.docreq-page) .table-record-grid .table-record-row>.table-record-value {
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: .35rem .65rem;
+    width: 100%;
+    text-align: left;
+    min-width: 0;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+:is(#mainContent.shared-patient-page, #mainContent.shared-appointments-page, #mainContent.docreq-page) .table-record-grid .table-record-actions {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    margin-top: auto;
+    padding-top: .65rem;
+    border-top: 1px solid var(--table-border-soft);
+}
+
+:is(#mainContent.shared-patient-page, #mainContent.shared-appointments-page, #mainContent.docreq-page) .table-record-grid .table-record-actions>.ui-action-group {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+@container (max-width: 820px) {
+    :is(#mainContent.shared-patient-page, #mainContent.shared-appointments-page, #mainContent.docreq-page) .table-record-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
+}
+
+@container (max-width: 480px) {
+    :is(#mainContent.shared-patient-page, #mainContent.shared-appointments-page, #mainContent.docreq-page) .table-record-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* Keep shared patient titles readable in compact list rows. */
+:is(#mainContent.shared-patient-page, #mainContent.shared-appointments-page, #mainContent.docreq-page) .table-list-row .table-record-title {
+    white-space: normal;
+    overflow-wrap: anywhere;
 }

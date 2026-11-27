@@ -209,8 +209,8 @@
     --status-denied-border: #E5E7EB;
     --status-denied-solid: #9CA3AF;
 
-    --status-pill-height: 28px;
-    --status-pill-padding-x: 12px;
+    --status-pill-height: 20px;
+    --status-pill-padding-x: 6px;
     --status-pill-gap: 6px;
     --status-pill-font-size: 11px;
     --status-pill-dot-size: 6px;

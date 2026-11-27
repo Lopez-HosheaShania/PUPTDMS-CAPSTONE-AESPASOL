@@ -176,16 +176,7 @@
             @if ($isDentistView)
                 <section class="dentist-hero mb-5">
                     <div class="dentist-hero-content">
-                        <div class="dentist-hero-icon">
-                            <i class="fa-solid fa-calendar-week"></i>
-                        </div>
-
                         <div class="min-w-0">
-                            <div class="dentist-hero-eyebrow">
-                                <i class="fa-solid fa-tooth"></i>
-                                Clinic Availability
-                            </div>
-
                             <h1 class="dentist-hero-title">
                                 Clinic Schedule
                             </h1>
@@ -198,8 +189,7 @@
                             Add Schedule Rule
                         </x-button>
 
-                        <x-button type="button" variant="secondary" icon="fa-solid fa-calendar-xmark"
-                            data-ui-click="action-35e136a0c602">
+                        <x-button type="button" variant="secondary" data-ui-click="action-35e136a0c602">
                             Block Date
                         </x-button>
                     </div>
@@ -212,8 +202,7 @@
                             Add Schedule Rule
                         </x-button>
 
-                        <x-button type="button" variant="secondary" icon="fa-solid fa-calendar-xmark"
-                            data-ui-click="action-35e136a0c602">
+                        <x-button type="button" variant="secondary" data-ui-click="action-35e136a0c602">
                             Block Date
                         </x-button>
                     </x-slot:actions>
@@ -264,17 +253,12 @@
                         <section id="clinicHoursCard" class="card">
                             <div class="card-header card-header-inline">
                                 <div class="card-header-left">
-                                    <span class="card-header-icon" aria-hidden="true">
-                                        <i class="fa-solid fa-clock"></i>
-                                    </span>
-
                                     <h2 class="card-title">Clinic Hours</h2>
                                 </div>
 
                                 <div class="card-header-right">
                                     <x-button type="button" variant="primary" size="sm" icon="fa-solid fa-plus"
                                         data-ui-click="action-3658b7ca536b">
-                                        Add
                                     </x-button>
                                 </div>
                             </div>
@@ -318,17 +302,12 @@
                         <section id="blockedDatesCard" class="card">
                             <div class="card-header card-header-inline">
                                 <div class="card-header-left">
-                                    <span class="card-header-icon" aria-hidden="true">
-                                        <i class="fa-solid fa-ban"></i>
-                                    </span>
-
                                     <h2 class="card-title">Blocked Dates</h2>
                                 </div>
 
                                 <div class="card-header-right">
                                     <x-button type="button" variant="primary" size="sm" icon="fa-solid fa-plus"
                                         data-ui-click="action-35e136a0c602">
-                                        Add
                                     </x-button>
                                 </div>
                             </div>
@@ -400,10 +379,6 @@
                             <div class="card-header weekly-appointment-header">
 
                                 <div class="card-header-left">
-                                    <span class="card-header-icon" aria-hidden="true">
-                                        <i class="fa-solid fa-calendar-week"></i>
-                                    </span>
-
                                     <h2 class="card-title">
                                         Weekly Appointment View
                                     </h2>
@@ -431,8 +406,7 @@
 
                                     </div>
 
-                                    <x-button id="todayBtn" type="button" variant="secondary" size="sm"
-                                        icon="fa-solid fa-calendar-day">
+                                    <x-button id="todayBtn" type="button" variant="secondary" size="sm">
                                         Today
                                     </x-button>
 
@@ -487,10 +461,6 @@
                             <div class="card-header card-header-inline">
 
                                 <div class="card-header-left">
-                                    <span class="card-header-icon" aria-hidden="true">
-                                        <i class="fa-solid fa-umbrella-beach"></i>
-                                    </span>
-
                                     <h2 class="card-title">
                                         Upcoming Holidays
                                     </h2>
@@ -659,7 +629,7 @@
 
                                 <div class="border-t px-4 py-3" data-ui-presentation="presentation-7c1d0a16a55f">
 
-                                    <x-button type="button" variant="secondary" icon="fa-regular fa-calendar-days"
+                                    <x-button type="button" variant="secondary"
                                         class="w-full" data-ui-click="action-62d7209e5e45">
                                         View Full List
                                     </x-button>
@@ -692,10 +662,6 @@
                     <section id="scheduleRulesCard" class="card">
                         <div class="card-header schedule-rules-header">
                             <div class="card-header-left">
-                                <span class="card-header-icon" aria-hidden="true">
-                                    <i class="fa-solid fa-list-check"></i>
-                                </span>
-
                                 <h2 class="card-title">Schedule Rules</h2>
                             </div>
 
@@ -1066,10 +1032,6 @@
                         <div class="card-header reserved-periods-header">
 
                             <div class="card-header-left">
-                                <span class="card-header-icon" aria-hidden="true">
-                                    <i class="fa-solid fa-calendar-check"></i>
-                                </span>
-
                                 <h2 class="card-title">
                                     Reserved Booking Periods
                                 </h2>
@@ -1686,10 +1648,6 @@
 
             <div class="modal-hd">
                 <div class="modal-heading">
-                    <div class="modal-icon">
-                        <i class="fa-solid fa-calendar-plus" id="ruleModalIcon"></i>
-                    </div>
-
                     <div class="modal-copy">
                         <h3 class="modal-title" id="ruleModalTitle">
                             Add Schedule Rule
@@ -1726,10 +1684,6 @@
                                     <h4>
                                         Applicable Days
                                     </h4>
-
-                                    <p>
-                                        Select one or more days for this rule.
-                                    </p>
                                 </div>
                             </div>
 
@@ -1785,10 +1739,6 @@
                                     <h4>
                                         Additional Notes
                                     </h4>
-
-                                    <p>
-                                        Optional reminder or exception.
-                                    </p>
                                 </div>
                             </div>
 
@@ -1844,17 +1794,13 @@
                                     <h4>
                                         Clinic Availability
                                     </h4>
-
-                                    <p>
-                                        Define whether the clinic is open, closed, or limited.
-                                    </p>
                                 </div>
                             </div>
 
                             <div class="modal-form-grid">
                                 <div data-global-field>
                                     <label class="form-label" for="ruleActivationState">
-                                        Schedule State
+                                        Schedule State <span class="field-optional">(Optional)</span>
                                     </label>
 
                                     <x-select id="ruleActivationState" data-placeholder="Select schedule state">
@@ -1879,7 +1825,7 @@
 
                                 <div data-global-field>
                                     <label class="form-label" for="ruleStatus">
-                                        Clinic Status
+                                        Clinic Status <span class="field-optional">(Optional)</span>
                                     </label>
 
                                     <x-select id="ruleStatus" data-placeholder="Select clinic status"
@@ -1908,7 +1854,7 @@
 
                                         <div data-global-field>
                                             <label class="form-label" for="ruleOpenTime">
-                                                Opening Time
+                                                Opening Time <span class="field-optional">(Optional)</span>
                                             </label>
 
                                             <x-select id="ruleOpenTime" data-placeholder="Select opening time">
@@ -1926,7 +1872,7 @@
 
                                         <div data-global-field>
                                             <label class="form-label" for="ruleCloseTime">
-                                                Closing Time
+                                                Closing Time <span class="field-optional">(Optional)</span>
                                             </label>
 
                                             <x-select id="ruleCloseTime" data-placeholder="Select closing time">
@@ -1946,7 +1892,7 @@
 
                                     <div data-global-field>
                                         <label class="form-label" for="ruleMaxSlots">
-                                            Max Appointments / Day
+                                            Max Appointments / Day <span class="field-optional">(Optional)</span>
                                         </label>
 
                                         <x-number-stepper id="ruleMaxSlots" value="5" min="1" max="30"
@@ -1966,7 +1912,7 @@
 
                                     <div data-global-field>
                                         <label class="form-label" for="ruleSlotDuration">
-                                            Slot Duration (minutes)
+                                            Slot Duration (minutes) <span class="field-optional">(Optional)</span>
                                         </label>
 
                                         <x-number-stepper id="ruleSlotDuration" value="60" min="5"
@@ -1986,7 +1932,7 @@
 
                                     <div data-global-field>
                                         <label class="form-label">
-                                            Lunch Break
+                                            Lunch Break <span class="field-optional">(Optional)</span>
                                         </label>
 
                                         <div id="ruleBreakGroup" class="break-chip-group">
@@ -2025,8 +1971,7 @@
                         Cancel
                     </x-button>
 
-                    <x-button id="ruleSubmitBtn" type="button" variant="primary" icon="fa-solid fa-floppy-disk"
-                        data-ui-click="action-2f4c982ff581">
+                    <x-button id="ruleSubmitBtn" type="button" variant="primary" data-ui-click="action-2f4c982ff581">
                         <span id="ruleSubmitText">
                             Save Rule
                         </span>
@@ -2048,10 +1993,6 @@
 
             <div class="modal-hd">
                 <div class="modal-heading">
-                    <div class="modal-icon">
-                        <i class="fa-solid fa-calendar-xmark"></i>
-                    </div>
-
                     <div class="modal-copy">
                         <h3 class="modal-title" id="blockDateModalTitle">
                             Block Date
@@ -2072,22 +2013,6 @@
 
             <div class="modal-bd modal-scroll-body">
                 <div class="info-card modal-form-section">
-                    <div class="modal-section-heading">
-                        <div class="modal-section-icon">
-                            <i class="fa-solid fa-calendar-xmark"></i>
-                        </div>
-
-                        <div>
-                            <h4>
-                                Date Details
-                            </h4>
-
-                            <p>
-                                Choose the blocked date and specify the reason.
-                            </p>
-                        </div>
-                    </div>
-
                     <div class="mb-4" data-global-field>
 
                         <label class="form-label" for="blockDate">
@@ -2215,11 +2140,6 @@
 
         <x-slot:header>
             <div class="modal-heading">
-                <div class="modal-icon">
-                    <i id="reservedPeriodModalIcon" class="fa-solid fa-calendar-check">
-                    </i>
-                </div>
-
                 <div class="modal-copy">
                     <h3 id="reservedPeriodModalTitle" class="modal-title">
                         Create Reserved Booking Period
@@ -4028,12 +3948,8 @@
                         'Update clinic days, operating hours, and booking capacity.';
                 }
 
-                if (icon) {
-                    icon.className = 'fa-solid fa-pen-to-square';
-                }
-
                 if (submitBtn) {
-                    submitBtn.className = 'ui-btn ui-btn-primary';
+                    submitBtn.className = 'ui-btn ui-btn-edit';
                 }
 
                 if (submitText) {

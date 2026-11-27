@@ -736,9 +736,6 @@
 
                 <div class="modal-hd">
                     <div class="modal-heading">
-                        <div class="modal-icon">
-                            <i class="fa-solid fa-box-archive"></i>
-                        </div>
 
                         <div class="modal-copy">
                             <h3 id="slArchiveModalTitle" class="modal-title">
@@ -829,10 +826,6 @@
                 <div class="modal-hd">
 
                     <div class="modal-heading">
-
-                        <div class="modal-icon">
-                            <i class="fa-solid fa-file-pdf"></i>
-                        </div>
 
                         <div class="modal-copy">
 
@@ -1013,9 +1006,6 @@
         <div class="ui-modal-card modal-lg" role="dialog" aria-modal="true" aria-labelledby="slDetailsModalTitle">
             <div class="modal-hd">
                 <div class="modal-heading">
-                    <div class="modal-icon">
-                        <i class="fa-solid fa-clipboard-list"></i>
-                    </div>
 
                     <div class="modal-copy">
                         <h3 id="slDetailsModalTitle" class="modal-title">
